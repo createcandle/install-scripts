@@ -27,6 +27,7 @@ ln -s /home/pi/.webthings/etc/timezone /etc/timezone
 
 # BINDS
 
+echo "candle" > /home/pi/.webthings/etc/hostname
 cp -r /etc/ssh /home/pi/.webthings/etc/ssh
 cp -r /etc/wpa_supplicant /home/pi/.webthings/etc/wpa_supplicant/
 cp -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
