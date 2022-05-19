@@ -14,13 +14,13 @@ apt-get install omxplayer
 
 
 # MAKE DIRECTORIES
-mkdir /home/pi/.webthings/etc
-mkdir /home/pi/.webthings/var/lib
-mkdir /home/pi/.webthings/tmp
+mkdir -p /home/pi/.webthings/etc
+mkdir -p /home/pi/.webthings/var/lib
+mkdir -p /home/pi/.webthings/tmp
 
-mkdir /home/pi/.webthings/arduino/.arduino15
-mkdir /home/pi/.webthings/arduino/Arduino
-
+mkdir -p /home/pi/.webthings/arduino/.arduino15
+mkdir -p /home/pi/.webthings/arduino/Arduino
+mkdir -p /home/pi/candle
 
 # COPY
 
@@ -55,25 +55,74 @@ cp -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
 
 
 # SERVICES
-systemd disable webthings-gateway.check-for-update.service
-systemd disable webthings-gateway.check-for-update.timer
-systemd disable webthings-gateway.update-rollback.service
+systemctl daemon-reload
 
-systemd enable candle_first_run.service
-systemd enable candle_bootup_actions.service
-systemd enable candle_start_swap.service
+systemctl disable webthings-gateway.check-for-update.service
+systemctl disable webthings-gateway.check-for-update.timer
+systemctl disable webthings-gateway.update-rollback.service
 
-systemd enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore?
+systemctl enable candle_first_run.service
+systemctl enable candle_bootup_actions.service
+systemctl enable candle_start_swap.service
+
+systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore?
+
+
+
+# BLUEALSA
+# compile and install BlueAlsa with legaly safe codes and built-in audio mixing
+git clone https://github.com/createcandle/bluez-alsa.git
+cd bluez-alsa
+autoreconf --install --force
+mkdir build
+cd build
+../configure --enable-msbc --enable-mp3lame --enable-faststream
+make
+make install
+cd ../..
+rm -rf bluez-alsa
+
+
+# RASPI CONFIG
+
+# enable camera
+raspi-config nonint do_camera 0
+
+
+
+
+
+# KIOSK
+
+# Download boot splash images and video
+wget https://www.candlesmarthome.com/tools/splash.png -P /boot/
+wget https://www.candlesmarthome.com/tools/splash180.png -P /boot/
+wget https://www.candlesmarthome.com/tools/splash.mp4 -P /boot/
+mkdir -p /usr/share/plymouth/themes/pix/
+cp /boot/splash.png /usr/share/plymouth/themes/pix/splash.png
+
+
+
+# disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
+wget https://www.candlesmarthome.com/tools/rc.xml -P /etc/xdg/openbox/rc.xml
+
+# CHROMIUM 
+
+# Add policy file to disable things like file selection
+mkdir -p /etc/chromium/policies/managed/
+echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false}' > /etc/chromium/policies/managed/candle.json
+
+
+
 
 
 # TODO:
 # RASPI-CONFIG
-# - Enabled the camera 
 # - Enabled SPI 
 # - Enabled I2C
 
 # Respeaker drivers?
-# compile and install BlueAlsa with legaly safe codes and built-in audio mixing
+
 # update python libraries except for 2 (schemajson and... )
 # directory ownership and permissions
 # install openbox. And disable its shortcuts. See original kiosk install script: https://www.candlesmarthome.com/tools/kiosk.txt
