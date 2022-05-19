@@ -64,7 +64,7 @@ systemd enable candle_start_swap.service
 
 
 
-TODO:
+# TODO:
 # build and install BlueAlsa with legaly safe codes and built-in audio mixing
 # directory ownership and permissions
 # install openbox. And disable its shorcuts.
