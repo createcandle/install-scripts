@@ -76,7 +76,7 @@ systemd enable candle_hostname_fix.service # ugly solution, might not even be ne
 # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
 # update python libraries except for 2 (schemajson and... )
 # directory ownership and permissions
-# install openbox. And disable its shorcuts.
+# install openbox. And disable its shortcuts. See original kiosk install script: https://www.candlesmarthome.com/tools/kiosk.txt
 
 # LONG TERM TODO?
 # Go 64 bit?
