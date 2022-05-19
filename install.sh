@@ -1,4 +1,13 @@
-# this script assumess that all the files have already been copied into place
+# Designed to turn a Webthings disk image into a Candle disk image
+# This script assumess that all the files have already been copied into place
+
+
+# MANAGE INSTALLED APPLICATIONS
+
+apt-get install fbi nbtscan
+
+# Just to be safe, although it should already be installed:
+apt-get install omxplayer
 
 
 # MAKE DIRECTORIES
@@ -49,3 +58,4 @@ systemd enable candle_start_swap.service
 TODO:
 # build and install BlueAlsa with legaly safe codes and built-in audio mixing
 # directory ownership and permissions
+# IP routes
