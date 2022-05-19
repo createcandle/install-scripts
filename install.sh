@@ -20,3 +20,13 @@ ln -s /home/pi/.webthings/etc/timezone /etc/timezone
 
 cp -r /etc/ssh /home/pi/.webthings/etc/ssh
 cp -r /etc/wpa_supplicant /home/pi/.webthings/etc/wpa_supplicant/
+
+
+# SERVICES
+systemd disable webthings-gateway.check-for-update.service
+systemd disable webthings-gateway.check-for-update.timer
+systemd disable webthings-gateway.update-rollback.service
+
+# TODO:
+# - enable systemd services
+# - disable webthings 
