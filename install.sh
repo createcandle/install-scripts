@@ -4,7 +4,7 @@
 
 # MANAGE INSTALLED APPLICATIONS
 
-apt-get install fbi nbtscan
+apt-get install fbi nbtscan openbox
 
 # Just to be safe, although it should already be installed:
 apt-get install omxplayer
@@ -59,3 +59,4 @@ TODO:
 # build and install BlueAlsa with legaly safe codes and built-in audio mixing
 # directory ownership and permissions
 # IP routes
+# install openbox. And disable its shorcuts.
