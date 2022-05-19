@@ -6,6 +6,7 @@
 
 apt-get install fbi nbtscan openbox
 
+# TODO: chromium browser v88
 
 
 # Just to be safe, although it should already be installed:
@@ -70,4 +71,5 @@ systemd enable candle_start_swap.service
 # install openbox. And disable its shorcuts.
 
 # LONG TERM TODO?
-# copy IP routes and other setup/settings from Webthings disk image creation? That way only one install script needs to be run instead of a waterfall model.
+# Go 64 bit?
+# Copy IP routes and other setup/settings from Webthings disk image creation? That way only one install script needs to be run instead of a waterfall model.
