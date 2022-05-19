@@ -1,4 +1,4 @@
-
+# this script assumess that all the files have already been copied into place
 
 
 mkdir /home/pi/.webthings/etc/
@@ -26,7 +26,3 @@ cp -r /etc/wpa_supplicant /home/pi/.webthings/etc/wpa_supplicant/
 systemd disable webthings-gateway.check-for-update.service
 systemd disable webthings-gateway.check-for-update.timer
 systemd disable webthings-gateway.update-rollback.service
-
-# TODO:
-# - enable systemd services
-# - disable webthings 
