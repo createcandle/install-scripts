@@ -59,8 +59,6 @@ systemd disable webthings-gateway.check-for-update.service
 systemd disable webthings-gateway.check-for-update.timer
 systemd disable webthings-gateway.update-rollback.service
 
-systemd disable rsyslog
-
 systemd enable candle_first_run.service
 systemd enable candle_reset.service
 systemd enable candle_start_swap.service
