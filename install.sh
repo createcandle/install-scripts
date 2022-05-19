@@ -1,5 +1,5 @@
 # Designed to turn a Webthings disk image into a Candle disk image
-# This script assumess that all the files have already been copied into place
+# This script assumess that all the files have already been copied into place from https://github.com/createcandle/configuration-scripts
 
 
 # MANAGE INSTALLED APPLICATIONS
@@ -59,6 +59,8 @@ systemd disable webthings-gateway.check-for-update.service
 systemd disable webthings-gateway.check-for-update.timer
 systemd disable webthings-gateway.update-rollback.service
 
+systemd disable rsyslog
+
 systemd enable candle_first_run.service
 systemd enable candle_reset.service
 systemd enable candle_start_swap.service
@@ -66,7 +68,14 @@ systemd enable candle_start_swap.service
 
 
 # TODO:
-# build and install BlueAlsa with legaly safe codes and built-in audio mixing
+# RASPI-CONFIG
+# - Enabled the camera 
+# - Enabled SPI 
+# - Enabled I2C
+
+# Respeaker drivers?
+# compile and install BlueAlsa with legaly safe codes and built-in audio mixing
+# update python libraries except for 2 (schemajson and... )
 # directory ownership and permissions
 # install openbox. And disable its shorcuts.
 
