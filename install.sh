@@ -6,6 +6,8 @@
 
 apt-get install fbi nbtscan openbox
 
+
+
 # Just to be safe, although it should already be installed:
 apt-get install omxplayer
 
@@ -17,6 +19,13 @@ mkdir /home/pi/.webthings/tmp
 
 mkdir /home/pi/.webthings/arduino/.arduino15
 mkdir /home/pi/.webthings/arduino/Arduino
+
+
+# COPY
+
+cp /home/pi/.webthings/uploads/floorplan.svg /home/pi/.webthings/floorplan.svg
+
+
 
 
 
@@ -58,5 +67,7 @@ systemd enable candle_start_swap.service
 TODO:
 # build and install BlueAlsa with legaly safe codes and built-in audio mixing
 # directory ownership and permissions
-# IP routes
 # install openbox. And disable its shorcuts.
+
+# LONG TERM TODO?
+# copy IP routes and other setup/settings from Webthings disk image creation? That way only one install script needs to be run instead of a waterfall model.
