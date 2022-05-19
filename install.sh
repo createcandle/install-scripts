@@ -60,9 +60,10 @@ systemd disable webthings-gateway.check-for-update.timer
 systemd disable webthings-gateway.update-rollback.service
 
 systemd enable candle_first_run.service
-systemd enable candle_reset.service
+systemd enable candle_bootup_actions.service
 systemd enable candle_start_swap.service
 
+systemd enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore?
 
 
 # TODO:
