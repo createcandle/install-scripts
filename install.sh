@@ -65,10 +65,14 @@ systemctl disable webthings-gateway.check-for-update.service
 systemctl disable webthings-gateway.check-for-update.timer
 systemctl disable webthings-gateway.update-rollback.service
 
+# disable triggerhappy (keyboard shortcuts)
+systemctl disable triggerhappy.socket
+systemctl disable triggerhappy.service
+
+# enable Candle services
 systemctl enable candle_first_run.service
 systemctl enable candle_bootup_actions.service
 systemctl enable candle_start_swap.service
-
 systemctl enable splashscreen.service
 systemctl enable splashscreen180.service
 
