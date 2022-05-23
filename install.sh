@@ -181,6 +181,8 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false}' > /etc
 # - Enabled SPI 
 # - Enabled I2C
 
+# ~/.config/configstore/update-notifier-npm.json <- set output to true
+
 # Respeaker drivers?
 
 # update python libraries except for 2 (schemajson and... )
