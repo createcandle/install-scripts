@@ -43,6 +43,9 @@ cp /etc/timezone /home/pi/.webthings/etc/timezone
 rm /etc/timezone 
 ln -s /home/pi/.webthings/etc/timezone /etc/timezone 
 
+# move fake hardware clock to user partition
+rm /etc/fake-hwclock.data
+ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 
 
 # BINDS
