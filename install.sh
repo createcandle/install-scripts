@@ -108,6 +108,8 @@ raspi-config nonint do_camera 0
 # Download boot splash images and video
 wget https://www.candlesmarthome.com/tools/splash.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash180.png -P /boot/
+wget https://www.candlesmarthome.com/tools/splash_updating.png -P /boot/
+wget https://www.candlesmarthome.com/tools/splash_updating180.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash.mp4 -P /boot/
 mkdir -p /usr/share/plymouth/themes/pix/
 cp /boot/splash.png /usr/share/plymouth/themes/pix/splash.png
