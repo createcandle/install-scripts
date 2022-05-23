@@ -75,6 +75,8 @@ systemctl enable candle_bootup_actions.service
 systemctl enable candle_start_swap.service
 systemctl enable splashscreen.service
 systemctl enable splashscreen180.service
+systemctl enable splashscreen_updating.service
+systemctl enable splashscreen_updating180.service
 
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore?
 
