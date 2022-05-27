@@ -78,7 +78,7 @@ systemctl enable splashscreen180.service
 systemctl enable splashscreen_updating.service
 systemctl enable splashscreen_updating180.service
 
-systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore?
+systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 
 
 
