@@ -196,6 +196,22 @@ export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
 CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 
 
+
+
+echo " "
+echo "INSTALLING CANDLE STORE"
+echo " "
+
+cd /home/pi/.webthings/addons
+wget https://github.com/createcandle/candleappstore/releases/download/0.4.17/candleappstore-0.4.17-linux-arm64-v3.9.tgz
+tar -xf candleappstore-0.4.17-linux-arm64-v3.9.tgz
+mv package candleappstore
+rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
+cd /home/pi
+
+
+
+
 echo " "
 echo "INSTALLING OTHER FILES AND SERVICES"
 echo " "
