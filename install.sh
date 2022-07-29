@@ -56,7 +56,22 @@ echo "INSTALLING APPLICATIONS AND LIBRARIES"
 echo " "
 
 apt update
-apt install autoconf build-essential curl git libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six python3-pip -y
+apt install -y \
+  autoconf \
+  build-essential \
+  curl \
+  git \
+  libbluetooth-dev \
+  libboost-python-dev \
+  libboost-thread-dev \
+  libffi-dev \
+  libglib2.0-dev \
+  libpng-dev \
+  libudev-dev \
+  libusb-1.0-0-dev \
+  pkg-config \
+  python-six \
+  python3-pip
 
 apt install -y \
   arping \
