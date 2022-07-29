@@ -1,34 +1,254 @@
-# Designed to turn a Webthings disk image into a Candle disk image
-# This script assumess that all the files have already been copied into place from https://github.com/createcandle/configuration-scripts
+# TODO: check if candlecam works on this disk image, as it may use the new camera interface
+
+# This script will turn a Rapsberry Pi OS Lite installation into a Candle controller
+
+# PREPARATION
+# Flash basic raspbian lite 64 image using Raspberry Pi Imager software. Use the gear icon to set everything up that you can: enable ssh (username "pi", and password "smarthome"), set the hostname to "candle", pre-fill your wifi credentials, etc.
+
+# Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt”. From it, remove “init=/usr/lib/raspi-config/init_resize.sh”, and save. Saving might seem to fail, but it probably saved anyway.
+
+# Make sure there is no other "candle.local" device on the network already.
+# Now insert the SD card into the Raspberry Pi, power it up, wait a minute, and log into it via ssh:
+# ssh pi@candle.local
+
+# Once logged in via SSH, you can download and run this install script.
 
 
-# MANAGE INSTALLED APPLICATIONS
+# CREATE PARTITIONS
+
+cd /home/pi
+
+echo " "
+echo "CREATING CANDLE DISK IMAGE"
+echo " "
+echo "PATH: "
+echo $PATH
+
+
+if [ ! -d "/dev/mmcblk0p3" ]
+then
+    echo " "
+    echo "CREATING PARTITIONS"
+    echo " "
+
+    printf "resizepart 2 6500\nmkpart\np\next4\n6501MB\n14000MB\nquit" | parted
+    resize2fs /dev/mmcblk0p2
+    printf "y" | mkfs.ext4 /dev/mmcblk0p3
+    mkdir /home/pi/.webthings
+    chown pi:pi /home/pi/.webthings
+    mount /dev/mmcblk0p3 /home/pi/.webthings
+    
+
+else
+    echo "partitions already created:"
+fi
+
+lsblk
+echo " "
+
+
+# INSTALL PROGRAMS AND UPDATE
+echo " "
+echo "INSTALLING APPLICATIONS AND LIBRARIES"
+echo " "
+
+apt update
+apt install autoconf build-essential curl git libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six python3-pip -y
+
+apt install -y \
+  arping \
+  autoconf \
+  ffmpeg \
+  libboost-python-dev \
+  libboost-thread-dev \
+  libbluetooth-dev \
+  libffi-dev \
+  libglib2.0-dev \
+  libtool \
+  libudev-dev \
+  libusb-1.0-0-dev \
+  mosquitto \
+  policykit-1 \
+  sqlite3
+
+
+apt install -y \
+  dnsmasq \
+  hostapd
+
+systemctl unmask hostapd.service
+systemctl disable hostapd.service
+systemctl disable dnsmasq.service
+
+
+# removed from above list:
+#  libnanomsg-dev \
+#  libnanomsg5 \
+#  python-pip \
+
+# additional programs for Candle kiosk mode:
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh omxplayer fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
+# for BlueAlsa
+apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
 
 
-# TODO: chromium browser v88
- 
+apt --fix-broken install -y
+apt upgrade -y
+apt autoremove -y
 
-# Just to be safe, although it should already be installed:
-apt-get install omxplayer
+# Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
+# TODO: this should be version 88.
+apt-get install chromium
 
 
-# MAKE DIRECTORIES
-mkdir -p /home/pi/.webthings/etc
-mkdir -p /home/pi/.webthings/var/lib
-mkdir -p /home/pi/.webthings/tmp
+
+# PYTHON
+
+pip3 install dbus-python
+
+
+
+
+# BLUEALSA
+
+if [ ! -d "/usr/bin/bluealsa" ]
+then
+    
+    echo " "
+    echo "Creating BlueAlsa"
+    echo " "
+
+    # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
+    git clone https://github.com/createcandle/bluez-alsa.git
+    cd bluez-alsa
+    autoreconf --install --force
+    mkdir build
+    cd build
+    ../configure --enable-msbc --enable-mp3lame --enable-faststream
+    make
+    make install
+    cd ../..
+    rm -rf bluez-alsa
+
+else
+    echo "BlueAlsa was already installed"
+fi
+
+
+
+
+
+# sudo update-rc.d gateway-iptables defaults
+
+# TODO: also need to look closer at this: https://github.com/WebThingsIO/gateway/tree/37591f4be3542901255da3c901396f3e9b8a443b/image/etc
+
+
+
+# INSTALL CANDLE CONTROLLER
+
+echo " "
+echo "INSTALLING CANDLE CONTROLLER"
+echo " "
+
+python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+#. ~/.bashrc
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+
+
+echo " "
+echo "NODE AND NPM VERSIONS:"
+node --version
+npm --version
+
+setcap cap_net_raw+eip $(eval readlink -f `which node`)
+setcap cap_net_raw+eip $(eval readlink -f `which python3`)
+
+
+
+
+mkdir /home/pi/webthings
+chown pi:pi /home/pi/webthings
+cd /home/pi/webthings
+git clone --depth 1 https://github.com/createcandle/candle-controller.git
+mv candle-controller gateway
+chown -R pi:pi /home/pi/webthings/gateway
+cd gateway
+nvm install 14
+nvm use 14
+nvm alias default 14
+
+rm -rf node_modules/
+
+export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
+# CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
+# npm install typescript --save-dev # TODO: check if this is now in package.json already
+# npm install
+CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
+
+
+echo " "
+echo "INSTALLING OTHER FILES AND SERVICES"
+echo " "
+
+
+# switch back to root of home folder
+cd /home/pi
+
+
+# Make folders that should be owned by Pi user
+mkdir /home/pi/Arduino
+chown pi:pi /home/pi/Arduino
+
+mkdir /home/pi/.arduino
+chown pi:pi /home/pi/.arduino
 
 mkdir -p /home/pi/.webthings/arduino/.arduino15
+chown pi:pi /home/pi/.webthings/arduino/.arduino15
+
 mkdir -p /home/pi/.webthings/arduino/Arduino
+chown pi:pi /home/pi/.webthings/arduino/Arduino
+
+touch /home/pi/candle.log
+chown pi:pi /home/pi/candle.log
+
+mkdir -p /home/pi/.webthings/etc
+chown pi:pi /home/pi/.webthings/etc
+
 mkdir -p /home/pi/candle
+chown pi:pi /home/pi/candle
 
-# COPY
 
+# Make folders that should be owned by root
+mkdir -p /home/pi/.webthings/var/lib/bluetooth
+mkdir -p /home/pi/.webthings/etc/wpa_supplicant
+mkdir -p /home/pi/.webthings/etc/ssh
+mkdir -p /home/pi/.webthings/etc/hostname
+mkdir -p /home/pi/.webthings/tmp
+
+
+# all directories needed to keep fstab happy should now exist
+
+
+# COPY FILES
+
+cd /home/pi
+
+# Used when doing factory reset to restore original floorplan image:
 cp /home/pi/.webthings/uploads/floorplan.svg /home/pi/.webthings/floorplan.svg
 
-
-
+# download tons of ready-made settings files from the Candle github
+git clone --depth 1 https://github.com/createcandle/configuration-files
+cp -R /home/pi/configuration-files/boot/* /boot/
+cp -R /home/pi/configuration-files/etc/* /etc/
+cp -R /home/pi/configuration-files/home/pi/* /home/pi/
+cp -R /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
 
 
 # SYMLINKS
@@ -56,8 +276,6 @@ cp -r /etc/wpa_supplicant /home/pi/.webthings/etc/wpa_supplicant/
 cp -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
 
 
-
-
 # SERVICES
 systemctl daemon-reload
 
@@ -79,28 +297,6 @@ systemctl enable splashscreen_updating.service
 systemctl enable splashscreen_updating180.service
 
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
-
-
-
-# BLUEALSA
-# compile and install BlueAlsa with legaly safe codes and built-in audio mixing
-git clone https://github.com/createcandle/bluez-alsa.git
-cd bluez-alsa
-autoreconf --install --force
-mkdir build
-cd build
-../configure --enable-msbc --enable-mp3lame --enable-faststream
-make
-make install
-cd ../..
-rm -rf bluez-alsa
-
-
-# RASPI CONFIG
-
-# enable camera
-raspi-config nonint do_camera 0
-
 
 
 
@@ -183,20 +379,46 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false}' > /etc
 
 
 
+# ADD IP-TABLES
+
+  echo "Redirecting :80 to :8080 and :443 to :4443"
+  iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
+  iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
+  iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+  iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
+  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
+  iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
+
+
 
 # TODO:
-# RASPI-CONFIG
-# - Enabled SPI 
-# - Enabled I2C
 
 # ~/.config/configstore/update-notifier-npm.json <- set output to true
-
 # Respeaker drivers?
-
 # update python libraries except for 2 (schemajson and... )
-# directory ownership and permissions
-# install openbox. And disable its shortcuts. See original kiosk install script: https://www.candlesmarthome.com/tools/kiosk.txt
 
-# LONG TERM TODO?
-# Go 64 bit?
-# Copy IP routes and other setup/settings from Webthings disk image creation? That way only one install script needs to be run instead of a waterfall model.
+
+
+# RASPI CONFIG
+
+# enable i2c, needed for clock module support
+raspi-config nonint do_i2c 0
+
+# enable SPI
+raspi-config nonint do_spi 0
+
+# enable Camera.
+raspi-config nonint do_camera 0
+
+
+
+
+# CLEANUP
+
+# remove no longer needed applications?
+# apt-get purge libtool
+
+# disable swap file
+dphys-swapfile swapoff
+
+
