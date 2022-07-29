@@ -6,9 +6,12 @@
 # Flash basic Raspberry Pi OS Lite 64 image using Raspberry Pi Imager software. 
 # https://www.raspberrypi.com/software/
 
-# Use the gear icon to set everything up that you can: enable ssh, set username "pi" and password "smarthome", set the hostname to "candle", pre-fill your wifi credentials, etc.
+# Use the gear icon to set everything up that you can: enable ssh,
+#set username "pi" and password "smarthome", set the hostname to "candle", pre-fill your wifi credentials, etc.
 
-# Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt”. From it, remove “init=/usr/lib/raspi-config/init_resize.sh”, and save. Saving might seem to fail, but it probably saved anyway.
+# Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. 
+#A new disk called "boot" should appear. Edit the file called “cmdline.txt”. From it, remove “init=/usr/lib/raspi-config/init_resize.sh”, 
+#and save. Saving might seem to fail, but it probably saved anyway.
 
 # Make sure there is no other "candle.local" device on the network already.
 # Now insert the SD card into the Raspberry Pi, power it up, wait a minute, and log into it via ssh:
@@ -105,10 +108,32 @@ systemctl disable dnsmasq.service
 #  python-pip \
 
 # additional programs for Candle kiosk mode:
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh omxplayer fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
+apt-get install -y \
+--no-install-recommends \
+xserver-xorg \
+x11-xserver-utils \
+xserver-xorg-legacy \
+xinit \
+openbox \
+wmctrl \
+xdotool \
+feh \
+omxplayer \
+fbi \
+unclutter \
+lsb-release \
+xfonts-base \
+libinput-tools \
+nbtscan
 
 # for BlueAlsa
-apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
+apt-get install -y \
+libasound2-dev \
+libdbus-glib-1-dev \
+libgirepository1.0-dev \
+libsbc-dev \
+libmp3lame-dev \
+libspandsp-dev
 
 
 apt --fix-broken install -y
