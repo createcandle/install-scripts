@@ -1,6 +1,6 @@
 # install-scripts
 
-# PREPARATION
+## PREPARATION
 1. Flash basic Raspberry Pi OS Lite 64 image using Raspberry Pi Imager software. 
 2. https://www.raspberrypi.com/software/
 
