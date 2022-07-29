@@ -108,32 +108,31 @@ systemctl disable dnsmasq.service
 #  python-pip \
 
 # additional programs for Candle kiosk mode:
-apt-get install -y \
---no-install-recommends \
-xserver-xorg \
-x11-xserver-utils \
-xserver-xorg-legacy \
-xinit \
-openbox \
-wmctrl \
-xdotool \
-feh \
-omxplayer \
-fbi \
-unclutter \
-lsb-release \
-xfonts-base \
-libinput-tools \
-nbtscan
+apt-get install --no-install-recommends -y \
+  xserver-xorg \
+  x11-xserver-utils \
+  xserver-xorg-legacy \
+  xinit \
+  openbox \
+  wmctrl \
+  xdotool \
+  feh \
+  omxplayer \
+  fbi \
+  unclutter \
+  lsb-release \
+  xfonts-base \
+  libinput-tools \
+  nbtscan
 
 # for BlueAlsa
 apt-get install -y \
-libasound2-dev \
-libdbus-glib-1-dev \
-libgirepository1.0-dev \
-libsbc-dev \
-libmp3lame-dev \
-libspandsp-dev
+  libasound2-dev \
+  libdbus-glib-1-dev \
+  libgirepository1.0-dev \
+  libsbc-dev \
+  libmp3lame-dev \
+  libspandsp-dev
 
 
 apt --fix-broken install -y
@@ -142,7 +141,8 @@ apt autoremove -y
 
 # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
 # TODO: this should be version 88.
-apt-get install chromium
+apt install -y \
+  chromium
 
 
 
