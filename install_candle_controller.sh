@@ -50,7 +50,7 @@ then
   echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
   #npm run build
   
-  npm install -D webpack-cli
+  #npm install -D webpack-cli
   
   rm -rf build
   cp -rL src build
