@@ -89,7 +89,7 @@ then
   rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
   
   cd /home/pi/webthings/gateway
-  timeout 5 npm run run-only
+  timeout 15 npm run run-only
   exit 0
   
 else
