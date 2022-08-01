@@ -14,8 +14,12 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/in
 
 5. Make sure there is no other "candle.local" device on the network already (if so you could reflash the card using a different name on point 3).
 
-6. Now insert the SD card into the Raspberry Pi, power it up, wait a minute, and log into it via ssh:
-`ssh pi@candle.local(or username@hostname.local that you set on point if different)`
+6. Now insert the SD card into the Raspberry Pi, power it up, wait a minute, and log into it via ssh using the username and hostname you entered earlier. E.g.:
+```
+ssh pi@candle.local
+```
 
 8. Once logged in via SSH, you can download and run this install script.
-`curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash`
+```
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
+```
