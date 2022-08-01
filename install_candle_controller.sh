@@ -16,8 +16,6 @@ if [ "$EUID" -ne 0 ]
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-  #nvm install --lts
-
   echo " "
   echo "NODE AND NPM VERSIONS:"
   node --version
@@ -25,6 +23,7 @@ if [ "$EUID" -ne 0 ]
 
   echo " "
   echo "DOWNLOADING AND INSTALLING CANDLE CONTROLLER"
+  
   # Download Candle controller from Github and install it
   mkdir /home/pi/webthings
   chown pi:pi /home/pi/webthings
