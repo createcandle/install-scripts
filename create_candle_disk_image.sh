@@ -17,7 +17,7 @@
 # ssh pi@candle.local
 
 # Once logged in via SSH, you can download and run this install script.
-# curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/install.sh | sudo bash
+# curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
 
 
 
@@ -168,29 +168,21 @@ echo " "
 echo "INSTALLING CANDLE CONTROLLER"
 echo " "
 
+cd /home/pi
+rm -rf /home/pi/webthings
+
 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh
+sudo chmod +x ./install_candle_controller.sh
 sudo -u pi ./install_candle_controller.sh
 rm install_candle_controller.sh
+
+cd /home/pi
 
 setcap cap_net_raw+eip $(eval readlink -f `which node`)
 setcap cap_net_raw+eip $(eval readlink -f `which python3`)
 
 
 
-
-
-
-echo " "
-echo "INSTALLING CANDLE STORE"
-echo " "
-
-cd /home/pi/.webthings/addons
-wget https://github.com/createcandle/candleappstore/releases/download/0.4.17/candleappstore-0.4.17-linux-arm64-v3.9.tgz
-tar -xf candleappstore-0.4.17-linux-arm64-v3.9.tgz
-mv package candleappstore
-chown pi:pi candleappstore
-rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
-cd /home/pi
 
 
 
