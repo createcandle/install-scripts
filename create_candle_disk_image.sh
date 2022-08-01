@@ -124,6 +124,7 @@ apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-
 
 echo " "
 echo "UPGRADING LINUX"
+apt-get update --fix-missing
 apt --fix-broken install -y
 apt upgrade -y
 apt autoremove -y
