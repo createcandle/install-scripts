@@ -326,6 +326,7 @@ systemctl disable triggerhappy.service
 systemctl enable candle_first_run.service
 systemctl enable candle_bootup_actions.service
 systemctl enable candle_start_swap.service
+systemctl enable candle_early.service
 systemctl enable splashscreen.service
 systemctl enable splashscreen180.service
 systemctl enable splashscreen_updating.service
