@@ -124,6 +124,7 @@ apt-get install chromium
 # PYTHON
 echo " "
 echo "INSTALLING PYTHON PACKAGES"
+sudo -u pi pip3 uninstall -y adapt-parser || true
 sudo -u pi pip3 install dbus-python
 sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
