@@ -232,7 +232,7 @@ touch /home/pi/.webthings/etc/hostname
 
 
 #mkdir -p /home/pi/.webthings/tmp
-cp -r /tmp /home/pi/.webthings/tmp
+cp --verbose -r /tmp /home/pi/.webthings/tmp
 chmod 1777 /home/pi/.webthings/tmp
 find /home/pi/.webthings/tmp \
      -mindepth 1 \
@@ -247,7 +247,7 @@ find /home/pi/.webthings/tmp \
 cd /home/pi
 
 # Used when doing factory reset to restore original floorplan image:
-if [ ! -f "/home/pi/.webthings/uploads/floorplan.svg" ]
+if [ -f "/home/pi/.webthings/uploads/floorplan.svg" ]
 then
   cp /home/pi/.webthings/uploads/floorplan.svg /home/pi/.webthings/floorplan.svg
 else
@@ -257,23 +257,15 @@ else
     echo " "
 fi
 
-# download tons of ready-made settings files from the Candle github
-git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
-cp -r /home/pi/configuration-files/boot/* /boot/
-cp -r /home/pi/configuration-files/etc/* /etc/
-cp -r /home/pi/configuration-files/home/pi/* /home/pi/
-cp -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
-
-
 # SYMLINKS
 
 # move hosts file to user partition
-cp /etc/hosts /home/pi/.webthings/etc/hosts
+cp --verbose /etc/hosts /home/pi/.webthings/etc/hosts
 rm /etc/hosts
 ln -s /home/pi/.webthings/etc/hosts /etc/hosts
 
 # move timezone file to user partition
-cp /etc/timezone /home/pi/.webthings/etc/timezone
+cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
 rm /etc/timezone 
 ln -s /home/pi/.webthings/etc/timezone /etc/timezone 
 
@@ -285,9 +277,23 @@ ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 # BINDS
 
 echo "candle" > /home/pi/.webthings/etc/hostname
-cp -r /etc/ssh /home/pi/.webthings/etc/ssh
-cp -r /etc/wpa_supplicant /home/pi/.webthings/etc/wpa_supplicant/
-cp -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
+cp --verbose -r /etc/ssh /home/pi/.webthings/etc/ssh
+cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/wpa_supplicant/
+cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
+
+
+
+# Download tons of ready-made settings files from the Candle github
+echo " "
+echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
+echo " "
+git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+cp  --verbose -r /home/pi/configuration-files/boot/* /boot/
+cp  --verbose -r /home/pi/configuration-files/etc/* /etc/
+cp  --verbose -r /home/pi/configuration-files/home/pi/* /home/pi/
+cp  --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
+
+
 
 
 # SERVICES
