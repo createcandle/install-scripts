@@ -39,7 +39,7 @@ echo " "
 echo "PATH: $PATH"
 
 
-if [ ! -d "/dev/mmcblk0p3" ]
+if [ ! -f "/dev/mmcblk0p3" ]
 then
     echo " "
     echo "CREATING PARTITIONS"
@@ -51,9 +51,9 @@ then
     mkdir /home/pi/.webthings
     chown pi:pi /home/pi/.webthings
     mount /dev/mmcblk0p3 /home/pi/.webthings
-    
 
 else
+    echo " "
     echo "partitions already created:"
 fi
 
@@ -287,7 +287,7 @@ systemctl disable webthings-gateway.check-for-update.service
 systemctl disable webthings-gateway.check-for-update.timer
 systemctl disable webthings-gateway.update-rollback.service
 
-# disable triggerhappy (keyboard shortcuts)
+# disable triggerhappy
 systemctl disable triggerhappy.socket
 systemctl disable triggerhappy.service
 
