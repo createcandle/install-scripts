@@ -22,7 +22,11 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/in
 ssh pi@candle.local
 ```
 
-8. Once logged in via SSH, you can download and run this install script.
+8. Once logged in via SSH, you can download and run the script to create the disk image.
 ```
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
 ```
+
+9. Once the disk image is complete you can shut down the Raspberry Pi and insert the SD card back into your laptop again to turn it into a disk image file. On windows you can use the free version of Win32 Disk Imager for this. Make sure to check the box to only read the partitions. Name the file to be extracted something like `Candle_2.0.0.img`.
+
+10. Once you have the .img file, zip that file. It should have shrunk down to less than 1.5Gb in size.
