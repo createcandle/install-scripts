@@ -2,7 +2,10 @@
 
 ## Installing the Candle Controller only
 This script is part of the larger script that creates the Candle Disk Image, and can technically be run separately.
+```
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh | bash
+```
+
 
 ## Creating the Candle Raspberry Pi disk image
 1. Flash basic Raspberry Pi OS Lite 64 image using Raspberry Pi Imager software. 
