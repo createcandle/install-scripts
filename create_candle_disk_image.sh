@@ -257,7 +257,7 @@ else
 fi
 
 # download tons of ready-made settings files from the Candle github
-git clone --depth 1 https://github.com/createcandle/configuration-files
+git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
 cp -r /home/pi/configuration-files/boot/* /boot/
 cp -r /home/pi/configuration-files/etc/* /etc/
 cp -r /home/pi/configuration-files/home/pi/* /home/pi/
