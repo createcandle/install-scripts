@@ -481,6 +481,7 @@ raspi-config nonint do_camera 0
 dphys-swapfile swapoff
 
 apt autoremove
+rm -rf /tmp/*
 
 cd /home/pi/webthings/gateway
 sudo -u pi /home/pi/webthings/gateway/run-app.sh &
