@@ -292,6 +292,7 @@ cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/
 echo " "
 echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
 echo " "
+rm -rf /home/pi/configuration-files
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
 cp --verbose -r /home/pi/configuration-files/boot/* /boot/
 cp --verbose -r /home/pi/configuration-files/etc/* /etc/
