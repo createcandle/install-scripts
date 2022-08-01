@@ -39,8 +39,10 @@ echo " "
 echo "PATH: $PATH"
 
 
-if [ ! -f "/dev/mmcblk0p3" ]
-then
+if ls /dev/mmcblk0p3; then
+    echo " "
+    echo "partitions already created:"
+else
     echo " "
     echo "CREATING PARTITIONS"
     echo " "
@@ -50,10 +52,8 @@ then
     printf "y" | mkfs.ext4 /dev/mmcblk0p3
     mkdir /home/pi/.webthings
     chown pi:pi /home/pi/.webthings
-else
-    echo " "
-    echo "partitions already created:"
 fi
+
 
 mount /dev/mmcblk0p3 /home/pi/.webthings
 chown pi:pi /home/pi/.webthings
