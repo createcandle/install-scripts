@@ -63,6 +63,7 @@ then
   echo "INSTALLING CANDLE STORE ADDON"
   echo " "
 
+  mkdir -p /home/pi/.webthings/addons
   cd /home/pi/.webthings/addons
   rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
   rm -rf package
