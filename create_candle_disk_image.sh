@@ -223,9 +223,19 @@ chown pi:pi /home/pi/candle
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
 mkdir -p /home/pi/.webthings/etc/wpa_supplicant
 mkdir -p /home/pi/.webthings/etc/ssh
-mkdir -p /home/pi/.webthings/etc/hostname
-mkdir -p /home/pi/.webthings/tmp
 
+# Create files that are linked to using binding in fstab
+touch /home/pi/.webthings/etc/hostname
+
+
+
+#mkdir -p /home/pi/.webthings/tmp
+cp -r /tmp /home/pi/.webthings/tmp
+chmod 1777 /home/pi/.webthings/tmp
+find /home/pi/.webthings/tmp \
+     -mindepth 1 \
+     -name '.*-unix' -exec chmod 1777 {} + -prune -o \
+     -exec chmod go-rwx {} +
 
 # all directories needed to keep fstab happy should now exist
 
@@ -239,10 +249,10 @@ cp /home/pi/.webthings/uploads/floorplan.svg /home/pi/.webthings/floorplan.svg
 
 # download tons of ready-made settings files from the Candle github
 git clone --depth 1 https://github.com/createcandle/configuration-files
-cp -R /home/pi/configuration-files/boot/* /boot/
-cp -R /home/pi/configuration-files/etc/* /etc/
-cp -R /home/pi/configuration-files/home/pi/* /home/pi/
-cp -R /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
+cp -r /home/pi/configuration-files/boot/* /boot/
+cp -r /home/pi/configuration-files/etc/* /etc/
+cp -r /home/pi/configuration-files/home/pi/* /home/pi/
+cp -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
 
 
 # SYMLINKS
