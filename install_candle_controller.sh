@@ -67,11 +67,11 @@ then
   cp -rL src build
   cp -rL static build/static
   find build -name '*.ts' -delete
-  echo "compiling typescript.. this will take a while"
+  echo "Compiling typescript. this will take a while..."
   npx tsc -p .
   echo "(it probably found some errors, don't worry about those)"
   echo " "
-  echo "running webpack.. this will take a while too"
+  echo "Running webpack. this will take a while too..."
   npx webpack
   
   echo " "

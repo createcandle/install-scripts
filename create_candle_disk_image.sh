@@ -72,7 +72,13 @@ apt update
 
 # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
 # TODO: this should be version 88.
-apt install chromium -y
+apt-get install chromium -y
+
+#echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
+#curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
+#apt update
+#apt install ungoogled-chromium -y
+
 
 apt install autoconf build-essential curl git libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six python3-pip -y
 
@@ -432,7 +438,7 @@ echo " "
 echo "Redirecting :80 to :8080 and :443 to :4443"
 echo " "
 
-if sudo iptables --list | grep 4443; then
+if iptables --list | grep 4443; then
     echo "IPTABLES ALREADY ADDED"
 else
     iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
@@ -495,6 +501,6 @@ sudo -u pi /home/pi/webthings/gateway/run-app.sh &
 echo " "
 echo "DONE!"
 echo "Starting controller for testing"
-echo "\nReboot the controller with 'sudo reboot' command if everything looks ok."
+echo "Reboot the controller with 'sudo reboot' command if everything looks ok."
 echo "After the reboot you should be able to open http://candle.local in your browser."
 echo " "
