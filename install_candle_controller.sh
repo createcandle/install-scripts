@@ -76,10 +76,11 @@ then
   
   cd /home/pi/webthings/gateway
   timeout 5 npm run run-only
+  exit 0
   
 else
   echo "Please run as user pi"
-  exit
+  exit 1
 fi
 
 
