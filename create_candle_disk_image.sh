@@ -277,9 +277,9 @@ ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 # BINDS
 
 echo "candle" > /home/pi/.webthings/etc/hostname
-cp --verbose -r /etc/ssh /home/pi/.webthings/etc/ssh
-cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/wpa_supplicant/
-cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
+cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
+cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
+cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/
 
 
 
@@ -288,10 +288,12 @@ echo " "
 echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
 echo " "
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
-cp  --verbose -r /home/pi/configuration-files/boot/* /boot/
-cp  --verbose -r /home/pi/configuration-files/etc/* /etc/
-cp  --verbose -r /home/pi/configuration-files/home/pi/* /home/pi/
-cp  --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
+cp --verbose -r /home/pi/configuration-files/boot/* /boot/
+cp --verbose -r /home/pi/configuration-files/etc/* /etc/
+cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
+cp --verbose -r /home/pi/configuration-files/home/pi/candle/* /home/pi/candle
+cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.webthings/etc/
+cp --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
 
 
 
@@ -300,7 +302,7 @@ cp  --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/
 echo " "
 echo "ENABLING AND DISABLING SERVICES"
 echo " "
-systemctl daemon-reload
+#systemctl daemon-reload
 
 
 # disable triggerhappy
@@ -362,7 +364,7 @@ then
 	# hide all the small things normally shown at boot
 	sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' /boot/cmdline.txt        
 else
-        echo "- The cmdline.txt file was already modified"
+    echo "- The cmdline.txt file was already modified"
 fi
 
 # Hide the login text (it will still be available on tty3 - connect a keyboard to your pi and press CTRl-ALT-F3 to see it)
@@ -387,6 +389,7 @@ mkdir -p /etc/X11/xinit
 mkdir -p /etc/xdg/openbox
 
 # Disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
+rm /etc/xdg/openbox/rc.xml
 wget https://www.candlesmarthome.com/tools/rc.xml -P /etc/xdg/openbox/rc.xml
 
 # Modify the xinitrc file to automatically log in the pi user
@@ -415,16 +418,32 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false}' > /etc
 # ADD IP-TABLES
 echo " "
 echo "ADDING IPTABLES"
+echo "before:"
+ls /etc/iptables/
+cat /etc/iptables/*
+iptables -t nat --list
+echo " "
 echo "Redirecting :80 to :8080 and :443 to :4443"
 echo " "
-iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
-iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
-iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
-iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
-iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
 
-echo "y\ny\n" | apt install iptables-persistent -y
+if sudo iptables --list | grep 4443; then
+    echo "IPTABLES ALREADY ADDED"
+else
+    iptables -C -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
+    iptables -C -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
+    iptables -C -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+    iptables -C -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
+    iptables -C -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
+    iptables -C -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
+fi
+
+#iptables -L -v -n
+echo "after"
+ls /etc/iptables/
+cat /etc/iptables/*
+iptables -t nat --list
+
+echo "\n\n" | apt install iptables-persistent -y
 #apt install iptables-persistent -y
 
 
@@ -461,9 +480,14 @@ raspi-config nonint do_camera 0
 # disable swap file
 dphys-swapfile swapoff
 
+apt autoremove
+
 cd /home/pi/webthings/gateway
-npm run run-only &
+sudo -u pi /home/pi/webthings/gateway/run-app.sh &
 
 echo " "
-echo "DONE! Reboot the controller."
+echo "DONE!"
+echo "Starting controller for testing"
+echo "\nReboot the controller with 'sudo reboot' command if everything looks ok."
+echo "After the reboot you should be able to open http://candle.local in your browser."
 echo " "

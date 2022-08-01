@@ -69,7 +69,9 @@ then
   find build -name '*.ts' -delete
   echo "compiling typescript.. this will take a while"
   npx tsc -p .
-  echo "running webpack.. this will take a while"
+  echo "(it probably found some errors, don't worry about those)"
+  echo " "
+  echo "running webpack.. this will take a while too"
   npx webpack
   
   echo " "
