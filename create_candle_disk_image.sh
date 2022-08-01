@@ -254,6 +254,7 @@ else
     echo " "
     echo "ERROR DETECTED DURING CANDLE INSTALL"
     echo "the floorplan.svg file is not where it should be"
+    echo " "
 fi
 
 # download tons of ready-made settings files from the Candle github
@@ -290,6 +291,9 @@ cp -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
 
 
 # SERVICES
+echo " "
+echo "ENABLING AND DISABLING SERVICES"
+echo " "
 systemctl daemon-reload
 
 
@@ -321,6 +325,9 @@ systemctl disable webthings-gateway.update-rollback.service
 # KIOSK
 
 # Download boot splash images and video
+echo " "
+echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEO"
+echo " "
 wget https://www.candlesmarthome.com/tools/splash.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash180.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash_updating.png -P /boot/
@@ -371,6 +378,7 @@ fi
 
 
 mkdir -p /etc/X11/xinit
+mkdir -p /etc/xdg/openbox
 
 # Disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
 wget https://www.candlesmarthome.com/tools/rc.xml -P /etc/xdg/openbox/rc.xml
@@ -410,7 +418,8 @@ iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
 iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
 iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
 
-apt install iptables-persistent -y
+echo "y\ny\n" | apt install iptables-persistent -y
+#apt install iptables-persistent -y
 
 
 # TODO:
