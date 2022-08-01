@@ -283,13 +283,11 @@ cp -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
 # SERVICES
 systemctl daemon-reload
 
-systemctl disable webthings-gateway.check-for-update.service
-systemctl disable webthings-gateway.check-for-update.timer
-systemctl disable webthings-gateway.update-rollback.service
 
 # disable triggerhappy
 systemctl disable triggerhappy.socket
 systemctl disable triggerhappy.service
+
 
 # enable Candle services
 systemctl enable candle_first_run.service
@@ -302,6 +300,12 @@ systemctl enable splashscreen_updating180.service
 
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 
+
+# Webthings Gateway
+systemctl enable webthings-gateway.service
+systemctl disable webthings-gateway.check-for-update.service
+systemctl disable webthings-gateway.check-for-update.timer
+systemctl disable webthings-gateway.update-rollback.service
 
 
 
@@ -384,8 +388,10 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false}' > /etc
 
 
 # ADD IP-TABLES
-
+echo " "
+echo "ADDING IPTABLES"
 echo "Redirecting :80 to :8080 and :443 to :4443"
+echo " "
 iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
 iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
 iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
@@ -393,6 +399,7 @@ iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
 iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
 iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
 
+apt install iptables-persistent -y
 
 
 # TODO:
