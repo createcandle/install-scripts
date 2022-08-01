@@ -146,7 +146,7 @@ if [ ! -d "/usr/bin/bluealsa" ]
 then
     
     echo " "
-    echo "Creating BlueAlsa"
+    echo "CREATING BLUEALSA"
     echo " "
 
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
