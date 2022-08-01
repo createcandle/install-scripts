@@ -67,7 +67,13 @@ echo " "
 echo "INSTALLING APPLICATIONS AND LIBRARIES"
 echo " "
 
+
 apt update
+
+# Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
+# TODO: this should be version 88.
+apt install chromium -y
+
 apt install autoconf build-essential curl git libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six python3-pip -y
 
 apt install -y \
@@ -109,15 +115,13 @@ apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-x
 apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
 
 
+
 echo " "
 echo "UPGRADING LINUX"
 apt --fix-broken install -y
 apt upgrade -y
 apt autoremove -y
 
-# Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
-# TODO: this should be version 88.
-apt-get install chromium
 
 
 
@@ -430,12 +434,12 @@ echo " "
 if sudo iptables --list | grep 4443; then
     echo "IPTABLES ALREADY ADDED"
 else
-    iptables -C -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
-    iptables -C -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
-    iptables -C -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-    iptables -C -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
-    iptables -C -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
-    iptables -C -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
+    iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
+    iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
+    iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+    iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
+    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
+    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
 fi
 
 #iptables -L -v -n
