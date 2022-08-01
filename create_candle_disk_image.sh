@@ -446,6 +446,9 @@ raspi-config nonint do_camera 0
 # disable swap file
 dphys-swapfile swapoff
 
+cd /home/pi/webthings/gateway
+npm run run-only &
+
 echo " "
 echo "DONE! Reboot the controller."
 echo " "
