@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # TODO: check if candlecam works on this disk image, as it may use the new camera interface
 
 # This script will turn a Raspberry Pi OS Lite installation into a Candle controller
@@ -6,12 +8,9 @@
 # Flash basic Raspberry Pi OS Lite 64 image using Raspberry Pi Imager software. 
 # https://www.raspberrypi.com/software/
 
-# Use the gear icon to set everything up that you can: enable ssh,
-#set username "pi" and password "smarthome", set the hostname to "candle", pre-fill your wifi credentials, etc.
+# Use the gear icon to set everything up that you can: enable ssh, set username "pi" and password "smarthome", set the hostname to "candle", pre-fill your wifi credentials, etc.
 
-# Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. 
-#A new disk called "boot" should appear. Edit the file called “cmdline.txt”. From it, remove “init=/usr/lib/raspi-config/init_resize.sh”, 
-#and save. Saving might seem to fail, but it probably saved anyway.
+# Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt”. From it, remove “init=/usr/lib/raspi-config/init_resize.sh”, and save. Saving might seem to fail, but it probably saved anyway.
 
 # Make sure there is no other "candle.local" device on the network already.
 # Now insert the SD card into the Raspberry Pi, power it up, wait a minute, and log into it via ssh:
@@ -20,6 +19,16 @@
 # Once logged in via SSH, you can download and run this install script.
 # curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/install.sh | sudo bash
 
+
+
+# Check if script is being run as root
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root (use sudo)"
+  exit
+fi
+
+
+
 # CREATE PARTITIONS
 
 cd /home/pi
@@ -27,8 +36,7 @@ cd /home/pi
 echo " "
 echo "CREATING CANDLE DISK IMAGE"
 echo " "
-echo "PATH: "
-echo $PATH
+echo "PATH: $PATH"
 
 
 if [ ! -d "/dev/mmcblk0p3" ]
@@ -59,22 +67,7 @@ echo "INSTALLING APPLICATIONS AND LIBRARIES"
 echo " "
 
 apt update
-apt install -y \
-  autoconf \
-  build-essential \
-  curl \
-  git \
-  libbluetooth-dev \
-  libboost-python-dev \
-  libboost-thread-dev \
-  libffi-dev \
-  libglib2.0-dev \
-  libpng-dev \
-  libudev-dev \
-  libusb-1.0-0-dev \
-  pkg-config \
-  python-six \
-  python3-pip
+apt install autoconf build-essential curl git libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six python3-pip -y
 
 apt install -y \
   arping \
@@ -90,7 +83,8 @@ apt install -y \
   libusb-1.0-0-dev \
   mosquitto \
   policykit-1 \
-  sqlite3
+  sqlite3 \
+  iptables
 
 
 apt install -y \
@@ -108,53 +102,33 @@ systemctl disable dnsmasq.service
 #  python-pip \
 
 # additional programs for Candle kiosk mode:
-apt-get install --no-install-recommends -y \
-  xserver-xorg \
-  x11-xserver-utils \
-  xserver-xorg-legacy \
-  xinit \
-  openbox \
-  wmctrl \
-  xdotool \
-  feh \
-  omxplayer \
-  fbi \
-  unclutter \
-  lsb-release \
-  xfonts-base \
-  libinput-tools \
-  nbtscan
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh omxplayer fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
 # for BlueAlsa
-apt-get install -y \
-  libasound2-dev \
-  libdbus-glib-1-dev \
-  libgirepository1.0-dev \
-  libsbc-dev \
-  libmp3lame-dev \
-  libspandsp-dev
+apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
 
 
+echo " "
+echo "UPGRADING LINUX"
 apt --fix-broken install -y
 apt upgrade -y
 apt autoremove -y
 
 # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
 # TODO: this should be version 88.
-apt install -y \
-  chromium
+apt-get install chromium
 
 
 
 # PYTHON
-
-pip3 install dbus-python
-
+echo " "
+echo "INSTALLING PYTHON PACKAGES"
+sudo -u pi pip3 install dbus-python
+sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
 
 
 # BLUEALSA
-
 if [ ! -d "/usr/bin/bluealsa" ]
 then
     
@@ -194,46 +168,14 @@ echo " "
 echo "INSTALLING CANDLE CONTROLLER"
 echo " "
 
-python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
-
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
-#. ~/.bashrc
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-#nvm install --lts
-
-echo " "
-echo "NODE AND NPM VERSIONS:"
-node --version
-npm --version
+wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh
+sudo -u pi ./install_candle_controller.sh
+rm install_candle_controller.sh
 
 setcap cap_net_raw+eip $(eval readlink -f `which node`)
 setcap cap_net_raw+eip $(eval readlink -f `which python3`)
 
 
-
-
-mkdir /home/pi/webthings
-chown pi:pi /home/pi/webthings
-cd /home/pi/webthings
-git clone --depth 1 https://github.com/createcandle/candle-controller.git
-mv candle-controller gateway
-chown -R pi:pi /home/pi/webthings/gateway
-cd gateway
-nvm install 14
-nvm use 14
-nvm alias default 14
-
-rm -rf node_modules/
-
-export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
-# CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
-# npm install typescript --save-dev # TODO: check if this is now in package.json already
-# npm install
-CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 
 
 
@@ -246,6 +188,7 @@ cd /home/pi/.webthings/addons
 wget https://github.com/createcandle/candleappstore/releases/download/0.4.17/candleappstore-0.4.17-linux-arm64-v3.9.tgz
 tar -xf candleappstore-0.4.17-linux-arm64-v3.9.tgz
 mv package candleappstore
+chown pi:pi candleappstore
 rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
 cd /home/pi
 
