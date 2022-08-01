@@ -12,12 +12,21 @@ then
 
   python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+  rm install.sh
+  #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+  wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh
+  chmod +x install.sh
+  ./install.sh
+  
   #. ~/.bashrc
 
-  export NVM_DIR="$HOME/.nvm"
+  export NVM_DIR="/home/pi/.nvm"
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+  nvm install 14
+  nvm use 14
+  nvm alias default 14
 
   echo " "
   echo "NODE AND NPM VERSIONS:"
@@ -26,6 +35,8 @@ then
 
   echo " "
   echo "DOWNLOADING AND INSTALLING CANDLE CONTROLLER"
+  echo "Do not worry about the errors you will see with optipng and jpegtran"
+  echo " "
   
   # Download Candle controller from Github and install it
   mkdir -p /home/pi/webthings
@@ -56,7 +67,9 @@ then
   cp -rL src build
   cp -rL static build/static
   find build -name '*.ts' -delete
+  echo "compiling typescript.. this will take a while"
   npx tsc -p .
+  echo "running webpack.. this will take a while"
   npx webpack
   
   echo " "
@@ -64,6 +77,7 @@ then
   echo " "
 
   mkdir -p /home/pi/.webthings/addons
+  chown -R pi:pi /home/pi/.webthings/addons
   cd /home/pi/.webthings/addons
   rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
   rm -rf package
@@ -71,7 +85,7 @@ then
   wget https://github.com/createcandle/candleappstore/releases/download/0.4.17/candleappstore-0.4.17-linux-arm64-v3.9.tgz
   tar -xf candleappstore-0.4.17-linux-arm64-v3.9.tgz
   mv package candleappstore
-  chown pi:pi candleappstore
+  chown -R pi:pi candleappstore
   rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
   
   cd /home/pi/webthings/gateway
