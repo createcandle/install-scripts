@@ -78,7 +78,7 @@ then
   timeout 5 npm run run-only
   
 else
-  echo "Please do not run as root"
+  echo "Please run as user pi"
   exit
 fi
 
