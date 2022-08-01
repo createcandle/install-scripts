@@ -22,9 +22,21 @@ ssh pi@candle.local
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
 ```
 
-9. Once the disk image is complete you can shut down the Raspberry Pi and insert the SD card back into your laptop again to turn it into a disk image file. On windows you can use the free version of Win32 Disk Imager for this. Make sure to check the box to only read the partitions. Name the file to be extracted something like `Candle_2.0.0.img`.
+The script, once done, will reboot the Raspberry Pi. You should now have a Candle controller with only one addon, the Candle store. Use the Candle store to at least install the following addons:
+- Power settings
+- Candle theme
+- Zigbee2MQTT
 
-10. Once you have the .img file, zip that file. It should shrink down to less than 1.5Gb in size.
+Also, enable SSH under settings -> developer. Then Log into the Candle controller using SSH again.
+
+The final step is to run the script that turns a controller into a disk image.
+```
+sudo /home/pi/prepare_for_disk_image.sh
+```
+
+Once the process is complete the Raspberry Pi will shut down. You can then insert the SD card back into your laptop again to turn it into a disk image file. On windows you can use the free version of Win32 Disk Imager for this. Make sure to check the box to only read the partitions. Name the file to be extracted something like `Candle_2.0.0.img`.
+
+Once you have the .img file, zip that file. It should shrink down to less than 1.5Gb in size.
 
 
 ## Installing the Candle Controller only
