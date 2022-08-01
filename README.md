@@ -28,7 +28,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 
 
 ## Installing the Candle Controller only
-This script is part of the larger script that creates the Candle Disk Image, and can technically be run separately.
+This script is part of the larger script that creates the Candle Disk Image, and can technically be run separately. It assumes a Raspberry Pi OS with username pi.
 ```
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh | bash
 ```
