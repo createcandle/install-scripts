@@ -88,6 +88,8 @@ then
   chown -R pi:pi candleappstore
   rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
   
+  echo " "
+  echo "running gateway for 15 seconds to create folders"
   cd /home/pi/webthings/gateway
   timeout 15 npm run run-only
   exit 0
