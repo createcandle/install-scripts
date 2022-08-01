@@ -50,12 +50,13 @@ then
     printf "y" | mkfs.ext4 /dev/mmcblk0p3
     mkdir /home/pi/.webthings
     chown pi:pi /home/pi/.webthings
-    mount /dev/mmcblk0p3 /home/pi/.webthings
-
 else
     echo " "
     echo "partitions already created:"
 fi
+
+mount /dev/mmcblk0p3 /home/pi/.webthings
+chown pi:pi /home/pi/.webthings
 
 lsblk
 echo " "
@@ -170,6 +171,7 @@ echo " "
 
 cd /home/pi
 rm -rf /home/pi/webthings
+rm -rf /home/pi/.webthings
 
 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh
 sudo chmod +x ./install_candle_controller.sh
@@ -245,7 +247,14 @@ find /home/pi/.webthings/tmp \
 cd /home/pi
 
 # Used when doing factory reset to restore original floorplan image:
-cp /home/pi/.webthings/uploads/floorplan.svg /home/pi/.webthings/floorplan.svg
+if [ ! -f "/home/pi/.webthings/uploads/floorplan.svg" ]
+then
+  cp /home/pi/.webthings/uploads/floorplan.svg /home/pi/.webthings/floorplan.svg
+else
+    echo " "
+    echo "ERROR DETECTED DURING CANDLE INSTALL"
+    echo "the floorplan.svg file is not where it should be"
+fi
 
 # download tons of ready-made settings files from the Candle github
 git clone --depth 1 https://github.com/createcandle/configuration-files
@@ -360,6 +369,8 @@ else
 fi
 
 
+
+mkdir -p /etc/X11/xinit
 
 # Disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
 wget https://www.candlesmarthome.com/tools/rc.xml -P /etc/xdg/openbox/rc.xml
