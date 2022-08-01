@@ -457,7 +457,7 @@ ls /etc/iptables/
 cat /etc/iptables/*
 iptables -t nat --list
 
-echo "\n\n" | apt install iptables-persistent -y
+#echo "\n\n" | apt install iptables-persistent -y
 #apt install iptables-persistent -y
 
 
@@ -501,7 +501,7 @@ cd /home/pi/webthings/gateway
 sudo -u pi /home/pi/webthings/gateway/run-app.sh &
 
 echo " "
-echo "DONE!"
+echo "ALMOST DONE!"
 echo "Starting controller for testing"
 echo "Reboot the controller with 'sudo reboot' command if everything looks ok."
 echo "After the reboot you should be able to open http://candle.local in your browser."
