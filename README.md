@@ -14,4 +14,4 @@
 7. ssh pi@candle.local(or username@hostname.local that you set on point if different)
 
 8. Once logged in via SSH, you can download and run this install script.
-9. curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/install.sh | sudo bash
+9. curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
