@@ -141,6 +141,11 @@ wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190
 dpkg –i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 rm omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 
+mkdir -p /opt/vc/
+wget https://www.candlesmarthome.com/tools/lib.tar
+tar -xvf lib.tar -C /opt/vc/
+rm lib.tar
+
 # for BlueAlsa
 apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
 
