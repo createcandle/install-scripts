@@ -30,6 +30,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 
 12. The final step is to run the script that turns a working Candle controller into a disk image.
 ```
+sudo chmod +x /home/pi/prepare_for_disk_image.sh
 sudo /home/pi/prepare_for_disk_image.sh
 ```
 
