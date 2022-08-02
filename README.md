@@ -24,7 +24,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 
 9. The script will easily take an hour to run on a Raspberry Pi 3b. When it gets near the end it will start the Controller. You will see a list of addons being loaded, e.g. `Loading add-on: candleappstore`. 
 
-10. At this point you can open a browser and visit http://candle.local. Create an account. Once logged in make sure all the pre-installed addon are enabled and up-to-date. The Zigbee2MQTT addon is installing itself, which will take a while. You can check it's progress on the zigbee overview page. When it's done you can reboot the Raspberry Pi from the main menu.
+10. At this point you can open a browser and visit http://candle.local. Create an account. Once logged in make sure all the pre-installed addon are enabled and up-to-date. The Zigbee2MQTT addon is installing itself, which will take a while. You can check it's progress on the Zigbee2mqtt addon overview page (or wait for `zigbee2mqtt-adapter: -----INSTALL COMPLETE-----` to show up in the terminal). When it's done you can reboot the Raspberry Pi from the main menu.
 
 11. The reboot may take a little longer than usual. Login when the system is up again. Then enable SSH under settings -> developer (you may need to click the gear icon on the settings page 4 times first), and then Log into the Candle controller using SSH again. 
 
