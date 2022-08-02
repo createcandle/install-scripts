@@ -114,7 +114,9 @@ apt install -y \
   mosquitto \
   policykit-1 \
   sqlite3 \
-  iptables
+  iptables \
+  libolm3 \
+  libffi6
 
 
 apt install -y dnsmasq 
