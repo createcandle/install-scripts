@@ -5,7 +5,7 @@
 # This script will turn a Raspberry Pi OS Lite installation into a Candle controller
 
 # PREPARATION
-# Flash basic Raspberry Pi OS Lite 64 image using Raspberry Pi Imager software. 
+# Flash basic Raspberry Pi OS Lite Legacy image using Raspberry Pi Imager software. 
 # https://www.raspberrypi.com/software/
 
 # Use the gear icon to set everything up that you can: enable ssh, set username "pi" and password "smarthome", set the hostname to "candle", pre-fill your wifi credentials, etc.

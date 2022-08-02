@@ -81,14 +81,14 @@ then
   mkdir -p /home/pi/.webthings/addons
   chown -R pi:pi /home/pi/.webthings/addons
   cd /home/pi/.webthings/addons
-  rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
+  rm candleappstore-0.4.18-linux-arm-v3.9.tgz
   rm -rf package
   rm -rf candleappstore
-  wget https://github.com/createcandle/candleappstore/releases/download/0.4.17/candleappstore-0.4.17-linux-arm64-v3.9.tgz
-  tar -xf candleappstore-0.4.17-linux-arm64-v3.9.tgz
+  wget https://github.com/createcandle/candleappstore/releases/download/0.4.18/candleappstore-0.4.18-linux-arm-v3.9.tgz
+  tar -xf candleappstore-0.4.18-linux-arm-v3.9.tgz
   mv package candleappstore
   chown -R pi:pi candleappstore
-  rm candleappstore-0.4.17-linux-arm64-v3.9.tgz
+  rm candleappstore-0.4.18-linux-arm-v3.9.tgz
   
   rm -rf package
   rm -rf candle-theme
