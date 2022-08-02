@@ -80,7 +80,22 @@ apt-get install chromium -y
 #apt install ungoogled-chromium -y
 
 
-apt install autoconf build-essential curl git libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six python3-pip -y
+apt install -y \
+    autoconf \
+    build-essential \
+    curl \
+    git \
+    libbluetooth-dev \
+    libboost-python-dev \
+    libboost-thread-dev \
+    libffi-dev \
+    libglib2.0-dev \
+    libpng-dev \
+    libudev-dev \
+    libusb-1.0-0-dev \
+    pkg-config \
+    python-six \
+    python3-pip
 
 apt install -y \
   arping \
@@ -136,7 +151,7 @@ apt autoremove -y
 echo " "
 echo "INSTALLING PYTHON PACKAGES"
 sudo -u pi pip3 uninstall -y adapt-parser || true
-sudo -u pi pip3 install dbus-python
+sudo -u pi pip3 install dbus-python pybluez pillow pycryptodomex
 sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
 
@@ -307,7 +322,7 @@ cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
 cp --verbose -r /home/pi/configuration-files/home/pi/candle/* /home/pi/candle
 cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.webthings/etc/
 cp --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
-
+rm -rf /home/pi/configuration-files
 
 
 

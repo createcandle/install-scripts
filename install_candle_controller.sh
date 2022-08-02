@@ -170,9 +170,6 @@ then
   chown -R pi:pi webinterface
   rm webinterface-0.2.2.tgz
   
-  cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
-  chown pi:pi /home/pi/.webthings/config/db.sqlite3
-  
   echo " "
   echo "running gateway for 15 seconds to create folders"
   cd /home/pi/webthings/gateway
@@ -180,6 +177,9 @@ then
   echo "controller installation should be complete"
   echo "ls /home/pi/.webthings:"
   ls /home/pi/.webthings
+  
+  cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
+  chown pi:pi /home/pi/.webthings/config/db.sqlite3
   exit 0
   
 else
