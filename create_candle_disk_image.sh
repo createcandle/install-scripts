@@ -115,13 +115,13 @@ apt install -y \
   iptables
 
 
-apt install -y \
-  dnsmasq \
-  hostapd
+apt install -y dnsmasq 
+systemctl disable dnsmasq.service
 
+apt install -y hostapd
 systemctl unmask hostapd.service
 systemctl disable hostapd.service
-systemctl disable dnsmasq.service
+
 
 
 # removed from above list:
@@ -130,7 +130,11 @@ systemctl disable dnsmasq.service
 #  python-pip \
 
 # additional programs for Candle kiosk mode:
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh omxplayer fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
+
+# get OMXPlayer for Internet Radio
+wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
+dpkg –i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 
 # for BlueAlsa
 apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
@@ -165,7 +169,7 @@ then
     echo " "
 
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
-    git clone https://github.com/createcandle/bluez-alsa.git
+    git clone --depth 1 https://github.com/createcandle/bluez-alsa.git
     cd bluez-alsa
     autoreconf --install --force
     mkdir build
@@ -198,10 +202,10 @@ echo " "
 
 cd /home/pi
 rm -rf /home/pi/webthings
-rm -rf /home/pi/.webthings
+#rm -rf /home/pi/.webthings # too dangerous
 
 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh
-sudo chmod +x ./install_candle_controller.sh
+chmod +x ./install_candle_controller.sh
 sudo -u pi ./install_candle_controller.sh
 rm install_candle_controller.sh
 
@@ -254,12 +258,12 @@ mkdir -p /home/pi/.webthings/etc/wpa_supplicant
 mkdir -p /home/pi/.webthings/etc/ssh
 
 # Create files that are linked to using binding in fstab
-touch /home/pi/.webthings/etc/hostname
+cp /etc/hostname /home/pi/.webthings/etc/hostname
 
 
 
 #mkdir -p /home/pi/.webthings/tmp
-cp --verbose -r /tmp /home/pi/.webthings/tmp
+cp -r /tmp /home/pi/.webthings/tmp
 chmod 1777 /home/pi/.webthings/tmp
 find /home/pi/.webthings/tmp \
      -mindepth 1 \
@@ -277,6 +281,7 @@ cd /home/pi
 if [ -f "/home/pi/.webthings/uploads/floorplan.svg" ]
 then
   cp /home/pi/.webthings/uploads/floorplan.svg /home/pi/.webthings/floorplan.svg
+  chown pi:pi /home/pi/.webthings/floorplan.svg
 else
     echo " "
     echo "ERROR DETECTED DURING CANDLE INSTALL"
@@ -512,8 +517,13 @@ dphys-swapfile swapoff
 apt autoremove
 rm -rf /tmp/*
 
+echo "candle" > /home/pi/.webthings/etc/hostname
+
+
 cd /home/pi/webthings/gateway
 sudo -u pi /home/pi/webthings/gateway/run-app.sh &
+
+
 
 echo " "
 echo "ALMOST DONE!"

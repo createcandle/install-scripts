@@ -72,7 +72,7 @@ then
   echo "(it probably found some errors, don't worry about those)"
   echo " "
   echo "Running webpack. this will take a while too..."
-  npx webpack
+  NODE_OPTIONS="--max-old-space-size=496" npx webpack
   
   echo " "
   echo "INSTALLING CANDLE STORE ADDON"
@@ -148,11 +148,11 @@ then
   
   rm -rf package
   rm -rf zigbee2mqtt-adapter
-  wget https://github.com/kabbi/zigbee2mqtt-adapter/releases/download/1.0.35/zigbee2mqtt-adapter-1.0.35.tgz
-  tar -xf zigbee2mqtt-adapter-1.0.35.tgz
+  wget https://github.com/kabbi/zigbee2mqtt-adapter/releases/download/1.1.2/zigbee2mqtt-adapter-1.1.2.tgz
+  tar -xf zigbee2mqtt-adapter-1.1.2.tgz
   mv package zigbee2mqtt-adapter
   chown -R pi:pi zigbee2mqtt-adapter
-  rm zigbee2mqtt-adapter-1.0.35.tgz
+  rm zigbee2mqtt-adapter-1.1.2.tgz
   
   rm -rf package
   rm -rf privacy-manager
