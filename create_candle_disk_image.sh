@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e # continue on errors
 
 # TODO: check if candlecam works on this disk image, as it may use the new camera interface
 
@@ -36,6 +37,7 @@ cd /home/pi
 echo " "
 echo "CREATING CANDLE DISK IMAGE"
 echo " "
+date
 echo "PATH: $PATH"
 
 
@@ -133,8 +135,10 @@ systemctl disable hostapd.service
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
 # get OMXPlayer for Internet Radio
+# http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
 wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 dpkg –i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
+rm omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 
 # for BlueAlsa
 apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
@@ -143,7 +147,7 @@ apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-
 
 echo " "
 echo "UPGRADING LINUX"
-apt-get update --fix-missing
+apt-get update --fix-missing -y
 apt --fix-broken install -y
 apt upgrade -y
 apt autoremove -y
@@ -228,7 +232,6 @@ echo " "
 # switch back to root of home folder
 cd /home/pi
 
-
 # Make folders that should be owned by Pi user
 mkdir /home/pi/Arduino
 chown pi:pi /home/pi/Arduino
@@ -261,7 +264,9 @@ mkdir -p /home/pi/.webthings/etc/ssh
 cp /etc/hostname /home/pi/.webthings/etc/hostname
 
 
-
+rm -rf /tmp/*
+echo "/tmp contents:"
+ls -l -a /tmp
 #mkdir -p /home/pi/.webthings/tmp
 cp -r /tmp /home/pi/.webthings/tmp
 chmod 1777 /home/pi/.webthings/tmp
@@ -277,17 +282,9 @@ find /home/pi/.webthings/tmp \
 
 cd /home/pi
 
-# Used when doing factory reset to restore original floorplan image:
-if [ -f "/home/pi/.webthings/uploads/floorplan.svg" ]
-then
-  cp /home/pi/.webthings/uploads/floorplan.svg /home/pi/.webthings/floorplan.svg
-  chown pi:pi /home/pi/.webthings/floorplan.svg
-else
-    echo " "
-    echo "ERROR DETECTED DURING CANDLE INSTALL"
-    echo "the floorplan.svg file is not where it should be"
-    echo " "
-fi
+cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/floorplan.svg
+chown pi:pi /home/pi/.webthings/floorplan.svg
+
 
 # SYMLINKS
 
@@ -516,7 +513,9 @@ dphys-swapfile swapoff
 
 apt autoremove
 rm -rf /tmp/*
+rm /home/pi/install.sh
 
+echo "candle" > /etc/hostname
 echo "candle" > /home/pi/.webthings/etc/hostname
 
 
@@ -525,9 +524,9 @@ sudo -u pi /home/pi/webthings/gateway/run-app.sh &
 
 
 
+
 echo " "
 echo "ALMOST DONE!"
 echo "Starting controller for testing"
-echo "Reboot the controller with 'sudo reboot' command if everything looks ok."
-echo "After the reboot you should be able to open http://candle.local in your browser."
+echo "In a few seconds you should be able to open http://candle.local in your browser."
 echo " "
