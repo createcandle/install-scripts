@@ -22,18 +22,20 @@ ssh pi@candle.local
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
 ```
 
-9. The script will easily take an hour to run on a Raspberry Pi 3b. Once complete it's complete you can reboot the controller with the `sudo reboot` command.
+9. The script will easily take an hour to run on a Raspberry Pi 3b. When it gets near the end it will start the Controller. You will see a list of addons being loaded, e.g. `Loading add-on: candleappstore`. 
 
-10. You should be able to visit http://candle.local now and create an account. Once logged in make sure all the pre-installed addon are enabled and up-to-date. Also enable SSH under settings -> developer (you may need to click the gear icon on the settings page 4 times first), and then Log into the Candle controller using SSH again. 
+10. At this point you can open a browser and visit http://candle.local. Create an account. Once logged in make sure all the pre-installed addon are enabled and up-to-date. The Zigbee2MQTT addon is installing itself, which will take a while. You can check it's progress on the zigbee overview page. When it's done you can reboot the Raspberry Pi from the main menu.
 
-The final step is to run the script that turns a working Candle controller into a disk image.
+11. The reboot may take a little longer than usual. Login when the system is up again. Then enable SSH under settings -> developer (you may need to click the gear icon on the settings page 4 times first), and then Log into the Candle controller using SSH again. 
+
+12. The final step is to run the script that turns a working Candle controller into a disk image.
 ```
 sudo /home/pi/prepare_for_disk_image.sh
 ```
 
 Amongst other things this will remove cached data and logs, as well as the wifi login details and the user account itself. It will also enable the read-only system disk protection. Once this process is complete the Raspberry Pi will shut down. 
 
-Wait 15 seconds until the shutdown is complete, and then take out the SD card and insert it back into your laptop again to turn it into a disk image file. On windows you can use the free version of Win32 Disk Imager for this. Make sure to check the box to only read the partitions. Name the file to be extracted something like `Candle_2.0.0.img`.
+13. Wait 15 seconds until the shutdown is complete, and then take out the SD card and insert it back into your laptop again to turn it into a disk image file. On windows you can use the free version of Win32 Disk Imager for this. Make sure to check the box to only read the partitions. Name the file to be extracted something like `Candle_2.0.0.img` (depending on the intended version).
 
-Once you have the .img file, zip that file. It should shrink down to less than 1.5Gb in size.
+14. Once you have the .img file, zip that file to `candle_2.0.0.img.zip` (again accounting for the desired version number). It should shrink down to less than 1.5Gb in size.
 
