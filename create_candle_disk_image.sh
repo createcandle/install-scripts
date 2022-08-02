@@ -139,6 +139,10 @@ apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-x
 
 # get OMXPlayer for Internet Radio
 # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
+
+apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58
+apt --fix-broken install -y
+
 wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 dpkg –i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 rm omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
