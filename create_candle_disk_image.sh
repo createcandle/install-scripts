@@ -126,6 +126,7 @@ systemctl disable hostapd.service
 
 
 
+
 # removed from above list:
 #  libnanomsg-dev \
 #  libnanomsg5 \
@@ -254,6 +255,9 @@ chown pi:pi /home/pi/.webthings/etc
 mkdir -p /home/pi/candle
 chown pi:pi /home/pi/candle
 
+mkdir -p /var/run/mosquitto/
+chown mosquitto: /var/run/mosquitto
+chmod 755 /var/run/mosquitto
 
 # Make folders that should be owned by root
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
@@ -326,7 +330,13 @@ cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.
 cp --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
 rm -rf /home/pi/configuration-files
 
+chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
+chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
+chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
 
+ln -s /home/pi/.webthings/etc/asound.rc /home/pi/.asound.rc
+#chown mosquitto: /home/pi/.webthings/etc/mosquitto/zcandle.conf
+#chown mosquitto: /home/pi/.webthings/etc/mosquitto/mosquitto.conf
 
 # SERVICES
 echo " "
@@ -352,6 +362,9 @@ systemctl enable splashscreen_updating180.service
 
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 
+# enable BlueAlsa services
+systemctl enable bluealsa.service 
+systemctl enable bluealsa-aplay.service 
 
 # Webthings Gateway
 systemctl enable webthings-gateway.service
