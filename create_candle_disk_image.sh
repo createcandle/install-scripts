@@ -144,7 +144,7 @@ apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat
 apt --fix-broken install -y
 
 wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
-dpkg –i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
+dpkg -i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 rm omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 
 mkdir -p /opt/vc/
