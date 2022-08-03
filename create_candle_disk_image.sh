@@ -119,12 +119,6 @@ apt install -y \
   libffi6
 
 
-apt install -y dnsmasq 
-systemctl disable dnsmasq.service
-
-apt install -y hostapd
-systemctl unmask hostapd.service
-systemctl disable hostapd.service
 
 
 
@@ -145,7 +139,7 @@ apt --fix-broken install -y
 
 wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 dpkg -i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
-rm omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
+rm omxplayer*
 
 mkdir -p /opt/vc/
 wget https://www.candlesmarthome.com/tools/lib.tar
@@ -230,6 +224,17 @@ cd /home/pi
 setcap cap_net_raw+eip $(eval readlink -f `which node`)
 setcap cap_net_raw+eip $(eval readlink -f `which python3`)
 
+
+echo " "
+echo "INSTALLING HOSTAPD AND DNSMASQ"
+echo " "
+
+apt install -y dnsmasq 
+systemctl disable dnsmasq.service
+
+apt install -y hostapd
+systemctl unmask hostapd.service
+systemctl disable hostapd.service
 
 
 
