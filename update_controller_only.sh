@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if ! [ "$EUID" -ne 0 ]
+then
+  echo "Please run as user pi (do not use sudo)"
+  exit
+fi
+
 echo " "
 echo "UPDATING CONTROLLER ONLY"
 echo "this script:"
