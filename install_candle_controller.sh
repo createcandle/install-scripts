@@ -51,6 +51,7 @@ then
   echo " "
   
   # Download Candle controller from Github and install it
+  rm -rf /home/pi/webthings
   mkdir -p /home/pi/webthings
   chown pi:pi /home/pi/webthings
   cd /home/pi/webthings
@@ -92,95 +93,101 @@ then
 
   mkdir -p /home/pi/.webthings/addons
   chown -R pi:pi /home/pi/.webthings/addons
-  cd /home/pi/.webthings/addons
-  rm candleappstore-0.4.18-linux-arm-v3.9.tgz
-  rm -rf package
-  rm -rf candleappstore
-  wget https://github.com/createcandle/candleappstore/releases/download/0.4.18/candleappstore-0.4.18-linux-arm-v3.9.tgz
-  tar -xf candleappstore-0.4.18-linux-arm-v3.9.tgz
-  mv package candleappstore
-  chown -R pi:pi candleappstore
-  rm candleappstore-0.4.18-linux-arm-v3.9.tgz
+
+
+  if ! [ -d /home/pi/.webthings/addons/candleappstore ] then
   
-  rm -rf package
-  rm -rf candle-theme
-  wget https://github.com/createcandle/candle-theme/releases/download/2.5.0/candle-theme-2.5.0.tgz
-  tar -xf candle-theme-2.5.0.tgz
-  mv package candle-theme
-  chown -R pi:pi candle-theme
-  rm candle-theme-2.5.0.tgz
+      cd /home/pi/.webthings/addons
+      rm candleappstore-0.4.18-linux-arm-v3.9.tgz
+      rm -rf package
+      rm -rf candleappstore
+      wget https://github.com/createcandle/candleappstore/releases/download/0.4.18/candleappstore-0.4.18-linux-arm-v3.9.tgz
+      tar -xf candleappstore-0.4.18-linux-arm-v3.9.tgz
+      mv package candleappstore
+      chown -R pi:pi candleappstore
+      rm candleappstore-0.4.18-linux-arm-v3.9.tgz
   
-  rm -rf package
-  rm -rf power-settings
-  wget https://github.com/createcandle/power-settings/releases/download/3.2.18/power-settings-3.2.18.tgz
-  tar -xf power-settings-3.2.18.tgz
-  mv package power-settings
-  chown -R pi:pi power-settings
-  rm power-settings-3.2.18.tgz
+      rm -rf package
+      rm -rf candle-theme
+      wget https://github.com/createcandle/candle-theme/releases/download/2.5.0/candle-theme-2.5.0.tgz
+      tar -xf candle-theme-2.5.0.tgz
+      mv package candle-theme
+      chown -R pi:pi candle-theme
+      rm candle-theme-2.5.0.tgz
   
-  rm -rf package
-  rm -rf tutorial
-  wget https://github.com/createcandle/tutorial/releases/download/1.0.7/tutorial-1.0.7.tgz
-  tar -xf tutorial-1.0.7.tgz
-  mv package tutorial
-  chown -R pi:pi tutorial
-  rm tutorial-1.0.7.tgz
+      rm -rf package
+      rm -rf power-settings
+      wget https://github.com/createcandle/power-settings/releases/download/3.2.19/power-settings-3.2.19.tgz
+      tar -xf power-settings-3.2.19.tgz
+      mv package power-settings
+      chown -R pi:pi power-settings
+      rm power-settings-3.2.19.tgz
   
-  rm -rf package
-  rm -rf bluetoothpairing
-  wget https://github.com/createcandle/bluetoothpairing/releases/download/0.5.8/bluetoothpairing-0.5.8.tgz
-  tar -xf bluetoothpairing-0.5.8.tgz
-  mv package bluetoothpairing
-  chown -R pi:pi bluetoothpairing
-  rm bluetoothpairing-0.5.8.tgz
+      rm -rf package
+      rm -rf tutorial
+      wget https://github.com/createcandle/tutorial/releases/download/1.0.7/tutorial-1.0.7.tgz
+      tar -xf tutorial-1.0.7.tgz
+      mv package tutorial
+      chown -R pi:pi tutorial
+      rm tutorial-1.0.7.tgz
   
-  rm -rf package
-  rm -rf photo-frame
-  wget https://github.com/flatsiedatsie/photo-frame/releases/download/1.4.16/photo-frame-1.4.16.tgz
-  tar -xf photo-frame-1.4.16.tgz
-  mv package photo-frame
-  chown -R pi:pi photo-frame
-  rm photo-frame-1.4.16.tgz
+      rm -rf package
+      rm -rf bluetoothpairing
+      wget https://github.com/createcandle/bluetoothpairing/releases/download/0.5.8/bluetoothpairing-0.5.8.tgz
+      tar -xf bluetoothpairing-0.5.8.tgz
+      mv package bluetoothpairing
+      chown -R pi:pi bluetoothpairing
+      rm bluetoothpairing-0.5.8.tgz
   
-  rm -rf package
-  rm -rf followers
-  wget https://github.com/flatsiedatsie/followers-addon/releases/download/0.6.8/followers-0.6.8.tgz
-  tar -xf followers-0.6.8.tgz
-  mv package followers
-  chown -R pi:pi followers
-  rm followers-0.6.8.tgz
+      rm -rf package
+      rm -rf photo-frame
+      wget https://github.com/flatsiedatsie/photo-frame/releases/download/1.4.16/photo-frame-1.4.16.tgz
+      tar -xf photo-frame-1.4.16.tgz
+      mv package photo-frame
+      chown -R pi:pi photo-frame
+      rm photo-frame-1.4.16.tgz
   
-  rm -rf package
-  rm -rf internet-radio
-  wget https://github.com/flatsiedatsie/internet-radio/releases/download/2.1.31/internet-radio-2.1.31.tgz
-  tar -xf internet-radio-2.1.31.tgz
-  mv package internet-radio
-  chown -R pi:pi internet-radio
-  rm internet-radio-2.1.31.tgz
+      rm -rf package
+      rm -rf followers
+      wget https://github.com/flatsiedatsie/followers-addon/releases/download/0.6.8/followers-0.6.8.tgz
+      tar -xf followers-0.6.8.tgz
+      mv package followers
+      chown -R pi:pi followers
+      rm followers-0.6.8.tgz
   
-  rm -rf package
-  rm -rf zigbee2mqtt-adapter
-  wget https://github.com/kabbi/zigbee2mqtt-adapter/releases/download/1.1.2/zigbee2mqtt-adapter-1.1.2.tgz
-  tar -xf zigbee2mqtt-adapter-1.1.2.tgz
-  mv package zigbee2mqtt-adapter
-  chown -R pi:pi zigbee2mqtt-adapter
-  rm zigbee2mqtt-adapter-1.1.2.tgz
+      rm -rf package
+      rm -rf internet-radio
+      wget https://github.com/flatsiedatsie/internet-radio/releases/download/2.1.31/internet-radio-2.1.31.tgz
+      tar -xf internet-radio-2.1.31.tgz
+      mv package internet-radio
+      chown -R pi:pi internet-radio
+      rm internet-radio-2.1.31.tgz
   
-  rm -rf package
-  rm -rf privacy-manager
-  wget https://github.com/createcandle/privacy-manager/releases/download/0.2.8/privacy-manager-0.2.8.tgz
-  tar -xf privacy-manager-0.2.8.tgz
-  mv package privacy-manager
-  chown -R pi:pi privacy-manager
-  rm privacy-manager-0.2.8.tgz
+      rm -rf package
+      rm -rf zigbee2mqtt-adapter
+      wget https://github.com/kabbi/zigbee2mqtt-adapter/releases/download/1.1.2/zigbee2mqtt-adapter-1.1.2.tgz
+      tar -xf zigbee2mqtt-adapter-1.1.2.tgz
+      mv package zigbee2mqtt-adapter
+      chown -R pi:pi zigbee2mqtt-adapter
+      rm zigbee2mqtt-adapter-1.1.2.tgz
   
-  rm -rf package
-  rm -rf webinterface
-  wget https://github.com/createcandle/webinterface/releases/download/0.2.2/webinterface-0.2.2.tgz
-  tar -xf webinterface-0.2.2.tgz
-  mv package webinterface
-  chown -R pi:pi webinterface
-  rm webinterface-0.2.2.tgz
+      rm -rf package
+      rm -rf privacy-manager
+      wget https://github.com/createcandle/privacy-manager/releases/download/0.2.8/privacy-manager-0.2.8.tgz
+      tar -xf privacy-manager-0.2.8.tgz
+      mv package privacy-manager
+      chown -R pi:pi privacy-manager
+      rm privacy-manager-0.2.8.tgz
+  
+      rm -rf package
+      rm -rf webinterface
+      wget https://github.com/createcandle/webinterface/releases/download/0.2.3/webinterface-0.2.3.tgz
+      tar -xf webinterface-0.2.3.tgz
+      mv package webinterface
+      chown -R pi:pi webinterface
+      rm webinterface-0.2.3.tgz
+      
+  fi
   
   echo " "
   #echo "running gateway for 15 seconds to create folders"
@@ -191,8 +198,14 @@ then
   #ls /home/pi/.webthings
   
   mkdir -p /home/pi/.webthings/config
-  cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
-  chown pi:pi /home/pi/.webthings/config/db.sqlite3
+  chown -R pi:pi /home/pi/.webthings/config
+  if ! [ -e /home/pi/.webthings/config/db.sqlite3 ] then
+      echo "copying initial Candle database from power settings addon"
+      cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
+      chown pi:pi /home/pi/.webthings/config/db.sqlite3
+  else
+      echo "warning, not copying default database since a database file already exists"
+  fi
 
   rm ./install.sh
   
