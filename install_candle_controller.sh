@@ -21,6 +21,17 @@ then
   
   #. ~/.bashrc
 
+  if cat /home/pi/.profile | grep NVM
+  then
+      echo "NVM lines already appended to .profile"
+  else
+      echo "Appending NVM lines to .profile"
+      echo " " >> /home/pi/.profile
+      echo 'export NVM_DIR="/home/pi/.nvm"' >> /home/pi/.profile
+      echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> /home/pi/.profile
+      echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> /home/pi/.profile
+  fi
+
   export NVM_DIR="/home/pi/.nvm"
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
