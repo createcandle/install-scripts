@@ -101,9 +101,9 @@ apt install -y \
     libudev-dev \
     libusb-1.0-0-dev \
     pkg-config \
-    python-six \
-    python3-pip
+    python-six
 
+apt install -y python3-pip
 
 rm /etc/mosquitto/mosquitto.conf
 
@@ -122,9 +122,10 @@ apt install -y \
   mosquitto \
   policykit-1 \
   sqlite3 \
-  iptables \
   libolm3 \
   libffi6
+
+apt install -y iptables
 
 # removed from above list:
 #  libnanomsg-dev \
