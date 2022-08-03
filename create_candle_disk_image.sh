@@ -116,17 +116,12 @@ apt install -y \
   sqlite3 \
   iptables \
   libolm3 \
-  libffi6
-
-
-
-
-
+  libffi6 \
+  python-pip
 
 # removed from above list:
 #  libnanomsg-dev \
 #  libnanomsg5 \
-#  python-pip \
 
 # additional programs for Candle kiosk mode:
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
@@ -163,11 +158,19 @@ apt autoremove -y
 
 # PYTHON
 echo " "
-echo "INSTALLING PYTHON PACKAGES"
+echo "INSTALLING AND UPDATING PYTHON PACKAGES"
 sudo -u pi pip3 uninstall -y adapt-parser || true
 sudo -u pi pip3 install dbus-python pybluez pillow pycryptodomex
+
+if [ -d "/home/pi/.local/bin" ] ; then
+    echo "adding /home/pi/.local/bin to path"
+    PATH="/home/pi/.local/bin:$PATH"
+fi
+
 sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
+echo "Updating existing python packages"
+sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro requests RPi.GPIO ssh-import-id urllib3 wheel libevdev
 
 
 # BLUEALSA
@@ -345,6 +348,8 @@ cp --verbose -r /home/pi/configuration-files/home/pi/candle/* /home/pi/candle
 cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.webthings/etc/
 cp --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
 rm -rf /home/pi/configuration-files
+
+#chmod +x /home/pi/candle_first_run.sh
 
 chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
