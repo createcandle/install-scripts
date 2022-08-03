@@ -502,7 +502,7 @@ echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
 # Add policy file to disable things like file selection
 mkdir -p /etc/chromium/policies/managed/
-echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false}' > /etc/chromium/policies/managed/candle.json
+echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFillEnabled": false, "PasswordManagerEnabled": false}' > /etc/chromium/policies/managed/candle.json
 
 
 
