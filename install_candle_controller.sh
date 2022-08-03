@@ -183,10 +183,10 @@ then
   rm webinterface-0.2.2.tgz
   
   echo " "
-  echo "running gateway for 15 seconds to create folders"
-  cd /home/pi/webthings/gateway
-  timeout 15 npm run run-only
-  echo "controller installation should be complete"
+  #echo "running gateway for 15 seconds to create folders"
+  #cd /home/pi/webthings/gateway
+  #timeout 15 npm run run-only
+  #echo "controller installation should be complete"
   echo "ls /home/pi/.webthings:"
   ls /home/pi/.webthings
   
