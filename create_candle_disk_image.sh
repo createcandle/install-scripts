@@ -69,8 +69,10 @@ echo " "
 echo "INSTALLING APPLICATIONS AND LIBRARIES"
 echo " "
 
-
+echo "calling apt update"
 apt update
+
+echo "calling apt upgrade"
 apt upgrade
 
 # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
