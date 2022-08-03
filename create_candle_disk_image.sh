@@ -73,8 +73,10 @@ echo " "
 apt update
 
 # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
-# TODO: this should be version 88.
-apt-get install chromium -y
+# TODO: maybe use version 88?
+apt install chromium-browser -y
+
+apt install vlc --no-install-recommends
 
 #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
 #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
@@ -124,7 +126,7 @@ apt install -y \
 #  libnanomsg5 \
 
 # additional programs for Candle kiosk mode:
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
+apt install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
 # get OMXPlayer for Internet Radio
 # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
@@ -142,7 +144,7 @@ tar -xvf lib.tar -C /opt/vc/
 rm lib.tar
 
 # for BlueAlsa
-apt-get install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
+apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
 
 
 
@@ -173,12 +175,33 @@ echo "Updating existing python packages"
 sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro requests RPi.GPIO ssh-import-id urllib3 wheel libevdev
 
 
+
+
+# RESPEAKER HAT
+
+if [ ! -d "/etc/voicecard" ]
+then
+    echo " "
+    echo "INSTALLING RESPEAKER HAT DRIVERS"
+    cd /home/pi
+    git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
+    cd seeed-voicecard
+    ./install.sh
+    
+else
+    echo "ReSpeaker was already installed"
+fi
+
+cd /home/pi
+rm -rf seeed-voicecard
+
+
 # BLUEALSA
 if [ ! -d "/usr/bin/bluealsa" ]
 then
     
     echo " "
-    echo "CREATING BLUEALSA"
+    echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
     echo " "
 
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
@@ -190,14 +213,13 @@ then
     ../configure --enable-msbc --enable-mp3lame --enable-faststream
     make
     make install
-    cd ../..
-    rm -rf bluez-alsa
 
 else
     echo "BlueAlsa was already installed"
 fi
 
-
+cd /home/pi
+rm -rf bluez-alsa
 
 
 
@@ -450,12 +472,18 @@ fi
 
 
 
-mkdir -p /etc/X11/xinit
-mkdir -p /etc/xdg/openbox
+#mkdir -p /etc/X11/xinit
+#mkdir -p /etc/xdg/openbox
+
+if [ ! -d "/etc/xdg/openbox" ]
+then
+    echo "missing dir: /etc/xdg/openbox"
+    mkdir -p /etc/xdg/openbox
+fi
 
 # Disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
 rm /etc/xdg/openbox/rc.xml
-wget https://www.candlesmarthome.com/tools/rc.xml -P /etc/xdg/openbox/rc.xml
+wget https://www.candlesmarthome.com/tools/rc.xml /etc/xdg/openbox/rc.xml
 
 # Modify the xinitrc file to automatically log in the pi user
 echo "- Creating xinitrc file"
