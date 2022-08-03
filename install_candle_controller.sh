@@ -45,6 +45,11 @@ then
   node --version
   npm --version
 
+  npm config set metrics-registry=""
+  npm config set registry=""
+  npm config set user-agent=""
+  rm /home/pi/.npm/anonymous-cli-metrics.json
+
   echo " "
   echo "DOWNLOADING AND INSTALLING CANDLE CONTROLLER"
   echo "Do not worry about the errors you will see with optipng and jpegtran"
@@ -209,6 +214,12 @@ then
   fi
 
   rm ./install.sh
+  
+  npm config set metrics-registry=""
+  npm config set registry=""
+  npm config set user-agent=""
+  rm /home/pi/.npm/anonymous-cli-metrics.json
+  
   
 else
   echo "Please run as user pi"
