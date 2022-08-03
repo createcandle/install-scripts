@@ -190,9 +190,9 @@ then
   echo "ls /home/pi/.webthings:"
   ls /home/pi/.webthings
   
+  mkdir -p /home/pi/.webthings/config
   cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
   chown pi:pi /home/pi/.webthings/config/db.sqlite3
-  exit 0
   
 else
   echo "Please run as user pi"
