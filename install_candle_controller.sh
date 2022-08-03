@@ -13,7 +13,7 @@ then
 
   python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
-  rm install.sh
+  rm ./install.sh
   #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
   wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh
   chmod +x install.sh
@@ -193,6 +193,8 @@ then
   mkdir -p /home/pi/.webthings/config
   cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
   chown pi:pi /home/pi/.webthings/config/db.sqlite3
+
+  rm ./install.sh
   
 else
   echo "Please run as user pi"
