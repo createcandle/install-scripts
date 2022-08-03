@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e # continue on errors
+set +e # continue on errors
 
 # TODO: check if candlecam works on this disk image, as it may use the new camera interface
 
