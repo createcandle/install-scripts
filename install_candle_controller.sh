@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set +e
 
 # This script should be run as user pi (not root)
 
