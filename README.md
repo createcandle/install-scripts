@@ -15,7 +15,9 @@ https://www.raspberrypi.com/software/
 
 5. Make sure there is no other "candle.local" device on the network already, since after a reboot the Raspberry Pi's hostname will change to `candle.local`. You must also plug a network cable into the Raspberry Pi.
 
-6. Now insert the SD card into the Raspberry Pi, power it up, wait a minute, and log into it via ssh using the username and hostname you entered earlier. E.g.:
+6. Now insert the SD card into the Raspberry Pi, power it up, wait a minute.
+
+7. log into it via ssh using the username and hostname you entered earlier. E.g.:
 ```
 ssh pi@candle.local
 ```
