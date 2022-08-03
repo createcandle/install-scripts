@@ -19,7 +19,7 @@ echo "installing python gateway addon"
 python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
 echo "installing nvm"
-rm ./install.sh
+rm ./install_nvm.sh
 #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
 chmod +x install_nvm.sh
