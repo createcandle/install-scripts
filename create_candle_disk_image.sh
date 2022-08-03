@@ -71,6 +71,7 @@ echo " "
 
 
 apt update
+apt upgrade
 
 # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
 # TODO: maybe use version 88?
@@ -83,12 +84,12 @@ apt install vlc --no-install-recommends
 #apt update
 #apt install ungoogled-chromium -y
 
+apt install git -y
 
 apt install -y \
     autoconf \
     build-essential \
     curl \
-    git \
     libbluetooth-dev \
     libboost-python-dev \
     libboost-thread-dev \
@@ -118,20 +119,19 @@ apt install -y \
   sqlite3 \
   iptables \
   libolm3 \
-  libffi6 \
-  python-pip
+  libffi6
 
 # removed from above list:
 #  libnanomsg-dev \
 #  libnanomsg5 \
 
 # additional programs for Candle kiosk mode:
-apt install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
+apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
 # get OMXPlayer for Internet Radio
 # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
 
-apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58
+apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
 apt --fix-broken install -y
 
 wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
