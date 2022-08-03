@@ -96,17 +96,9 @@ then
 
 
   if ! [ -d /home/pi/.webthings/addons/candleappstore ] then
-  
+      
       cd /home/pi/.webthings/addons
-      rm candleappstore-0.4.18-linux-arm-v3.9.tgz
-      rm -rf package
-      rm -rf candleappstore
-      wget https://github.com/createcandle/candleappstore/releases/download/0.4.18/candleappstore-0.4.18-linux-arm-v3.9.tgz
-      tar -xf candleappstore-0.4.18-linux-arm-v3.9.tgz
-      mv package candleappstore
-      chown -R pi:pi candleappstore
-      rm candleappstore-0.4.18-linux-arm-v3.9.tgz
-  
+    
       rm -rf package
       rm -rf candle-theme
       wget https://github.com/createcandle/candle-theme/releases/download/2.5.0/candle-theme-2.5.0.tgz
@@ -186,6 +178,15 @@ then
       mv package webinterface
       chown -R pi:pi webinterface
       rm webinterface-0.2.3.tgz
+      
+      rm candleappstore-0.4.18-linux-arm-v3.9.tgz
+      rm -rf package
+      rm -rf candleappstore
+      wget https://github.com/createcandle/candleappstore/releases/download/0.4.18/candleappstore-0.4.18-linux-arm-v3.9.tgz
+      tar -xf candleappstore-0.4.18-linux-arm-v3.9.tgz
+      mv package candleappstore
+      chown -R pi:pi candleappstore
+      rm candleappstore-0.4.18-linux-arm-v3.9.tgz
       
   fi
   
