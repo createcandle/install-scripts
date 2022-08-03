@@ -3,17 +3,15 @@
 
 
 ## Creating the Candle Raspberry Pi disk image
-1. Install Raspberry Pi Imager software on a computer with an SD card reader.
+1. Install Raspberry Pi Imager software on a computer with an SD card reader, and get a micro SD card of at least 16Gb.
 
 https://www.raspberrypi.com/software/
 
-1. Flash Raspberry Pi OS Lite 32 Bit to a micro SD card of at least 16Gb.
-
-
+2. Open Raspberry Pi Imager, insert the SD card. Select Raspberry Pi OS Lite 32 Bit as the OS to install, and select your SD card.
 
 3. Use the gear icon to set everything up that you can: enable ssh, set username "pi" and password "smarthome", set the hostname to "candle", pre-fill your wifi credentials, etc.
 
-4. Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt”. From it, remove “init=/usr/lib/raspi-config/init_resize.sh”, and save. Saving might seem to fail, but it probably saved anyway. Open the cmdline.txt file again to confirm.
+4. Click "write". Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt”. From it, remove “init=/usr/lib/raspi-config/init_resize.sh”, and save. Saving might seem to fail, but it probably saved anyway. Open the cmdline.txt file again to confirm.
 
 5. Make sure there is no other "candle.local" device on the network already, since after a reboot the Raspberry Pi's hostname will change to `candle.local`. You must also plug a network cable into the Raspberry Pi.
 
