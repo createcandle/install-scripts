@@ -161,6 +161,10 @@ apt autoremove -y
 # PYTHON
 echo " "
 echo "INSTALLING AND UPDATING PYTHON PACKAGES"
+
+# upgrade pip first
+sudo -u pi python3 -m pip install --upgrade pip
+
 sudo -u pi pip3 uninstall -y adapt-parser || true
 sudo -u pi pip3 install dbus-python pybluez pillow pycryptodomex
 
@@ -561,6 +565,9 @@ raspi-config nonint do_spi 0
 
 # enable Camera.
 raspi-config nonint do_camera 0
+
+# enable old Camera.
+#raspi-config nonint do_legacy 0
 
 
 
