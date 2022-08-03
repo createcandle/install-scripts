@@ -21,9 +21,9 @@ python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#e
 echo "installing nvm"
 rm ./install.sh
 #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
-wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh
-chmod +x install.sh
-./install.sh
+wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
+chmod +x install_nvm.sh
+./install_nvm.sh
 
 #. ~/.bashrc
 
@@ -220,7 +220,7 @@ else
     echo "warning, not copying default database since a database file already exists"
 fi
 
-rm ./install.sh
+rm ./install_nvm.sh
 
 npm config set metrics-registry=""
 npm config set registry=""
