@@ -104,6 +104,9 @@ apt install -y \
     python-six \
     python3-pip
 
+
+rm /etc/mosquitto/mosquitto.conf
+
 apt install -y \
   arping \
   autoconf \
@@ -518,8 +521,6 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFi
 echo " "
 echo "ADDING IPTABLES"
 echo "before:"
-ls /etc/iptables/
-cat /etc/iptables/*
 iptables -t nat --list
 echo " "
 echo "Redirecting :80 to :8080 and :443 to :4443"
@@ -538,8 +539,6 @@ fi
 
 #iptables -L -v -n
 echo "after"
-ls /etc/iptables/
-cat /etc/iptables/*
 iptables -t nat --list
 
 #echo "\n\n" | apt install iptables-persistent -y
