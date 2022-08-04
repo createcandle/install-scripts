@@ -212,7 +212,8 @@ echo " "
 
 mkdir -p /home/pi/.webthings/config
 chown -R pi:pi /home/pi/.webthings/config
-if ! [ -e /home/pi/.webthings/config/db.sqlite3 ] then
+if ! [ -e /home/pi/.webthings/config/db.sqlite3 ] 
+then
     echo "copying initial Candle database from power settings addon"
     cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
     chown pi:pi /home/pi/.webthings/config/db.sqlite3
