@@ -69,23 +69,30 @@ echo " "
 echo "INSTALLING APPLICATIONS AND LIBRARIES"
 echo " "
 
+set -e
 echo " "
 echo "calling apt update"
-apt update
+apt update -y
+apt-get update -y
 
 echo " "
 echo "calling apt upgrade"
-apt upgrade
+#apt DEBIAN_FRONTEND=noninteractive upgrade -y
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+echo " "
+echo "Upgrade complete"
+
+set +e
 
 # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
 # TODO: maybe use version 88?
 echo " "
-echo "installign chromium-browser"
-apt install chromium-browser -y
+echo "installing chromium-browser"
+apt install chromium-browser -y --force-yes
 
 echo " "
 echo "installing vlc"
-apt install vlc --no-install-recommends
+apt install vlc --no-install-recommends -y --force-yes
 
 #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
 #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
@@ -94,31 +101,31 @@ apt install vlc --no-install-recommends
 
 echo " "
 echo "installing git"
-apt install git -y
+apt install git -y  --force-yes
 
 echo " "
 echo "installing build tools"
 for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six; do
-    apt install -y $i
+    apt install -y --force-yes $i
     echo " "
 done
 
 echo " "
 echo "installing pip3"
-apt install -y python3-pip
+apt install -y --force-yes python3-pip
 
 rm /etc/mosquitto/mosquitto.conf
 
 echo " "
 echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
 for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan; do
-    apt install -y $i
+    apt install -y --force-yes $i
     echo " "
 done
 
 echo " "
 echo "installing ip tables"
-apt install -y iptables
+apt install -y --force-yes iptables
 
 # removed from above list:
 #  libnanomsg-dev \
@@ -128,7 +135,7 @@ apt install -y iptables
 echo " "
 echo "installing kiosk packages (x, openbox)"
 for i in xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
-    apt-get install --no-install-recommends -y $i
+    apt-get install --no-install-recommends -y --force-yes $i
     echo " "
 done
 #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
@@ -139,11 +146,11 @@ done
 echo " "
 echo "installing omxplayer"
 for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
-    apt-get install -y $i
+    apt-get install -y --force-yes $i
     echo " "
 done
 #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
-apt --fix-broken install -y
+apt --fix-broken install -y --force-yes
 
 wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 dpkg -i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
