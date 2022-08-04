@@ -69,16 +69,22 @@ echo " "
 echo "INSTALLING APPLICATIONS AND LIBRARIES"
 echo " "
 
+echo " "
 echo "calling apt update"
 apt update
 
+echo " "
 echo "calling apt upgrade"
 apt upgrade
 
 # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
 # TODO: maybe use version 88?
+echo " "
+echo "installign chromium-browser"
 apt install chromium-browser -y
 
+echo " "
+echo "installing vlc"
 apt install vlc --no-install-recommends
 
 #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
@@ -86,49 +92,31 @@ apt install vlc --no-install-recommends
 #apt update
 #apt install ungoogled-chromium -y
 
+echo " "
 echo "installing git"
 apt install git -y
 
+echo " "
 echo "installing build tools"
-apt install -y \
-    autoconf \
-    build-essential \
-    curl \
-    libbluetooth-dev \
-    libboost-python-dev \
-    libboost-thread-dev \
-    libffi-dev \
-    libglib2.0-dev \
-    libpng-dev \
-    libudev-dev \
-    libusb-1.0-0-dev \
-    pkg-config \
-    python-six
+for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six; do
+    apt install -y $i
+    echo " "
+done
 
+echo " "
 echo "installing pip3"
 apt install -y python3-pip
 
 rm /etc/mosquitto/mosquitto.conf
 
+echo " "
 echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
-apt install -y \
-  arping \
-  autoconf \
-  ffmpeg \
-  libboost-python-dev \
-  libboost-thread-dev \
-  libbluetooth-dev \
-  libffi-dev \
-  libglib2.0-dev \
-  libtool \
-  libudev-dev \
-  libusb-1.0-0-dev \
-  mosquitto \
-  policykit-1 \
-  sqlite3 \
-  libolm3 \
-  libffi6
+for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan; do
+    apt install -y $i
+    echo " "
+done
 
+echo " "
 echo "installing ip tables"
 apt install -y iptables
 
@@ -137,28 +125,45 @@ apt install -y iptables
 #  libnanomsg5 \
 
 # additional programs for Candle kiosk mode:
+echo " "
 echo "installing kiosk packages (x, openbox)"
-apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
+for i in xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
+    apt-get install --no-install-recommends -y $i
+    echo " "
+done
+#apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
 # get OMXPlayer for Internet Radio
 # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
 
+echo " "
 echo "installing omxplayer"
-apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
+for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
+    apt-get install -y $i
+    echo " "
+done
+#apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
 apt --fix-broken install -y
 
 wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 dpkg -i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 rm omxplayer*
 
+#apt --fix-broken install -y
+
 mkdir -p /opt/vc/
 wget https://www.candlesmarthome.com/tools/lib.tar
 tar -xvf lib.tar -C /opt/vc/
 rm lib.tar
 
+
 # for BlueAlsa
 echo "installing bluealsa support packages"
-apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
+for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
+    apt install -y $i
+    echo " "
+done
+#apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
 
 
 
@@ -167,6 +172,8 @@ echo "UPGRADING LINUX"
 apt-get update --fix-missing -y
 apt --fix-broken install -y
 apt upgrade -y
+echo ""
+echo "calling autoremove"
 apt autoremove -y
 
 
