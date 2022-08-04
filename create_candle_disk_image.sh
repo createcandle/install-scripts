@@ -136,7 +136,7 @@ apt install -y iptables
 # additional programs for Candle kiosk mode:
 echo " "
 echo "installing kiosk packages (x, openbox)"
-for i in xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
+for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
     echo "$i"
     apt-get install --no-install-recommends -y $i
     echo " "
