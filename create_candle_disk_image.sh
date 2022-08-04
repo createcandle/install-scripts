@@ -219,7 +219,7 @@ echo "INSTALLING AND UPDATING PYTHON PACKAGES"
 sudo -u pi python3 -m pip install --upgrade pip
 
 sudo -u pi pip3 uninstall -y adapt-parser || true
-sudo -u pi pip3 install dbus-python pybluez pillow pycryptodomex
+sudo -u pi pip3 install dbus-python pybluez pillow pycryptodomex numpy
 
 if [ -d "/home/pi/.local/bin" ] ; then
     echo "adding /home/pi/.local/bin to path"
