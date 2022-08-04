@@ -51,8 +51,8 @@ echo "NODE AND NPM VERSIONS:"
 node --version
 npm --version
 
-npm config set metrics-registry=""
-npm config set registry=""
+npm config set metrics-registry="https://"
+npm config set registry="https://"
 npm config set user-agent=""
 rm /home/pi/.npm/anonymous-cli-metrics.json
 
@@ -210,6 +210,9 @@ echo " "
 #echo "ls /home/pi/.webthings:"
 #ls /home/pi/.webthings
 
+cd /home/pi
+rm ./install_nvm.sh
+
 mkdir -p /home/pi/.webthings/config
 chown -R pi:pi /home/pi/.webthings/config
 if ! [ -e /home/pi/.webthings/config/db.sqlite3 ] 
@@ -221,13 +224,15 @@ else
     echo "warning, not copying default database since a database file already exists"
 fi
 
-rm ./install_nvm.sh
 
-npm config set metrics-registry=""
-npm config set registry=""
+
+npm config set metrics-registry="https://"
+npm config set registry="https://"
 npm config set user-agent=""
 rm /home/pi/.npm/anonymous-cli-metrics.json
 
-
+echo " "
+echo "PART TWO COMPLETE"
+exit 0
 
 
