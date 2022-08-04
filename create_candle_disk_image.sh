@@ -86,8 +86,10 @@ apt install vlc --no-install-recommends
 #apt update
 #apt install ungoogled-chromium -y
 
+echo "installing git"
 apt install git -y
 
+echo "installing build tools"
 apt install -y \
     autoconf \
     build-essential \
@@ -103,10 +105,12 @@ apt install -y \
     pkg-config \
     python-six
 
+echo "installing pip3"
 apt install -y python3-pip
 
 rm /etc/mosquitto/mosquitto.conf
 
+echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
 apt install -y \
   arping \
   autoconf \
@@ -125,6 +129,7 @@ apt install -y \
   libolm3 \
   libffi6
 
+echo "installing ip tables"
 apt install -y iptables
 
 # removed from above list:
@@ -132,11 +137,13 @@ apt install -y iptables
 #  libnanomsg5 \
 
 # additional programs for Candle kiosk mode:
+echo "installing kiosk packages (x, openbox)"
 apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
 # get OMXPlayer for Internet Radio
 # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
 
+echo "installing omxplayer"
 apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
 apt --fix-broken install -y
 
@@ -150,6 +157,7 @@ tar -xvf lib.tar -C /opt/vc/
 rm lib.tar
 
 # for BlueAlsa
+echo "installing bluealsa support packages"
 apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
 
 
