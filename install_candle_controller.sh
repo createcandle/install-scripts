@@ -232,7 +232,7 @@ npm config set user-agent=""
 rm /home/pi/.npm/anonymous-cli-metrics.json
 
 echo " "
-echo "PART TWO COMPLETE"
+echo "sub-script that installs the Candle controller is done. Returning to the main install script."
 exit 0
 
 

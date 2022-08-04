@@ -196,6 +196,19 @@ echo "calling autoremove"
 apt autoremove -y
 
 
+dpkg -s git &> /dev/null
+
+if [ $? -eq 0 ]; then
+    echo "git installed succesfully"
+else
+    echo " "
+    echo "ERROR"
+    echo " "
+    echo "Error detected in the packages install phase (git is missing). Try running the Candle install script again."
+    echo ""
+    exit 1
+fi
+
 
 
 # PYTHON
@@ -393,7 +406,7 @@ ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 
 
 # BINDS
-
+echo "copying ssh, wpa_supplicant and bluetooth folder data to user partition"
 echo "candle" > /home/pi/.webthings/etc/hostname
 cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
 cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
@@ -526,8 +539,8 @@ then
 fi
 
 # Disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
-rm /etc/xdg/openbox/rc.xml
-wget https://www.candlesmarthome.com/tools/rc.xml /etc/xdg/openbox/rc.xml
+#rm /etc/xdg/openbox/rc.xml
+#wget https://www.candlesmarthome.com/tools/rc.xml /etc/xdg/openbox/rc.xml
 
 # Modify the xinitrc file to automatically log in the pi user
 echo "- Creating xinitrc file"
