@@ -166,6 +166,12 @@ done
 #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
 
 
+# Camera support
+
+for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
+    apt install -y $i
+    echo " "
+done
 
 echo " "
 echo "UPGRADING LINUX"
