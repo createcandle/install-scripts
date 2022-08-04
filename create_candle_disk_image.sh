@@ -74,11 +74,11 @@ echo " "
 echo "calling apt update"
 apt update -y
 apt-get update -y
-
 echo " "
 echo "calling apt upgrade"
 #apt DEBIAN_FRONTEND=noninteractive upgrade -y
-DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+wait
 echo " "
 echo "Upgrade complete"
 
@@ -88,11 +88,11 @@ set +e
 # TODO: maybe use version 88?
 echo " "
 echo "installing chromium-browser"
-apt install chromium-browser -y --force-yes
+apt install chromium-browser -y
 
 echo " "
 echo "installing vlc"
-apt install vlc --no-install-recommends -y --force-yes
+apt install vlc --no-install-recommends -y
 
 #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
 #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
@@ -101,31 +101,33 @@ apt install vlc --no-install-recommends -y --force-yes
 
 echo " "
 echo "installing git"
-apt install git -y  --force-yes
+apt install git -y 
 
 echo " "
 echo "installing build tools"
 for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six; do
-    apt install -y --force-yes $i
+    echo "$i"
+    apt install -y $i
     echo " "
 done
 
 echo " "
 echo "installing pip3"
-apt install -y --force-yes python3-pip
+apt install -y python3-pip
 
 rm /etc/mosquitto/mosquitto.conf
 
 echo " "
 echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
 for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan; do
-    apt install -y --force-yes $i
+    echo "$i"
+    apt install -y $i
     echo " "
 done
 
 echo " "
 echo "installing ip tables"
-apt install -y --force-yes iptables
+apt install -y iptables
 
 # removed from above list:
 #  libnanomsg-dev \
@@ -135,7 +137,8 @@ apt install -y --force-yes iptables
 echo " "
 echo "installing kiosk packages (x, openbox)"
 for i in xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
-    apt-get install --no-install-recommends -y --force-yes $i
+    echo "$i"
+    apt-get install --no-install-recommends -y $i
     echo " "
 done
 #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
@@ -146,11 +149,12 @@ done
 echo " "
 echo "installing omxplayer"
 for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
-    apt-get install -y --force-yes $i
+    echo "$i"
+    apt-get install -y $i
     echo " "
 done
 #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
-apt --fix-broken install -y --force-yes
+apt --fix-broken install -y
 
 wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
 dpkg -i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
@@ -167,6 +171,7 @@ rm lib.tar
 # for BlueAlsa
 echo "installing bluealsa support packages"
 for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
+    echo "$i"
     apt install -y $i
     echo " "
 done
@@ -176,6 +181,7 @@ done
 # Camera support
 
 for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
+    echo "$i"
     apt install -y $i
     echo " "
 done
@@ -610,12 +616,14 @@ raspi-config nonint do_camera 0
 # disable swap file
 dphys-swapfile swapoff
 
+apt clean
 apt autoremove
 rm -rf /tmp/*
 rm /home/pi/install.sh
 
 echo "candle" > /etc/hostname
 echo "candle" > /home/pi/.webthings/etc/hostname
+
 
 
 cd /home/pi/webthings/gateway
