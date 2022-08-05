@@ -119,7 +119,7 @@ rm /etc/mosquitto/mosquitto.conf
 
 echo " "
 echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
-for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan; do
+for i in plymouth arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan; do
     echo "$i"
     apt install -y $i
     echo " "
@@ -279,6 +279,17 @@ cd /home/pi
 rm -rf bluez-alsa
 
 
+# Plymouth-lite
+echo " "
+echo "creating Plymouth lite"
+git clone --depth 1 https://github.com/T4d3o/Plymouth-lite.git
+cd Plymouth-lite
+./configure
+make
+cp ply-image /usr/bin
+
+cd /home/pi
+rm -rf Plymouth-lite
 
 # sudo update-rc.d gateway-iptables defaults
 
@@ -407,6 +418,7 @@ ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 
 # BINDS
 echo "copying ssh, wpa_supplicant and bluetooth folder data to user partition"
+
 echo "candle" > /home/pi/.webthings/etc/hostname
 cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
 cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
@@ -455,10 +467,14 @@ systemctl enable candle_first_run.service
 systemctl enable candle_bootup_actions.service
 systemctl enable candle_start_swap.service
 systemctl enable candle_early.service
-systemctl enable splashscreen.service
-systemctl enable splashscreen180.service
-systemctl enable splashscreen_updating.service
-systemctl enable splashscreen_updating180.service
+systemctl enable candle_splashscreen.service
+systemctl enable candle_splashscreen180.service
+systemctl enable candle_reboot.service
+systemctl enable candle_reboot180.service
+systemctl enable candle_splashscreen_updating.service
+systemctl enable candle_splashscreen_updating180.service
+
+
 
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 
@@ -482,13 +498,15 @@ echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEO"
 echo " "
 wget https://www.candlesmarthome.com/tools/splash.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash180.png -P /boot/
+wget https://www.candlesmarthome.com/tools/splashalt.png -P /boot/
+wget https://www.candlesmarthome.com/tools/splash180alt.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash_updating.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash_updating180.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash.mp4 -P /boot/
-mkdir -p /usr/share/plymouth/themes/pix/
-cp /boot/splash.png /usr/share/plymouth/themes/pix/splash.png
+wget https://www.candlesmarthome.com/tools/splash180.mp4 -P /boot/
 
-# Hides the Raspberry Pi logos shown at boot
+
+# Hides the Raspberry Pi logos normally shown at boot
 isInFile2=$(cat /boot/config.txt | grep -c "disable_splash")
 if [ $isInFile2 -eq 0 ]
 then
@@ -628,6 +646,7 @@ raspi-config nonint do_camera 0
 
 # disable swap file
 dphys-swapfile swapoff
+rm /home/pi/.webthings/swap
 
 apt clean
 apt autoremove
@@ -639,14 +658,56 @@ echo "candle" > /home/pi/.webthings/etc/hostname
 
 
 
-cd /home/pi/webthings/gateway
-sudo -u pi /home/pi/webthings/gateway/run-app.sh &
+# Installl read-only file system
+isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
+if [ $isInFile4 -eq 0 ]
+then
+    mkinitramfs -o /boot/initrd
+    
+    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh /bin/ro-root.sh
+    chmod +x /bin/ro-root.sh
+    
+	echo "- Adding read only mode to config.txt"
+    echo ''
+    echo '# Read only mode'
+    echo 'initramfs initrd followkernel' >> /boot/config.txt
+    echo 'ramfsfile=initrd' >> /boot/config.txt
+    echo 'ramfsaddr=-1' >> /boot/config.txt
+    
+else
+    echo "- Read only file system mode was already in config.txt"
+fi
 
+isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
+if [ $isInFile5 -eq 0 ]
+then
+	echo "- Modifying cmdline.txt for read-only file system"
+    sed -i ' 1 s/.*/& init=/bin/ro-root.sh/' /boot/cmdline.txt
+else
+    echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
+fi
 
+isInFile6=$(cat /home/pi/.bashrc | grep -c "alias rw=")
+if [ $isInFile6 -eq 0 ]
+then
+    /home/pi/.bashrc >> "alias ro='sudo mount -o remount,ro /ro'"
+    /home/pi/.bashrc >> "alias rw='sudo mount -o remount,rw /ro'"
+fi
 
+# Allow the disk to remain RW on the next boot
+#touch /boot/candle_rw.txt
 
+echo "candle" > /etc/hostname
+
+# Start the Candle Controller
+#cd /home/pi/webthings/gateway
+#sudo -u pi /home/pi/webthings/gateway/run-app.sh &
+
+#npm cache clean --force
+#nvm cache clear
+
+# The prepare_for_disk_image script takes over
 echo " "
-echo "ALMOST DONE!"
-echo "Starting controller for testing"
-echo "In a few seconds you should be able to open http://candle.local in your browser."
-echo " "
+echo "FINAL PREPARATION FOR DISK IMAGE"
+chmod +x /home/pi/prepare_for_disk_image.sh 
+/home/pi/prepare_for_disk_image.sh 

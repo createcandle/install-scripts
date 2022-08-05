@@ -98,8 +98,20 @@ echo " "
 echo "Running webpack. this will take a while too..."
 NODE_OPTIONS="--max-old-space-size=496" npx webpack
 
+touch .post_upgrade_complete
+
+_node_version=$(node --version | egrep -o '[0-9]+' | head -n1)
+echo "${_node_version}" > "/home/pi/.webthings/.node_version"
+
+cd "/home/pi/webthings/gateway/node_modules/gateway-addon"
+npm link
+cd -
+
+
+
+
 echo " "
-echo "INSTALLING CANDLE STORE ADDON"
+echo "INSTALLING CANDLE ADDONS"
 echo " "
 
 mkdir -p /home/pi/.webthings/addons
@@ -123,7 +135,7 @@ then
 
     rm -rf package
     rm -rf power-settings
-    wget https://github.com/createcandle/power-settings/releases/download/3.2.19/power-settings-3.2.19.tgz
+    wget https://github.com/createcandle/power-settings/releases/download/3.2.19/power-settings-3.2.33.tgz
     for f in power-settings*.tgz; do
         tar -xf "$f"
     done
