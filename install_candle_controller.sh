@@ -101,8 +101,13 @@ NODE_OPTIONS="--max-old-space-size=496" npx webpack
 touch .post_upgrade_complete
 
 _node_version=$(node --version | egrep -o '[0-9]+' | head -n1)
-echo "${_node_version}" > "/home/pi/.webthings/.node_version"
 
+echo "${_node_version}" > "/home/pi/.webthings/.node_version"
+echo "Node version in .node_version file:"
+cat /home/pi/.webthings/.node_version
+
+echo " "
+echo "Linking gateway addon"
 cd "/home/pi/webthings/gateway/node_modules/gateway-addon"
 npm link
 cd -
@@ -135,7 +140,7 @@ then
 
     rm -rf package
     rm -rf power-settings
-    wget https://github.com/createcandle/power-settings/releases/download/3.2.19/power-settings-3.2.33.tgz
+    wget https://github.com/createcandle/power-settings/releases/download/3.2.33/power-settings-3.2.33.tgz
     for f in power-settings*.tgz; do
         tar -xf "$f"
     done
@@ -265,6 +270,9 @@ npm config set metrics-registry="https://"
 npm config set registry="https://"
 npm config set user-agent=""
 rm /home/pi/.npm/anonymous-cli-metrics.json
+
+npm cache clean --force
+nvm cache clear
 
 echo " "
 echo "sub-script that installs the Candle controller is done. Returning to the main install script."
