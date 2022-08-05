@@ -119,7 +119,7 @@ rm /etc/mosquitto/mosquitto.conf
 
 echo " "
 echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
-for i in plymouth arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan; do
+for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan; do
     echo "$i"
     apt install -y $i
     echo " "
