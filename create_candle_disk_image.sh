@@ -664,7 +664,7 @@ if [ $isInFile4 -eq 0 ]
 then
     mkinitramfs -o /boot/initrd
     
-    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh /bin/ro-root.sh
+    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O /bin/ro-root.sh
     chmod +x /bin/ro-root.sh
     
 	echo "- Adding read only mode to config.txt"
@@ -687,11 +687,12 @@ else
     echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
 fi
 
-isInFile6=$(cat /home/pi/.bashrc | grep -c "alias rw=")
+isInFile6=$(cat /home/pi/.profile | grep -c "alias rw=")
 if [ $isInFile6 -eq 0 ]
 then
-    /home/pi/.bashrc >> "alias ro='sudo mount -o remount,ro /ro'"
-    /home/pi/.bashrc >> "alias rw='sudo mount -o remount,rw /ro'"
+    echo "" >> /home/pi/.profile
+    echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
+    echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
 fi
 
 # Allow the disk to remain RW on the next boot
