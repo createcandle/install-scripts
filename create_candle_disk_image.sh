@@ -163,7 +163,7 @@ rm omxplayer*
 #apt --fix-broken install -y
 
 mkdir -p /opt/vc/
-wget https://www.candlesmarthome.com/tools/lib.tar
+wget https://www.candlesmarthome.com/tools/lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
 tar -xvf lib.tar -C /opt/vc/
 rm lib.tar
 

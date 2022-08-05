@@ -114,91 +114,114 @@ then
     rm -rf package
     rm -rf candle-theme
     wget https://github.com/createcandle/candle-theme/releases/download/2.5.0/candle-theme-2.5.0.tgz
-    tar -xf candle-theme-2.5.0.tgz
+    for f in candle-theme*.tgz; do
+        tar -xf "$f"
+    done
     mv package candle-theme
     chown -R pi:pi candle-theme
-    rm candle-theme-2.5.0.tgz
+    rm *.tgz
 
     rm -rf package
     rm -rf power-settings
     wget https://github.com/createcandle/power-settings/releases/download/3.2.19/power-settings-3.2.19.tgz
-    tar -xf power-settings-3.2.19.tgz
+    for f in power-settings*.tgz; do
+        tar -xf "$f"
+    done
     mv package power-settings
     chown -R pi:pi power-settings
-    rm power-settings-3.2.19.tgz
+    rm *.tgz
 
     rm -rf package
     rm -rf tutorial
     wget https://github.com/createcandle/tutorial/releases/download/1.0.7/tutorial-1.0.7.tgz
-    tar -xf tutorial-1.0.7.tgz
+    for f in tutorial*.tgz; do
+        tar -xf "$f"
+    done
     mv package tutorial
     chown -R pi:pi tutorial
-    rm tutorial-1.0.7.tgz
+    rm *.tgz
 
     rm -rf package
     rm -rf bluetoothpairing
     wget https://github.com/createcandle/bluetoothpairing/releases/download/0.5.8/bluetoothpairing-0.5.8.tgz
-    tar -xf bluetoothpairing-0.5.8.tgz
+    for f in bluetoothpairing*.tgz; do
+        tar -xf "$f"
+    done
     mv package bluetoothpairing
     chown -R pi:pi bluetoothpairing
-    rm bluetoothpairing-0.5.8.tgz
+    rm *.tgz
 
     rm -rf package
     rm -rf photo-frame
     wget https://github.com/flatsiedatsie/photo-frame/releases/download/1.4.16/photo-frame-1.4.16.tgz
-    tar -xf photo-frame-1.4.16.tgz
+    for f in photo-frame*.tgz; do
+        tar -xf "$f"
+    done
     mv package photo-frame
     chown -R pi:pi photo-frame
-    rm photo-frame-1.4.16.tgz
+    rm *.tgz
 
     rm -rf package
     rm -rf followers
     wget https://github.com/flatsiedatsie/followers-addon/releases/download/0.6.8/followers-0.6.8.tgz
-    tar -xf followers-0.6.8.tgz
+    for f in followers*.tgz; do
+        tar -xf "$f"
+    done
     mv package followers
     chown -R pi:pi followers
-    rm followers-0.6.8.tgz
+    rm *.tgz
 
     rm -rf package
     rm -rf internet-radio
-    wget https://github.com/flatsiedatsie/internet-radio/releases/download/2.1.31/internet-radio-2.1.31.tgz
-    tar -xf internet-radio-2.1.31.tgz
+    wget https://github.com/flatsiedatsie/internet-radio/releases/download/2.1.31/internet-radio-2.1.32.tgz
+    for f in internet-radio*.tgz; do
+        tar -xf "$f"
+    done
     mv package internet-radio
     chown -R pi:pi internet-radio
-    rm internet-radio-2.1.31.tgz
+    rm *.tgz
 
     rm -rf package
     rm -rf zigbee2mqtt-adapter
-    wget https://github.com/kabbi/zigbee2mqtt-adapter/releases/download/1.1.2/zigbee2mqtt-adapter-1.1.2.tgz
-    tar -xf zigbee2mqtt-adapter-1.1.2.tgz
+    wget https://github.com/kabbi/zigbee2mqtt-adapter/releases/download/1.1.3/zigbee2mqtt-adapter-1.1.3.tgz
+    #tar -xf zigbee2mqtt-adapter-1.1.3.tgz
+    for f in zigbee2mqtt-adapter*.tgz; do
+        tar -xf "$f"
+    done
     mv package zigbee2mqtt-adapter
     chown -R pi:pi zigbee2mqtt-adapter
-    rm zigbee2mqtt-adapter-1.1.2.tgz
+    rm *.tgz
 
     rm -rf package
     rm -rf privacy-manager
     wget https://github.com/createcandle/privacy-manager/releases/download/0.2.8/privacy-manager-0.2.8.tgz
-    tar -xf privacy-manager-0.2.8.tgz
+    for f in privacy-manager*.tgz; do
+        tar -xf "$f"
+    done
     mv package privacy-manager
     chown -R pi:pi privacy-manager
-    rm privacy-manager-0.2.8.tgz
+    rm *.tgz
 
     rm -rf package
     rm -rf webinterface
     wget https://github.com/createcandle/webinterface/releases/download/0.2.3/webinterface-0.2.3.tgz
-    tar -xf webinterface-0.2.3.tgz
+    for f in webinterface*.tgz; do
+        tar -xf "$f"
+    done
     mv package webinterface
     chown -R pi:pi webinterface
-    rm webinterface-0.2.3.tgz
+    rm *.tgz
     
     rm candleappstore-0.4.18-linux-arm-v3.9.tgz
     rm -rf package
     rm -rf candleappstore
     wget https://github.com/createcandle/candleappstore/releases/download/0.4.18/candleappstore-0.4.18-linux-arm-v3.9.tgz
-    tar -xf candleappstore-0.4.18-linux-arm-v3.9.tgz
+    for f in candleappstore*.tgz; do
+        tar -xf "$f"
+    done
     mv package candleappstore
     chown -R pi:pi candleappstore
-    rm candleappstore-0.4.18-linux-arm-v3.9.tgz
+    rm *.tgz
     
 fi
 
