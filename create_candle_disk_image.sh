@@ -664,6 +664,7 @@ raspi-config nonint do_camera 0
 # disable swap file
 dphys-swapfile swapoff
 rm /home/pi/.webthings/swap
+rm /var/swap
 
 apt clean
 apt autoremove
