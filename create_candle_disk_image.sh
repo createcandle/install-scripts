@@ -417,12 +417,21 @@ ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 
 
 # BINDS
-echo "copying ssh, wpa_supplicant and bluetooth folder data to user partition"
+echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 
 echo "candle" > /home/pi/.webthings/etc/hostname
-cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
-cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
-cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/
+#cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
+#cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
+#cp --verbose /etc/ssh/sshd_config /home/pi/.webthings/etc/ssh/sshd_config
+#cp --verbose -r /etc/ssh/ssh_config.d /home/pi/.webthings/etc/ssh/
+#cp --verbose -r /etc/ssh/sshd_config.d /home/pi/.webthings/etc/ssh/
+
+#cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
+#cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
+
+mkdir -p /home/pi/.webthings/etc/ssh/ssh_config.d
+mkdir -p /home/pi/.webthings/etc/ssh/sshd_config.d 
+mkdir -p /home/pi/.webthings/var/lib/bluetooth
 
 
 
@@ -489,6 +498,14 @@ systemctl disable webthings-gateway.check-for-update.timer
 systemctl disable webthings-gateway.update-rollback.service
 
 
+# Disable apt services
+sudo systemctl disable apt-daily.service
+sudo systemctl disable apt-daily.timer
+sudo systemctl disable apt-daily-upgrade.timer
+sudo systemctl disable apt-daily-upgrade.service
+
+# disable man-db
+systemctl disable man-db.timer
 
 # KIOSK
 
@@ -682,7 +699,7 @@ isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
 if [ $isInFile5 -eq 0 ]
 then
 	echo "- Modifying cmdline.txt for read-only file system"
-    sed -i ' 1 s/.*/& init=/bin/ro-root.sh/' /boot/cmdline.txt
+    sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
 else
     echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
 fi
