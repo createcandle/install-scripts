@@ -32,7 +32,13 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 
 14. Once you have the .img file, zip that file to `Candle_2.0.0.img.zip` (again accounting for the desired version number). It should shrink down to less than 1.5Gb in size.
 
+.
 
+.
+
+.
+
+.
 Note: it's also possible to inspect what the script has generated before it shuts down by using this install command instead:
 ```
 STOP_EARLY=yes curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
