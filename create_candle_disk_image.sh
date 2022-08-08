@@ -409,11 +409,11 @@ ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 
 echo "candle" > /home/pi/.webthings/etc/hostname
-cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
-#cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
-#cp --verbose /etc/ssh/sshd_config /home/pi/.webthings/etc/ssh/sshd_config
-#cp --verbose -r /etc/ssh/ssh_config.d /home/pi/.webthings/etc/ssh/
-#cp --verbose -r /etc/ssh/sshd_config.d /home/pi/.webthings/etc/ssh/
+#cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
+cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
+cp --verbose /etc/ssh/sshd_config /home/pi/.webthings/etc/ssh/sshd_config
+cp --verbose -r /etc/ssh/ssh_config.d /home/pi/.webthings/etc/ssh/
+cp --verbose -r /etc/ssh/sshd_config.d /home/pi/.webthings/etc/ssh/
 
 cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
 cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
@@ -731,6 +731,8 @@ pip3 list --format=freeze > candle_requirements.txt
 
 apt-get clean
 rm -rf /var/lib/apt/lists/*
+echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /etc/wpa_supplicant/wpa_supplicant.conf
+echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
 
 
 chmod +x /home/pi/prepare_for_disk_image.sh 
@@ -755,6 +757,9 @@ else
         apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
         chmod +x candle_packages_downloader.sh
         sudo -u pi ./candle_packages_downloader.sh
+        
+        # fix the filenames. Replaces "%3a" with ":".
+        # for f in *; do mv "$f" "${f//%3a/:}"; done
   
         echo " "
         echo "Downloaded packages in /home/pi/.webthings/deb_packages:"
@@ -762,7 +767,7 @@ else
         du /home/pi/.webthings/deb_packages -h
         
     else
-        echo "Skipping download of .deb files"
+        echo "Skipping download of .deb files. A download script has been generated in /home/pi/.webthings/deb_packages"
     fi
     
   
