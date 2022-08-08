@@ -1,25 +1,10 @@
 #!/bin/bash
 set +e # continue on errors
 
-# TODO: check if candlecam works on this disk image, as it may use the new camera interface
-
 # This script will turn a Raspberry Pi OS Lite installation into a Candle controller
 
-# PREPARATION
-# Flash basic Raspberry Pi OS Lite Legacy image using Raspberry Pi Imager software. 
-# https://www.raspberrypi.com/software/
-
-# Use the gear icon to set everything up that you can: enable ssh, set username "pi" and password "smarthome", set the hostname to "candle", pre-fill your wifi credentials, etc.
-
-# Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt”. From it, remove “init=/usr/lib/raspi-config/init_resize.sh”, and save. Saving might seem to fail, but it probably saved anyway.
-
-# Make sure there is no other "candle.local" device on the network already.
-# Now insert the SD card into the Raspberry Pi, power it up, wait a minute, and log into it via ssh:
-# ssh pi@candle.local
-
-# Once logged in via SSH, you can download and run this install script.
-# curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
-
+# If you want to avoid the shutdown at the end you can skip the finalization step by first setting an environment variable:
+# export STOP_EARLY=yes
 
 
 # Check if script is being run as root
@@ -119,7 +104,7 @@ rm /etc/mosquitto/mosquitto.conf
 
 echo " "
 echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
-for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan; do
+for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw; do
     echo "$i"
     apt install -y $i
     echo " "
@@ -725,24 +710,25 @@ echo "candle" > /etc/hostname
 #npm cache clean --force
 #nvm cache clear
 
+# Generate file that can be used to re-install this exact combination of packages's versions
+apt list --installed 2>/dev/null  | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > candle_packages.txt
+
+# Generate file that can be used to re-install this exact combination of Python packages's versions
+pip3 list --format=freeze > candle_requirements.txt
+
 chmod +x /home/pi/prepare_for_disk_image.sh 
 
-echo "Do you want to continue with the last part?"
-read answer
-if [[ $answer == y* ]]; then
-    
-    # The prepare_for_disk_image script takes over
-    echo " "
-    echo "FINAL PREPARATION FOR DISK IMAGE"
-    
-    /home/pi/prepare_for_disk_image.sh 
-    
+if [[ -z "${STOP_EARLY}" ]]; then
+  echo " "
+  echo " STARTING FINAL PHASE"
+  /home/pi/prepare_for_disk_image.sh 
+  
 else
-    echo " "
-    echo "MOSTLY DONE"
-    echo " "
-    echo "To finalise the process, enter this command:"
-    echo "/home/pi/prepare_for_disk_image.sh"
-    echo " "
+  #MY_SCRIPT_VARIABLE="${CANDLE_DEV}"
+  echo " "
+  echo "MOSTLY DONE"
+  echo " "
+  echo "To finalise the process, enter this command:"
+  echo "/home/pi/prepare_for_disk_image.sh"
+  echo " "
 fi
-
