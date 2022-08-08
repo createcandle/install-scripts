@@ -420,14 +420,14 @@ ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 
 echo "candle" > /home/pi/.webthings/etc/hostname
-#cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
+cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
 #cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
 #cp --verbose /etc/ssh/sshd_config /home/pi/.webthings/etc/ssh/sshd_config
 #cp --verbose -r /etc/ssh/ssh_config.d /home/pi/.webthings/etc/ssh/
 #cp --verbose -r /etc/ssh/sshd_config.d /home/pi/.webthings/etc/ssh/
 
-#cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
-#cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
+cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
+cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
 
 mkdir -p /home/pi/.webthings/etc/ssh/ssh_config.d
 mkdir -p /home/pi/.webthings/etc/ssh/sshd_config.d 
@@ -725,8 +725,24 @@ echo "candle" > /etc/hostname
 #npm cache clean --force
 #nvm cache clear
 
-# The prepare_for_disk_image script takes over
-echo " "
-echo "FINAL PREPARATION FOR DISK IMAGE"
 chmod +x /home/pi/prepare_for_disk_image.sh 
-/home/pi/prepare_for_disk_image.sh 
+
+echo "Do you want to continue with the last part?"
+read answer
+if [[ $answer == y* ]]; then
+    
+    # The prepare_for_disk_image script takes over
+    echo " "
+    echo "FINAL PREPARATION FOR DISK IMAGE"
+    
+    /home/pi/prepare_for_disk_image.sh 
+    
+else
+    echo " "
+    echo "MOSTLY DONE"
+    echo " "
+    echo "To finalise the process, enter this command:"
+    echo "/home/pi/prepare_for_disk_image.sh"
+    echo " "
+fi
+
