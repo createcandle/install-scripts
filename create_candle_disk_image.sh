@@ -100,6 +100,10 @@ echo " "
 echo "installing pip3"
 apt install -y python3-pip
 
+# update pip
+/usr/bin/python3 -m pip install --upgrade pip
+
+# remove the Candle conf file, just in case it exists from an earlier install attempt
 rm /etc/mosquitto/mosquitto.conf
 
 echo " "
@@ -711,10 +715,23 @@ echo "candle" > /etc/hostname
 #nvm cache clear
 
 # Generate file that can be used to re-install this exact combination of packages's versions
-apt list --installed 2>/dev/null  | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > candle_packages.txt
+apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > candle_packages.txt
+apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > candle_packages_installer.sh
+
+#apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "apt-get -y -d -o dir::cache=`pwd` -o Debug::NoLocking=1 install " $1 "=" $3}' > candle_packages_downloader.sh
+#apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "apt download " $1 "=" $3}' > candle_packages_downloader.sh
+
+#apt list --upgradable 2>/dev/null  | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "apt-get -y -d -o dir::cache=`pwd` -o Debug::NoLocking=1 install " $1 "=" $3}' > candle_packages_downloader.txt
+
+# apt-get -d -o dir::cache=`pwd` -o Debug::NoLocking=1 install
+
 
 # Generate file that can be used to re-install this exact combination of Python packages's versions
 pip3 list --format=freeze > candle_requirements.txt
+
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
 
 chmod +x /home/pi/prepare_for_disk_image.sh 
 
@@ -724,11 +741,45 @@ if [[ -z "${STOP_EARLY}" ]]; then
   /home/pi/prepare_for_disk_image.sh 
   
 else
+    
+    printf 'Do you want to download all the .deb files? (y/n)'
+    read answer
+    if [ "$answer" != "${answer#[Yy]}" ] ;then
+        
+        echo " " 
+        echo "DOWNLOADING ALL INSTALLED PACKAGES AS .DEB FILES"
+  
+        mkdir /home/pi/.webthings/deb_packages
+        chown pi:pi /home/pi/.webthings/deb_packages
+        cd /home/pi/.webthings/deb_packages
+        apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
+        chmod +x candle_packages_downloader.sh
+        sudo -u pi ./candle_packages_downloader.sh
+  
+        echo " "
+        echo "Downloaded packages in /home/pi/.webthings/deb_packages:"
+        ls -l
+        du /home/pi/.webthings/deb_packages -h
+        
+    else
+        echo "Skipping download of .deb files"
+    fi
+    
+  
+  
+  cd /home/pi/
+  
+  
+    
   #MY_SCRIPT_VARIABLE="${CANDLE_DEV}"
   echo " "
   echo "MOSTLY DONE"
   echo " "
-  echo "To finalise the process, enter this command:"
-  echo "/home/pi/prepare_for_disk_image.sh"
+  echo "To finalise the process, delete the deb folder:"
+  echo "sudo rm -rf /home/pi/.webthings/deb_packages"
   echo " "
+  echo "then enter this command:"
+  echo "sudo /home/pi/prepare_for_disk_image.sh"
+  echo " "
+  echo "Once that script is done the pi will shut down."
 fi
