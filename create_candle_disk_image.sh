@@ -540,6 +540,12 @@ systemctl enable getty@tty3.service
 systemctl disable getty@tty1.service
 
 
+# Use the older display driver for now, as this solves many audio headaches.
+# https://github.com/raspberrypi/linux/issues/4543
+sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
+
+
+
 
 # Sets more power for USB ports
 isInFile3=$(cat /boot/config.txt | grep -c "max_usb_current")
@@ -665,7 +671,7 @@ echo "candle" > /home/pi/.webthings/etc/hostname
 
 
 
-# Installl read-only file system
+# Install read-only file system
 isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
 if [ $isInFile4 -eq 0 ]
 then
