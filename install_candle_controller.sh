@@ -140,7 +140,7 @@ then
 
     rm -rf package
     rm -rf power-settings
-    wget https://github.com/createcandle/power-settings/releases/download/3.2.33/power-settings-3.2.33.tgz
+    wget https://github.com/createcandle/power-settings/releases/download/3.2.35/power-settings-3.2.35.tgz
     for f in power-settings*.tgz; do
         tar -xf "$f"
     done

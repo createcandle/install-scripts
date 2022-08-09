@@ -683,8 +683,8 @@ then
     chmod +x /bin/ro-root.sh
     
 	echo "- Adding read only mode to config.txt"
-    echo ''
-    echo '# Read only mode'
+    echo ' ' >> /boot/config.txt
+    echo '# Read only mode' >> /boot/config.txt
     echo 'initramfs initrd followkernel' >> /boot/config.txt
     echo 'ramfsfile=initrd' >> /boot/config.txt
     echo 'ramfsaddr=-1' >> /boot/config.txt
@@ -746,9 +746,9 @@ echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=
 chmod +x /home/pi/prepare_for_disk_image.sh 
 
 if [[ -z "${STOP_EARLY}" ]]; then
-  echo " "
-  echo " STARTING FINAL PHASE"
-  /home/pi/prepare_for_disk_image.sh 
+    echo " "
+    echo " STARTING FINAL PHASE"
+    /home/pi/prepare_for_disk_image.sh 
   
 else
     
@@ -780,19 +780,20 @@ else
     
   
   
-  cd /home/pi/
+    cd /home/pi/
   
-  
+    # On the next boot allow the system partition to be writeable
+    touch /boot/candle_rw_once.txt
     
-  #MY_SCRIPT_VARIABLE="${CANDLE_DEV}"
-  echo " "
-  echo "MOSTLY DONE"
-  echo " "
-  echo "To finalise the process, delete the deb folder:"
-  echo "sudo rm -rf /home/pi/.webthings/deb_packages"
-  echo " "
-  echo "then enter this command:"
-  echo "sudo /home/pi/prepare_for_disk_image.sh"
-  echo " "
-  echo "Once that script is done the pi will shut down."
+    #MY_SCRIPT_VARIABLE="${CANDLE_DEV}"
+    echo " "
+    echo "MOSTLY DONE"
+    echo " "
+    echo "To finalise the process, delete the deb folder:"
+    echo "sudo rm -rf /home/pi/.webthings/deb_packages"
+    echo " "
+    echo "then enter this command:"
+    echo "sudo /home/pi/prepare_for_disk_image.sh"
+    echo " "
+    echo "Once that script is done the pi will shut down."
 fi
