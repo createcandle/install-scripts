@@ -444,7 +444,7 @@ chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
 chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
 
-ln -s /home/pi/.webthings/etc/asound.rc /home/pi/.asound.rc
+ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/zcandle.conf
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/mosquitto.conf
 
