@@ -344,8 +344,8 @@ chown pi:pi /home/pi/.webthings/arduino/.arduino15
 mkdir -p /home/pi/.webthings/arduino/Arduino
 chown pi:pi /home/pi/.webthings/arduino/Arduino
 
-touch /home/pi/candle.log
-chown pi:pi /home/pi/candle.log
+touch /home/pi/.webthings/candle.log
+chown pi:pi /home/pi/.webthings/candle.log
 
 mkdir -p /home/pi/.webthings/etc
 chown pi:pi /home/pi/.webthings/etc
