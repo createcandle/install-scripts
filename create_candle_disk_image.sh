@@ -440,6 +440,8 @@ rm -rf /home/pi/configuration-files
 
 #chmod +x /home/pi/candle_first_run.sh
 
+chown pi:pi /home/pi/*
+
 chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
 chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
