@@ -745,6 +745,7 @@ fi
 cd /home/pi
 
 # Create a backup of the gateway
+echo "Creating controller_backup.tar"
 tar -czf ./controller_backup.tar ./webthings
 
 
