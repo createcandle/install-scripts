@@ -731,6 +731,14 @@ fi
 # Allow the disk to remain RW on the next boot
 #touch /boot/candle_rw.txt
 
+
+cd /home/pi
+
+# Create a backup of the gateway
+tar -czf ./controller_backup.tar ./webthings
+
+
+
 echo "candle" > /etc/hostname
 
 # Start the Candle Controller
@@ -739,6 +747,8 @@ echo "candle" > /etc/hostname
 
 #npm cache clean --force
 #nvm cache clear
+
+
 
 # Generate file that can be used to re-install this exact combination of packages's versions
 apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > candle_packages.txt

@@ -21,7 +21,7 @@ python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#e
 if ! command -v npm &> /dev/null
 then
     echo "NPM could not be found. Installing it now."
-    echo "Installing NVM" >> /dev/kmsg
+    sudo echo "Installing NVM" >> /dev/kmsg
     
     echo "installing NVM"
     rm ./install_nvm.sh
@@ -78,13 +78,13 @@ echo " "
 
 if [ -f /home/pi/webthings/build/app.js ]
 then
-    echo "Detected old webthings directory! Renamed it to webthings-old" >> /dev/kmsg
+    sudo echo "Detected old webthings directory! Renamed it to webthings-old" >> /dev/kmsg
     echo "Detected old webthings directory! Renamed it to webthings-old"
     mv /home/pi/webthings /home/pi/webthings-old
 fi
 rm -rf /home/pi/webthings
 
-echo "Starting gateway installation" >> /dev/kmsg
+sudo echo "Starting gateway installation" >> /dev/kmsg
 mkdir -p /home/pi/webthings
 chown pi:pi /home/pi/webthings
 cd /home/pi/webthings
@@ -105,7 +105,7 @@ CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 
 echo " "
 echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
-echo "Compiling Typescript and running Webpack" >> /dev/kmsg
+sudo echo "Compiling Typescript and running Webpack" >> /dev/kmsg
 #npm run build
 
 #npm install -D webpack-cli
@@ -148,7 +148,7 @@ chown -R pi:pi /home/pi/.webthings/addons
 
 if ! [ -d /home/pi/.webthings/addons/candleappstore ] 
 then
-    echo "Installing addons" >> /dev/kmsg
+    sudo echo "Installing addons" >> /dev/kmsg
         
     cd /home/pi/.webthings/addons
   
@@ -300,7 +300,7 @@ nvm cache clear
 
 echo " "
 echo "sub-script that installs the Candle controller is done. Returning to the main install script."
-echo "Gateway install script done" >> /dev/kmsg
+sudo echo "Gateway install script done" >> /dev/kmsg
 
 exit 0
 
