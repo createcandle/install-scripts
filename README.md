@@ -39,6 +39,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 .
 
 .
+### Developer option
 Note: it's also possible to inspect what the script has generated before it shuts down by using this install command instead:
 ```
 STOP_EARLY=yes curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
