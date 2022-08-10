@@ -13,7 +13,7 @@ fi
 
 echo "HOME: $HOME"
 
-cd /home/pi
+cd /home/pi || exit
 
 echo "installing python gateway addon"
 python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
@@ -21,7 +21,7 @@ python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#e
 if ! command -v npm &> /dev/null
 then
     echo "NPM could not be found. Installing it now."
-    sudo echo "Installing NVM" >> /dev/kmsg
+    echo "Installing NVM" >> sudo tee -a /dev/kmsg
     
     echo "installing NVM"
     rm ./install_nvm.sh
@@ -52,6 +52,7 @@ then
     nvm alias default 14
 else
     echo "NPM seems to already be installed."
+    echo "NPM seems to already be installed." >> sudo tee -a /dev/kmsg
 fi
 
 
@@ -78,13 +79,13 @@ echo " "
 
 if [ -f /home/pi/webthings/build/app.js ]
 then
-    sudo echo "Detected old webthings directory! Renamed it to webthings-old" >> /dev/kmsg
     echo "Detected old webthings directory! Renamed it to webthings-old"
+    echo "Detected old webthings directory! Renamed it to webthings-old" >> sudo tee -a /dev/kmsg
     mv /home/pi/webthings /home/pi/webthings-old
 fi
 rm -rf /home/pi/webthings
 
-sudo echo "Starting gateway installation" >> /dev/kmsg
+echo "Starting gateway installation" >> sudo tee -a /dev/kmsg
 mkdir -p /home/pi/webthings
 chown pi:pi /home/pi/webthings
 cd /home/pi/webthings
@@ -105,7 +106,8 @@ CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 
 echo " "
 echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
-sudo echo "Compiling Typescript and running Webpack" >> /dev/kmsg
+echo "Compiling Typescript and running Webpack" >> sudo tee -a /dev/kmsg
+
 #npm run build
 
 #npm install -D webpack-cli
@@ -123,7 +125,7 @@ NODE_OPTIONS="--max-old-space-size=496" npx webpack
 
 touch .post_upgrade_complete
 
-_node_version=$(node --version | egrep -o '[0-9]+' | head -n1)
+_node_version=$(node --version | grep -E -o '[0-9]+' | head -n1)
 
 echo "${_node_version}" > "/home/pi/.webthings/.node_version"
 echo "Node version in .node_version file:"
@@ -148,7 +150,7 @@ chown -R pi:pi /home/pi/.webthings/addons
 
 if ! [ -d /home/pi/.webthings/addons/candleappstore ] 
 then
-    sudo echo "Installing addons" >> /dev/kmsg
+    echo "Installing addons" >> sudo tee -a /dev/kmsg
         
     cd /home/pi/.webthings/addons
   
@@ -160,7 +162,7 @@ then
     done
     mv package candle-theme
     chown -R pi:pi candle-theme
-    rm *.tgz
+    rm ./*.tgz
 
     rm -rf package
     rm -rf power-settings
@@ -170,7 +172,7 @@ then
     done
     mv package power-settings
     chown -R pi:pi power-settings
-    rm *.tgz
+    rm ./*.tgz
 
     rm -rf package
     rm -rf tutorial
@@ -180,7 +182,7 @@ then
     done
     mv package tutorial
     chown -R pi:pi tutorial
-    rm *.tgz
+    rm ./*.tgz
 
     rm -rf package
     rm -rf bluetoothpairing
@@ -190,7 +192,7 @@ then
     done
     mv package bluetoothpairing
     chown -R pi:pi bluetoothpairing
-    rm *.tgz
+    rm ./*.tgz
 
     rm -rf package
     rm -rf photo-frame
@@ -200,7 +202,7 @@ then
     done
     mv package photo-frame
     chown -R pi:pi photo-frame
-    rm *.tgz
+    rm ./*.tgz
 
     rm -rf package
     rm -rf followers
@@ -210,7 +212,7 @@ then
     done
     mv package followers
     chown -R pi:pi followers
-    rm *.tgz
+    rm ./*.tgz
 
     rm -rf package
     rm -rf internet-radio
@@ -220,7 +222,7 @@ then
     done
     mv package internet-radio
     chown -R pi:pi internet-radio
-    rm *.tgz
+    rm ./*.tgz
 
     rm -rf package
     rm -rf zigbee2mqtt-adapter
@@ -231,7 +233,7 @@ then
     done
     mv package zigbee2mqtt-adapter
     chown -R pi:pi zigbee2mqtt-adapter
-    rm *.tgz
+    rm ./*.tgz
 
     rm -rf package
     rm -rf privacy-manager
@@ -241,7 +243,7 @@ then
     done
     mv package privacy-manager
     chown -R pi:pi privacy-manager
-    rm *.tgz
+    rm ./*.tgz
 
     rm -rf package
     rm -rf webinterface
@@ -251,7 +253,7 @@ then
     done
     mv package webinterface
     chown -R pi:pi webinterface
-    rm *.tgz
+    rm ./*.tgz
     
     rm candleappstore-0.4.18-linux-arm-v3.9.tgz
     rm -rf package
@@ -262,7 +264,7 @@ then
     done
     mv package candleappstore
     chown -R pi:pi candleappstore
-    rm *.tgz
+    rm ./*.tgz
     
 fi
 
@@ -300,7 +302,7 @@ nvm cache clear
 
 echo " "
 echo "sub-script that installs the Candle controller is done. Returning to the main install script."
-sudo echo "Gateway install script done" >> /dev/kmsg
+echo "Gateway install script done" >> sudo tee -a /dev/kmsg
 
 exit 0
 

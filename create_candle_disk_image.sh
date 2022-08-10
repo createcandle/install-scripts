@@ -535,8 +535,10 @@ wget https://www.candlesmarthome.com/tools/splashalt.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash180alt.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash_updating.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash_updating180.png -P /boot/
+wget https://www.candlesmarthome.com/tools/error.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash.mp4 -P /boot/
 wget https://www.candlesmarthome.com/tools/splash180.mp4 -P /boot/
+
 
 
 # Hides the Raspberry Pi logos normally shown at boot
