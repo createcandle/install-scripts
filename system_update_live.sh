@@ -13,7 +13,7 @@ chroot /ro sh -c "$(cat <<END
 echo "Starting live system update"
 ls /
 apt update
-apt upgrade -y --simulate
+apt upgrade -y
 apt clean
 END
 )"
