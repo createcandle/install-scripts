@@ -249,16 +249,23 @@ then
     echo " "
     echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
     echo " "
-
+    
+    sudo adduser --system --group --no-create-home bluealsa
+    sudo adduser --system --group --no-create-home bluealsa-aplay
+    sudo adduser bluealsa-aplay audio
+    sudo adduser bluealsa bluetooth
+    
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
     git clone --depth 1 https://github.com/createcandle/bluez-alsa.git
     cd bluez-alsa
     autoreconf --install --force
     mkdir build
-    cd build
-    ../configure --enable-msbc --enable-mp3lame --enable-faststream
+    cd build 
+    ../configure --enable-msbc --enable-mp3lame --enable-faststream --enable-systemd
     make
     make install
+    
+    
 
 else
     echo "BlueAlsa was already installed"
@@ -544,6 +551,7 @@ systemctl disable getty@tty1.service
 
 # Use the older display driver for now, as this solves many audio headaches.
 # https://github.com/raspberrypi/linux/issues/4543
+echo "setting fkms driver"
 sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
 
 
@@ -783,7 +791,7 @@ else
     cd /home/pi/
   
     # On the next boot allow the system partition to be writeable
-    touch /boot/candle_rw_once.txt
+    # touch /boot/candle_rw_once.txt
     
     #MY_SCRIPT_VARIABLE="${CANDLE_DEV}"
     echo " "
@@ -796,4 +804,12 @@ else
     echo "sudo /home/pi/prepare_for_disk_image.sh"
     echo " "
     echo "Once that script is done the pi will shut down."
+    echo " "
+    echo "Note that if you reboot, the read-only mode will become active."
+    echo "If you want to keep full read-write mode, then use this command:"
+    echo "touch /boot/candle_rw_once.txt"
+    echo "...or if you want RW mode permanently:"
+    echo "touch /boot/candle_rw_keep.txt"
+    echo ""
+    
 fi
