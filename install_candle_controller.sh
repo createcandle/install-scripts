@@ -18,33 +18,42 @@ cd /home/pi
 echo "installing python gateway addon"
 python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
-echo "installing nvm"
-rm ./install_nvm.sh
-#curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
-wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
-chmod +x install_nvm.sh
-./install_nvm.sh
-
-#. ~/.bashrc
-
-if cat /home/pi/.profile | grep NVM
+if ! command -v npm &> /dev/null
 then
-    echo "NVM lines already appended to .profile"
+    echo "NPM could not be found. Installing it now."
+    
+    echo "installing nvm"
+    rm ./install_nvm.sh
+    #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+    wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
+    chmod +x install_nvm.sh
+    ./install_nvm.sh
+
+    #. ~/.bashrc
+
+    if cat /home/pi/.profile | grep NVM
+    then
+        echo "NVM lines already appended to .profile"
+    else
+        echo "Appending NVM lines to .profile"
+        echo " " >> /home/pi/.profile
+        echo 'export NVM_DIR="/home/pi/.nvm"' >> /home/pi/.profile
+        echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> /home/pi/.profile
+        echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> /home/pi/.profile
+    fi
+
+    export NVM_DIR="/home/pi/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+    nvm install 14
+    nvm use 14
+    nvm alias default 14
 else
-    echo "Appending NVM lines to .profile"
-    echo " " >> /home/pi/.profile
-    echo 'export NVM_DIR="/home/pi/.nvm"' >> /home/pi/.profile
-    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> /home/pi/.profile
-    echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> /home/pi/.profile
+    echo "NPM seems to already be installed."
 fi
 
-export NVM_DIR="/home/pi/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-nvm install 14
-nvm use 14
-nvm alias default 14
 
 echo " "
 echo "NODE AND NPM VERSIONS:"
@@ -52,9 +61,12 @@ node --version
 npm --version
 
 npm config set metrics-registry="https://"
-npm config set registry="https://"
+#npm config set registry="https://"
 npm config set user-agent=""
-rm /home/pi/.npm/anonymous-cli-metrics.json
+if [ -f /home/pi/.npm/anonymous-cli-metrics.json ]
+then
+  rm /home/pi/.npm/anonymous-cli-metrics.json
+fi
 
 echo " "
 echo "DOWNLOADING AND INSTALLING CANDLE CONTROLLER"
@@ -62,6 +74,12 @@ echo "Do not worry about the errors you will see with optipng and jpegtran"
 echo " "
 
 # Download Candle controller from Github and install it
+
+if [ -d /home/pi/webthings ]
+then
+    echo "detected old webthings directory! Renamed it to webthings-old"
+    mv /home/pi/webthings /home/pi/webthings-old
+fi
 rm -rf /home/pi/webthings
 mkdir -p /home/pi/webthings
 chown pi:pi /home/pi/webthings
@@ -267,7 +285,7 @@ fi
 
 
 npm config set metrics-registry="https://"
-npm config set registry="https://"
+#npm config set registry="https://"
 npm config set user-agent=""
 rm /home/pi/.npm/anonymous-cli-metrics.json
 

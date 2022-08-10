@@ -370,7 +370,14 @@ mkdir -p /home/pi/.webthings/etc/wpa_supplicant
 mkdir -p /home/pi/.webthings/etc/ssh
 
 # Create files that are linked to using binding in fstab
-cp /etc/hostname /home/pi/.webthings/etc/hostname
+#if [ ! -e /home/pi/.webthings/etc/hostname ]
+#then
+#    cp /etc/hostname /home/pi/.webthings/etc/hostname
+#fi
+if [ ! -e /home/pi/.webthings/etc/hostname ]
+then
+    echo "candle" > /home/pi/.webthings/etc/hostname
+fi
 
 
 rm -rf /tmp/*
@@ -391,9 +398,14 @@ find /home/pi/.webthings/tmp \
 
 cd /home/pi
 
-cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/floorplan.svg
-chown pi:pi /home/pi/.webthings/floorplan.svg
-
+if [ -e /home/pi/webthings/gateway/static/images/floorplan.svg ]
+then
+    cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/floorplan.svg
+    chown pi:pi /home/pi/.webthings/floorplan.svg
+else
+    echo ""
+    echo "ERROR: missing floorplan"
+fi
 
 # SYMLINKS
 
@@ -415,7 +427,6 @@ ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 # BINDS
 echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 
-echo "candle" > /home/pi/.webthings/etc/hostname
 #cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
 cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
 cp --verbose /etc/ssh/sshd_config /home/pi/.webthings/etc/ssh/sshd_config
@@ -471,8 +482,8 @@ systemctl disable triggerhappy.service
 
 # enable Candle services
 systemctl enable candle_first_run.service
-systemctl enable candle_bootup_actions.service
-systemctl enable candle_start_swap.service
+#systemctl enable candle_bootup_actions.service
+#systemctl enable candle_start_swap.service
 systemctl enable candle_early.service
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
@@ -481,9 +492,8 @@ systemctl enable candle_reboot180.service
 systemctl enable candle_splashscreen_updating.service
 systemctl enable candle_splashscreen_updating180.service
 
-
-
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
+# TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon)
 
 # enable BlueAlsa services
 systemctl enable bluealsa.service 
@@ -750,7 +760,7 @@ rm -rf /var/lib/apt/lists/*
 echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /etc/wpa_supplicant/wpa_supplicant.conf
 echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
 
-
+rm /boot/bootup_actions.sh
 chmod +x /home/pi/prepare_for_disk_image.sh 
 
 if [[ -z "${STOP_EARLY}" ]]; then
@@ -813,3 +823,5 @@ else
     echo ""
     
 fi
+
+exit 0
