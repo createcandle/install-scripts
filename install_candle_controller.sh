@@ -21,7 +21,7 @@ python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#e
 if ! command -v npm &> /dev/null
 then
     echo "NPM could not be found. Installing it now."
-    #echo "Installing NVM" >> sudo tee -a /dev/kmsg
+    echo "Installing NVM" | sudo tee -a /dev/kmsg
     
     echo "installing NVM"
     rm ./install_nvm.sh
@@ -52,7 +52,7 @@ then
     nvm alias default 14
 else
     echo "NPM seems to already be installed."
-    #echo "NPM seems to already be installed." >> sudo tee -a /dev/kmsg
+    echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
 fi
 
 
@@ -80,12 +80,12 @@ echo " "
 if [ -f /home/pi/webthings/build/app.js ]
 then
     echo "Detected old webthings directory! Renamed it to webthings-old"
-    #echo "Detected old webthings directory! Renamed it to webthings-old" >> sudo tee -a /dev/kmsg
+    echo "Detected old webthings directory! Renamed it to webthings-old" | sudo tee -a /dev/kmsg
     mv /home/pi/webthings /home/pi/webthings-old
 fi
 rm -rf /home/pi/webthings
 
-#echo "Starting gateway installation" >> sudo tee -a /dev/kmsg
+echo "Starting gateway installation" | sudo tee -a /dev/kmsg
 mkdir -p /home/pi/webthings
 chown pi:pi /home/pi/webthings
 cd /home/pi/webthings
@@ -106,7 +106,7 @@ CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 
 echo " "
 echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
-#echo "Compiling Typescript and running Webpack" >> sudo tee -a /dev/kmsg
+echo "Compiling Typescript and running Webpack" | sudo tee -a /dev/kmsg
 
 #npm run build
 
@@ -150,7 +150,7 @@ chown -R pi:pi /home/pi/.webthings/addons
 
 if ! [ -d /home/pi/.webthings/addons/candleappstore ] 
 then
-    #echo "Installing addons" >> sudo tee -a /dev/kmsg
+    echo "Installing addons" | sudo tee -a /dev/kmsg
         
     cd /home/pi/.webthings/addons
   
@@ -269,11 +269,11 @@ then
 fi
 
 echo " "
-#echo "running gateway for 15 seconds to create folders"
+echo "running gateway for 15 seconds to create folders"
 #cd /home/pi/webthings/gateway
 #timeout 10 npm run run-only
-#echo "controller installation should be complete"
-#echo "ls /home/pi/.webthings:"
+echo "controller installation should be complete"
+echo "ls /home/pi/.webthings:"
 #ls /home/pi/.webthings
 
 cd /home/pi
@@ -302,7 +302,7 @@ nvm cache clear
 
 echo " "
 echo "sub-script that installs the Candle controller is done. Returning to the main install script."
-#echo "Gateway install script done" >> sudo tee -a /dev/kmsg
+echo "Gateway install script done" | sudo tee -a /dev/kmsg
 
 exit 0
 
