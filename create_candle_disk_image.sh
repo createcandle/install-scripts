@@ -688,7 +688,10 @@ raspi-config nonint do_camera 0
 
 # disable swap file
 dphys-swapfile swapoff
+phys-swapfile uninstall
+update-rc.d dphys-swapfile remove
 rm /home/pi/.webthings/swap
+swapoff /var/swap
 rm /var/swap
 
 apt clean
@@ -761,6 +764,23 @@ echo "candle" > /etc/hostname
 
 
 
+
+# CLEANUP
+
+npm cache clean --force
+nvm cache clear
+apt-get clean
+apt remove --purge
+apt autoremove
+
+rm -rf /var/lib/apt/lists/*
+
+
+# SAVE STATE
+
+# Generate file that can be used to re-install this exact combination of Python packages's versions
+pip3 list --format=freeze > candle_requirements.txt
+
 # Generate file that can be used to re-install this exact combination of packages's versions
 apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > candle_packages.txt
 apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > candle_packages_installer.sh
@@ -773,13 +793,13 @@ apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "a
 # apt-get -d -o dir::cache=`pwd` -o Debug::NoLocking=1 install
 
 
-# Generate file that can be used to re-install this exact combination of Python packages's versions
-pip3 list --format=freeze > candle_requirements.txt
 
-apt-get clean
-rm -rf /var/lib/apt/lists/*
-echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /etc/wpa_supplicant/wpa_supplicant.conf
-echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
+
+#echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /etc/wpa_supplicant/wpa_supplicant.conf
+#echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
+echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /etc/wpa_supplicant/wpa_supplicant.conf
+echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
+
 
 rm /boot/bootup_actions.sh
 chmod +x /home/pi/prepare_for_disk_image.sh 
