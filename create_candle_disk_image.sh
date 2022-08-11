@@ -250,10 +250,13 @@ then
     echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
     echo " "
     
-    sudo adduser --system --group --no-create-home bluealsa
-    sudo adduser --system --group --no-create-home bluealsa-aplay
-    sudo adduser bluealsa-aplay audio
-    sudo adduser bluealsa bluetooth
+    adduser --system --group --no-create-home bluealsa --add_extra_groups audio bluetooth
+    adduser --system --group --no-create-home bluealsa-aplay --add_extra_groups audio bluetooth
+    adduser bluealsa-aplay audio
+    adduser bluealsa audio bluetooth
+    usermod -a -G bluetooth bluealsa 
+    usermod -a -G audio bluealsa 
+    usermod -a -G audio bluealsa-aplay
     
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
     git clone --depth 1 https://github.com/createcandle/bluez-alsa.git
@@ -460,6 +463,7 @@ rm -rf /home/pi/configuration-files
 
 
 # CHMOD THE NEW FILES
+chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
 chmod +x /home/pi/debug.sh
 
@@ -493,13 +497,13 @@ systemctl enable candle_first_run.service
 #systemctl enable candle_bootup_actions.service
 #systemctl enable candle_start_swap.service
 systemctl enable candle_early.service
+systemctl enable candle_late.service
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
 systemctl enable candle_reboot.service
 systemctl enable candle_reboot180.service
 systemctl enable candle_splashscreen_updating.service
 systemctl enable candle_splashscreen_updating180.service
-
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 # TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon)
 
@@ -520,8 +524,11 @@ sudo systemctl disable apt-daily.timer
 sudo systemctl disable apt-daily-upgrade.timer
 sudo systemctl disable apt-daily-upgrade.service
 
-# disable man-db
+# disable man-db timer
 systemctl disable man-db.timer
+
+# Enable half-hourly save of time
+systemctl enable fake-hwclock-save.service
 
 # KIOSK
 

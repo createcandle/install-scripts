@@ -35,6 +35,7 @@ then
     if cat /home/pi/.profile | grep NVM
     then
         echo "NVM lines already appended to .profile"
+        echo "NVM lines already appended to .profile" | sudo tee -a /dev/kmsg
     else
         echo "Appending NVM lines to .profile"
         echo " " >> /home/pi/.profile
@@ -61,6 +62,9 @@ echo " "
 echo "NODE AND NPM VERSIONS:"
 node --version
 npm --version
+echo "node --version: $(node --version)" | sudo tee -a /dev/kmsg
+echo "npm --version: $(npm --version)" | sudo tee -a /dev/kmsg
+
 
 npm config set metrics-registry="https://"
 #npm config set registry="https://"
@@ -77,7 +81,7 @@ echo " "
 
 # Download Candle controller from Github and install it
 
-if [ -f /home/pi/webthings/build/app.js ]
+if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -d /home/pi/webthings/gateway/build/static/bundle ];
 then
     echo "Detected old webthings directory! Renamed it to webthings-old"
     echo "Detected old webthings directory! Renamed it to webthings-old" | sudo tee -a /dev/kmsg
@@ -85,7 +89,7 @@ then
 fi
 rm -rf /home/pi/webthings
 
-echo "Starting gateway installation" | sudo tee -a /dev/kmsg
+echo "Starting controller installation" | sudo tee -a /dev/kmsg
 mkdir -p /home/pi/webthings
 chown pi:pi /home/pi/webthings
 cd /home/pi/webthings
@@ -103,6 +107,8 @@ export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
 # npm install typescript --save-dev # TODO: check if this is now in package.json already
 # npm install
 CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
+
+echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
 
 echo " "
 echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
@@ -126,6 +132,7 @@ NODE_OPTIONS="--max-old-space-size=496" npx webpack
 touch .post_upgrade_complete
 
 _node_version=$(node --version | grep -E -o '[0-9]+' | head -n1)
+echo "Node version: ${_node_version}" | sudo tee -a /dev/kmsg
 
 echo "${_node_version}" > "/home/pi/.webthings/.node_version"
 echo "Node version in .node_version file:"
@@ -133,11 +140,14 @@ cat /home/pi/.webthings/.node_version
 
 echo " "
 echo "Linking gateway addon"
-cd "/home/pi/webthings/gateway/node_modules/gateway-addon"
-npm link
-cd -
-
-
+if [ -d /home/pi/webthings/gateway/node_modules/gateway-addon ];
+then
+  cd "/home/pi/webthings/gateway/node_modules/gateway-addon"
+  npm link
+  cd -
+else
+  echo "ERROR, node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
+fi
 
 
 echo " "
