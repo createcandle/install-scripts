@@ -461,7 +461,7 @@ rm -rf /home/pi/configuration-files
 
 # CHMOD THE NEW FILES
 chmod +x /etc/rc.local
-
+chmod +x /home/pi/debug.sh
 
 # CHOWN THE NEW FILES
 chown pi:pi /home/pi/*
@@ -714,7 +714,7 @@ then
     chmod +x /bin/ro-root.sh
     
 	echo "- Adding read only mode to config.txt"
-    echo ' ' >> /boot/config.txt
+    echo >> /boot/config.txt
     echo '# Read only mode' >> /boot/config.txt
     echo 'initramfs initrd followkernel' >> /boot/config.txt
     echo 'ramfsfile=initrd' >> /boot/config.txt
@@ -747,10 +747,13 @@ fi
 
 cd /home/pi
 
-# Create a backup of the gateway
-echo "Creating controller_backup.tar"
-tar -czf ./controller_backup.tar ./webthings
 
+
+# CREATE BACKUPS
+echo "Creating backups"
+tar -czf ./controller_backup.tar ./webthings
+cp /etc/rc.local /etc/rc.local.bak
+cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
 
 
 echo "candle" > /etc/hostname
