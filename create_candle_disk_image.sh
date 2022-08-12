@@ -40,7 +40,7 @@ else
     echo "CREATING PARTITIONS"
     echo
 
-    printf "resizepart 2 6500\nmkpart\np\next4\n6501MB\n14000MB\nquit" | parted
+    printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n14000MB\nquit" | parted
     resize2fs /dev/mmcblk0p2
     printf "y" | mkfs.ext4 /dev/mmcblk0p3
     mkdir /home/pi/.webthings
@@ -851,6 +851,7 @@ echo
 if [[ -z "${STOP_EARLY}" ]]; then
     echo
     echo " STARTING FINAL PHASE"
+    rm /boot/
     /home/pi/prepare_for_disk_image.sh 
     exit 0
   
