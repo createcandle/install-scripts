@@ -718,6 +718,8 @@ raspi-config nonint do_camera 0
 # apt-get purge libtool
 
 # disable swap file
+echo
+echo "removing swap"
 dphys-swapfile swapoff
 dphys-swapfile uninstall
 update-rc.d dphys-swapfile remove
@@ -810,8 +812,8 @@ echo "candle" > /etc/hostname
 
 # CLEANUP
 
-npm cache clean --force
-nvm cache clear
+#npm cache clean --force
+#nvm cache clear
 apt-get clean
 apt remove --purge
 apt autoremove
@@ -845,7 +847,9 @@ echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=
 
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
-rm /boot/bootup_actions.sh
+if [ -f /boot/bootup_actions.sh ]; then
+    rm /boot/bootup_actions.sh
+fi
 chmod +x /home/pi/prepare_for_disk_image.sh 
 
 
