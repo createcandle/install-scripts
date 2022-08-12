@@ -19,20 +19,20 @@ fi
 
 cd /home/pi
 
-echo " "
+echo
 echo "CREATING CANDLE DISK IMAGE"
-echo " "
+echo
 date
 echo "PATH: $PATH"
 
 
 if ls /dev/mmcblk0p3; then
-    echo " "
+    echo
     echo "partitions already created:"
 else
-    echo " "
+    echo
     echo "CREATING PARTITIONS"
-    echo " "
+    echo
 
     printf "resizepart 2 6500\nmkpart\np\next4\n6501MB\n14000MB\nquit" | parted
     resize2fs /dev/mmcblk0p2
@@ -46,36 +46,36 @@ mount /dev/mmcblk0p3 /home/pi/.webthings
 chown pi:pi /home/pi/.webthings
 
 lsblk
-echo " "
+echo
 
 
 # INSTALL PROGRAMS AND UPDATE
-echo " "
+echo
 echo "INSTALLING APPLICATIONS AND LIBRARIES"
-echo " "
+echo
 
 set -e
-echo " "
+echo
 echo "calling apt update"
 apt update -y
 apt-get update -y
-echo " "
+echo
 echo "calling apt upgrade"
 #apt DEBIAN_FRONTEND=noninteractive upgrade -y
 DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
 wait
-echo " "
+echo
 echo "Upgrade complete"
 
 set +e
 
 # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
 # TODO: maybe use version 88?
-echo " "
+echo
 echo "installing chromium-browser"
 apt install chromium-browser -y
 
-echo " "
+echo
 echo "installing vlc"
 apt install vlc --no-install-recommends -y
 
@@ -84,19 +84,19 @@ apt install vlc --no-install-recommends -y
 #apt update
 #apt install ungoogled-chromium -y
 
-echo " "
+echo
 echo "installing git"
 apt install git -y 
 
-echo " "
+echo
 echo "installing build tools"
 for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six; do
     echo "$i"
     apt install -y $i
-    echo " "
+    echo
 done
 
-echo " "
+echo
 echo "installing pip3"
 apt install -y python3-pip
 
@@ -106,15 +106,15 @@ apt install -y python3-pip
 # remove the Candle conf file, just in case it exists from an earlier install attempt
 rm /etc/mosquitto/mosquitto.conf
 
-echo " "
+echo
 echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
 for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw; do
     echo "$i"
     apt install -y $i
-    echo " "
+    echo
 done
 
-echo " "
+echo
 echo "installing ip tables"
 apt install -y iptables
 
@@ -123,24 +123,24 @@ apt install -y iptables
 #  libnanomsg5 \
 
 # additional programs for Candle kiosk mode:
-echo " "
+echo
 echo "installing kiosk packages (x, openbox)"
 for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
     echo "$i"
     apt-get install --no-install-recommends -y $i
-    echo " "
+    echo
 done
 #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
 # get OMXPlayer for Internet Radio
 # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
 
-echo " "
+echo
 echo "installing omxplayer"
 for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
     echo "$i"
     apt-get install -y $i
-    echo " "
+    echo
 done
 #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
 apt --fix-broken install -y
@@ -162,7 +162,7 @@ echo "installing bluealsa support packages"
 for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
     echo "$i"
     apt install -y $i
-    echo " "
+    echo
 done
 #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
 
@@ -172,10 +172,10 @@ done
 for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
     echo "$i"
     apt install -y $i
-    echo " "
+    echo
 done
 
-echo " "
+echo
 echo "UPGRADING LINUX"
 apt-get update --fix-missing -y
 apt --fix-broken install -y
@@ -190,9 +190,9 @@ dpkg -s git &> /dev/null
 if [ $? -eq 0 ]; then
     echo "git installed succesfully"
 else
-    echo " "
+    echo
     echo "ERROR"
-    echo " "
+    echo
     echo "Error detected in the packages install phase (git is missing). Try running the Candle install script again."
     echo ""
     exit 1
@@ -201,7 +201,7 @@ fi
 
 
 # PYTHON
-echo " "
+echo
 echo "INSTALLING AND UPDATING PYTHON PACKAGES"
 
 # upgrade pip first
@@ -226,7 +226,7 @@ sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro re
 # RESPEAKER HAT
 
 
-echo " "
+echo
 echo "INSTALLING RESPEAKER HAT DRIVERS"
 cd /home/pi
 git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
@@ -251,9 +251,9 @@ rm -rf seeed-voicecard
 if [ ! -d "/usr/bin/bluealsa" ]
 then
     
-    echo " "
+    echo
     echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
-    echo " "
+    echo
     
     adduser --system --group --no-create-home bluealsa
     adduser --system --group --no-create-home bluealsa-aplay
@@ -286,7 +286,7 @@ rm -rf bluez-alsa
 
 
 # Plymouth-lite
-echo " "
+echo
 echo "creating Plymouth lite"
 git clone --depth 1 https://github.com/T4d3o/Plymouth-lite.git
 cd Plymouth-lite
@@ -305,9 +305,9 @@ rm -rf Plymouth-lite
 
 # INSTALL CANDLE CONTROLLER
 
-echo " "
+echo
 echo "INSTALLING CANDLE CONTROLLER"
-echo " "
+echo
 
 cd /home/pi
 rm -rf /home/pi/webthings
@@ -324,9 +324,9 @@ setcap cap_net_raw+eip $(eval readlink -f `which node`)
 setcap cap_net_raw+eip $(eval readlink -f `which python3`)
 
 
-echo " "
+echo
 echo "INSTALLING HOSTAPD AND DNSMASQ"
-echo " "
+echo
 
 apt install -y dnsmasq 
 systemctl disable dnsmasq.service
@@ -340,9 +340,9 @@ systemctl disable hostapd.service
 
 
 
-echo " "
+echo
 echo "INSTALLING OTHER FILES AND SERVICES"
-echo " "
+echo
 
 
 # switch back to root of home folder
@@ -453,9 +453,9 @@ mkdir -p /home/pi/.webthings/var/lib/bluetooth
 
 
 # Download tons of ready-made settings files from the Candle github
-echo " "
+echo
 echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
-echo " "
+echo
 rm -rf /home/pi/configuration-files
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
 cp --verbose -r /home/pi/configuration-files/boot/* /boot/
@@ -488,9 +488,9 @@ ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
 
 
 # SERVICES
-echo " "
+echo
 echo "ENABLING AND DISABLING SERVICES"
-echo " "
+echo
 #systemctl daemon-reload
 
 
@@ -540,9 +540,9 @@ systemctl enable fake-hwclock-save.service
 # KIOSK
 
 # Download boot splash images and video
-echo " "
+echo
 echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEO"
-echo " "
+echo
 wget https://www.candlesmarthome.com/tools/splash.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splash180.png -P /boot/
 wget https://www.candlesmarthome.com/tools/splashalt.png -P /boot/
@@ -640,13 +640,13 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFi
 
 
 # ADD IP-TABLES
-echo " "
+echo
 echo "ADDING IPTABLES"
 echo "before:"
 iptables -t nat --list
-echo " "
+echo
 echo "Redirecting :80 to :8080 and :443 to :4443"
-echo " "
+echo
 
 if iptables --list | grep 4443; then
     echo "IPTABLES ALREADY ADDED"
@@ -833,7 +833,7 @@ echo
 echo
 
 if [[ -z "${STOP_EARLY}" ]]; then
-    echo " "
+    echo
     echo " STARTING FINAL PHASE"
     /home/pi/prepare_for_disk_image.sh 
   
@@ -843,7 +843,7 @@ else
     read answer
     if [ "$answer" != "${answer#[Yy]}" ] ;then
         
-        echo " " 
+        echo 
         echo "DOWNLOADING ALL INSTALLED PACKAGES AS .DEB FILES"
   
         mkdir /home/pi/.webthings/deb_packages
@@ -856,7 +856,7 @@ else
         # fix the filenames. Replaces "%3a" with ":".
         # for f in *; do mv "$f" "${f//%3a/:}"; done
   
-        echo " "
+        echo
         echo "Downloaded packages in /home/pi/.webthings/deb_packages:"
         ls -l
         du /home/pi/.webthings/deb_packages -h
@@ -873,17 +873,17 @@ else
     # touch /boot/candle_rw_once.txt
     
     #MY_SCRIPT_VARIABLE="${CANDLE_DEV}"
-    echo " "
+    echo
     echo "MOSTLY DONE"
-    echo " "
+    echo
     echo "To finalise the process, delete the deb folder:"
     echo "sudo rm -rf /home/pi/.webthings/deb_packages"
-    echo " "
+    echo
     echo "then enter this command:"
     echo "sudo /home/pi/prepare_for_disk_image.sh"
-    echo " "
+    echo
     echo "Once that script is done the pi will shut down."
-    echo " "
+    echo
     echo "Note that if you reboot, the read-only mode will become active."
     echo "If you want to keep full read-write mode, then use this command:"
     echo "touch /boot/candle_rw_once.txt"
