@@ -225,21 +225,26 @@ sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro re
 
 # RESPEAKER HAT
 
-if [ ! -d "/etc/voicecard" ]
+
+echo " "
+echo "INSTALLING RESPEAKER HAT DRIVERS"
+cd /home/pi
+git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
+cd seeed-voicecard
+
+
+if [ -d "/etc/voicecard" ]
 then
-    echo " "
-    echo "INSTALLING RESPEAKER HAT DRIVERS"
-    cd /home/pi
-    git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
-    cd seeed-voicecard
-    ./install.sh
-    
-else
-    echo "ReSpeaker was already installed"
+    echo "ReSpeaker was already installed. Doing uninstall first"
+    ./uninstall.sh    
 fi
+
+apt-get update
+./install.sh
 
 cd /home/pi
 rm -rf seeed-voicecard
+
 
 
 # BLUEALSA
@@ -250,13 +255,15 @@ then
     echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
     echo " "
     
-    adduser --system --group --no-create-home bluealsa --add_extra_groups audio bluetooth
-    adduser --system --group --no-create-home bluealsa-aplay --add_extra_groups audio bluetooth
+    adduser --system --group --no-create-home bluealsa
+    adduser --system --group --no-create-home bluealsa-aplay
+    adduser bluealsa audio
+    adduser bluealsa bluetooth
     adduser bluealsa-aplay audio
-    adduser bluealsa audio bluetooth
-    usermod -a -G bluetooth bluealsa 
-    usermod -a -G audio bluealsa 
-    usermod -a -G audio bluealsa-aplay
+
+    #usermod -a -G bluetooth bluealsa 
+    #usermod -a -G audio bluealsa 
+    #usermod -a -G audio bluealsa-aplay
     
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
     git clone --depth 1 https://github.com/createcandle/bluez-alsa.git
@@ -814,6 +821,17 @@ echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=
 rm /boot/bootup_actions.sh
 chmod +x /home/pi/prepare_for_disk_image.sh 
 
+
+# Run test script
+echo
+echo
+echo 
+echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
+/home/pi/debug.sh
+
+echo
+echo
+
 if [[ -z "${STOP_EARLY}" ]]; then
     echo " "
     echo " STARTING FINAL PHASE"
@@ -874,5 +892,7 @@ else
     echo ""
     
 fi
+
+
 
 exit 0
