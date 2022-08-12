@@ -19,9 +19,10 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-if [ -d /ro ]; then
+if [ ! -z "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; then
+  echo 
   echo "detected /ro. Run `sudo touch /boot/candle_rw_once.txt` first, reboot, and then try again."
-  echo "detected /ro. Run `sudo touch /boot/candle_rw_once.txt` first, reboot, and then try again." >> /dev/kmsg
+  echo "detected /ro directory - system is still mainly read-only." >> /dev/kmsg
   exit 1
 fi
 
