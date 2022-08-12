@@ -98,7 +98,7 @@ set +e
 echo
 echo "installing chromium-browser"
 echo
-apt install chromium-browser -y
+apt install chromium-browser -y --allow-change-held-packages
 
 echo
 echo "installing vlc"
