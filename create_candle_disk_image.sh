@@ -843,7 +843,9 @@ echo
 echo
 echo 
 echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
-/home/pi/debug.sh
+/home/pi/debug.sh > /home/pi/debug.txt
+cat /home/pi/debug.txt
+rm /home/pi/debug.txt
 
 echo
 echo
