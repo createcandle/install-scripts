@@ -665,6 +665,7 @@ echo "Redirecting :80 to :8080 and :443 to :4443"
 echo
 
 if iptables --list | grep 4443; then
+    echo
     echo "IPTABLES ALREADY ADDED"
 else
     iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
@@ -718,7 +719,7 @@ raspi-config nonint do_camera 0
 
 # disable swap file
 dphys-swapfile swapoff
-phys-swapfile uninstall
+dphys-swapfile uninstall
 update-rc.d dphys-swapfile remove
 rm /home/pi/.webthings/swap
 swapoff /var/swap
