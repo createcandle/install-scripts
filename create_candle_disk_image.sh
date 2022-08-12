@@ -346,10 +346,10 @@ echo
 apt install -y dnsmasq 
 systemctl disable dnsmasq.service
 
+echo 
 apt install -y hostapd
 systemctl unmask hostapd.service
 systemctl disable hostapd.service
-
 
 
 
@@ -430,6 +430,7 @@ then
 else
     echo ""
     echo "ERROR: missing floorplan"
+    echo ""
 fi
 
 # SYMLINKS
@@ -726,7 +727,9 @@ rm /var/swap
 apt clean
 apt autoremove
 rm -rf /tmp/*
-rm /home/pi/install.sh
+if [ -f /home/pi/install.sh ]; then
+    rm /home/pi/install.sh
+fi
 
 echo "candle" > /etc/hostname
 echo "candle" > /home/pi/.webthings/etc/hostname
@@ -765,6 +768,7 @@ fi
 isInFile6=$(cat /home/pi/.profile | grep -c "alias rw=")
 if [ $isInFile6 -eq 0 ]
 then
+    echo "adding ro and rw aliases to /home/pi/.profile"
     echo "" >> /home/pi/.profile
     echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
     echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
@@ -780,7 +784,13 @@ cd /home/pi
 
 # CREATE BACKUPS
 echo "Creating backups"
-tar -czf ./controller_backup.tar ./webthings
+if [ -d  /home/pi/webthings ]; then
+    tar -czf ./controller_backup.tar ./webthings
+else
+    echo
+    echo "ERROR, MISSING WEBTHINGS DIRECTORY"
+    echo
+fi
 cp /etc/rc.local /etc/rc.local.bak
 cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
 
@@ -843,6 +853,7 @@ echo
 echo
 echo 
 echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
+echo
 /home/pi/debug.sh > /home/pi/debug.txt
 cat /home/pi/debug.txt
 rm /home/pi/debug.txt

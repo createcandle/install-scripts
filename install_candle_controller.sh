@@ -26,7 +26,11 @@ then
     echo "installing NVM"
     if [ -f ./install_nvm.sh ]; then
         rm ./install_nvm.sh
-        echo "spotted NVM installation left-over"
+        echo "spotted NVM installation left-over: install_nvm.sh"
+    fi
+    if [ -d ./.nvm ]; then
+        rm -rf ./.nvm
+        echo "spotted NVM installation left-over: .nvm dir"
     fi
     #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
     wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
@@ -51,9 +55,9 @@ then
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-    nvm install 14
-    nvm use 14
-    nvm alias default 14
+    nvm install 12
+    nvm use 12
+    nvm alias default 12
 else
     echo "NPM seems to already be installed."
     echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
