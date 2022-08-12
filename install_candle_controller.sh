@@ -24,7 +24,10 @@ then
     echo "Installing NVM" | sudo tee -a /dev/kmsg
     
     echo "installing NVM"
-    rm ./install_nvm.sh
+    if [ -f ./install_nvm.sh ]: then
+        rm ./install_nvm.sh
+        echo "spotted NVM installation left-over"
+    fi
     #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
     wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
     chmod +x install_nvm.sh

@@ -6,6 +6,12 @@ set +e # continue on errors
 # If you want to avoid the shutdown at the end you can skip the finalization step by first setting an environment variable:
 # export STOP_EARLY=yes
 
+# If STOP_EARLY is set, then you also have the option to ask the script to reboot when done. This is useful if it's acting as an update script.
+# export REBOOT_WHEN_DONE=yes
+
+# If you also want this script to download all the installed packages' as .deb files, then set this environment variable:
+# export DOWNLOAD_DEB=yes
+
 
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]
@@ -615,7 +621,7 @@ fi
 #mkdir -p /etc/X11/xinit
 #mkdir -p /etc/xdg/openbox
 
-if [ ! -d "/etc/xdg/openbox" ]
+if [ ! -d "/etc/xdg/openbox" ];
 then
     echo "missing dir: /etc/xdg/openbox"
     mkdir -p /etc/xdg/openbox
@@ -827,6 +833,7 @@ echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=
 echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
 
 
+# delete bootup_actions, just in case this script is being run as a bootup_actions script.
 rm /boot/bootup_actions.sh
 chmod +x /home/pi/prepare_for_disk_image.sh 
 
@@ -845,12 +852,17 @@ if [[ -z "${STOP_EARLY}" ]]; then
     echo
     echo " STARTING FINAL PHASE"
     /home/pi/prepare_for_disk_image.sh 
+    exit 0
   
 else
     
-    printf 'Do you want to download all the .deb files? (y/n)'
-    read answer
-    if [ "$answer" != "${answer#[Yy]}" ] ;then
+    if [[ -z "${DOWNLOAD_DEB}" ]]; then
+        echo "Skipping download of .deb files"
+        
+    else
+    #printf 'Do you want to download all the .deb files? (y/n)'
+    #read answer
+    #if [ "$answer" != "${answer#[Yy]}" ] ;then
         
         echo 
         echo "DOWNLOADING ALL INSTALLED PACKAGES AS .DEB FILES"
@@ -870,8 +882,6 @@ else
         ls -l
         du /home/pi/.webthings/deb_packages -h
         
-    else
-        echo "Skipping download of .deb files. A download script has been generated in /home/pi/.webthings/deb_packages"
     fi
     
   
@@ -903,5 +913,13 @@ else
 fi
 
 
+
+if [[ -z "${REBOOT_WHEN_DONE}" ]]; then
+    echo "not rebooting"
+else
+    echo "rebooting in 10 seconds"
+    sleep 10
+    reboot
+fi
 
 exit 0
