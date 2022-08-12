@@ -851,7 +851,6 @@ echo
 if [[ -z "${STOP_EARLY}" ]]; then
     echo
     echo " STARTING FINAL PHASE"
-    rm /boot/
     /home/pi/prepare_for_disk_image.sh 
     exit 0
   
