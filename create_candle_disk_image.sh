@@ -21,8 +21,8 @@ fi
 
 if [ ! -z "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; then
   echo 
-  echo "detected /ro. Create /boot/candle_rw_once.txt, reboot, and then try again."
-  echo "detected /ro directory - system is still mainly read-only." >> /dev/kmsg
+  echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
+  echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
   exit 1
 fi
 
@@ -582,15 +582,15 @@ systemctl enable fake-hwclock-save.service
 echo
 echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEO"
 echo
-wget https://www.candlesmarthome.com/tools/splash.png -P /boot/
-wget https://www.candlesmarthome.com/tools/splash180.png -P /boot/
-wget https://www.candlesmarthome.com/tools/splashalt.png -P /boot/
-wget https://www.candlesmarthome.com/tools/splash180alt.png -P /boot/
-wget https://www.candlesmarthome.com/tools/splash_updating.png -P /boot/
-wget https://www.candlesmarthome.com/tools/splash_updating180.png -P /boot/
-wget https://www.candlesmarthome.com/tools/error.png -P /boot/
-wget https://www.candlesmarthome.com/tools/splash.mp4 -P /boot/
-wget https://www.candlesmarthome.com/tools/splash180.mp4 -P /boot/
+wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
+wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
+wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
+wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
+wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
+wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
+wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+wget https://www.candlesmarthome.com/tools/splash.mp4 -0 /boot/splash.mp4
+wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
 
 
 
