@@ -63,6 +63,16 @@ if [ -f /home/pi/.webthings/zero.fill ]; then
   echo "removed /home/pi/.webthings/zero.fill"
 fi
 
+# make sure there is a current time
+if [ -f /boot/candle_hardware_clock.txt ]; then
+    rm /boot/candle_hardware_clock.txt
+    systemctl restart systemd-timesyncd.service
+    timedatectl set-ntp true
+    sleep 2
+    /usr/sbin/fake-hwclock save
+fi
+
+
 # INSTALL PROGRAMS AND UPDATE
 echo
 echo "INSTALLING APPLICATIONS AND LIBRARIES"
@@ -487,7 +497,7 @@ cp --verbose -r /home/pi/configuration-files/etc/* /etc/
 cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
 cp --verbose -r /home/pi/configuration-files/home/pi/candle/* /home/pi/candle
 cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.webthings/etc/
-cp --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
+#cp --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
 rm -rf /home/pi/configuration-files
 
 #chmod +x /home/pi/candle_first_run.sh
