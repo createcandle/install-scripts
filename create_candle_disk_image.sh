@@ -798,6 +798,11 @@ cp /etc/rc.local /etc/rc.local.bak
 cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
 
 
+export NVM_DIR="/home/pi/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+
 echo "candle" > /etc/hostname
 
 # Start the Candle Controller
@@ -808,6 +813,8 @@ echo "candle" > /etc/hostname
 #nvm cache clear
 
 
+rm -rf /boot/.Spotlight*
+rm /boot/._cmdline.txt
 
 
 # CLEANUP
