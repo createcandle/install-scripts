@@ -24,7 +24,7 @@ then
     echo "Installing NVM" | sudo tee -a /dev/kmsg
     
     echo "installing NVM"
-    if [ -f ./install_nvm.sh ]: then
+    if [ -f ./install_nvm.sh ]; then
         rm ./install_nvm.sh
         echo "spotted NVM installation left-over"
     fi
