@@ -73,6 +73,7 @@ set +e
 # TODO: maybe use version 88?
 echo
 echo "installing chromium-browser"
+echo
 apt install chromium-browser -y
 
 echo
@@ -86,6 +87,7 @@ apt install vlc --no-install-recommends -y
 
 echo
 echo "installing git"
+echo
 apt install git -y 
 
 echo
@@ -98,6 +100,7 @@ done
 
 echo
 echo "installing pip3"
+echo
 apt install -y python3-pip
 
 # update pip
@@ -108,6 +111,7 @@ rm /etc/mosquitto/mosquitto.conf
 
 echo
 echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
+echo
 for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw; do
     echo "$i"
     apt install -y $i
@@ -116,6 +120,7 @@ done
 
 echo
 echo "installing ip tables"
+echo
 apt install -y iptables
 
 # removed from above list:
@@ -125,6 +130,7 @@ apt install -y iptables
 # additional programs for Candle kiosk mode:
 echo
 echo "installing kiosk packages (x, openbox)"
+echo
 for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
     echo "$i"
     apt-get install --no-install-recommends -y $i
@@ -177,6 +183,7 @@ done
 
 echo
 echo "UPGRADING LINUX"
+echo
 apt-get update --fix-missing -y
 apt --fix-broken install -y
 apt upgrade -y
@@ -203,7 +210,7 @@ fi
 # PYTHON
 echo
 echo "INSTALLING AND UPDATING PYTHON PACKAGES"
-
+echo
 # upgrade pip first
 sudo -u pi python3 -m pip install --upgrade pip
 
@@ -228,6 +235,7 @@ sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro re
 
 echo
 echo "INSTALLING RESPEAKER HAT DRIVERS"
+echo
 cd /home/pi
 git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
 cd seeed-voicecard
@@ -288,6 +296,7 @@ rm -rf bluez-alsa
 # Plymouth-lite
 echo
 echo "creating Plymouth lite"
+echo
 git clone --depth 1 https://github.com/T4d3o/Plymouth-lite.git
 cd Plymouth-lite
 ./configure
@@ -440,14 +449,14 @@ echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 #cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
 cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
 cp --verbose /etc/ssh/sshd_config /home/pi/.webthings/etc/ssh/sshd_config
-cp --verbose -r /etc/ssh/ssh_config.d /home/pi/.webthings/etc/ssh/
-cp --verbose -r /etc/ssh/sshd_config.d /home/pi/.webthings/etc/ssh/
-
-cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
-cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
-
+#cp --verbose -r /etc/ssh/ssh_config.d /home/pi/.webthings/etc/ssh/
+#cp --verbose -r /etc/ssh/sshd_config.d /home/pi/.webthings/etc/ssh/
 mkdir -p /home/pi/.webthings/etc/ssh/ssh_config.d
 mkdir -p /home/pi/.webthings/etc/ssh/sshd_config.d 
+
+cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
+#cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
+
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
 
 
