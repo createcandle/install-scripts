@@ -19,7 +19,11 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-
+if [ -d /ro ]; then
+  echo "detected /ro. Run `sudo touch /boot/candle_rw_once.txt` first, reboot, and then try again."
+  echo "detected /ro. Run `sudo touch /boot/candle_rw_once.txt` first, reboot, and then try again." >> /dev/kmsg
+  exit 1
+fi
 
 # CREATE PARTITIONS
 
