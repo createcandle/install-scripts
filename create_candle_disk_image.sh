@@ -54,6 +54,14 @@ chown pi:pi /home/pi/.webthings
 lsblk
 echo
 
+if [ -f /zero.fill ]; then
+  rm /zero.fill
+  echo "removed /zero.fill"
+fi
+if [ -f /home/pi/.webthings/zero.fill ]; then
+  rm /home/pi/.webthings/zero.fill
+  echo "removed /home/pi/.webthings/zero.fill"
+fi
 
 # INSTALL PROGRAMS AND UPDATE
 echo
