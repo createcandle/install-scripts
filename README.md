@@ -45,3 +45,8 @@ Note: There are some other options which are described in the create_candle_disk
 ```
 STOP_EARLY=yes curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
 ```
+
+You could also try to use it as an update script:
+```
+STOP_EARLY=yes REBOOT_WHEN_DONE=yes curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
+```
