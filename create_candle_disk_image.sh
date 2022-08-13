@@ -224,16 +224,16 @@ done
 #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
 apt --fix-broken install -y
 
-wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
-dpkg -i omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb
-rm omxplayer*
+wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb -O ./omxplayer.deb
+dpkg -i ./omxplayer.deb
+rm -rf ./omxplayer*
 
 #apt --fix-broken install -y
 
 mkdir -p /opt/vc/
-wget https://www.candlesmarthome.com/tools/lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
+wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
 tar -xvf lib.tar -C /opt/vc/
-rm lib.tar
+rm ./lib.tar
 
 
 # for BlueAlsa
@@ -405,10 +405,10 @@ cd /home/pi
 rm -rf /home/pi/webthings
 #rm -rf /home/pi/.webthings # too dangerous
 
-wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh
+wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
 chmod +x ./install_candle_controller.sh
 sudo -u pi ./install_candle_controller.sh
-rm install_candle_controller.sh
+rm ./install_candle_controller.sh
 
 cd /home/pi
 
