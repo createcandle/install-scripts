@@ -52,7 +52,12 @@ echo "Setting /ro to RW"
 mount -o remount,rw /ro
 echo "remount done"
 
-cp /etc/resolve.conf /ro/etc/resolve.conf
+echo "juggling /etc/resolv.conf"
+cp /etc/resolve.conf /ro/etc/resolve.conf.jump
+rm /rw/upper/etc/resolve.conf
+rm /etc/resolve.conf
+cp /ro/etc/resolve.conf.jump /ro/etc/resolve.conf
+
 
 if [ -d /ro/home/pi/webthingsx ]; then
     echo "calculating free space"
