@@ -52,7 +52,7 @@ echo "Setting /ro to RW"
 mount -o remount,rw /ro
 echo "remount done"
 
-if [ -d /ro/home/pi/webthings ]; then
+if [ -d /ro/home/pi/webthingsx ]; then
     echo "calculating free space"
     availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
     echo "calculating size of webthings folder"
@@ -111,16 +111,27 @@ echo "Candle: Finalising update outside of chroot" >> /dev/kmsg
 
 sleep 5
 
-rm /ro/home/pi/create_candle_disk_image.sh
+if [ -f /ro/home/pi/create_candle_disk_image.sh ]; then
+    rm /ro/home/pi/create_candle_disk_image.sh
+else
+    echo "strange, the install script is gone"
+fi
+
 
 if [ -d /ro/home/pi/configuration-files ]; then
-    rm -rf /ro/home/pi/configuration-files
+    echo "removing /ro/home/pi/configuration-files"
+else
+    echo "/ro/home/pi/configuration-files did not exist, so is not being deleted"
+    git clone --depth 1 https://github.com/createcandle/configuration-files /ro/home/pi/configuration-files
 fi
-git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+
+
 if [ -d /home/pi/configuration-files/boot ]; then
-    cp --verbose -r /home/pi/configuration-files/boot/* /boot/
+    cp --verbose -r /ro/home/pi/configuration-files/boot/* /boot/
+    rm -rf /ro/home/pi/configuration-files
 else
     echo "ERROR: configuration files not downloaded?"
+    echo "Candle: ERROR: could not update files in /boot" >> /dev/kmsg
 fi
 
 
