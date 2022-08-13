@@ -66,26 +66,31 @@ scriptname=`basename "$0"`
 echo "NAME: $scriptname"
 
 
-if ls /dev/mmcblk0p3; then
-    echo
-    echo "partitions already created:"
-else
-    echo
-    echo "CREATING PARTITIONS"
-    echo
+if [ -f /dev/mmcblk0p2 ]; then
+    
+    if ls /dev/mmcblk0p3; then
+        echo
+        echo "partitions already created:"
+    else
+        echo
+        echo "CREATING PARTITIONS"
+        echo
 
-    printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n14000MB\nquit" | parted
-    resize2fs /dev/mmcblk0p2
-    printf "y" | mkfs.ext4 /dev/mmcblk0p3
-    mkdir /home/pi/.webthings
-    chown pi:pi /home/pi/.webthings
+        printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n14000MB\nquit" | parted
+        resize2fs /dev/mmcblk0p2
+        printf "y" | mkfs.ext4 /dev/mmcblk0p3
+        mkdir -p /home/pi/.webthings
+        chown pi:pi /home/pi/.webthings
+    fi
+
+    if [ ! -d /home/pi/.webthings/addons ]; then
+        mount /dev/mmcblk0p3 /home/pi/.webthings
+        chown pi:pi /home/pi/.webthings
+    fi
+    
+    lsblk
 fi
 
-
-mount /dev/mmcblk0p3 /home/pi/.webthings
-chown pi:pi /home/pi/.webthings
-
-lsblk
 echo
 
 if [ -f /zero.fill ]; then
