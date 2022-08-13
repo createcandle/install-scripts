@@ -58,11 +58,12 @@ if [ -d /ro/home/pi/webthings ]; then
     echo "calculating size of webthings folder"
     fileSize=$(du -k --max-depth=0 "/ro/home/pi/webthings" | awk '{print $1}')
 
-    if [ "$fileSize" -gt "$availMem" ]; then
-        echo "WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY"
+    if [ "$fileSize" -gt "$availMem" ]; 
+    then
+        echo "WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY. SKIPPING."
         echo "Candle: WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY" >> /dev/kmsg
     else
-        echo "Creating backup copy op webthings folder"
+        echo "Creating backup copy of webthings folder"
         echo "Candle: creating backup copy to webthings-old" >> /dev/kmsg
         cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
     fi
@@ -94,7 +95,13 @@ echo "Candle: starting chroot" >> /dev/kmsg
 chroot /ro sh -c "$(cat <<END
 echo "in chroot"
 cd /home/pi
-STOP_EARLY=yes /home/pi/create_candle_disk_image.sh
+export STOP_EARLY=yes
+if [ -f /home/pi/create_candle_disk_image.sh ]; then
+echo "Install script found, starting it"
+/home/pi/create_candle_disk_image.sh > /home/pi/update_report.txt
+else
+echo "Error in chroot: create_candle_disk_image.sh not found"
+fi
 END
 )"
 
