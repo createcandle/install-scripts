@@ -949,6 +949,13 @@ apt update
 
 
 
+if [ ! -f /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ]; then
+  ln -s /usr/lib/firmware/brcm/brcmfmac43455-sdio.bin /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin  
+  echo "Candle: added symlink for missing audio firmware" >> /dev/kmsg
+fi
+
+
+
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
 if [ -f /boot/bootup_actions.sh ]; then
     rm /boot/bootup_actions.sh
