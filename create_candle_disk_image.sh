@@ -67,6 +67,7 @@ echo "DATE       : $(date)"
 echo "IP ADDRESS : $(hostname -I)"
 echo "PATH       : $PATH"
 scriptname=`basename "$0"`
+echo "USER       : $(whoami)"
 echo "NAME       : $scriptname"
 
 if [ ! -f /boot/cmdline.txt ]; then

@@ -8,9 +8,11 @@ echo "CANDLE LIVE UPDATE"
 
 
 # Check if script is being run as root
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root (use sudo)"
+if [ "$EUID" -ne 0 ]; then 
+  echo "Please run as root (use sudo)"
   exit
+else
+  echo "running as user $(whoami)"
 fi
 
 if [ ! -d /ro ]; then
@@ -31,7 +33,8 @@ echo
 
 
 # make sure there is a current time
-if [ -f /boot/candle_hardware_clock.txt ]; then
+if [ -f /boot/candle_hardware_clock.txt ]; 
+then
     echo "Trying to get time update from NTP server"
     rm /boot/candle_hardware_clock.txt
     systemctl restart systemd-timesyncd.service
