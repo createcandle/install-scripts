@@ -68,6 +68,8 @@ if [ -f /home/pi/.webthings/zero.fill ]; then
   echo "removed /home/pi/.webthings/zero.fill"
 fi
 
+sleep 5
+
 # make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
     rm /boot/candle_hardware_clock.txt
@@ -84,7 +86,6 @@ echo "INSTALLING APPLICATIONS AND LIBRARIES"
 echo
 
 set -e
-echo
 echo "calling apt update"
 apt update -y
 apt-get update -y
@@ -459,7 +460,10 @@ fi
 # SYMLINKS
 
 # move hosts file to user partition
-cp --verbose /etc/hosts /home/pi/.webthings/etc/hosts
+if [ ! -f /boot/candle_first_run_complete.txt ]; then
+    cp --verbose /etc/hosts /home/pi/.webthings/etc/hosts
+    sed -i -E "s|127.0.1.1\s+candle|127.0.1.1        $(cat /home/pi/.webthings/etc/hostname)|g" /home/pi/.webthings/etc/hosts
+fi
 rm /etc/hosts
 ln -s /home/pi/.webthings/etc/hosts /etc/hosts
 
@@ -506,6 +510,19 @@ cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.
 rm -rf /home/pi/configuration-files
 
 #chmod +x /home/pi/candle_first_run.sh
+
+
+# Only copy hosts file if it doesn't already exist
+if [ ! -f /home/pi/.webthings/etc/hosts ]; then
+    if [ -f /home/pi/.webthings/etc/hosts-bak ]; then
+        cp /home/pi/.webthings/etc/hosts-bak /home/pi/.webthings/etc/hosts
+    else
+        echo
+        echo "ERROR, missing /home/pi/.webthings/etc/hosts-bak"
+        echo
+    fi
+fi
+
 
 
 # CHMOD THE NEW FILES
@@ -758,7 +775,7 @@ if [ -f /home/pi/install.sh ]; then
 fi
 
 echo "candle" > /etc/hostname
-echo "candle" > /home/pi/.webthings/etc/hostname
+#echo "candle" > /home/pi/.webthings/etc/hostname
 
 
 
@@ -826,7 +843,7 @@ export NVM_DIR="/home/pi/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
 
-echo "candle" > /etc/hostname
+#echo "candle" > /etc/hostname
 
 # Start the Candle Controller
 #cd /home/pi/webthings/gateway

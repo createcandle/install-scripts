@@ -118,7 +118,7 @@ CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
 
 echo " "
-echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
+#echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
 echo "Compiling Typescript and running Webpack" | sudo tee -a /dev/kmsg
 
 #npm run build
@@ -129,6 +129,7 @@ rm -rf build
 cp -rL src build
 cp -rL static build/static
 find build -name '*.ts' -delete
+echo
 echo "Compiling typescript. this will take a while..."
 npx tsc -p .
 echo "(it probably found some errors, don't worry about those)"
