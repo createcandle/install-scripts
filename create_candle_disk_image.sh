@@ -1024,8 +1024,9 @@ if [ -f /boot/cmdline.txt ]; then
     echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
     echo
 
-    if [ "$scriptname" = "bootup_actions.sh" ];
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
         rm /boot/bootup_actions.sh
+        rm /boot/bootup_actions_failed.sh
         /home/pi/debug.sh > /boot/debug.txt
     
         echo "" >> /boot/debug.txt
