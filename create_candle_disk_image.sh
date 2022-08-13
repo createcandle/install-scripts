@@ -35,6 +35,8 @@ echo "CREATING CANDLE DISK IMAGE"
 echo
 date
 echo "PATH: $PATH"
+me=`basename "$0"`
+echo "name of this script: $me"
 
 
 if ls /dev/mmcblk0p3; then
@@ -460,12 +462,20 @@ fi
 # SYMLINKS
 
 # move hosts file to user partition
-if [ ! -f /boot/candle_first_run_complete.txt ]; then
-    cp --verbose /etc/hosts /home/pi/.webthings/etc/hosts
-    sed -i -E "s|127.0.1.1\s+candle|127.0.1.1        $(cat /home/pi/.webthings/etc/hostname)|g" /home/pi/.webthings/etc/hosts
+#if [ ! -f /boot/candle_first_run_complete.txt ]; then
+#    cp --verbose /etc/hosts /home/pi/.webthings/etc/hosts
+#    sed -i -E "s|127.0.1.1\s+candle|127.0.1.1        $(cat /home/pi/.webthings/etc/hostname)|g" /home/pi/.webthings/etc/hosts
+#fi
+
+
+# Create hosts file and its symlink
+if [ ! -f /home/pi/.webthings/etc/hosts ]; then
+    echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
 fi
-rm /etc/hosts
-ln -s /home/pi/.webthings/etc/hosts /etc/hosts
+if [ ! -L /etc/hosts ]; then
+    rm /etc/hosts
+    ln -s /home/pi/.webthings/etc/hosts /etc/hosts
+fi
 
 # move timezone file to user partition
 cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
@@ -477,7 +487,7 @@ rm /etc/fake-hwclock.data
 ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 
 
-# BINDS
+# PREPARE FOR BINDS IN FSTAB
 echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 
 #cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
@@ -502,26 +512,16 @@ echo
 rm -rf /home/pi/configuration-files
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
 cp --verbose -r /home/pi/configuration-files/boot/* /boot/
-cp --verbose -r /home/pi/configuration-files/etc/* /etc/
 cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
 cp --verbose -r /home/pi/configuration-files/home/pi/candle/* /home/pi/candle
 cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.webthings/etc/
 #cp --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
+cp --verbose -r /home/pi/configuration-files/etc/* /etc/
+
 rm -rf /home/pi/configuration-files
 
 #chmod +x /home/pi/candle_first_run.sh
 
-
-# Only copy hosts file if it doesn't already exist
-if [ ! -f /home/pi/.webthings/etc/hosts ]; then
-    if [ -f /home/pi/.webthings/etc/hosts-bak ]; then
-        cp /home/pi/.webthings/etc/hosts-bak /home/pi/.webthings/etc/hosts
-    else
-        echo
-        echo "ERROR, missing /home/pi/.webthings/etc/hosts-bak"
-        echo
-    fi
-fi
 
 
 
@@ -592,6 +592,7 @@ systemctl disable man-db.timer
 
 # Enable half-hourly save of time
 systemctl enable fake-hwclock-save.service
+
 
 # KIOSK
 
