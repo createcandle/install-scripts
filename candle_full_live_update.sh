@@ -9,6 +9,11 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+if [ ! -d /ro ]; then
+    echo "no overlay detected, aborting."
+fi
+    
+
 
 echo
 echo "Starting live controller upate"
@@ -27,7 +32,7 @@ cp ./webthings ./webthings-old
 
 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh
 chmod +x ./create_candle_disk_image.sh
-./create_candle_disk_image.sh
+STOP_EARLY=yes ./create_candle_disk_image.sh
 rm ./create_candle_disk_image.sh
 fi
 
