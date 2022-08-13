@@ -850,10 +850,11 @@ dphys-swapfile swapoff
 dphys-swapfile uninstall
 update-rc.d dphys-swapfile remove
 if [ -f /home/pi/.webthings/swap ]; then
+    swapoff /home/pi/.webthings/swap
     rm /home/pi/.webthings/swap
 fi
-swapoff /var/swap
 if [ -f /var/swap ]; then
+    swapoff /var/swap
     rm /var/swap
 fi
 
@@ -1018,7 +1019,8 @@ fi
 
 
 # Run test script
-if [ -f /boot/cmdline.txt ]; then
+if [ -f /boot/cmdline.txt ]; 
+then
     echo
     echo
     echo 
@@ -1026,6 +1028,7 @@ if [ -f /boot/cmdline.txt ]; then
     echo
 
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    then
         rm /boot/bootup_actions.sh
         rm /boot/bootup_actions_failed.sh
         /home/pi/debug.sh > /boot/debug.txt
@@ -1060,7 +1063,8 @@ fi
 
 
 
-if [[ -z "${STOP_EARLY}" ]]; then
+if [[ -z "${STOP_EARLY}" ]]; 
+then
     echo
     echo " STARTING FINAL PHASE"
     echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
