@@ -19,35 +19,40 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
-# Detect is read-only mode is active
-if [ ! -z "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; then
-  echo 
-  echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
-  echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
+if [ -f /proc/mounts ]; 
+then
+    # Detect is read-only mode is active
+    if [ ! -z "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; then
+      echo 
+      echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
+      echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
   
-  # Show error image
-  if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
-    /bin/ply-image /boot/error.png
-    sleep 7200
-  fi
+      # Show error image
+      if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+        /bin/ply-image /boot/error.png
+        sleep 7200
+      fi
   
-  exit 1
+      exit 1
+    fi
 fi
 
 
 # Detect if old overlay system is active
-if grep -q "boot=overlay" /boot/cmdline.txt; then
-    echo 
-    echo "Detected the OLD raspi-config read-only overlay. Disable it under raspi-config -> performance (and then reboot)"
-    echo "Candle: detected OLD read-only mode. Aborting." >> /dev/kmsg
+if [ ! -f /boot/cmdline.txt ]; then
+    if grep -q "boot=overlay" /boot/cmdline.txt; then
+        echo 
+        echo "Detected the OLD raspi-config read-only overlay. Disable it under raspi-config -> performance (and then reboot)"
+        echo "Candle: detected OLD read-only mode. Aborting." >> /dev/kmsg
   
-    # Show error image
-    if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
-      /bin/ply-image /boot/error.png
-      sleep 7200
+        # Show error image
+        if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+            /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+  
+        exit 1
     fi
-  
-    exit 1
 fi
 
 
@@ -918,6 +923,12 @@ if [ -f /boot/cmdline.txt ]; then
     else
         echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
     fi
+    
+    # Remove files left over by Windows or MacOS
+    rm -rf /boot/.Spotlight*
+    if [ -f /boot/._cmdline.txt ]; then
+        rm /boot/._cmdline.txt
+    fi
 fi
 
 
@@ -982,10 +993,7 @@ export NVM_DIR="/home/pi/.nvm"
 #nvm cache clear
 
 
-rm -rf /boot/.Spotlight*
-if [ -f /boot/._cmdline.txt ]; then
-    rm /boot/._cmdline.txt
-fi
+
 
 
 # CLEANUP
