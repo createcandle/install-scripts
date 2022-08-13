@@ -728,7 +728,7 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
     wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
     wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
-    wget https://www.candlesmarthome.com/tools/splash.mp4 -0 /boot/splash.mp4
+    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
     wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
 
 

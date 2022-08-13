@@ -21,7 +21,7 @@ python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#e
 if ! command -v npm &> /dev/null
 then
     echo "NPM could not be found. Installing it now."
-    echo "Installing NVM" | sudo tee -a /dev/kmsg
+    echo "candle: installing NVM" | sudo tee -a /dev/kmsg
     
     if [ -f ./install_nvm.sh ]; then
         rm ./install_nvm.sh
@@ -68,8 +68,8 @@ echo " "
 echo "NODE AND NPM VERSIONS:"
 node --version
 npm --version
-echo "node --version: $(node --version)" | sudo tee -a /dev/kmsg
-echo "npm --version: $(npm --version)" | sudo tee -a /dev/kmsg
+echo "candle: node --version: $(node --version)" | sudo tee -a /dev/kmsg
+echo "candle: npm --version: $(npm --version)" | sudo tee -a /dev/kmsg
 
 
 npm config set metrics-registry="https://"
@@ -114,7 +114,7 @@ export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
 # npm install
 CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 
-echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
+#echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
 
 sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
 sudo setcap cap_net_raw+eip $(eval readlink -f `which python3`)
@@ -138,14 +138,14 @@ echo "Compiling typescript. this will take a while..." | sudo tee -a /dev/kmsg
 npx tsc -p .
 echo "(it probably found some errors, don't worry about those)"
 echo " "
-echo "Running webpack. this will take a while too..."
+#echo "Running webpack. this will take a while too..."
 echo "Running webpack. this will take a while too..." | sudo tee -a /dev/kmsg
 NODE_OPTIONS="--max-old-space-size=496" npx webpack
 
 if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ];
 then
   touch .post_upgrade_complete
-  echo "Controller installation seems ok"
+  #echo "Controller installation seems ok"
   echo "Controller installation seems ok" | sudo tee -a /dev/kmsg
 else
   echo  
