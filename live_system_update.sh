@@ -66,6 +66,7 @@ if [ -d /ro/home/pi/webthingsx ]; then
         echo "Creating backup copy of webthings folder"
         echo "Candle: creating backup copy to webthings-old" >> /dev/kmsg
         cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
+        chown pi:pi /ro/home/pi/webthings-old
     fi
 else
     echo "ERROR: /ro/home/pi/webthings does not exist??"
