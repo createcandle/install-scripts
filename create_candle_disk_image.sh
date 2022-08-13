@@ -305,7 +305,7 @@ if [ -d "/home/pi/.local/bin" ] ; then
     PATH="/home/pi/.local/bin:$PATH"
 fi
 
-sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
+#sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
 echo "Updating existing python packages"
 sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro requests RPi.GPIO ssh-import-id urllib3 wheel libevdev
@@ -533,20 +533,38 @@ fi
 
 # Create hosts file and its symlink
 if [ ! -f /home/pi/.webthings/etc/hosts ]; then
+    echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
     echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
 fi
 if [ ! -L /etc/hosts ]; then
+    echo "removing /etc/hosts and creating a symlink to /home/pi/.webthings/etc/hosts instead"
     rm /etc/hosts
     ln -s /home/pi/.webthings/etc/hosts /etc/hosts
 fi
 
 # move timezone file to user partition
 if [ ! -f /home/pi/.webthings/etc/timezone ]; then
+    echo "copying /etc/timezone to /home/pi/.webthings/etc/timezone"
     cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
 fi
 
-# move fake hardware clock to user partition
+#creating symlink for timezone
+if [ ! -L /etc/timezone ]; then
+    echo "removing /etc/timezone file and creating a symlink to /home/pi/.webthings/etc/timezone instead"
+    rm /etc/timezone
+    ln -s /home/pi/.webthings/etc/timezone /etc/timezone
+fi
+
+
+# create fake-hwclock file
+if [ ! -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
+    echo "copying /etc/fake-hwclock.data to /home/pi/.webthings/etc/fake-hwclock.data"
+    cp --verbose /etc/fake-hwclock.data /home/pi/.webthings/etc/fake-hwclock.data
+fi
+
+# create symlink for fake-hwclock
 if [ ! -L /etc/fake-hwclock.data ]; then
+    echo "removing /etc/fake-hwclock.data file and creating a symlink to /home/pi/.webthings/etc/fake-hwclock.data instead"
     rm /etc/fake-hwclock.data
     ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
 fi
@@ -968,6 +986,7 @@ rm -rf /boot/.Spotlight*
 if [ -f /boot/._cmdline.txt ]; then
     rm /boot/._cmdline.txt
 fi
+
 
 # CLEANUP
 echo "Candle: cleaning up" >> /dev/kmsg
