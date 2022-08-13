@@ -21,6 +21,7 @@ python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#e
 
 if ! command -v npm &> /dev/null
 then
+    echo
     echo "NPM could not be found. Installing it now."
     echo "candle: installing NVM" | sudo tee -a /dev/kmsg
     
@@ -55,6 +56,7 @@ then
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+    echo "starting nvm install"
     nvm install 12
     nvm use 12
     nvm alias default 12
@@ -73,9 +75,12 @@ echo "candle: node --version: $(node --version)" | sudo tee -a /dev/kmsg
 echo "candle: npm --version: $(npm --version)" | sudo tee -a /dev/kmsg
 
 
+npm cache verify
+
+
 npm config set metrics-registry="https://"
 #npm config set registry="https://"
-npm config set user-agent=""
+#npm config set user-agent=""
 if [ -f /home/pi/.npm/anonymous-cli-metrics.json ]
 then
   rm /home/pi/.npm/anonymous-cli-metrics.json
@@ -88,11 +93,12 @@ echo " "
 
 # Download Candle controller from Github and install it
 
-if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -d /home/pi/webthings/gateway/build/static/bundle ];
+if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ];
 then
-    echo "Detected old webthings directory! Renamed it to webthings-old"
-    echo "Detected old webthings directory! Renamed it to webthings-old" | sudo tee -a /dev/kmsg
-    mv /home/pi/webthings /home/pi/webthings-old
+    echo "Detected old webthings directory! Creating aditional backup"
+    echo "Detected old webthings directory! Creating additional backup" | sudo tee -a /dev/kmsg
+    #mv /home/pi/webthings /home/pi/webthings-old
+    tar -czf ./controller_backup_fresh.tar ./webthings
 fi
 rm -rf /home/pi/webthings
 
@@ -153,7 +159,7 @@ else
   echo "ERROR, controller installation is mising parts"
   echo
   echo "Candle: ERROR, controller installation is mising parts" | sudo tee -a /dev/kmsg
-  echo "$(date) - ERROR, controller installation is mising parts" >> /boot/candle.log
+  echo "$(date) - ERROR, controller installation is mising parts" | sudo tee -a /boot/candle.log
 fi
 
 _node_version=$(node --version | grep -E -o '[0-9]+' | head -n1)
@@ -171,6 +177,7 @@ then
   npm link
   cd -
 else
+  echo "ERROR, node_modules/gateway-addon was missing"
   echo "ERROR, node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
 fi
 

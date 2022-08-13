@@ -310,11 +310,11 @@ if [ -d "/home/pi/.local/bin" ] ; then
     PATH="/home/pi/.local/bin:$PATH"
 fi
 
-#sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
-
 echo "Updating existing python packages"
 sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro requests RPi.GPIO ssh-import-id urllib3 wheel libevdev
 
+echo "Installing Python gateway_addon"
+sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
 
 
@@ -613,6 +613,7 @@ fi
 cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
 cp --verbose -r /home/pi/configuration-files/home/pi/candle/* /home/pi/candle
 cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.webthings/etc/
+cp --verbose -r /home/pi/configuration-files/home/pi/.config/* /home/pi/.config/
 #cp --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
 cp --verbose -r /home/pi/configuration-files/etc/* /etc/
 
@@ -636,6 +637,7 @@ chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
 chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
 
 # ADD LINKS
+rm /home/pi/.asoundrc
 ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/zcandle.conf
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/mosquitto.conf

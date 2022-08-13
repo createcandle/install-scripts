@@ -70,10 +70,11 @@ if [ -d /ro/home/pi/webthingsx ]; then
         echo "WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY. SKIPPING."
         echo "Candle: WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY" >> /dev/kmsg
     else
-        echo "Creating backup copy of webthings folder"
-        echo "Candle: creating backup copy to webthings-old" >> /dev/kmsg
-        cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
-        chown pi:pi /ro/home/pi/webthings-old
+        echo "Creating fresh backup of webthings folder"
+        echo "Candle: creating fresh backup copy" >> /dev/kmsg
+        #cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
+        tar -czf /ro/home/pi//controller_backup_fresh.tar /ro/home/pi/webthings
+        chown pi:pi /ro/home/pi//controller_backup_fresh.tar
     fi
 else
     echo "ERROR: /ro/home/pi/webthings does not exist??"
