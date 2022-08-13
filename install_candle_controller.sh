@@ -23,7 +23,6 @@ then
     echo "NPM could not be found. Installing it now."
     echo "Installing NVM" | sudo tee -a /dev/kmsg
     
-    echo "installing NVM"
     if [ -f ./install_nvm.sh ]; then
         rm ./install_nvm.sh
         echo "spotted NVM installation left-over: install_nvm.sh"
@@ -135,13 +134,26 @@ cp -rL static build/static
 find build -name '*.ts' -delete
 echo
 echo "Compiling typescript. this will take a while..."
+echo "Compiling typescript. this will take a while..." | sudo tee -a /dev/kmsg
 npx tsc -p .
 echo "(it probably found some errors, don't worry about those)"
 echo " "
 echo "Running webpack. this will take a while too..."
+echo "Running webpack. this will take a while too..." | sudo tee -a /dev/kmsg
 NODE_OPTIONS="--max-old-space-size=496" npx webpack
 
-touch .post_upgrade_complete
+if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ];
+then
+  touch .post_upgrade_complete
+  echo "Controller installation seems ok"
+  echo "Controller installation seems ok" | sudo tee -a /dev/kmsg
+else
+  echo  
+  echo "ERROR, controller installation is mising parts"
+  echo
+  echo "Candle: ERROR, controller installation is mising parts" | sudo tee -a /dev/kmsg
+  echo "$(date) - ERROR, controller installation is mising parts" >> /boot/candle.log
+fi
 
 _node_version=$(node --version | grep -E -o '[0-9]+' | head -n1)
 echo "Node version: ${_node_version}" | sudo tee -a /dev/kmsg
@@ -303,13 +315,14 @@ rm ./install_nvm.sh
 
 mkdir -p /home/pi/.webthings/config
 chown -R pi:pi /home/pi/.webthings/config
-if ! [ -e /home/pi/.webthings/config/db.sqlite3 ] 
+if [ ! -f /home/pi/.webthings/config/db.sqlite3 ];
 then
     echo "copying initial Candle database from power settings addon"
     cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
     chown pi:pi /home/pi/.webthings/config/db.sqlite3
 else
     echo "warning, not copying default database since a database file already exists"
+    echo "Database file already existed" | sudo tee -a /dev/kmsg
 fi
 
 

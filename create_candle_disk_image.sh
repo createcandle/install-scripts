@@ -23,6 +23,13 @@ if [ ! -z "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; t
   echo 
   echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
   echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
+  
+  # Show error image
+  if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+    /bin/ply-image /boot/error.png
+    sleep 7200
+  fi
+  
   exit 1
 fi
 
@@ -79,6 +86,7 @@ if [ -f /boot/candle_hardware_clock.txt ]; then
     timedatectl set-ntp true
     sleep 2
     /usr/sbin/fake-hwclock save
+    echo "Candle: requested latest time. Date is now: $(date)" >> /dev/kmsg
 fi
 
 
@@ -93,6 +101,7 @@ apt update -y
 apt-get update -y
 echo
 echo "calling apt upgrade"
+echo "Candle: doing apt upgrade" >> /dev/kmsg
 #apt DEBIAN_FRONTEND=noninteractive upgrade -y
 DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
 wait
@@ -105,6 +114,7 @@ set +e
 # TODO: maybe use version 88?
 echo
 echo "installing chromium-browser"
+echo "Candle: installing chromium-browser" >> /dev/kmsg
 echo
 apt install chromium-browser -y --allow-change-held-packages
 
@@ -119,6 +129,7 @@ apt install vlc --no-install-recommends -y
 
 echo
 echo "installing git"
+echo "Candle: installing git" >> /dev/kmsg
 echo
 apt install git -y 
 
@@ -142,18 +153,16 @@ apt install -y python3-pip
 rm /etc/mosquitto/mosquitto.conf
 
 echo
-echo "installing support programs like ffmpeg, arping, libolm, sqlite, mosquitto"
+echo "installing support packages like ffmpeg, arping, libolm, sqlite, mosquitto"
+echo "Candle: installing support packages" >> /dev/kmsg
 echo
-for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw; do
+for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables; do
     echo "$i"
+    echo "Candle: installing $i" >> /dev/kmsg
     apt install -y $i
     echo
 done
 
-echo
-echo "installing ip tables"
-echo
-apt install -y iptables
 
 # removed from above list:
 #  libnanomsg-dev \
@@ -165,6 +174,7 @@ echo "installing kiosk packages (x, openbox)"
 echo
 for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
     echo "$i"
+    echo "Candle: installing $i" >> /dev/kmsg
     apt-get install --no-install-recommends -y $i
     echo
 done
@@ -177,6 +187,7 @@ echo
 echo "installing omxplayer"
 for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
     echo "$i"
+    echo "Candle: installing $i" >> /dev/kmsg
     apt-get install -y $i
     echo
 done
@@ -199,6 +210,7 @@ rm lib.tar
 echo "installing bluealsa support packages"
 for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
     echo "$i"
+    echo "Candle: installing $i" >> /dev/kmsg
     apt install -y $i
     echo
 done
@@ -208,6 +220,7 @@ done
 # Camera support
 for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
     echo "$i"
+    echo "Candle: installing $i" >> /dev/kmsg
     apt install -y $i
     echo
 done
@@ -233,6 +246,14 @@ else
     echo
     echo "Error detected in the packages install phase (git is missing). Try running the Candle install script again."
     echo ""
+    echo "Candle: error GIT failed to install" >> /dev/kmsg
+    
+    # Show error image
+    if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+      /bin/ply-image /boot/error.png
+      sleep 7200
+    fi
+    
     exit 1
 fi
 
@@ -347,6 +368,7 @@ rm -rf Plymouth-lite
 
 echo
 echo "INSTALLING CANDLE CONTROLLER"
+echo "Candle: starting installing of candle controller" >> /dev/kmsg
 echo
 
 cd /home/pi
@@ -367,6 +389,7 @@ cd /home/pi
 
 echo
 echo "INSTALLING HOSTAPD AND DNSMASQ"
+echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
 echo
 
 apt install -y dnsmasq 
@@ -405,8 +428,10 @@ chown pi:pi /home/pi/.webthings/arduino/Arduino
 touch /home/pi/.webthings/candle.log
 chown pi:pi /home/pi/.webthings/candle.log
 
-mkdir -p /home/pi/.webthings/etc
-chown pi:pi /home/pi/.webthings/etc
+if [ ! -d /home/pi/.webthings/etc ]; then
+    mkdir -p /home/pi/.webthings/etc
+    chown pi:pi /home/pi/.webthings/etc
+fi
 
 mkdir -p /home/pi/candle
 chown pi:pi /home/pi/candle
@@ -428,14 +453,21 @@ mkdir -p /home/pi/.webthings/etc/ssh
 if [ ! -e /home/pi/.webthings/etc/hostname ]
 then
     echo "candle" > /home/pi/.webthings/etc/hostname
+    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
+else
+    echo "hostname file already existed"
+    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
 fi
 
+echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
 rm -rf /tmp/*
 echo "/tmp contents:"
 ls -l -a /tmp
 #mkdir -p /home/pi/.webthings/tmp
-cp -r /tmp /home/pi/.webthings/tmp
+if [ ! -d /home/pi/.webthings/tmp ]; then
+    cp -r /tmp /home/pi/.webthings/tmp
+fi
 chmod 1777 /home/pi/.webthings/tmp
 find /home/pi/.webthings/tmp \
      -mindepth 1 \
@@ -478,36 +510,45 @@ if [ ! -L /etc/hosts ]; then
 fi
 
 # move timezone file to user partition
-cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
-rm /etc/timezone 
-ln -s /home/pi/.webthings/etc/timezone /etc/timezone 
+if [ ! -f /home/pi/.webthings/etc/timezone ]; then
+    cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
+fi
 
 # move fake hardware clock to user partition
-rm /etc/fake-hwclock.data
-ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
-
+if [ ! -L /etc/fake-hwclock.data ]; then
+    rm /etc/fake-hwclock.data
+    ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
+fi
 
 # PREPARE FOR BINDS IN FSTAB
 echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 
 #cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
-cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
-cp --verbose /etc/ssh/sshd_config /home/pi/.webthings/etc/ssh/sshd_config
+if [ ! -f /home/pi/.webthings/etc/ssh/ssh_config ]; then
+    cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
+    cp --verbose /etc/ssh/sshd_config /home/pi/.webthings/etc/ssh/sshd_config
+fi
 #cp --verbose -r /etc/ssh/ssh_config.d /home/pi/.webthings/etc/ssh/
 #cp --verbose -r /etc/ssh/sshd_config.d /home/pi/.webthings/etc/ssh/
 mkdir -p /home/pi/.webthings/etc/ssh/ssh_config.d
 mkdir -p /home/pi/.webthings/etc/ssh/sshd_config.d 
 
-cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
-#cp --verbose -r /var/lib/bluetooth /home/pi/.webthings/var/lib/bluetooth
 
-mkdir -p /home/pi/.webthings/var/lib/bluetooth
+# Create "empty" wpa_supplicant confog file if it doesn't exist yet
+if [ ! -f /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf ]; then
+    cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
+    #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /etc/wpa_supplicant/wpa_supplicant.conf
+    #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
+    echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /etc/wpa_supplicant/wpa_supplicant.conf
+    echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
+fi
 
 
 
 # Download tons of ready-made settings files from the Candle github
 echo
 echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
+echo "Candle: downloading configuration files from Github" >> /dev/kmsg
 echo
 rm -rf /home/pi/configuration-files
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
@@ -546,6 +587,7 @@ ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
 # SERVICES
 echo
 echo "ENABLING AND DISABLING SERVICES"
+echo "Candle: enabling services" >> /dev/kmsg
 echo
 #systemctl daemon-reload
 
@@ -598,7 +640,8 @@ systemctl enable fake-hwclock-save.service
 
 # Download boot splash images and video
 echo
-echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEO"
+echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEOS"
+echo "Candle: downloading splash images and videos" >> /dev/kmsg
 echo
 wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
 wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
@@ -627,12 +670,14 @@ isInFile=$(cat /boot/cmdline.txt | grep -c "tty3")
 if [ $isInFile -eq 0 ]
 then    
 	echo "- Modifying cmdline.txt"
+    echo "Candle: adding kiosk parameters to cmdline.txt" >> /dev/kmsg
 	# change text output to third console. press alt-shift-F3 during boot to see it again.
     sed -i 's/tty1/tty3/' /boot/cmdline.txt
 	# hide all the small things normally shown at boot
 	sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' /boot/cmdline.txt        
 else
     echo "- The cmdline.txt file was already modified"
+    echo "Candle: cmdline.txt kiosk parameters were already present" >> /dev/kmsg
 fi
 
 # Hide the login text (it will still be available on tty3 - connect a keyboard to your pi and press CTRl-ALT-F3 to see it)
@@ -699,6 +744,7 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFi
 # ADD IP-TABLES
 echo
 echo "ADDING IPTABLES"
+
 echo "before:"
 iptables -t nat --list
 echo
@@ -708,7 +754,9 @@ echo
 if iptables --list | grep 4443; then
     echo
     echo "IPTABLES ALREADY ADDED"
+    echo "Candle: ip tables already added" >> /dev/kmsg
 else
+    echo "Candle: adding ip tables" >> /dev/kmsg
     iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
     iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
     iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
@@ -761,12 +809,17 @@ raspi-config nonint do_camera 0
 # disable swap file
 echo
 echo "removing swap"
+echo "Candle: removing swap" >> /dev/kmsg
 dphys-swapfile swapoff
 dphys-swapfile uninstall
 update-rc.d dphys-swapfile remove
-rm /home/pi/.webthings/swap
+if [ -f /home/pi/.webthings/swap ]; then
+    rm /home/pi/.webthings/swap
+fi
 swapoff /var/swap
-rm /var/swap
+if [ -f /var/swap ]; then
+    rm /var/swap
+fi
 
 apt clean
 apt autoremove
@@ -784,6 +837,7 @@ echo "candle" > /etc/hostname
 isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
 if [ $isInFile4 -eq 0 ]
 then
+    echo "Candle: adding read-only mode" >> /dev/kmsg
     mkinitramfs -o /boot/initrd
     
     wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O /bin/ro-root.sh
@@ -798,6 +852,7 @@ then
     
 else
     echo "- Read only file system mode was already in config.txt"
+    echo "Candle: read-only mode already existed" >> /dev/kmsg
 fi
 
 isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
@@ -828,11 +883,13 @@ cd /home/pi
 
 # CREATE BACKUPS
 echo "Creating backups"
+echo "Candle: creating backups" >> /dev/kmsg
 if [ -d  /home/pi/webthings ]; then
     tar -czf ./controller_backup.tar ./webthings
 else
     echo
     echo "ERROR, MISSING WEBTHINGS DIRECTORY"
+    echo "Candle: ERROR, missing webthings directory" >> /dev/kmsg
     echo
 fi
 cp /etc/rc.local /etc/rc.local.bak
@@ -859,7 +916,7 @@ rm /boot/._cmdline.txt
 
 
 # CLEANUP
-
+echo "Candle: cleaning up" >> /dev/kmsg
 #npm cache clean --force
 #nvm cache clear
 apt-get clean
@@ -874,32 +931,29 @@ rm -rf /var/lib/apt/lists/*
 # Generate file that can be used to re-install this exact combination of Python packages's versions
 pip3 list --format=freeze > candle_requirements.txt
 
-# Generate file that can be used to re-install this exact combination of packages's versions
+# Create file that simply lists the installec packages and their versions
 apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > candle_packages.txt
+
+# Create a script that could re-install all those packages if the sources were available. 
+# However, the Raspberry servers only serve the very latest versions, so this is moot.
 apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > candle_packages_installer.sh
 
-#apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "apt-get -y -d -o dir::cache=`pwd` -o Debug::NoLocking=1 install " $1 "=" $3}' > candle_packages_downloader.sh
-#apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "apt download " $1 "=" $3}' > candle_packages_downloader.sh
+# Prepare for potential download of all current versions of the packages
+mkdir /home/pi/.webthings/deb_packages
+chown pi:pi /home/pi/.webthings/deb_packages
+apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "echo '" $1 "' >> /dev/kmsg && apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
 
-#apt list --upgradable 2>/dev/null  | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "apt-get -y -d -o dir::cache=`pwd` -o Debug::NoLocking=1 install " $1 "=" $3}' > candle_packages_downloader.txt
+sed -i '' '1i\
+apt update
+' /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
 
-# apt-get -d -o dir::cache=`pwd` -o Debug::NoLocking=1 install
-
-
-# Create file for wpa_supplicant redirect if it doesn't exist yet
-if [ ! -f /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf ]; then
-    #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /etc/wpa_supplicant/wpa_supplicant.conf
-    #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
-    echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /etc/wpa_supplicant/wpa_supplicant.conf
-    echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
-fi
 
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
 if [ -f /boot/bootup_actions.sh ]; then
     rm /boot/bootup_actions.sh
 fi
-chmod +x /home/pi/prepare_for_disk_image.sh 
+
 
 
 # Run test script
@@ -911,10 +965,14 @@ echo
 
 if [ "$scriptname" = "bootup_actions.sh" ]; then
     rm /boot/bootup_actions.sh
-    /home/pi/debug.sh > /root/debug.txt
-    echo "" >> /root/debug.txt
-    echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPGRADE PROCESS" >> /root/debug.txt
-    cat /home/pi/debug.txt
+    /home/pi/debug.sh > /boot/debug.txt
+    
+    echo "" >> /boot/debug.txt
+    echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPGRADE PROCESS" >> /boot/debug.txt
+    cat /boot/debug.txt
+    
+    echo "Candle: DONE. Debug output placed in /boot/debug.txt" >> /dev/kmsg
+    echo "Candle: Rebooting in 5 seconds..." >> /dev/kmsg
     sleep 5
     reboot
     exit 0
@@ -924,7 +982,6 @@ else
     rm /home/pi/debug.txt
 fi
 
-
 echo
 echo
 
@@ -932,6 +989,8 @@ echo
 if [[ -z "${STOP_EARLY}" ]]; then
     echo
     echo " STARTING FINAL PHASE"
+    echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
+    chmod +x /home/pi/prepare_for_disk_image.sh 
     /home/pi/prepare_for_disk_image.sh 
     exit 0
   
@@ -939,7 +998,7 @@ else
     
     if [[ -z "${DOWNLOAD_DEB}" ]]; then
         echo "Skipping download of .deb files"
-        
+        echo "Candle: skipping download of .deb files" >> /dev/kmsg
     else
     #printf 'Do you want to download all the .deb files? (y/n)'
     #read answer
@@ -947,12 +1006,11 @@ else
         
         echo 
         echo "DOWNLOADING ALL INSTALLED PACKAGES AS .DEB FILES"
-  
-        mkdir /home/pi/.webthings/deb_packages
-        chown pi:pi /home/pi/.webthings/deb_packages
+        echo "Candle: downloading all .deb files" >> /dev/kmsg
+        
+
         cd /home/pi/.webthings/deb_packages
-        apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
-        chmod +x candle_packages_downloader.sh
+        chmod +x ./candle_packages_downloader.sh
         sudo -u pi ./candle_packages_downloader.sh
         
         # fix the filenames. Replaces "%3a" with ":".
