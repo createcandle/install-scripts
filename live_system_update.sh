@@ -50,18 +50,21 @@ echo "Setting /ro to RW"
 # This shouldn't even be possible really 
 
 mount -o remount,rw /ro
+echo "remount done"
 
+if [ -d /ro/home/pi/webthings ]; then
 
-availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
-fileSize=$(du -k --max-depth=0 "/ro/home/pi/webthings" | awk '{print $1}')
+    availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
+    fileSize=$(du -k --max-depth=0 "/ro/home/pi/webthings" | awk '{print $1}')
 
-if [ "$fileSize" -gt "$availMem" ]; then
-    echo "WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY"
-    echo "Candle: WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY" >> /dev/kmsg
-else
-    echo "Creating backup copy op webthings folder"
-    echo "Candle: creating backup copy to webthings-old" >> /dev/kmsg
-    cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
+    if [ "$fileSize" -gt "$availMem" ]; then
+        echo "WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY"
+        echo "Candle: WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY" >> /dev/kmsg
+    else
+        echo "Creating backup copy op webthings folder"
+        echo "Candle: creating backup copy to webthings-old" >> /dev/kmsg
+        cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
+    fi
 fi
 
 
@@ -85,6 +88,7 @@ echo "starting chroot"
 echo "Candle: starting chroot" >> /dev/kmsg
 
 chroot /ro sh -c "$(cat <<END
+echo "in chroot"
 cd /home/pi
 STOP_EARLY=yes /home/pi/create_candle_disk_image.sh
 END
@@ -98,7 +102,7 @@ sleep 5
 
 rm /ro/home/pi/create_candle_disk_image.sh
 
-if [ -f /ro/home/pi/configuration-files ]; then
+if [ -d /ro/home/pi/configuration-files ]; then
     rm -rf /ro/home/pi/configuration-files
 fi
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
