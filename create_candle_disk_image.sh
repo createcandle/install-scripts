@@ -59,6 +59,7 @@ echo
 echo "CREATING CANDLE"
 echo
 echo "DATE: $(date)"
+echo "IP  : $(hostname -I)"
 echo "PATH: $PATH"
 scriptname=`basename "$0"`
 echo "NAME: $scriptname"
