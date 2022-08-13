@@ -58,14 +58,14 @@ cd /home/pi
 echo
 echo "CREATING CANDLE"
 echo
-echo "DATE: $(date)"
-echo "IP  : $(hostname -I)"
-echo "PATH: $PATH"
+echo "DATE       : $(date)"
+echo "IP ADDRESS : $(hostname -I)"
+echo "PATH       : $PATH"
 scriptname=`basename "$0"`
-echo "NAME: $scriptname"
+echo "NAME       : $scriptname"
 
 if [ ! -f /boot/cmdline.txt ]; then
-    echo "NOTE: DETECTED THE NEW OVERLAY SYSTEM (boot partition is not mounted)"
+echo "NOTE       : INSIDE CHROOT (boot partition is not mounted)"
 fi
 
 
@@ -1017,39 +1017,45 @@ fi
 
 
 # Run test script
-echo
-echo
-echo 
-echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
-echo
+if [ -f /boot/cmdline.txt ]; then
+    echo
+    echo
+    echo 
+    echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
+    echo
 
-if [ "$scriptname" = "bootup_actions.sh" ] && [ -f /boot/cmdline.txt ]; then
-    rm /boot/bootup_actions.sh
-    /home/pi/debug.sh > /boot/debug.txt
+    if [ "$scriptname" = "bootup_actions.sh" ];
+        rm /boot/bootup_actions.sh
+        /home/pi/debug.sh > /boot/debug.txt
     
-    echo "" >> /boot/debug.txt
-    echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPGRADE PROCESS" >> /boot/debug.txt
-    cat /boot/debug.txt
+        echo "" >> /boot/debug.txt
+        echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPGRADE PROCESS" >> /boot/debug.txt
+        cat /boot/debug.txt
     
-    echo "Candle: DONE. Debug output placed in /boot/debug.txt" >> /dev/kmsg
-    echo "Candle: Rebooting in 5 seconds..." >> /dev/kmsg
-    sleep 5
-    reboot
-    exit 0
+        echo "Candle: DONE. Debug output placed in /boot/debug.txt" >> /dev/kmsg
+        echo "Candle: Rebooting in 5 seconds..." >> /dev/kmsg
+        sleep 5
+        reboot
+        exit 0
+    else
+        /home/pi/debug.sh > /home/pi/debug.txt
+        cat /home/pi/debug.txt
+        rm /home/pi/debug.txt
+    fi
+
+    echo
+    echo
+    
 else
-    /home/pi/debug.sh > /home/pi/debug.txt
-    cat /home/pi/debug.txt
-    rm /home/pi/debug.txt
-fi
-
-echo
-echo
-
-if [ ! -f /boot/cmdline.txt ]; then
+    echo
+    echo
     echo "boot partition not mounted, so DONE"
+    echo
+    echo
     echo "boot partition not mounted, so DONE" >> /dev/kmsg
     exit 0
 fi
+
 
 
 if [[ -z "${STOP_EARLY}" ]]; then
