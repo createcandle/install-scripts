@@ -16,6 +16,7 @@ echo "HOME: $HOME"
 cd /home/pi || exit
 
 echo "installing python gateway addon"
+echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
 if ! command -v npm &> /dev/null
