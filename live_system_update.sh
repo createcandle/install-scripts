@@ -52,6 +52,8 @@ echo "Setting /ro to RW"
 mount -o remount,rw /ro
 echo "remount done"
 
+cp /etc/resolve.conf /ro/etc/resolve.conf
+
 if [ -d /ro/home/pi/webthingsx ]; then
     echo "calculating free space"
     availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
@@ -86,8 +88,12 @@ fi
 
 
 # sudo chroot /ro sh -c "ls /dev"
-# sudo chroot /ro sh -c "ls /"
+# sudo chroot /ro sh -c "ls /mnt"
 # sudo chroot /ro sh -c "apt update"
+# sudo chroot /ro sh -c "cat /proc/mounts"
+# sudo chroot /ro sh -c "wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh"
+
+
 
 # mount -o bind /dir/outside/chroot /dir/inside/chroot
 echo "starting chroot"
@@ -95,6 +101,8 @@ echo "Candle: starting chroot" >> /dev/kmsg
 
 chroot /ro sh -c "$(cat <<END
 echo "in chroot"
+echo "/etc/resolv.conf: $(cat /etc/resolv.conf)"
+echo "cat /mnt/etc/resolv.conf: $(cat /mnt/etc/resolv.conf)"
 cd /home/pi
 export STOP_EARLY=yes
 if [ -f /home/pi/create_candle_disk_image.sh ]; then
