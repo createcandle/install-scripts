@@ -116,6 +116,7 @@ echo "Install script found, starting it"
 else
 echo "Error in chroot: create_candle_disk_image.sh not found"
 fi
+touch /home/pi/TEST_FILE.txt
 END
 )"
 
@@ -156,7 +157,7 @@ fi
 
 # re-enable read-only mode
 echo "Setting /ro back to RO"
-mount -o remount,ro /ro
+mount -l -o remount,ro /ro
 
 echo "LIVE controller update done" >> /dev/kmsg
 
