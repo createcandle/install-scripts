@@ -24,7 +24,7 @@ echo
 
 
 echo "preparations"
-cd /ro/home/pi
+cd /ro/home/pi || exit
 
 
 # make sure there is a current time
@@ -34,7 +34,7 @@ if [ -f /boot/candle_hardware_clock.txt ]; then
     timedatectl set-ntp true
     sleep 2
     /usr/sbin/fake-hwclock save
-    echo "Candle: requested latest time. Date is now: $(date)" >> /dev/kmsg
+    echo "Candle: requested latest time from internet. Date is now: $(date)" >> /dev/kmsg
 fi
 
 
@@ -70,9 +70,6 @@ fi
 chroot /ro sh -c "$(cat <<END
 cd /home/pi
 
-echo "moving webthings folder into webthings-old, as a backup"
-
-
 echo "Downloading latest install script from Github" 
 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh -O ./create_candle_disk_image.sh
 chmod +x ./create_candle_disk_image.sh
@@ -85,6 +82,7 @@ END
 
 
 echo "Finalising outside of chroot"
+echo "Candle: Finalising update outside of chroot" >> /dev/kmsg
 
 sleep 5
 
