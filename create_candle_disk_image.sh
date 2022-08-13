@@ -67,7 +67,7 @@ echo "NAME       : $scriptname"
 if [ ! -f /boot/cmdline.txt ]; then
 echo "NOTE       : INSIDE CHROOT (boot partition is not mounted)"
 fi
-
+echo
 
 if [ ! -d /home/pi/.webthings/addons ] && [ -f /boot/cmdline.txt ]; 
 then
@@ -1016,11 +1016,11 @@ mkdir -p /home/pi/.webthings/deb_packages
 chown pi:pi /home/pi/.webthings/deb_packages
 apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "echo '" $1 "' >> /dev/kmsg && apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
 
-if [ -f /home/pi/.webthings/deb_packages/candle_packages_downloader.sh ]; then
-sed -i '' '1i\
-apt update
-' /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
-fi
+#if [ -f /home/pi/.webthings/deb_packages/candle_packages_downloader.sh ]; then
+#sed -i '' '1i\
+#apt update
+#' /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
+#fi
 
 
 if [ ! -e /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ]; then
