@@ -28,10 +28,10 @@ then
         rm ./install_nvm.sh
         echo "spotted NVM installation left-over: install_nvm.sh"
     fi
-    if [ -d ./.nvm ]; then
-        rm -rf ./.nvm
-        echo "spotted NVM installation left-over: .nvm dir"
-    fi
+    #if [ -d ./.nvm ]; then
+    #    rm -rf ./.nvm
+    #    echo "spotted NVM installation left-over: .nvm dir"
+    #fi
     #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
     wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
     chmod +x install_nvm.sh
