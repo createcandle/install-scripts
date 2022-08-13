@@ -35,9 +35,7 @@ if [ ! -z "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; t
 fi
 
 
-# TODO: detect old overlay system state too
-
-
+# Detect if old overlay system is active
 if grep -q "boot=overlay" /boot/cmdline.txt; then
     echo 
     echo "Detected the OLD raspi-config read-only overlay. Disable it under raspi-config -> performance (and then reboot)"
@@ -58,15 +56,20 @@ fi
 cd /home/pi
 
 echo
-echo "CREATING CANDLE DISK IMAGE"
+echo "CREATING CANDLE"
 echo
 echo "DATE: $(date)"
 echo "PATH: $PATH"
 scriptname=`basename "$0"`
 echo "NAME: $scriptname"
 
+if [ ! -f /boot/cmdline.txt ]; then
+    echo "NOTE: DETECTED THE NEW OVERLAY SYSTEM (boot partition is not mounted)"
+fi
 
-if [ -f /dev/mmcblk0p2 ]; then
+
+if [ ! -d /home/pi/.webthings/addons ] && [ -f /boot/cmdline.txt ]; 
+then
     
     if ls /dev/mmcblk0p3; then
         echo
@@ -83,12 +86,14 @@ if [ -f /dev/mmcblk0p2 ]; then
         chown pi:pi /home/pi/.webthings
     fi
 
-    if [ ! -d /home/pi/.webthings/addons ]; then
-        mount /dev/mmcblk0p3 /home/pi/.webthings
-        chown pi:pi /home/pi/.webthings
-    fi
+    
+    mount /dev/mmcblk0p3 /home/pi/.webthings
+    chown pi:pi /home/pi/.webthings
     
     lsblk
+    
+else
+    echo "Partitions seem to already exist (addons dir existed)"
 fi
 
 echo
@@ -577,7 +582,10 @@ echo "Candle: downloading configuration files from Github" >> /dev/kmsg
 echo
 rm -rf /home/pi/configuration-files
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
-cp --verbose -r /home/pi/configuration-files/boot/* /boot/
+
+if [ -f /boot/cmdline.txt ]; then
+    cp --verbose -r /home/pi/configuration-files/boot/* /boot/
+fi
 cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
 cp --verbose -r /home/pi/configuration-files/home/pi/candle/* /home/pi/candle
 cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.webthings/etc/
@@ -664,69 +672,71 @@ systemctl enable fake-hwclock-save.service
 # KIOSK
 
 # Download boot splash images and video
-echo
-echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEOS"
-echo "Candle: downloading splash images and videos" >> /dev/kmsg
-echo
-wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
-wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
-wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
-wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
-wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
-wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
-wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
-wget https://www.candlesmarthome.com/tools/splash.mp4 -0 /boot/splash.mp4
-wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
+if [ -f /boot/cmdline.txt ]; then
+
+    # Hides the Raspberry Pi logos normally shown at boot
+    isInFile2=$(cat /boot/config.txt | grep -c "disable_splash")
+    if [ $isInFile2 -eq 0 ]
+    then
+    	echo "- Adding disable_splash to config.txt"
+    	echo 'disable_splash=1' >> /boot/config.txt
+    else
+        echo "- Splash was already disabled in config.txt"
+    fi
+
+    # Hide the text normally shown when linux boots up
+    isInFile=$(cat /boot/cmdline.txt | grep -c "tty3")
+    if [ $isInFile -eq 0 ]
+    then    
+    	echo "- Modifying cmdline.txt"
+        echo "Candle: adding kiosk parameters to cmdline.txt" >> /dev/kmsg
+    	# change text output to third console. press alt-shift-F3 during boot to see it again.
+        sed -i 's/tty1/tty3/' /boot/cmdline.txt
+    	# hide all the small things normally shown at boot
+    	sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' /boot/cmdline.txt        
+    else
+        echo "- The cmdline.txt file was already modified"
+        echo "Candle: cmdline.txt kiosk parameters were already present" >> /dev/kmsg
+    fi
+    
+    
+    # Use the older display driver for now, as this solves many audio headaches.
+    # https://github.com/raspberrypi/linux/issues/4543
+    echo "setting fkms driver"
+    sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
 
 
+    # Sets more power for USB ports
+    isInFile3=$(cat /boot/config.txt | grep -c "max_usb_current")
+    if [ $isInFile3 -eq 0 ]
+    then
+    	echo "- Setting USB to deliver more current in config.txt"
+    	echo 'max_usb_current=1' >> /boot/config.txt
+    else
+        echo "- USB was already set to deliver more current in config.txt"
+    fi
 
-# Hides the Raspberry Pi logos normally shown at boot
-isInFile2=$(cat /boot/config.txt | grep -c "disable_splash")
-if [ $isInFile2 -eq 0 ]
-then
-	echo "- Adding disable_splash to config.txt"
-	echo 'disable_splash=1' >> /boot/config.txt
-else
-    echo "- Splash was already disabled in config.txt"
+    echo
+    echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEOS"
+    echo "Candle: downloading splash images and videos" >> /dev/kmsg
+    echo
+    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
+    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
+    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
+    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
+    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
+    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+    wget https://www.candlesmarthome.com/tools/splash.mp4 -0 /boot/splash.mp4
+    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
+
+
+    
 fi
-
-# Hide the text normally shown when linux boots up
-isInFile=$(cat /boot/cmdline.txt | grep -c "tty3")
-if [ $isInFile -eq 0 ]
-then    
-	echo "- Modifying cmdline.txt"
-    echo "Candle: adding kiosk parameters to cmdline.txt" >> /dev/kmsg
-	# change text output to third console. press alt-shift-F3 during boot to see it again.
-    sed -i 's/tty1/tty3/' /boot/cmdline.txt
-	# hide all the small things normally shown at boot
-	sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' /boot/cmdline.txt        
-else
-    echo "- The cmdline.txt file was already modified"
-    echo "Candle: cmdline.txt kiosk parameters were already present" >> /dev/kmsg
-fi
-
 # Hide the login text (it will still be available on tty3 - connect a keyboard to your pi and press CTRl-ALT-F3 to see it)
 systemctl enable getty@tty3.service
 systemctl disable getty@tty1.service
 
-
-# Use the older display driver for now, as this solves many audio headaches.
-# https://github.com/raspberrypi/linux/issues/4543
-echo "setting fkms driver"
-sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
-
-
-
-
-# Sets more power for USB ports
-isInFile3=$(cat /boot/config.txt | grep -c "max_usb_current")
-if [ $isInFile3 -eq 0 ]
-then
-	echo "- Setting USB to deliver more current in config.txt"
-	echo 'max_usb_current=1' >> /boot/config.txt
-else
-    echo "- USB was already set to deliver more current in config.txt"
-fi
 
 
 
@@ -857,38 +867,41 @@ echo "candle" > /etc/hostname
 #echo "candle" > /home/pi/.webthings/etc/hostname
 
 
+if [ -f /boot/cmdline.txt ]; then
+    # Install read-only file system
+    isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
+    if [ $isInFile4 -eq 0 ]
+    then
+        echo "Candle: adding read-only mode" >> /dev/kmsg
+        mkinitramfs -o /boot/initrd
+    
+        wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O /bin/ro-root.sh
+        chmod +x /bin/ro-root.sh
+    
+    	echo "- Adding read only mode to config.txt"
+        echo >> /boot/config.txt
+        echo '# Read only mode' >> /boot/config.txt
+        echo 'initramfs initrd followkernel' >> /boot/config.txt
+        echo 'ramfsfile=initrd' >> /boot/config.txt
+        echo 'ramfsaddr=-1' >> /boot/config.txt
+    
+    else
+        echo "- Read only file system mode was already in config.txt"
+        echo "Candle: read-only mode already existed" >> /dev/kmsg
+    fi
 
-# Install read-only file system
-isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
-if [ $isInFile4 -eq 0 ]
-then
-    echo "Candle: adding read-only mode" >> /dev/kmsg
-    mkinitramfs -o /boot/initrd
-    
-    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O /bin/ro-root.sh
-    chmod +x /bin/ro-root.sh
-    
-	echo "- Adding read only mode to config.txt"
-    echo >> /boot/config.txt
-    echo '# Read only mode' >> /boot/config.txt
-    echo 'initramfs initrd followkernel' >> /boot/config.txt
-    echo 'ramfsfile=initrd' >> /boot/config.txt
-    echo 'ramfsaddr=-1' >> /boot/config.txt
-    
-else
-    echo "- Read only file system mode was already in config.txt"
-    echo "Candle: read-only mode already existed" >> /dev/kmsg
+    isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
+    if [ $isInFile5 -eq 0 ]
+    then
+    	echo "- Modifying cmdline.txt for read-only file system"
+        sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
+    else
+        echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
+    fi
 fi
 
-isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
-if [ $isInFile5 -eq 0 ]
-then
-	echo "- Modifying cmdline.txt for read-only file system"
-    sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
-else
-    echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
-fi
 
+# Add alias shortcuts to .profile
 isInFile6=$(cat /home/pi/.profile | grep -c "alias rw=")
 if [ $isInFile6 -eq 0 ]
 then
@@ -907,19 +920,32 @@ cd /home/pi
 
 
 # CREATE BACKUPS
-echo "Creating backups"
-echo "Candle: creating backups" >> /dev/kmsg
-if [ -d  /home/pi/webthings ]; then
-    tar -czf ./controller_backup.tar ./webthings
-else
-    echo
-    echo "ERROR, MISSING WEBTHINGS DIRECTORY"
-    echo "Candle: ERROR, missing webthings directory" >> /dev/kmsg
-    echo
-fi
-cp /etc/rc.local /etc/rc.local.bak
-cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
 
+
+if [ ! -f /home/pi/controller_backup.tar ]; then
+    if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
+    then
+        echo "Creating initial backup of webthings folder"
+        echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
+        tar -czf ./controller_backup.tar ./webthings
+    else
+        echo
+        echo "ERROR, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
+        echo "Candle: ERROR, missing (parts of) webthings directory" >> /dev/kmsg
+        echo
+    fi
+fi
+
+# important boot files backup
+if [ ! -f /etc/rc.local.bak ]; then
+    cp /etc/rc.local /etc/rc.local.bak
+fi
+if [ ! -f /home/pi/candle/early.sh.bak ]; then
+    cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
+fi
+if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
+    cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
+fi
 
 export NVM_DIR="/home/pi/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -937,8 +963,9 @@ export NVM_DIR="/home/pi/.nvm"
 
 
 rm -rf /boot/.Spotlight*
-rm /boot/._cmdline.txt
-
+if [ -f /boot/._cmdline.txt]; then
+    rm /boot/._cmdline.txt
+fi
 
 # CLEANUP
 echo "Candle: cleaning up" >> /dev/kmsg
@@ -995,7 +1022,7 @@ echo
 echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
 echo
 
-if [ "$scriptname" = "bootup_actions.sh" ]; then
+if [ "$scriptname" = "bootup_actions.sh" ] && [ -f /boot/cmdline.txt ]; then
     rm /boot/bootup_actions.sh
     /home/pi/debug.sh > /boot/debug.txt
     
@@ -1016,6 +1043,12 @@ fi
 
 echo
 echo
+
+if [ ! -f /boot/cmdline.txt ]; then
+    echo "boot partition not mounted, so DONE"
+    echo "boot partition not mounted, so DONE" >> /dev/kmsg
+    exit 0
+fi
 
 
 if [[ -z "${STOP_EARLY}" ]]; then
