@@ -19,6 +19,7 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+# Detect is read-only mode is active
 if [ ! -z "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; then
   echo 
   echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
@@ -32,6 +33,25 @@ if [ ! -z "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; t
   
   exit 1
 fi
+
+
+# TODO: detect old overlay system state too
+
+
+if grep -q "boot=overlay" /boot/cmdline.txt; then
+    echo 
+    echo "Detected the OLD raspi-config read-only overlay. Disable it under raspi-config -> performance (and then reboot)"
+    echo "Candle: detected OLD read-only mode. Aborting." >> /dev/kmsg
+  
+    # Show error image
+    if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+      /bin/ply-image /boot/error.png
+      sleep 7200
+    fi
+  
+    exit 1
+fi
+
 
 # CREATE PARTITIONS
 
@@ -949,7 +969,7 @@ apt update
 
 
 
-if [ ! -f /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ]; then
+if [ ! -e /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ]; then
   ln -s /usr/lib/firmware/brcm/brcmfmac43455-sdio.bin /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin  
   echo "Candle: added symlink for missing audio firmware" >> /dev/kmsg
 fi
