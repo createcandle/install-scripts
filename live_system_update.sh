@@ -5,7 +5,7 @@
 
 echo
 echo "CANDLE LIVE UPDATE"
-echo
+
 
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]
@@ -14,10 +14,13 @@ if [ "$EUID" -ne 0 ]
 fi
 
 if [ ! -d /ro ]; then
+    echo
     echo "no overlay detected, aborting."
     exit 1
 fi
     
+
+cd /ro/home/pi || exit
 
 
 echo
@@ -27,18 +30,17 @@ echo
 
 
 
-echo "preparations"
-cd /ro/home/pi || exit
-
-
 # make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
+    echo "Trying to get time update from NTP server"
     rm /boot/candle_hardware_clock.txt
     systemctl restart systemd-timesyncd.service
     timedatectl set-ntp true
     sleep 2
     /usr/sbin/fake-hwclock save
     echo "Candle: requested latest time from internet. Date is now: $(date)" >> /dev/kmsg
+else
+    echo "no hardware clock detected, assuming time is current"
 fi
 
 
@@ -50,8 +52,6 @@ echo "Setting /ro to RW"
 mount -o remount,rw /ro
 
 
-
-
 availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
 fileSize=$(du -k --max-depth=0 "/ro/home/pi/webthings" | awk '{print $1}')
 
@@ -59,10 +59,21 @@ if [ "$fileSize" -gt "$availMem" ]; then
     echo "WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY"
     echo "Candle: WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY" >> /dev/kmsg
 else
+    echo "Creating backup copy op webthings folder"
     echo "Candle: creating backup copy to webthings-old" >> /dev/kmsg
     cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
 fi
 
+
+echo "Downloading latest install script from Github" 
+wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh -O /ro/home/pi/create_candle_disk_image.sh
+if [ -f /ro/home/pi/create_candle_disk_image.sh ]; then
+    echo "Download succesful"
+    chmod +x /ro/home/pi/create_candle_disk_image.sh
+else
+    echo "ERROR: DOWNLOADING LATEST SCRIPT FAILED"
+    exit 1
+fi
 
 
 # sudo chroot /ro sh -c "ls /dev"
@@ -70,17 +81,12 @@ fi
 # sudo chroot /ro sh -c "apt update"
 
 # mount -o bind /dir/outside/chroot /dir/inside/chroot
+echo "starting chroot"
+echo "Candle: starting chroot" >> /dev/kmsg
 
 chroot /ro sh -c "$(cat <<END
 cd /home/pi
-
-echo "Downloading latest install script from Github" 
-wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh -O ./create_candle_disk_image.sh
-chmod +x ./create_candle_disk_image.sh
-STOP_EARLY=yes ./create_candle_disk_image.sh
-rm ./create_candle_disk_image.sh
-fi
-
+STOP_EARLY=yes /home/pi/create_candle_disk_image.sh
 END
 )"
 
@@ -89,6 +95,8 @@ echo "Finalising outside of chroot"
 echo "Candle: Finalising update outside of chroot" >> /dev/kmsg
 
 sleep 5
+
+rm /ro/home/pi/create_candle_disk_image.sh
 
 if [ -f /ro/home/pi/configuration-files ]; then
     rm -rf /ro/home/pi/configuration-files
@@ -103,7 +111,7 @@ fi
 
 
 # re-enable read-only mode
-echo "setting back to RO"
+echo "Setting /ro back to RO"
 mount -o remount,ro /ro
 
 echo "LIVE controller update done" >> /dev/kmsg
