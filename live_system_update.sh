@@ -53,8 +53,9 @@ mount -o remount,rw /ro
 echo "remount done"
 
 if [ -d /ro/home/pi/webthings ]; then
-
+    echo "calculating free space"
     availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
+    echo "calculating size of webthings folder"
     fileSize=$(du -k --max-depth=0 "/ro/home/pi/webthings" | awk '{print $1}')
 
     if [ "$fileSize" -gt "$availMem" ]; then
@@ -65,10 +66,13 @@ if [ -d /ro/home/pi/webthings ]; then
         echo "Candle: creating backup copy to webthings-old" >> /dev/kmsg
         cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
     fi
+else
+    echo "ERROR: /ro/home/pi/webthings does not exist??"
 fi
 
 
 echo "Downloading latest install script from Github" 
+
 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh -O /ro/home/pi/create_candle_disk_image.sh
 if [ -f /ro/home/pi/create_candle_disk_image.sh ]; then
     echo "Download succesful"
