@@ -52,11 +52,11 @@ echo "Setting /ro to RW"
 mount -o remount,rw /ro
 echo "remount done"
 
-echo "juggling /etc/resolv.conf"
-cp /etc/resolve.conf /ro/etc/resolve.conf.jump
-rm /rw/upper/etc/resolve.conf
-rm /etc/resolve.conf
-cp /ro/etc/resolve.conf.jump /ro/etc/resolve.conf
+#echo "juggling /etc/resolv.conf"
+#cp /etc/resolve.conf /ro/etc/resolve.conf.jump
+#rm /rw/upper/etc/resolve.conf
+#rm /etc/resolve.conf
+#cp /ro/etc/resolve.conf.jump /ro/etc/resolve.conf
 
 
 if [ -d /ro/home/pi/webthingsx ]; then
@@ -97,7 +97,7 @@ fi
 # sudo chroot /ro sh -c "apt update"
 # sudo chroot /ro sh -c "cat /proc/mounts"
 # sudo chroot /ro sh -c "wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh"
-
+# sudo chroot /ro sh -c "ls /home/pi/alfred"
 
 
 # mount -o bind /dir/outside/chroot /dir/inside/chroot
