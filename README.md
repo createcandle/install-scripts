@@ -63,7 +63,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 ### Live update script
 With the latest versions of Candle it's now possible to fully update the controller while the system is running. This is experimental, so use at your own risk. It automatically detects if your controller is compatible.
 ```
-curl -sSl https://github.com/createcandle/install-scripts/raw/main/live_system_update.sh | sudo bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo bash
 ```
 
 
