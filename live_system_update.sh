@@ -125,6 +125,10 @@ echo "Candle: Finalising update outside of chroot" >> /dev/kmsg
 
 sleep 5
 
+echo "setting fkms driver"
+sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
+
+
 if [ -f /ro/home/pi/create_candle_disk_image.sh ]; then
     rm /ro/home/pi/create_candle_disk_image.sh
 else
