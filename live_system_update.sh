@@ -3,6 +3,10 @@
 # LIVE UPDATE
 # If the Candle controller uses the new overlay system, then this script might be able to update it "live", without needing a reboot or fully disabling the overlay.
 
+echo
+echo "CANDLE LIVE UPDATE"
+echo
+
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root (use sudo)"

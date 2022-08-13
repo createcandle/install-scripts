@@ -14,8 +14,8 @@ set +e # continue on errors
 
 
 # Check if script is being run as root
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root (use sudo)"
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (use sudo)"
   exit
 fi
 
@@ -677,7 +677,7 @@ if [ -f /boot/cmdline.txt ]; then
 
     # Hides the Raspberry Pi logos normally shown at boot
     isInFile2=$(cat /boot/config.txt | grep -c "disable_splash")
-    if [ $isInFile2 -eq 0 ]
+    if [ $isInFile2 -eq 0 ];
     then
     	echo "- Adding disable_splash to config.txt"
     	echo 'disable_splash=1' >> /boot/config.txt
@@ -964,7 +964,7 @@ export NVM_DIR="/home/pi/.nvm"
 
 
 rm -rf /boot/.Spotlight*
-if [ -f /boot/._cmdline.txt]; then
+if [ -f /boot/._cmdline.txt ]; then
     rm /boot/._cmdline.txt
 fi
 
