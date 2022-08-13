@@ -33,10 +33,10 @@ cd /home/pi
 echo
 echo "CREATING CANDLE DISK IMAGE"
 echo
-date
+echo "DATE: $(date)"
 echo "PATH: $PATH"
-me=`basename "$0"`
-echo "name of this script: $me"
+scriptname=`basename "$0"`
+echo "NAME: $scriptname"
 
 
 if ls /dev/mmcblk0p3; then
@@ -124,7 +124,7 @@ apt install git -y
 
 echo
 echo "installing build tools"
-for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libudev-dev libusb-1.0-0-dev pkg-config python-six; do
+for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config python-six; do
     echo "$i"
     apt install -y $i
     echo
@@ -206,7 +206,6 @@ done
 
 
 # Camera support
-
 for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
     echo "$i"
     apt install -y $i
@@ -361,8 +360,9 @@ rm install_candle_controller.sh
 
 cd /home/pi
 
-setcap cap_net_raw+eip $(eval readlink -f `which node`)
-setcap cap_net_raw+eip $(eval readlink -f `which python3`)
+# This should work now, but setcap has been move to install_candle_controller script instead
+#NODE_PATH=$(sudo -i -u pi which node)
+#setcap cap_net_raw+eip $(eval readlink -f "$NODE_PATH")
 
 
 echo
@@ -907,12 +907,26 @@ echo
 echo 
 echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
 echo
-/home/pi/debug.sh > /home/pi/debug.txt
-cat /home/pi/debug.txt
-rm /home/pi/debug.txt
+
+if [ "$scriptname" = "bootup_actions.sh" ]; then
+    rm /boot/bootup_actions.sh
+    /home/pi/debug.sh > /root/debug.txt
+    echo "" >> /root/debug.txt
+    echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPGRADE PROCESS" >> /root/debug.txt
+    cat /home/pi/debug.txt
+    sleep 5
+    reboot
+    exit 0
+else
+    /home/pi/debug.sh > /home/pi/debug.txt
+    cat /home/pi/debug.txt
+    rm /home/pi/debug.txt
+fi
+
 
 echo
 echo
+
 
 if [[ -z "${STOP_EARLY}" ]]; then
     echo

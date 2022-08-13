@@ -117,6 +117,10 @@ CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 
 echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
 
+sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
+sudo setcap cap_net_raw+eip $(eval readlink -f `which python3`)
+
+
 echo " "
 #echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
 echo "Compiling Typescript and running Webpack" | sudo tee -a /dev/kmsg
