@@ -41,7 +41,7 @@ fi
 
 # Detect if old overlay system is active
 
-if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
+if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 
     if grep -q "boot=overlay" /boot/cmdline.txt; then
         echo 
@@ -73,7 +73,7 @@ scriptname=`basename "$0"`
 echo "USER       : $(whoami)"
 echo "NAME       : $scriptname"
 
-if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
+if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 echo "NOTE       : Not in chroot"
 else
 echo "NOTE       : INSIDE CHROOT (boot partition is not mounted)"
@@ -621,7 +621,7 @@ echo
 rm -rf /home/pi/configuration-files
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
 
-if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
+if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     cp --verbose -r /home/pi/configuration-files/boot/* /boot/
 fi
 cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
@@ -712,7 +712,7 @@ systemctl enable fake-hwclock-save.service
 # KIOSK
 
 # Download boot splash images and video
-if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
+if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 
     # Hides the Raspberry Pi logos normally shown at boot
     isInFile2=$(cat /boot/config.txt | grep -c "disable_splash")
@@ -908,7 +908,7 @@ echo "candle" > /etc/hostname
 #echo "candle" > /home/pi/.webthings/etc/hostname
 
 
-if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
+if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     # Install read-only file system
     isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
     if [ $isInFile4 -eq 0 ]
@@ -1056,13 +1056,14 @@ fi
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
 if [ -f /boot/bootup_actions.sh ]; then
+    echo "removed /boot/bootup_actions.sh"
     rm /boot/bootup_actions.sh
 fi
 
 
 
 # Run test script
-if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; 
+if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; 
 then
     echo
     echo
@@ -1106,7 +1107,7 @@ fi
 
 
 
-if [[ -z "${STOP_EARLY}" ]]; 
+if [[ -z "${STOP_EARLY}" ]] || ["$STOP_EARLY" = no ]; 
 then
     echo
     echo " STARTING FINAL PHASE"
