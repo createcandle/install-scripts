@@ -25,6 +25,7 @@ then
     echo "NPM could not be found. Installing it now."
     echo "candle: installing NVM" | sudo tee -a /dev/kmsg
     
+    
     if [ -f ./install_nvm.sh ]; then
         rm ./install_nvm.sh
         echo "spotted NVM installation left-over: install_nvm.sh"

@@ -1073,14 +1073,14 @@ fi
 # SAVE STATE
 
 # Generate file that can be used to re-install this exact combination of Python packages's versions
-pip3 list --format=freeze > candle_requirements.txt
+pip3 list --format=freeze > /home/pi/candle/candle_requirements.txt
 
 # Create file that simply lists the installec packages and their versions
-apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > candle_packages.txt
+apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > /home/pi/candle/candle_packages.txt
 
 # Create a script that could re-install all those packages if the sources were available. 
 # However, the Raspberry servers only serve the very latest versions, so this is moot.
-apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > candle_packages_installer.sh
+apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > /home/pi/candle/candle_packages_installer.sh
 
 # Prepare for potential download of all current versions of the packages
 mkdir -p /home/pi/.webthings/deb_packages
@@ -1277,7 +1277,7 @@ then
     then
         rm /boot/bootup_actions.sh
         rm /boot/bootup_actions_failed.sh
-        /home/pi/debug.sh > /boot/debug.txt
+        /home/pi/candle/debug.sh > /boot/debug.txt
     
         echo "" >> /boot/debug.txt
         echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPGRADE PROCESS" >> /boot/debug.txt
@@ -1289,9 +1289,9 @@ then
         reboot
         exit 0
     else
-        /home/pi/debug.sh > /home/pi/debug.txt
-        cat /home/pi/debug.txt
-        rm /home/pi/debug.txt
+        /home/pi/candle/debug.sh > /home/pi/candle/debug.txt
+        cat /home/pi/candle/debug.txt
+        rm /home/pi/candle/debug.txt
     fi
 
     echo
@@ -1315,8 +1315,8 @@ if [[ -z "${STOP_EARLY}" ]] || [ "$STOP_EARLY" = no ];
 then
     echo "STARTING FINAL PHASE"
     echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
-    chmod +x /home/pi/prepare_for_disk_image.sh 
-    /home/pi/prepare_for_disk_image.sh 
+    chmod +x /home/pi/candle/prepare_for_disk_image.sh 
+    /home/pi/candle/prepare_for_disk_image.sh 
     exit 0
   
 else
