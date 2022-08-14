@@ -345,8 +345,8 @@ nvm cache clear
 
 echo " "
 echo "sub-script that installs the Candle controller is done. Returning to the main install script."
-echo "Gateway install script done" | sudo tee -a /dev/kmsg
-
+echo "sub-script that installs the Candle controller is done. Returning to the main install script." | sudo tee -a /dev/kmsg
+echo
 exit 0
 
 

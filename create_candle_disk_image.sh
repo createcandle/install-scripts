@@ -1190,6 +1190,7 @@ else
     # it also shouldn't conflict with using this as an upgrade script, since in those cases this file should already exist
     # Only downside is a missing machine_id
     touch /boot/candle_first_run_complete.txt
+    touch /boot/ssh.txt
     
     #if [[ -z "${DOWNLOAD_DEB}" ]]; then
     if [[ -z "${DOWNLOAD_DEB}" ]] || [ "$DOWNLOAD_DEB" = no ]; then
