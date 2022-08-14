@@ -40,7 +40,9 @@ fi
 
 
 # Detect if old overlay system is active
-if [ "$CHROOTED" = true ]; then
+
+if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
+
     if grep -q "boot=overlay" /boot/cmdline.txt; then
         echo 
         echo "Detected the OLD raspi-config read-only overlay. Disable it under raspi-config -> performance (and then reboot)"
@@ -71,9 +73,12 @@ scriptname=`basename "$0"`
 echo "USER       : $(whoami)"
 echo "NAME       : $scriptname"
 
-if [ "$CHROOTED" = true ]; then
+if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
+echo "NOTE       : Not in chroot"
+else
 echo "NOTE       : INSIDE CHROOT (boot partition is not mounted)"
 fi
+
 echo
 
 
@@ -616,7 +621,7 @@ echo
 rm -rf /home/pi/configuration-files
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
 
-if [ "$CHROOTED" = false ]; then
+if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
     cp --verbose -r /home/pi/configuration-files/boot/* /boot/
 fi
 cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
@@ -707,7 +712,7 @@ systemctl enable fake-hwclock-save.service
 # KIOSK
 
 # Download boot splash images and video
-if [ "$CHROOTED" = false ]; then
+if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
 
     # Hides the Raspberry Pi logos normally shown at boot
     isInFile2=$(cat /boot/config.txt | grep -c "disable_splash")
@@ -903,7 +908,7 @@ echo "candle" > /etc/hostname
 #echo "candle" > /home/pi/.webthings/etc/hostname
 
 
-if [ "$CHROOTED" = false ]; then
+if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; then
     # Install read-only file system
     isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
     if [ $isInFile4 -eq 0 ]
@@ -1057,7 +1062,7 @@ fi
 
 
 # Run test script
-if [ "$CHROOTED" = false ]; 
+if [ "$CHROOTED" = false ] || [[ -z "${CHROOTED}" ]]; 
 then
     echo
     echo
