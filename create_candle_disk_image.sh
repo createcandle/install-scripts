@@ -76,6 +76,8 @@ echo "NOTE       : INSIDE CHROOT (boot partition is not mounted)"
 fi
 echo
 
+
+# Create disk partitions
 if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${CHROOTED}" ]]; 
 then
     
