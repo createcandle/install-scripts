@@ -1,7 +1,11 @@
 #!/bin/bash
 set +e # continue on errors
 
+
+# CANDLE INSTALL AND UPDATE SCRIPT
+
 # This script will turn a Raspberry Pi OS Lite installation into a Candle controller
+# It can also update a Candle controller to the latest available version (with some limitations)
 
 # If you want to avoid the shutdown at the end you can skip the finalization step by first setting an environment variable:
 # export STOP_EARLY=yes
@@ -9,16 +13,16 @@ set +e # continue on errors
 # If STOP_EARLY is set, then you also have the option to ask the script to reboot when done. This is useful if it's acting as an update script.
 # export REBOOT_WHEN_DONE=yes
 
-# If you also want this script to download all the installed packages' as .deb files, then set this environment variable:
-# export DOWNLOAD_DEB=yes
-
 # Other parts of the script that can be skipped:
 # export SKIP_APT_INSTALL=yes
 # export SKIP_APT_UPGRADE=yes
 # export SKIP_PYTHON=yes
 # export SKIP_RESPEAKER=yes
 # export SKIP_BLUEALSA=yes
+# export SKIP_CONTROLLER_INSTALL=yes
 
+# If you also want this script to download all the installed packages' as .deb files, then set this environment variable:
+# export DOWNLOAD_DEB=yes
 
 # if you want to pretend that the script is running into a chroot at /ro:
 # export CHROOTED=yes
@@ -342,7 +346,6 @@ then
     echo "INSTALLING AND UPDATING PYTHON PACKAGES"
     echo
 
-
     echo
     echo "installing pip3"
     echo
@@ -395,6 +398,7 @@ then
     cd /home/pi
     rm -rf seeed-voicecard
 fi
+
 
 
 # BLUEALSA
@@ -458,25 +462,29 @@ fi
 
 
 # INSTALL CANDLE CONTROLLER
-echo
-echo "INSTALLING CANDLE CONTROLLER"
-echo "Candle: starting installing of candle controller" >> /dev/kmsg
-echo
+if [[ -z "${SKIP_CONTROLLER_INSTALL}" ]] || [ "$SKIP_CONTROLLER_INSTALL" = no ]; 
+then
+    
+    echo
+    echo "INSTALLING CANDLE CONTROLLER"
+    echo "Candle: starting installing of candle controller" >> /dev/kmsg
+    echo
 
-cd /home/pi
-rm -rf /home/pi/webthings
-#rm -rf /home/pi/.webthings # too dangerous
+    cd /home/pi
+    rm -rf /home/pi/webthings
+    #rm -rf /home/pi/.webthings # too dangerous
 
-wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
-chmod +x ./install_candle_controller.sh
-sudo -u pi ./install_candle_controller.sh
-rm ./install_candle_controller.sh
+    wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
+    chmod +x ./install_candle_controller.sh
+    sudo -u pi ./install_candle_controller.sh
+    rm ./install_candle_controller.sh
 
-cd /home/pi
+    cd /home/pi
 
-# This should work now, but setcap has been move to install_candle_controller script instead
-#NODE_PATH=$(sudo -i -u pi which node)
-#setcap cap_net_raw+eip $(eval readlink -f "$NODE_PATH")
+    # This should work now, but setcap has been move to install_candle_controller script instead
+    #NODE_PATH=$(sudo -i -u pi which node)
+    #setcap cap_net_raw+eip $(eval readlink -f "$NODE_PATH")
+fi
 
 
 
@@ -541,16 +549,13 @@ mkdir -p /home/pi/.webthings/etc/wpa_supplicant
 mkdir -p /home/pi/.webthings/etc/ssh
 
 # Create files that are linked to using binding in fstab
-#if [ ! -e /home/pi/.webthings/etc/hostname ]
-#then
-#    cp /etc/hostname /home/pi/.webthings/etc/hostname
-#fi
 if [ ! -e /home/pi/.webthings/etc/hostname ]
 then
+    echo "candle" > /etc/hostname
     echo "candle" > /home/pi/.webthings/etc/hostname
     echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
 else
-    echo "hostname file already existed"
+    echo "/home/pi/.webthings/etc/hostname already existed"
     echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
 fi
 
@@ -619,7 +624,6 @@ if [ ! -L /etc/timezone ]; then
     ln -s /home/pi/.webthings/etc/timezone /etc/timezone
 fi
 
-
 # create fake-hwclock file
 if [ ! -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
     echo "copying /etc/fake-hwclock.data to /home/pi/.webthings/etc/fake-hwclock.data"
@@ -663,9 +667,15 @@ echo
 echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
 echo "Candle: downloading configuration files from Github" >> /dev/kmsg
 echo
-rm -rf /home/pi/configuration-files
+
+if [ -d /home/pi/configuration-files ]; then
+    echo "Warning, found a left over configuration-files directory"
+    rm -rf /home/pi/configuration-files
+fi
+
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
 
+# Copy files to their locations
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     cp --verbose -r /home/pi/configuration-files/boot/* /boot/
 fi
@@ -682,7 +692,6 @@ rm -rf /home/pi/configuration-files
 
 
 
-
 # CHMOD THE NEW FILES
 chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
@@ -696,24 +705,26 @@ chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
 chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
 
 # ADD LINKS
-rm /home/pi/.asoundrc
-ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
+if [ -f /home/pi/.asoundrc ] && [ -f /home/pi/.webthings/etc/asoundrc ]; then
+    echo "Creating symlink from /home/pi/.asoundrc to /home/pi/.webthings/etc/asoundrc"
+    rm /home/pi/.asoundrc
+    ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
+fi
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/zcandle.conf
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/mosquitto.conf
 
 
-# SERVICES
+
+# ENABLE SERVICES
 echo
 echo "ENABLING AND DISABLING SERVICES"
 echo "Candle: enabling services" >> /dev/kmsg
 echo
 #systemctl daemon-reload
 
-
 # disable triggerhappy
 systemctl disable triggerhappy.socket
 systemctl disable triggerhappy.service
-
 
 # enable Candle services
 systemctl enable candle_first_run.service
@@ -728,7 +739,7 @@ systemctl enable candle_reboot180.service
 systemctl enable candle_splashscreen_updating.service
 systemctl enable candle_splashscreen_updating180.service
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
-# TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon)
+# TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon). Then again, can't hurt to have redundancy.
 
 # enable BlueAlsa services
 systemctl enable bluealsa.service 
@@ -741,7 +752,7 @@ systemctl disable webthings-gateway.check-for-update.timer
 systemctl disable webthings-gateway.update-rollback.service
 
 
-# Disable apt services
+# disable apt services
 sudo systemctl disable apt-daily.service
 sudo systemctl disable apt-daily.timer
 sudo systemctl disable apt-daily-upgrade.timer
@@ -750,8 +761,11 @@ sudo systemctl disable apt-daily-upgrade.service
 # disable man-db timer
 systemctl disable man-db.timer
 
-# Enable half-hourly save of time
+# enable half-hourly save of time
 systemctl enable fake-hwclock-save.service
+
+
+
 
 
 # KIOSK
@@ -784,14 +798,13 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         echo "Candle: cmdline.txt kiosk parameters were already present" >> /dev/kmsg
     fi
     
-    
     # Use the older display driver for now, as this solves many audio headaches.
     # https://github.com/raspberrypi/linux/issues/4543
-    echo "setting fkms driver"
+    echo "setting fkms display driver"
     sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
 
 
-    # Sets more power for USB ports
+    # Set more power for USB ports
     isInFile3=$(cat /boot/config.txt | grep -c "max_usb_current")
     if [ $isInFile3 -eq 0 ]
     then
@@ -801,6 +814,7 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         echo "- USB was already set to deliver more current in config.txt"
     fi
 
+    # Downloading splash images
     echo
     echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEOS"
     echo "Candle: downloading splash images and videos" >> /dev/kmsg
@@ -814,16 +828,12 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
     wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
     wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
-
-
     
 fi
+
 # Hide the login text (it will still be available on tty3 - connect a keyboard to your pi and press CTRl-ALT-F3 to see it)
 systemctl enable getty@tty3.service
 systemctl disable getty@tty1.service
-
-
-
 
 #mkdir -p /etc/X11/xinit
 #mkdir -p /etc/xdg/openbox
@@ -851,7 +861,7 @@ echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
 
 
-# CHROMIUM 
+# ADD CHROMIUM POLICY
 
 # Add policy file to disable things like file selection
 mkdir -p /etc/chromium/policies/managed/
@@ -864,15 +874,13 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFi
 # ADD IP-TABLES
 echo
 echo "ADDING IPTABLES"
-
-echo "before:"
-iptables -t nat --list
 echo
-echo "Redirecting :80 to :8080 and :443 to :4443"
-echo
-
+#echo "before:"
+#iptables -t nat --list
+#echo
+#echo "Redirecting :80 to :8080 and :443 to :4443"
+#echo
 if iptables --list | grep 4443; then
-    echo
     echo "IPTABLES ALREADY ADDED"
     echo "Candle: ip tables already added" >> /dev/kmsg
 else
@@ -884,13 +892,16 @@ else
     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
 fi
-
 #iptables -L -v -n
-echo "after"
-iptables -t nat --list
+#echo "after"
+#iptables -t nat --list
 
 #echo "\n\n" | apt install iptables-persistent -y
 #apt install iptables-persistent -y
+
+echo
+
+
 
 
 # TODO:
@@ -904,7 +915,9 @@ iptables -t nat --list
 # - websocket-client
 # - jsonschema (if memory serves)
 
+
 # RASPI CONFIG
+echo "Set Raspi-config I2C, SPI, Camera"
 
 # enable i2c, needed for clock module support
 raspi-config nonint do_i2c 0
@@ -913,46 +926,14 @@ raspi-config nonint do_i2c 0
 raspi-config nonint do_spi 0
 
 # enable Camera.
-raspi-config nonint do_camera 0
+raspi-config nonint do_camera 0 # This does nothing on Bullseye, but is needed for older versions of Raspberry Pi OS
 
 # enable old Camera.
 #raspi-config nonint do_legacy 0
 
 
 
-
-# CLEANUP
-
-# remove no longer needed applications?
-# apt-get purge libtool
-
-# disable swap file
-echo
-echo "removing swap"
-echo "Candle: removing swap" >> /dev/kmsg
-dphys-swapfile swapoff
-dphys-swapfile uninstall
-update-rc.d dphys-swapfile remove
-if [ -f /home/pi/.webthings/swap ]; then
-    swapoff /home/pi/.webthings/swap
-    rm /home/pi/.webthings/swap
-fi
-if [ -f /var/swap ]; then
-    swapoff /var/swap
-    rm /var/swap
-fi
-
-apt clean
-apt autoremove
-rm -rf /tmp/*
-if [ -f /home/pi/install.sh ]; then
-    rm /home/pi/install.sh
-fi
-
-echo "candle" > /etc/hostname
-#echo "candle" > /home/pi/.webthings/etc/hostname
-
-
+# Enable read-only mode
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     # Install read-only file system
     isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
@@ -994,6 +975,8 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         rm /boot/._cmdline.txt
     fi
 fi
+
+
 
 
 # Add alias shortcuts to .profile
@@ -1041,33 +1024,6 @@ if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
     cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
 fi
 
-export NVM_DIR="/home/pi/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-
-#echo "candle" > /etc/hostname
-
-# Start the Candle Controller
-#cd /home/pi/webthings/gateway
-#sudo -u pi /home/pi/webthings/gateway/run-app.sh &
-
-#npm cache clean --force
-#nvm cache clear
-
-
-
-
-
-# CLEANUP
-echo "Candle: cleaning up" >> /dev/kmsg
-#npm cache clean --force
-#nvm cache clear
-apt-get clean
-apt remove --purge
-apt autoremove
-
-rm -rf /var/lib/apt/lists/*
 
 
 # SAVE STATE
@@ -1094,11 +1050,57 @@ apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk
 #fi
 
 
-if [ ! -e /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ]; then
-  ln -s /usr/lib/firmware/brcm/brcmfmac43455-sdio.bin /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin  
-  echo "Candle: added symlink for missing audio firmware" >> /dev/kmsg
+
+
+
+echo
+echo "Enabling NVM now"
+export NVM_DIR="/home/pi/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+
+
+
+# CLEANUP
+
+echo
+echo "CLEANING UP"
+echo
+echo "Candle: cleaning up" >> /dev/kmsg
+
+#npm cache clean --force # already done in install_candle_controller script
+#nvm cache clear
+
+echo "Clearing Apt leftovers"
+apt clean
+apt-get clean
+apt remove --purge
+apt autoremove
+rm -rf /var/lib/apt/lists/*
+
+echo "removing swap"
+echo "Candle: removing swap" >> /dev/kmsg
+dphys-swapfile swapoff
+dphys-swapfile uninstall
+update-rc.d dphys-swapfile remove
+if [ -f /home/pi/.webthings/swap ]; then
+    swapoff /home/pi/.webthings/swap
+    rm /home/pi/.webthings/swap
+fi
+if [ -f /var/swap ]; then
+    swapoff /var/swap
+    rm /var/swap
 fi
 
+
+echo "Clearing /tmp"
+rm -rf /tmp/*
+
+
+#if [ -f /home/pi/install.sh ]; then # TODO: does this still do anything?
+#    rm /home/pi/install.sh
+#fi
 
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
@@ -1109,7 +1111,25 @@ fi
 
 
 
-# Run test script
+
+
+# OTHER
+
+# Create fix for missing audio firmware
+if [ ! -e /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ]; then
+  ln -s /usr/lib/firmware/brcm/brcmfmac43455-sdio.bin /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin  
+  echo
+  echo "Candle: added symlink for missing audio firmware"
+  echo
+  echo "Candle: added symlink for missing audio firmware" >> /dev/kmsg
+fi
+
+
+
+
+
+# RUN DEBUG SCRIPT
+
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; 
 then
     echo
@@ -1153,6 +1173,8 @@ else
 fi
 
 echo
+
+
 
 if [[ -z "${STOP_EARLY}" ]] || ["$STOP_EARLY" = no ]; 
 then
