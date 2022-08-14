@@ -62,7 +62,7 @@ echo "remount done"
 #cp /ro/etc/resolve.conf.jump /ro/etc/resolve.conf
 
 
-if [ -d /ro/home/pi/webthingsx ]; then
+if [ -d /ro/home/pi/webthings ]; then
     echo "calculating free space"
     availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
     echo "calculating size of webthings folder"
@@ -70,18 +70,22 @@ if [ -d /ro/home/pi/webthingsx ]; then
 
     if [ "$fileSize" -gt "$availMem" ]; 
     then
-        echo "WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY. SKIPPING."
-        echo "Candle: WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS-OLD COPY" >> /dev/kmsg
+        echo "WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS BACKUP. SKIPPING."
+        echo "Candle: WARNING: LOW DISK SPACE, NOT CREATING BACKUP FIRST" >> /dev/kmsg
     else
-        echo "Creating fresh backup of webthings folder"
+        echo "Creating fresh backup tar of webthings folder"
         echo "Candle: creating fresh backup copy" >> /dev/kmsg
-        #cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
+        # cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
         tar -czf /ro/home/pi//controller_backup_fresh.tar /ro/home/pi/webthings
         chown pi:pi /ro/home/pi//controller_backup_fresh.tar
     fi
 else
     echo "ERROR: /ro/home/pi/webthings does not exist??"
 fi
+
+mkdir -p /ro/home/pi/tmp/boot
+cp -r --verbose /boot/* /ro/home/pi/tmp/boot
+
 
 
 echo "Downloading latest install script from Github" 
@@ -114,6 +118,12 @@ echo "/etc/resolv.conf: $(cat /etc/resolv.conf)"
 echo "cat /mnt/etc/resolv.conf: $(cat /mnt/etc/resolv.conf)"
 cd /home/pi
 export STOP_EARLY=yes
+if [ -d /home/pi/tmp/boot ]; then
+echo "creating bind mount over /boot"
+mount --bind /home/pi/tmp/boot /boot
+else
+echo "/home/pi/tmp/boot was missing"
+fi
 if [ -f /home/pi/create_candle_disk_image.sh ]; then
 echo "Install script found, starting it"
 /home/pi/create_candle_disk_image.sh > /home/pi/update_report.txt
