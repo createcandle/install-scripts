@@ -1041,7 +1041,7 @@ apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "a
 # Prepare for potential download of all current versions of the packages
 mkdir -p /home/pi/.webthings/deb_packages
 chown pi:pi /home/pi/.webthings/deb_packages
-apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "echo '" $1 "' >> /dev/kmsg && apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
+apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "echo '" $1 "' | sudo tee -a /dev/kmsg && apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
 
 #if [ -f /home/pi/.webthings/deb_packages/candle_packages_downloader.sh ]; then
 #sed -i '' '1i\
