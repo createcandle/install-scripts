@@ -51,6 +51,10 @@ You could even try to use it as an update script:
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo STOP_EARLY=yes REBOOT_WHEN_DONE=yes bash
 ```
 
+Many parts of the script can be turned off. This command turns off most parts:
+```
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo STOP_EARLY=yes SKIP_PYTHON=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER_INSTALL=yes bash
+```
 
 .
 
