@@ -708,10 +708,12 @@ chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
 chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
 
 # ADD LINKS
-if [ -f /home/pi/.asoundrc ] && [ -f /home/pi/.webthings/etc/asoundrc ]; then
-    echo "Creating symlink from /home/pi/.asoundrc to /home/pi/.webthings/etc/asoundrc"
-    rm /home/pi/.asoundrc
-    ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
+if [ ! -L /home/pi/.asoundrc ]; then
+    if [ -f /home/pi/.webthings/etc/asoundrc ]; then
+        echo "Creating symlink from /home/pi/.asoundrc to /home/pi/.webthings/etc/asoundrc"
+        rm /home/pi/.asoundrc
+        ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
+    fi
 fi
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/zcandle.conf
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/mosquitto.conf
