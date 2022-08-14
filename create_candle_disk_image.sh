@@ -79,7 +79,7 @@ echo
 echo "DATE       : $(date)"
 echo "IP ADDRESS : $(hostname -I)"
 echo "PATH       : $PATH"
-scriptname=`basename "$0"`
+scriptname=$(basename "$0")
 echo "USER       : $(whoami)"
 echo "NAME       : $scriptname"
 
@@ -289,6 +289,7 @@ then
 fi
 
 
+
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
     echo
@@ -432,6 +433,7 @@ cd /home/pi
 rm -rf bluez-alsa
 
 
+
 # Plymouth-lite
 if [ ! -f /bin/ply-image ]; 
 then
@@ -454,8 +456,8 @@ fi
 
 
 
-# INSTALL CANDLE CONTROLLER
 
+# INSTALL CANDLE CONTROLLER
 echo
 echo "INSTALLING CANDLE CONTROLLER"
 echo "Candle: starting installing of candle controller" >> /dev/kmsg
@@ -477,19 +479,23 @@ cd /home/pi
 #setcap cap_net_raw+eip $(eval readlink -f "$NODE_PATH")
 
 
-echo
-echo "INSTALLING HOSTAPD AND DNSMASQ"
-echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
-echo
 
-apt install -y dnsmasq 
-systemctl disable dnsmasq.service
+# Install HostAPD and DNSMasq
+if [ "$SKIP_APT_INSTALL" = no ] || [[ -z "${SKIP_APT_INSTALL}" ]];
+then
+    echo
+    echo "INSTALLING HOSTAPD AND DNSMASQ"
+    echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
+    echo
 
-echo 
-apt install -y hostapd
-systemctl unmask hostapd.service
-systemctl disable hostapd.service
+    apt install -y dnsmasq 
+    systemctl disable dnsmasq.service
 
+    echo 
+    apt install -y hostapd
+    systemctl unmask hostapd.service
+    systemctl disable hostapd.service
+fi
 
 
 
@@ -497,7 +503,6 @@ systemctl disable hostapd.service
 echo
 echo "INSTALLING OTHER FILES AND SERVICES"
 echo
-
 
 # switch back to root of home folder
 cd /home/pi
