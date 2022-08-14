@@ -25,7 +25,7 @@ cd /ro/home/pi || exit
 
 
 echo
-echo "Starting live controller upate"
+echo "Starting live controller update"
 echo "starting LIVE controller update" >> /dev/kmsg
 echo
 
@@ -107,7 +107,7 @@ else
     exit 1
 fi
 
-
+sudo chroot /ro sh -c "whoami"
 # sudo chroot /ro sh -c "ls /dev"
 # sudo chroot /ro sh -c "ls /mnt"
 # sudo chroot /ro sh -c "apt update"
@@ -115,36 +115,51 @@ fi
 # sudo chroot /ro sh -c "wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh"
 # sudo chroot /ro sh -c "ls /home/pi/alfred"
 
-# sudo chroot /ro sh -c "mount -t procfs && ls /proc"
+# sudo chroot /ro sh -c "mount -t proc proc /proc && mount -t sysfs && ls /proc"
+# sudo chroot /ro sh -c "mount -t procfs && mount -t sysfs && ls /proc"
+
+
 
 #sudo chroot /ro ln -s /proc/mounts /etc/mtab
 
 # mount -o bind /dir/outside/chroot /dir/inside/chroot
+
+
+# sudo chroot /ro sh -c "ls /home/pi/alfred"
+
+
 echo "starting chroot"
 echo "Candle: starting chroot" >> /dev/kmsg
 
 chroot /ro sh -c "$(cat <<END
 echo "in chroot"
+whoami
 export CHROOTED=yes
 echo "/etc/resolv.conf: $(cat /etc/resolv.conf)"
 echo "cat /mnt/etc/resolv.conf: $(cat /mnt/etc/resolv.conf)"
 cd /home/pi
 export STOP_EARLY=yes
-if [ -d /home/pi/tmp/boot ]; then
-echo "creating bind mount over /boot"
-mount --bind /home/pi/tmp/boot /boot
-else
-echo "/home/pi/tmp/boot was missing"
-fi
-mount -t procfs
-mount -t sysfs
+
+#if [ -d /home/pi/tmp/boot ]; then
+#echo "creating bind mount over /boot"
+#mount --bind /home/pi/tmp/boot /boot
+#else
+#echo "/home/pi/tmp/boot was missing"
+#fi
+
+#mount -t procfs
+sudo mount -t proc proc /proc
+sudo mount -t sysfs sysfs /sys
+sudo mount -t devfs devfs /dev
+sudo mount -t devfs devfs /dev
+
 if [ -f /home/pi/create_candle_disk_image.sh ]; then
 echo "Install script found, starting it"
 /home/pi/create_candle_disk_image.sh > /home/pi/update_report.txt
 else
 echo "Error in chroot: create_candle_disk_image.sh not found"
 fi
-touch /home/pi/TEST_FILE.txt
+touch /home/pi/TEST_FILE_CREATED_IN_CHROOT.txt
 END
 )"
 

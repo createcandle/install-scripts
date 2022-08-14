@@ -149,6 +149,7 @@ echo " "
 echo "Running webpack. this will take a while too..." | sudo tee -a /dev/kmsg
 NODE_OPTIONS="--max-old-space-size=496" npx webpack
 
+
 if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ];
 then
   touch .post_upgrade_complete
@@ -190,7 +191,21 @@ mkdir -p /home/pi/.webthings/addons
 chown -R pi:pi /home/pi/.webthings/addons
 
 
-if ! [ -d /home/pi/.webthings/addons/candleappstore ] 
+if [ ! -f /home/pi/.webthings/config/db.sqlite ] || [ ! -d /home/pi/.webthings/addons/power-settings ];
+then
+    rm -rf package
+    rm -rf power-settings
+    wget https://github.com/createcandle/power-settings/releases/download/3.2.37/power-settings-3.2.37.tgz
+    for f in power-settings*.tgz; do
+        tar -xf "$f"
+    done
+    mv package power-settings
+    chown -R pi:pi power-settings
+    rm ./*.tgz
+fi
+
+
+if [ ! -d /home/pi/.webthings/addons/candleappstore ]; 
 then
     echo "Installing addons" | sudo tee -a /dev/kmsg
         
@@ -204,16 +219,6 @@ then
     done
     mv package candle-theme
     chown -R pi:pi candle-theme
-    rm ./*.tgz
-
-    rm -rf package
-    rm -rf power-settings
-    wget https://github.com/createcandle/power-settings/releases/download/3.2.37/power-settings-3.2.37.tgz
-    for f in power-settings*.tgz; do
-        tar -xf "$f"
-    done
-    mv package power-settings
-    chown -R pi:pi power-settings
     rm ./*.tgz
 
     rm -rf package

@@ -295,11 +295,13 @@ then
 
     apt install -y dnsmasq 
     systemctl disable dnsmasq.service
+    systemctl stop dnsmasq.service
 
     echo 
     apt install -y hostapd
     systemctl unmask hostapd.service
     systemctl disable hostapd.service
+    systemctl stop hostapd.service
     
 
     # Try to fix anything that may have gone wrong
@@ -494,7 +496,8 @@ then
 
     wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
     chmod +x ./install_candle_controller.sh
-    sudo -u pi ./install_candle_controller.sh
+    sudo -u pi ./install_candle_controller.sh &
+    wait
     rm ./install_candle_controller.sh
 
     cd /home/pi
@@ -521,7 +524,6 @@ then
     fi
     
 fi
-
 
 
 
@@ -570,18 +572,9 @@ mkdir -p /home/pi/.webthings/var/lib/bluetooth
 mkdir -p /home/pi/.webthings/etc/wpa_supplicant
 mkdir -p /home/pi/.webthings/etc/ssh
 
-# Create files that are linked to using binding in fstab
-if [ ! -e /home/pi/.webthings/etc/hostname ]
-then
-    echo "candle" > /etc/hostname
-    echo "candle" > /home/pi/.webthings/etc/hostname
-    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-else
-    echo "/home/pi/.webthings/etc/hostname already existed"
-    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-fi
 
-echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
+
+#echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
 
 
@@ -686,6 +679,7 @@ if [ ! -f /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf ]; then
     echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /etc/wpa_supplicant/wpa_supplicant.conf
     echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
 fi
+
 
 
 
@@ -1044,15 +1038,20 @@ cd /home/pi
 # CREATE BACKUPS
 
 # Create tar backup up controller
-if [ ! -f /home/pi/controller_backup.tar ]; then
-    if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
+if [ ! -f /home/pi/controller_backup.tar ];
+then
+    if [ -f /home/pi/webthings/gateway/build/app.js ] \
+    && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
+    && [ -f /home/pi/webthings/gateway/ ] \
+    && [ -d /home/pi/webthings/gateway/node_modules ] \
+    && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
     then
         echo "Creating initial backup of webthings folder"
         echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
         tar -czf ./controller_backup.tar ./webthings
     else
         echo
-        echo "ERROR, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
+        echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
         echo "Candle: ERROR, missing (parts of) webthings directory" >> /dev/kmsg
         echo
     fi
@@ -1142,6 +1141,22 @@ fi
 echo "Clearing /tmp"
 rm -rf /tmp/*
 
+
+
+
+# Set Candle as the hostname
+if [ ! -e /home/pi/.webthings/etc/hostname ]
+then
+    echo "candle" > /etc/hostname
+    echo "candle" > /home/pi/.webthings/etc/hostname
+    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
+else
+    echo "/home/pi/.webthings/etc/hostname already existed"
+    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
+fi
+
+
+
 # Copying the fstab file is the last thing to do since it could rended the system inaccessible
 
 if [ -f /home/pi/configuration-files/boot/fstab3.bak ] \
@@ -1182,7 +1197,13 @@ then
         fi
         
     fi
+else
+    echo
+    echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST"
+    echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST" >> /dev/kmsg
+    echo
 fi
+
 
 echo "Clearing /home/pi/configuration-files"
 rm -rf /home/pi/configuration-files
@@ -1209,6 +1230,11 @@ fi
 
 
 
+
+
+# Some final insurance
+chown pi:pi /home/pi/*
+
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
 if [ -f /boot/bootup_actions.sh ]; then
     echo "removed /boot/bootup_actions.sh"
@@ -1230,6 +1256,9 @@ if [ ! -e /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ];
   echo "Candle: added symlink for missing audio firmware" >> /dev/kmsg
 fi
 
+
+
+# cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
 
 
 
