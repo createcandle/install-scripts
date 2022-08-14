@@ -1176,7 +1176,7 @@ echo
 
 
 
-if [[ -z "${STOP_EARLY}" ]] || ["$STOP_EARLY" = no ]; 
+if [[ -z "${STOP_EARLY}" ]] || [ "$STOP_EARLY" = no ]; 
 then
     echo "STARTING FINAL PHASE"
     echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
@@ -1192,7 +1192,7 @@ else
     touch /boot/candle_first_run_complete.txt
     
     #if [[ -z "${DOWNLOAD_DEB}" ]]; then
-    if [ "$DOWNLOAD_DEB" = yes ]; then
+    if [[ -z "${DOWNLOAD_DEB}" ]] || [ "$DOWNLOAD_DEB" = no ]; then
         echo "Skipping download of .deb files"
         echo "Candle: skipping download of .deb files" >> /dev/kmsg
     else
