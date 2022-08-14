@@ -184,10 +184,12 @@ echo
 apt install -y python3-pip
 
 # update pip
-/usr/bin/python3 -m pip install --upgrade pip
+sudo -u pi /usr/bin/python3 -m pip install --upgrade pip
 
 # remove the Candle conf file, just in case it exists from an earlier install attempt
-rm /etc/mosquitto/mosquitto.conf
+if [ -f /etc/mosquitto/mosquitto.conf ]; then
+  rm /etc/mosquitto/mosquitto.conf
+fi
 
 echo
 echo "installing support packages like ffmpeg, arping, libolm, sqlite, mosquitto"
@@ -262,6 +264,8 @@ for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopen
     echo
 done
 
+
+# Do apt upgrade
 echo
 echo "UPGRADING LINUX"
 echo
@@ -273,8 +277,8 @@ echo "calling autoremove"
 apt autoremove -y
 
 
+# Check if GIT installed succesfully
 dpkg -s git &> /dev/null
-
 if [ $? -eq 0 ]; then
     echo "git installed succesfully"
 else
@@ -309,6 +313,8 @@ sudo -u pi pip3 install dbus-python pybluez pillow pycryptodomex numpy
 if [ -d "/home/pi/.local/bin" ] ; then
     echo "adding /home/pi/.local/bin to path"
     PATH="/home/pi/.local/bin:$PATH"
+else
+    echo "ERROR, /home/pi/.local/bin does not exist"
 fi
 
 echo "Updating existing python packages"
@@ -320,15 +326,12 @@ sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-add
 
 
 # RESPEAKER HAT
-
-
 echo
 echo "INSTALLING RESPEAKER HAT DRIVERS"
 echo
 cd /home/pi
 git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
 cd seeed-voicecard
-
 
 if [ -d "/etc/voicecard" ]
 then
