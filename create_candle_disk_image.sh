@@ -12,6 +12,16 @@ set +e # continue on errors
 # If you also want this script to download all the installed packages' as .deb files, then set this environment variable:
 # export DOWNLOAD_DEB=yes
 
+# Other parts of the script that can be skipped:
+# export SKIP_APT_INSTALL=yes
+# export SKIP_APT_UPGRADE=yes
+# export SKIP_PYTHON=yes
+# export SKIP_RESPEAKER=yes
+# export SKIP_BLUEALSA=yes
+
+
+# if you want to pretend that the script is running into a chroot at /ro:
+# export CHROOTED=yes
 
 
 # Check if script is being run as root
@@ -138,153 +148,161 @@ fi
 
 
 # INSTALL PROGRAMS AND UPDATE
-echo
-echo "INSTALLING APPLICATIONS AND LIBRARIES"
-echo
-
-set -e
-echo "calling apt update"
-apt update -y
-apt-get update -y
-echo
-echo "calling apt upgrade"
-echo "Candle: doing apt upgrade" >> /dev/kmsg
-#apt DEBIAN_FRONTEND=noninteractive upgrade -y
-DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
-wait
-echo
-echo "Upgrade complete"
-
-set +e
-
-# Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
-# TODO: maybe use version 88?
-echo
-echo "installing chromium-browser"
-echo "Candle: installing chromium-browser" >> /dev/kmsg
-echo
-apt install chromium-browser -y --allow-change-held-packages
-
-echo
-echo "installing vlc"
-apt install vlc --no-install-recommends -y
-
-#echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
-#curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
-#apt update
-#apt install ungoogled-chromium -y
-
-echo
-echo "installing git"
-echo "Candle: installing git" >> /dev/kmsg
-echo
-apt install git -y 
-
-echo
-echo "installing build tools"
-for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six; do
-    echo "$i"
-    apt install -y $i
+if [ "$SKIP_APT_INSTALL" = no ] || [[ -z "${SKIP_APT_INSTALL}" ]];
+then
     echo
-done
+    echo "INSTALLING APPLICATIONS AND LIBRARIES"
+    echo
 
-echo
-echo "installing pip3"
-echo
-apt install -y python3-pip
+    set -e
+    echo "calling apt update"
+    apt update -y
+    apt-get update -y
+    echo
+    if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
+    then
+        echo "calling apt upgrade"
+        echo "Candle: doing apt upgrade" >> /dev/kmsg
+        #apt DEBIAN_FRONTEND=noninteractive upgrade -y
+        DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+        wait
+        echo
+        echo "Upgrade complete"
+    fi
 
-# update pip
-sudo -u pi /usr/bin/python3 -m pip install --upgrade pip
+    set +e
 
-# remove the Candle conf file, just in case it exists from an earlier install attempt
-if [ -f /etc/mosquitto/mosquitto.conf ]; then
-  rm /etc/mosquitto/mosquitto.conf
+    # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
+    # TODO: maybe use version 88?
+    echo
+    echo "installing chromium-browser"
+    echo "Candle: installing chromium-browser" >> /dev/kmsg
+    echo
+    apt install chromium-browser -y --allow-change-held-packages
+
+    echo
+    echo "installing vlc"
+    apt install vlc --no-install-recommends -y
+
+    #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
+    #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
+    #apt update
+    #apt install ungoogled-chromium -y
+
+    echo
+    echo "installing git"
+    echo "Candle: installing git" >> /dev/kmsg
+    echo
+    apt install git -y 
+
+    echo
+    echo "installing build tools"
+    for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six; do
+        echo "$i"
+        apt install -y $i
+        echo
+    done
+
+
+    # remove the Candle conf file, just in case it exists from an earlier install attempt
+    if [ -f /etc/mosquitto/mosquitto.conf ]; then
+      rm /etc/mosquitto/mosquitto.conf
+    fi
+
+    echo
+    echo "installing support packages like ffmpeg, arping, libolm, sqlite, mosquitto"
+    echo "Candle: installing support packages" >> /dev/kmsg
+    echo
+    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables; do
+        echo "$i"
+        echo "Candle: installing $i" >> /dev/kmsg
+        apt install -y $i
+        echo
+    done
+
+
+    # removed from above list:
+    #  libnanomsg-dev \
+    #  libnanomsg5 \
+
+    # additional programs for Candle kiosk mode:
+    echo
+    echo "installing kiosk packages (x, openbox)"
+    echo
+    for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
+        echo "$i"
+        echo "Candle: installing $i" >> /dev/kmsg
+        apt-get install --no-install-recommends -y $i
+        echo
+    done
+    #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
+
+    # get OMXPlayer for Internet Radio
+    # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
+
+    echo
+    echo "installing omxplayer"
+    for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
+        echo "$i"
+        echo "Candle: installing $i" >> /dev/kmsg
+        apt-get install -y $i
+        echo
+    done
+    #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
+    apt --fix-broken install -y
+
+    wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb -O ./omxplayer.deb
+    dpkg -i ./omxplayer.deb
+    rm -rf ./omxplayer*
+
+    #apt --fix-broken install -y
+
+    mkdir -p /opt/vc/
+    wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
+    tar -xvf lib.tar -C /opt/vc/
+    rm ./lib.tar
+
+
+    # for BlueAlsa
+    echo "installing bluealsa support packages"
+    for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
+        echo "$i"
+        echo "Candle: installing $i" >> /dev/kmsg
+        apt install -y $i
+        echo
+    done
+    #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
+
+
+    # Camera support
+    for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
+        echo "$i"
+        echo "Candle: installing $i" >> /dev/kmsg
+        apt install -y $i
+        echo
+    done
+
+
+    # Try to fix anything that may have gone wrong
+    apt-get update --fix-missing -y
+    apt --fix-broken install -y
 fi
 
-echo
-echo "installing support packages like ffmpeg, arping, libolm, sqlite, mosquitto"
-echo "Candle: installing support packages" >> /dev/kmsg
-echo
-for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables; do
-    echo "$i"
-    echo "Candle: installing $i" >> /dev/kmsg
-    apt install -y $i
+
+if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
+then
     echo
-done
-
-
-# removed from above list:
-#  libnanomsg-dev \
-#  libnanomsg5 \
-
-# additional programs for Candle kiosk mode:
-echo
-echo "installing kiosk packages (x, openbox)"
-echo
-for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
-    echo "$i"
-    echo "Candle: installing $i" >> /dev/kmsg
-    apt-get install --no-install-recommends -y $i
+    echo "UPGRADING LINUX"
     echo
-done
-#apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
+    #apt upgrade -y
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+    wait
+    echo ""
+    echo "calling autoremove"
+    apt autoremove -y
+fi
 
-# get OMXPlayer for Internet Radio
-# http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
-
-echo
-echo "installing omxplayer"
-for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
-    echo "$i"
-    echo "Candle: installing $i" >> /dev/kmsg
-    apt-get install -y $i
-    echo
-done
-#apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
-apt --fix-broken install -y
-
-wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb -O ./omxplayer.deb
-dpkg -i ./omxplayer.deb
-rm -rf ./omxplayer*
-
-#apt --fix-broken install -y
-
-mkdir -p /opt/vc/
-wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
-tar -xvf lib.tar -C /opt/vc/
-rm ./lib.tar
-
-
-# for BlueAlsa
-echo "installing bluealsa support packages"
-for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
-    echo "$i"
-    echo "Candle: installing $i" >> /dev/kmsg
-    apt install -y $i
-    echo
-done
-#apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
-
-
-# Camera support
-for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
-    echo "$i"
-    echo "Candle: installing $i" >> /dev/kmsg
-    apt install -y $i
-    echo
-done
-
-
-# Do apt upgrade
-echo
-echo "UPGRADING LINUX"
-echo
-apt-get update --fix-missing -y
-apt --fix-broken install -y
-apt upgrade -y
-echo ""
-echo "calling autoremove"
-apt autoremove -y
 
 
 # Check if GIT installed succesfully
@@ -311,54 +329,68 @@ fi
 
 
 # PYTHON
-echo
-echo "INSTALLING AND UPDATING PYTHON PACKAGES"
-echo
-# upgrade pip first
-sudo -u pi python3 -m pip install --upgrade pip
+if [ "$SKIP_PYTHON" = no ] || [[ -z "${SKIP_PYTHON}" ]];
+then
+    echo
+    echo "INSTALLING AND UPDATING PYTHON PACKAGES"
+    echo
 
-sudo -u pi pip3 uninstall -y adapt-parser || true
-sudo -u pi pip3 install dbus-python pybluez pillow pycryptodomex numpy
 
-if [ -d "/home/pi/.local/bin" ] ; then
-    echo "adding /home/pi/.local/bin to path"
-    PATH="/home/pi/.local/bin:$PATH"
-else
-    echo "ERROR, /home/pi/.local/bin does not exist"
+    echo
+    echo "installing pip3"
+    echo
+    apt install -y python3-pip
+
+    # update pip
+    #sudo -u pi /usr/bin/python3 -m pip install --upgrade pip
+
+    # upgrade pip first
+    sudo -u pi python3 -m pip install --upgrade pip
+
+    sudo -u pi pip3 uninstall -y adapt-parser || true
+    sudo -u pi pip3 install dbus-python pybluez pillow pycryptodomex numpy
+
+    if [ -d "/home/pi/.local/bin" ] ; then
+        echo "adding /home/pi/.local/bin to path"
+        PATH="/home/pi/.local/bin:$PATH"
+    else
+        echo "ERROR, /home/pi/.local/bin does not exist"
+    fi
+
+    echo "Updating existing python packages"
+    sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro requests RPi.GPIO ssh-import-id urllib3 wheel libevdev
+
+    echo "Installing Python gateway_addon"
+    sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 fi
-
-echo "Updating existing python packages"
-sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro requests RPi.GPIO ssh-import-id urllib3 wheel libevdev
-
-echo "Installing Python gateway_addon"
-sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
 
 
 # RESPEAKER HAT
-echo
-echo "INSTALLING RESPEAKER HAT DRIVERS"
-echo
-cd /home/pi
-git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
-cd seeed-voicecard
+if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]];
+    echo
+    echo "INSTALLING RESPEAKER HAT DRIVERS"
+    echo
+    cd /home/pi
+    git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
+    cd seeed-voicecard
 
-if [ -d "/etc/voicecard" ]
-then
-    echo "ReSpeaker was already installed. Doing uninstall first"
-    ./uninstall.sh    
+    if [ -d "/etc/voicecard" ]
+    then
+        echo "ReSpeaker was already installed. Doing uninstall first"
+        ./uninstall.sh    
+    fi
+
+    apt-get update
+    ./install.sh
+
+    cd /home/pi
+    rm -rf seeed-voicecard
 fi
-
-apt-get update
-./install.sh
-
-cd /home/pi
-rm -rf seeed-voicecard
-
 
 
 # BLUEALSA
-if [ ! -d "/usr/bin/bluealsa" ]
+if [ "$SKIP_BLUEALSA" = no ] || [[ -z "${SKIP_BLUEALSA}" ]];
 then
     
     echo
@@ -384,11 +416,9 @@ then
     ../configure --enable-msbc --enable-mp3lame --enable-faststream --enable-systemd
     make
     make install
-    
-    
 
 else
-    echo "BlueAlsa was already installed"
+    echo "Skipping BlueAlsa build"
 fi
 
 cd /home/pi
@@ -913,6 +943,9 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
     if [ $isInFile4 -eq 0 ]
     then
+        echo
+        echo "ADDING READ-ONLY MODE"
+        echo
         echo "Candle: adding read-only mode" >> /dev/kmsg
         mkinitramfs -o /boot/initrd
     
@@ -965,10 +998,9 @@ fi
 cd /home/pi
 
 
-
 # CREATE BACKUPS
 
-
+# Create tar backup up controller
 if [ ! -f /home/pi/controller_backup.tar ]; then
     if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
     then
@@ -1105,19 +1137,18 @@ else
     exit 0
 fi
 
-
+echo
 
 if [[ -z "${STOP_EARLY}" ]] || ["$STOP_EARLY" = no ]; 
 then
-    echo
-    echo " STARTING FINAL PHASE"
+    echo "STARTING FINAL PHASE"
     echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
     chmod +x /home/pi/prepare_for_disk_image.sh 
     /home/pi/prepare_for_disk_image.sh 
     exit 0
   
 else
-    
+    echo "NOT RUNNING PREPARE_FOR_DISK_IMAGE SCRIPT YET. Stopping early."
     # This will prevent the controller from asking for a new wifi connection and SSH keys on reboot, which is easier during development.
     # it also shouldn't conflict with using this as an upgrade script, since in those cases this file should already exist
     # Only downside is a missing machine_id
@@ -1168,21 +1199,21 @@ else
     echo "then enter this command:"
     echo "sudo /home/pi/prepare_for_disk_image.sh"
     echo
-    echo "Once that script is done the pi will shut down."
+    echo "Once that script is done the pi will shut down and can be imaged."
     echo
     echo "Note that if you reboot, the read-only mode will become active."
-    echo "If you want to keep full read-write mode, then use this command:"
+    echo "If you want to delay this once, then use this command:"
     echo "touch /boot/candle_rw_once.txt"
-    echo "...or if you want RW mode permanently:"
+    echo "...or if you want skip read-only mode permanently:"
     echo "touch /boot/candle_rw_keep.txt"
     echo ""
     
 fi
 
 
-
-if [[ -z "${REBOOT_WHEN_DONE}" ]]; then
-    echo "not rebooting"
+# If STOP_EARLY is enabled, then here it's possible to also ask the script to reboot. This is useful for upgrading the system.
+if [[ -z "${REBOOT_WHEN_DONE}" ]] || [ "$REBOOT_WHEN_DONE" = no ]; then
+    echo "(not rebooting)"
 else
     echo "rebooting in 10 seconds"
     sleep 10
