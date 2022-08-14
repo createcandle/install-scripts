@@ -6,7 +6,6 @@
 echo
 echo "CANDLE LIVE UPDATE"
 
-
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]; then 
   echo "Please run as root (use sudo)"
@@ -86,7 +85,16 @@ fi
 mkdir -p /ro/home/pi/tmp/boot
 cp -r --verbose /boot/* /ro/home/pi/tmp/boot
 
+mkdir -p /ro/home/pi/tmp/root
+cp -r --verbose /root/* /ro/home/pi/tmp/root
 
+cp -r --verbose /proc/device-tree /ro/home/pi/tmp/proc/device-tree
+cp -r --verbose /proc/mounts /ro/home/pi/tmp/proc/mounts
+
+
+mkdir -p /ro/home/pi/tmp/etc
+cp -r --verbose /ro/home/pi/.webthings/etc/hostname /ro/home/pi/tmp/etc/hostname
+cp -r --verbose /ro/home/pi/.webthings/etc/hosts /ro/home/pi/tmp/etc/hosts
 
 echo "Downloading latest install script from Github" 
 
@@ -107,6 +115,9 @@ fi
 # sudo chroot /ro sh -c "wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh"
 # sudo chroot /ro sh -c "ls /home/pi/alfred"
 
+# sudo chroot /ro sh -c "mount -t procfs && ls /proc"
+
+#sudo chroot /ro ln -s /proc/mounts /etc/mtab
 
 # mount -o bind /dir/outside/chroot /dir/inside/chroot
 echo "starting chroot"
@@ -114,6 +125,7 @@ echo "Candle: starting chroot" >> /dev/kmsg
 
 chroot /ro sh -c "$(cat <<END
 echo "in chroot"
+export CHROOTED=yes
 echo "/etc/resolv.conf: $(cat /etc/resolv.conf)"
 echo "cat /mnt/etc/resolv.conf: $(cat /mnt/etc/resolv.conf)"
 cd /home/pi
@@ -124,6 +136,8 @@ mount --bind /home/pi/tmp/boot /boot
 else
 echo "/home/pi/tmp/boot was missing"
 fi
+mount -t procfs
+mount -t sysfs
 if [ -f /home/pi/create_candle_disk_image.sh ]; then
 echo "Install script found, starting it"
 /home/pi/create_candle_disk_image.sh > /home/pi/update_report.txt
@@ -142,6 +156,10 @@ sleep 5
 
 echo "setting fkms driver"
 sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
+
+
+# delete the temporary directory
+rm -rf /ro/home/pi/tmp
 
 
 if [ -f /ro/home/pi/create_candle_disk_image.sh ]; then

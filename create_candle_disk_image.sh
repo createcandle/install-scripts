@@ -13,6 +13,7 @@ set +e # continue on errors
 # export DOWNLOAD_DEB=yes
 
 
+
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root (use sudo)"
@@ -39,7 +40,7 @@ fi
 
 
 # Detect if old overlay system is active
-if [ ! -f /boot/cmdline.txt ]; then
+if [ "$CHROOTED" = true ]; then
     if grep -q "boot=overlay" /boot/cmdline.txt; then
         echo 
         echo "Detected the OLD raspi-config read-only overlay. Disable it under raspi-config -> performance (and then reboot)"
@@ -70,15 +71,15 @@ scriptname=`basename "$0"`
 echo "USER       : $(whoami)"
 echo "NAME       : $scriptname"
 
-if [ ! -f /boot/cmdline.txt ]; then
+if [ "$CHROOTED" = true ]; then
 echo "NOTE       : INSIDE CHROOT (boot partition is not mounted)"
 fi
 echo
 
-if [ ! -d /home/pi/.webthings/addons ] && [ -f /boot/cmdline.txt ]; 
+if [ ! -d /home/pi/.webthings/addons ] && [ "$CHROOTED" = false ]; 
 then
     
-    if ls /dev/mmcblk0p3; then
+    if ls /dev/mmcblk0p4; then
         echo
         echo "partitions already created:"
     else
@@ -86,15 +87,17 @@ then
         echo "CREATING PARTITIONS"
         echo
 
-        printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n14000MB\nquit" | parted
+        printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7501MB\n14000MB\nquit" | parted
         resize2fs /dev/mmcblk0p2
-        printf "y" | mkfs.ext4 /dev/mmcblk0p3
+        #printf "y" | mkfs.ext4 /dev/mmcblk0p3
+        printf "y" | mkfs.ext4 /dev/mmcblk0p4
         mkdir -p /home/pi/.webthings
         chown pi:pi /home/pi/.webthings
+        touch /boot/candle_has_4th_partition.txt
     fi
 
     
-    mount /dev/mmcblk0p3 /home/pi/.webthings
+    mount /dev/mmcblk0p4 /home/pi/.webthings
     chown pi:pi /home/pi/.webthings
     
     lsblk
@@ -611,7 +614,7 @@ echo
 rm -rf /home/pi/configuration-files
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
 
-if [ -f /boot/cmdline.txt ]; then
+if [ "$CHROOTED" = false ]; then
     cp --verbose -r /home/pi/configuration-files/boot/* /boot/
 fi
 cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
@@ -702,7 +705,7 @@ systemctl enable fake-hwclock-save.service
 # KIOSK
 
 # Download boot splash images and video
-if [ -f /boot/cmdline.txt ]; then
+if [ "$CHROOTED" = false ]; then
 
     # Hides the Raspberry Pi logos normally shown at boot
     isInFile2=$(cat /boot/config.txt | grep -c "disable_splash")
@@ -898,7 +901,7 @@ echo "candle" > /etc/hostname
 #echo "candle" > /home/pi/.webthings/etc/hostname
 
 
-if [ -f /boot/cmdline.txt ]; then
+if [ "$CHROOTED" = false ]; then
     # Install read-only file system
     isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
     if [ $isInFile4 -eq 0 ]
@@ -1052,7 +1055,7 @@ fi
 
 
 # Run test script
-if [ -f /boot/cmdline.txt ]; 
+if [ "$CHROOTED" = false ]; 
 then
     echo
     echo
@@ -1107,7 +1110,13 @@ then
   
 else
     
-    if [[ -z "${DOWNLOAD_DEB}" ]]; then
+    # This will prevent the controller from asking for a new wifi connection and SSH keys on reboot, which is easier during development.
+    # it also shouldn't conflict with using this as an upgrade script, since in those cases this file should already exist
+    # Only downside is a missing machine_id
+    touch /boot/candle_first_run_complete.txt
+    
+    #if [[ -z "${DOWNLOAD_DEB}" ]]; then
+    if [ "$DOWNLOAD_DEB" = yes ]; then
         echo "Skipping download of .deb files"
         echo "Candle: skipping download of .deb files" >> /dev/kmsg
     else
