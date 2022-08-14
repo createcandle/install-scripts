@@ -382,7 +382,7 @@ then
     git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
     cd seeed-voicecard
 
-    if [ -d "/etc/voicecard" ]
+    if [ -d "/etc/voicecard" ];
     then
         echo "ReSpeaker was already installed. Doing uninstall first"
         ./uninstall.sh    
@@ -433,17 +433,20 @@ rm -rf bluez-alsa
 
 
 # Plymouth-lite
-echo
-echo "creating Plymouth lite"
-echo
-git clone --depth 1 https://github.com/T4d3o/Plymouth-lite.git
-cd Plymouth-lite
-./configure
-make
-cp ply-image /usr/bin
+if [ ! -f /bin/ply-image ]; 
+then
+    echo
+    echo "creating Plymouth lite"
+    echo
+    git clone --depth 1 https://github.com/T4d3o/Plymouth-lite.git
+    cd Plymouth-lite
+    ./configure
+    make
+    cp ply-image /usr/bin
 
-cd /home/pi
-rm -rf Plymouth-lite
+    cd /home/pi
+    rm -rf Plymouth-lite
+fi
 
 # sudo update-rc.d gateway-iptables defaults
 
