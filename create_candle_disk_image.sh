@@ -76,7 +76,7 @@ echo "NOTE       : INSIDE CHROOT (boot partition is not mounted)"
 fi
 echo
 
-if [ ! -d /home/pi/.webthings/addons ] && [ "$CHROOTED" = false ]; 
+if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${CHROOTED}" ]]; 
 then
     
     if ls /dev/mmcblk0p4; then
