@@ -288,7 +288,19 @@ then
         apt install -y $i
         echo
     done
+    
+    echo
+    echo "INSTALLING HOSTAPD AND DNSMASQ"
+    echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
 
+    apt install -y dnsmasq 
+    systemctl disable dnsmasq.service
+
+    echo 
+    apt install -y hostapd
+    systemctl unmask hostapd.service
+    systemctl disable hostapd.service
+    
 
     # Try to fix anything that may have gone wrong
     apt-get update --fix-missing -y
@@ -331,8 +343,8 @@ else
     
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
-      /bin/ply-image /boot/error.png
-      sleep 7200
+        /bin/ply-image /boot/error.png
+        sleep 7200
     fi
     
     exit 1
@@ -379,6 +391,7 @@ fi
 
 
 
+
 # RESPEAKER HAT
 if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]];
 then
@@ -401,6 +414,7 @@ then
     cd /home/pi
     rm -rf seeed-voicecard
 fi
+
 
 
 
@@ -441,7 +455,8 @@ rm -rf bluez-alsa
 
 
 
-# Plymouth-lite
+
+# PLYMOUTH LITE
 if [ ! -f /bin/ply-image ]; 
 then
     echo
@@ -487,26 +502,30 @@ then
     # This should work now, but setcap has been move to install_candle_controller script instead
     #NODE_PATH=$(sudo -i -u pi which node)
     #setcap cap_net_raw+eip $(eval readlink -f "$NODE_PATH")
+    
+    # Check if the installation of the controller succeeded
+    if [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ]; then
+    
+        echo 
+        echo "ERROR, failed to (fully) install candle-controller"
+        echo "ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
+        echo
+
+        # Show error image
+        if [ -e "/bin/ply-image" ] && [ -f /boot/error.png ]; then
+            /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+
+        exit 1
+    fi
+    
 fi
 
 
 
-# Install HostAPD and DNSMasq
-if [ "$SKIP_APT_INSTALL" = no ] || [[ -z "${SKIP_APT_INSTALL}" ]];
-then
-    echo
-    echo "INSTALLING HOSTAPD AND DNSMASQ"
-    echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
-    echo
 
-    apt install -y dnsmasq 
-    systemctl disable dnsmasq.service
 
-    echo 
-    apt install -y hostapd
-    systemctl unmask hostapd.service
-    systemctl disable hostapd.service
-fi
 
 
 
@@ -564,12 +583,15 @@ fi
 
 echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
-rm -rf /tmp/*
-echo "/tmp contents:"
-ls -l -a /tmp
-#mkdir -p /home/pi/.webthings/tmp
+
+
+
 if [ ! -d /home/pi/.webthings/tmp ]; then
-    cp -r /tmp /home/pi/.webthings/tmp
+    mkdir -p /home/pi/.webthings/tmp
+    rm -rf /tmp/*
+    echo "cleared /tmp contents:"
+    ls -l -a /tmp
+    cp -r /tmp/* /home/pi/.webthings/tmp
 fi
 chmod 1777 /home/pi/.webthings/tmp
 find /home/pi/.webthings/tmp \
@@ -577,14 +599,14 @@ find /home/pi/.webthings/tmp \
      -name '.*-unix' -exec chmod 1777 {} + -prune -o \
      -exec chmod go-rwx {} +
 
-# all directories needed to keep fstab happy should now exist
+
 
 
 # COPY FILES
 
 cd /home/pi
 
-if [ -e /home/pi/webthings/gateway/static/images/floorplan.svg ]
+if [ -e /home/pi/webthings/gateway/static/images/floorplan.svg ];
 then
     cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/floorplan.svg
     chown pi:pi /home/pi/.webthings/floorplan.svg
@@ -654,9 +676,11 @@ mkdir -p /home/pi/.webthings/etc/ssh/ssh_config.d
 mkdir -p /home/pi/.webthings/etc/ssh/sshd_config.d 
 
 
-# Create "empty" wpa_supplicant confog file if it doesn't exist yet
+# Create "empty" wpa_supplicant config file if it doesn't exist yet
 if [ ! -f /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf ]; then
-    cp --verbose -r /etc/wpa_supplicant /home/pi/.webthings/etc/
+    echo "Creating redirected wpa_supplicant file"
+    mkdir -p /home/pi/.webthings/etc/wpa_supplicant
+    cp --verbose -r /etc/wpa_supplicant/* /home/pi/.webthings/etc/wpa_supplicant
     #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /etc/wpa_supplicant/wpa_supplicant.conf
     #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
     echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /etc/wpa_supplicant/wpa_supplicant.conf
@@ -665,7 +689,14 @@ fi
 
 
 
-# Download tons of ready-made settings files from the Candle github
+
+
+
+
+
+
+# COPY SETTINGS
+
 echo
 echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
 echo "Candle: downloading configuration files from Github" >> /dev/kmsg
@@ -676,20 +707,45 @@ if [ -d /home/pi/configuration-files ]; then
     rm -rf /home/pi/configuration-files
 fi
 
+# Download ready-made settings files from the Candle github
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
 
-# Copy files to their locations
-if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
-    cp --verbose -r /home/pi/configuration-files/boot/* /boot/
-fi
-cp --verbose /home/pi/configuration-files/home/pi/* /home/pi/
-cp --verbose -r /home/pi/configuration-files/home/pi/candle/* /home/pi/candle
-cp --verbose -r /home/pi/configuration-files/home/pi/.webthings/etc/* /home/pi/.webthings/etc/
-cp --verbose -r /home/pi/configuration-files/home/pi/.config/* /home/pi/.config/
-#cp --verbose -r /home/pi/configuration-files/lib/systemd/system/* /lib/systemd/system/ 
-cp --verbose -r /home/pi/configuration-files/etc/* /etc/
 
-rm -rf /home/pi/configuration-files
+# Check if download succeeded
+if [ ! -d /home/pi/configuration-files ]; then
+    echo 
+    echo "ERROR, failed to download latest configuration files"
+    echo "ERROR, failed to download latest configuration files" >> /dev/kmsg
+    
+    echo
+    
+    # Show error image
+    if [ -e "/bin/ply-image" ] && [ -f /boot/error.png ]; then
+        /bin/ply-image /boot/error.png
+    fi
+    
+    sleep 7200
+    exit 1
+else
+    echo "Configuration files download succeeded"
+    echo "Configuration files download succeeded" >> /dev/kmsg
+fi
+
+
+rsync -vr /home/pi/configuration-files/* /
+
+
+#if [ ! -f /boot/candle_config_version.txt ]; then
+#    touch /boot/candle_config_version.txt
+#fi
+#if ! diff -q /home/pi/configuration-files/boot/candle_config_version.txt /boot/candle_config_version.txt &>/dev/null; 
+#then
+#    echo "Different config version, intiating Rsync"
+#    echo "Candle: Different config version, intiating Rsync" >> /dev/kmsg
+#    rsync -vr /home/pi/configuration-files/* /
+#else
+#    echo "No new config version detected"
+#fi
 
 #chmod +x /home/pi/candle_first_run.sh
 
@@ -756,7 +812,6 @@ systemctl disable webthings-gateway.check-for-update.service
 systemctl disable webthings-gateway.check-for-update.timer
 systemctl disable webthings-gateway.update-rollback.service
 
-
 # disable apt services
 sudo systemctl disable apt-daily.service
 sudo systemctl disable apt-daily.timer
@@ -769,13 +824,14 @@ systemctl disable man-db.timer
 # enable half-hourly save of time
 systemctl enable fake-hwclock-save.service
 
-
+# Hide the login text (it will still be available on tty3 - connect a keyboard to your pi and press CTRl-ALT-F3 to see it)
+systemctl enable getty@tty3.service
+systemctl disable getty@tty1.service
 
 
 
 # KIOSK
 
-# Download boot splash images and video
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 
     # Hides the Raspberry Pi logos normally shown at boot
@@ -819,26 +875,10 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         echo "- USB was already set to deliver more current in config.txt"
     fi
 
-    # Downloading splash images
-    echo
-    echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEOS"
-    echo "Candle: downloading splash images and videos" >> /dev/kmsg
-    echo
-    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
-    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
-    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
-    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
-    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
-    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
-    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
-    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
-    
 fi
 
-# Hide the login text (it will still be available on tty3 - connect a keyboard to your pi and press CTRl-ALT-F3 to see it)
-systemctl enable getty@tty3.service
-systemctl disable getty@tty1.service
+
+
 
 #mkdir -p /etc/X11/xinit
 #mkdir -p /etc/xdg/openbox
@@ -1102,10 +1142,71 @@ fi
 echo "Clearing /tmp"
 rm -rf /tmp/*
 
+# Copying the fstab file is the last thing to do since it could rended the system inaccessible
 
-#if [ -f /home/pi/install.sh ]; then # TODO: does this still do anything?
-#    rm /home/pi/install.sh
-#fi
+if [ -f /home/pi/configuration-files/boot/fstab3.bak ] \
+&& [ -f /home/pi/configuration-files/boot/fstab4.bak ] \
+&& [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
+&& [ -d /home/pi/.webthings/var/lib/bluetooth ] \
+&& [ -d /home/pi/.webthings/etc/ssh ] \
+&& [ -f /home/pi/.webthings/etc/hostname ] \
+&& [ -d /home/pi/.webthings/tmp ] \
+&& [ -d /home/pi/.webthings/arduino/.arduino15 ] \
+&& [ -d /home/pi/.webthings/arduino/Arduino ];
+then
+    echo
+    echo "COPYING FSTAB FILE"
+    echo
+
+    if lsblk | grep -q 'mmcblk0p4'; 
+    then
+        echo "copying 4 partition version of fstab"
+        echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
+        
+        if ! diff -q /home/pi/configuration-files/boot/fstab4.bak /etc/fstab &>/dev/null; then
+            echo "fstab file is different, copying it"
+            cp --verbose /home/pi/configuration-files/boot/fstab4.bak /etc/fstab
+        else
+            echo "new fstab file is same as the old one, not copying it."
+        fi
+        
+    else
+        echo "copying 3 partition version of fstab"
+        echo "Candle: copying 3 partition version of fstab" >> /dev/kmsg
+        
+        if ! diff -q /home/pi/configuration-files/boot/fstab3.bak /etc/fstab &>/dev/null; then
+            echo "fstab file is different, copying it"
+            cp --verbose /home/pi/configuration-files/boot/fstab3.bak /etc/fstab
+        else
+            echo "new fstab file is same as the old one, not copying it."
+        fi
+        
+    fi
+fi
+
+echo "Clearing /home/pi/configuration-files"
+rm -rf /home/pi/configuration-files
+
+
+# Downloading splash images
+if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
+
+    echo
+    echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEOS"
+    echo "Candle: downloading splash images and videos" >> /dev/kmsg
+    echo
+    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
+    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
+    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
+    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
+    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
+    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
+    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
+    
+fi
+
 
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
@@ -1191,20 +1292,18 @@ then
   
 else
     echo "NOT RUNNING PREPARE_FOR_DISK_IMAGE SCRIPT YET. Stopping early."
-    # This will prevent the controller from asking for a new wifi connection and SSH keys on reboot, which is easier during development.
-    # it also shouldn't conflict with using this as an upgrade script, since in those cases this file should already exist
-    # Only downside is a missing machine_id
-    touch /boot/candle_first_run_complete.txt
-    touch /boot/ssh.txt
     
-    #if [[ -z "${DOWNLOAD_DEB}" ]]; then
+    # To be safe, start SSH on the first run
+    #touch /boot/ssh.txt
+    
+    # Optional download of .deb files
     if [[ -z "${DOWNLOAD_DEB}" ]] || [ "$DOWNLOAD_DEB" = no ]; then
         echo "Skipping download of .deb files"
         echo "Candle: skipping download of .deb files" >> /dev/kmsg
     else
-    #printf 'Do you want to download all the .deb files? (y/n)'
-    #read answer
-    #if [ "$answer" != "${answer#[Yy]}" ] ;then
+        #printf 'Do you want to download all the .deb files? (y/n)'
+        #read answer
+        #if [ "$answer" != "${answer#[Yy]}" ] ;then
         
         echo 
         echo "DOWNLOADING ALL INSTALLED PACKAGES AS .DEB FILES"
