@@ -84,9 +84,9 @@ echo "USER       : $(whoami)"
 echo "NAME       : $scriptname"
 
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
-echo "NOTE       : Not in chroot"
+echo "CHROOT     : Not in chroot"
 else
-echo "NOTE       : INSIDE CHROOT (boot partition is not mounted)"
+echo "CHROOT     : INSIDE CHROOT (boot partition is not mounted)"
 fi
 
 echo
@@ -305,6 +305,10 @@ fi
 
 
 
+
+
+# SANITY CHECK
+
 # Check if GIT installed succesfully
 dpkg -s git &> /dev/null
 if [ $? -eq 0 ]; then
@@ -325,6 +329,8 @@ else
     
     exit 1
 fi
+
+
 
 
 
@@ -368,6 +374,7 @@ fi
 
 # RESPEAKER HAT
 if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]];
+then
     echo
     echo "INSTALLING RESPEAKER HAT DRIVERS"
     echo
