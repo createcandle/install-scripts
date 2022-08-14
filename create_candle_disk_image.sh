@@ -1,6 +1,7 @@
 #!/bin/bash
 set +e # continue on errors
 
+export PATH="/home/pi/.local/bin:$PATH"
 
 # CANDLE INSTALL AND UPDATE SCRIPT
 
@@ -71,6 +72,8 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         exit 1
     fi
 fi
+
+
 
 
 # CREATE PARTITIONS
