@@ -142,7 +142,13 @@ fi
 
 if [ -f /boot/developer.txt ]; then
     git clone --depth 1 https://github.com/createcandle/candle-controller.git
-    mv candle-controller gateway2
+    if [ -d ./candle-controller ]; then
+        mv candle-controller /home/pi/webthings/gateway2
+    else
+        echo "ERROR, downloading cutting edge candle-controller dir from Github failed"
+    fi
+    
+    
     
 else
     curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
@@ -152,33 +158,38 @@ else
     | sed 's/,*$//' \
     | wget -qi - -O candle-controller.tar
 
-    tar -xf candle-controller.tar
-    rm candle-controller.tar
+    if [ -f candle-controller.tar ]; then
+        tar -xf candle-controller.tar
+        rm candle-controller.tar
     
-    for directory in createcandle-candle-controller*; do
-      [[ -d $directory ]] || continue
-      echo "Directory: $directory"
-      mv -- "$directory" ./gateway2
-    done
+        for directory in createcandle-candle-controller*; do
+          [[ -d $directory ]] || continue
+          echo "Directory: $directory"
+          mv -- "$directory" ./gateway2
+        done
     
-    #mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
-    echo
-    echo "result:"
-    ls ./gateway2
+        #mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
+        echo
+        echo "PWD: $(pwd)"
+        echo "ls /home/pi/webthings/gateway2:"
+        ls /home/pi/webthings/gateway2
+    else
+        echo "ERROR, downloading latest release of candle-controller source dir from Github failed"
+    fi
 fi
 
-if [ ! -d gateway2 ]; then
+if [ ! -d /home/pi/webthings/gateway2 ]; then
     echo
     echo "ERROR, missing gateway2 directory"
+    echo "ERROR, missing gateway2 directory" | sudo tee -a /dev/kmsg
     echo
     exit 1
 fi
 
+echo
 
 
-
-chown -R pi:pi /home/pi/webthings/gateway2
-cd gateway2
+cd /home/pi/webthings/gateway2
 
 rm -rf node_modules/
 
