@@ -748,7 +748,7 @@ rsync -vr /home/pi/configuration-files/* /
 # CHMOD THE NEW FILES
 chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
-chmod +x /home/pi/debug.sh
+chmod +x /home/pi/candle/debug.sh
 
 # CHOWN THE NEW FILES
 chown pi:pi /home/pi/*
@@ -1042,7 +1042,7 @@ if [ ! -f /home/pi/controller_backup.tar ];
 then
     if [ -f /home/pi/webthings/gateway/build/app.js ] \
     && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
-    && [ -f /home/pi/webthings/gateway/ ] \
+    && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
     && [ -d /home/pi/webthings/gateway/node_modules ] \
     && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
     then
