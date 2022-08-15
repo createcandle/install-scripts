@@ -103,26 +103,37 @@ echo
 if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${CHROOTED}" ]]; 
 then
     
-    if ls /dev/mmcblk0p4; then
+    if [ -f /dev/mmcblk0p4 ]; then
         echo
         echo "partitions already created:"
     else
-        echo
-        echo "CREATING PARTITIONS"
-        echo
+        #if ls /dev/mmcblk0p2; then
+        if [ -f /dev/mmcblk0p2 ]; then
+            
+            echo
+            echo "CREATING PARTITIONS"
+            echo
 
-        printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7501MB\n14000MB\nquit" | parted
-        resize2fs /dev/mmcblk0p2
-        #printf "y" | mkfs.ext4 /dev/mmcblk0p3
-        printf "y" | mkfs.ext4 /dev/mmcblk0p4
-        mkdir -p /home/pi/.webthings
-        chown pi:pi /home/pi/.webthings
-        touch /boot/candle_has_4th_partition.txt
+            printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7501MB\n14000MB\nquit" | parted
+            resize2fs /dev/mmcblk0p2
+            #printf "y" | mkfs.ext4 /dev/mmcblk0p3
+            printf "y" | mkfs.ext4 /dev/mmcblk0p4
+            mkdir -p /home/pi/.webthings
+            chown pi:pi /home/pi/.webthings
+            touch /boot/candle_has_4th_partition.txt
+        else
+            echo
+            echo "Partition 2 was missing. Inside chroot?"
+            echo
+        fi
     fi
 
-    
-    mount /dev/mmcblk0p4 /home/pi/.webthings
-    chown pi:pi /home/pi/.webthings
+    if [ -f /dev/mmcblk0p4 ]; then
+        mount /dev/mmcblk0p4 /home/pi/.webthings
+        chown pi:pi /home/pi/.webthings
+    else
+        echo "/dev/mmcblk0p4 was missing - in chroot?"
+    fi
     
     lsblk
     
@@ -1256,6 +1267,9 @@ fi
 
 # Some final insurance
 chown pi:pi /home/pi/*
+timedatectl set-ntp true
+sleep 2
+fake-hwclock save
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
 if [ -f /boot/bootup_actions.sh ]; then
