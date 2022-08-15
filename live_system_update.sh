@@ -34,18 +34,23 @@ echo
 # make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; 
 then
-    echo "Trying to get time update from NTP server"
+    echo "Detected hardware clock indicator. Trying to get latest time update from NTP server"
     rm /boot/candle_hardware_clock.txt
     systemctl restart systemd-timesyncd.service
     timedatectl set-ntp true
     sleep 2
     /usr/sbin/fake-hwclock save
-    echo "Candle: requested latest time from internet. Date is now: $(date)" >> /dev/kmsg
+    echo "Candle: attempted requested of latest time from internet." >> /dev/kmsg
 else
     echo "no hardware clock detected, assuming time is current"
 fi
 
+timedatectl set-ntp true
+sleep 2
+/usr/sbin/fake-hwclock save
 
+echo "current date: $(date)"
+echo
 
 echo "Setting /ro to RW"
 
@@ -163,7 +168,7 @@ export STOP_EARLY=yes
 #fi
 
 #mount -t procfs
-if [ ! -l /proc/partitions ]; then
+if [ ! -f /proc/partitions ]; then
 mount -t proc proc /proc
 fi
 
