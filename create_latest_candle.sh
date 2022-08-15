@@ -99,6 +99,14 @@ fi
 echo
 
 
+if [ ! -s /etc/resolve.conf ]; then
+    # no nameserver
+    echo "no nameserver, aborting"
+    echo "Candle: no nameserver, aborting" >> /dev/kmsg
+    exit 1
+fi
+
+
 # Create disk partitions
 if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${CHROOTED}" ]]; 
 then
@@ -455,30 +463,38 @@ then
     apt-get update
     cd /home/pi
     git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
-    cd seeed-voicecard
     
-    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
-        touch /home/pi/candle/installed_respeaker_version.txt
-    fi
+    if [ -d seeed-voicecard ]; then
+        cd seeed-voicecard
     
-    if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ];
-    then
-        echo "ReSpeaker was already installed"
+        if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
+            touch /home/pi/candle/installed_respeaker_version.txt
+        fi
+    
+        if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ];
+        then
+            echo "ReSpeaker was already installed"
         
-        if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
-            ./uninstall.sh
+            if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
+                ./uninstall.sh
+                ./install.sh
+            fi
+        
+            cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+        
+        else
+            echo "Doing initial ReSpeaker install"
             ./install.sh
         fi
         
-        cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+        cd /home/pi
+        rm -rf seeed-voicecard
         
     else
-        echo "Doing initial ReSpeaker install"
-        ./install.sh
+        echo "Error, failed to download respeaker source"
     fi
     
-    cd /home/pi
-    rm -rf seeed-voicecard
+    
     
 fi
 
@@ -516,7 +532,7 @@ then
         make
         make install
     else
-        echo "Failed to download bluealsa source from github"
+        echo "Error, Failed to download bluealsa source from github"
     fi
 
 else

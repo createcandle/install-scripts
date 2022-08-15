@@ -31,6 +31,14 @@ echo
 
 
 
+if [ ! -s /etc/resolve.conf ]; then
+    # no nameserver
+    echo "no nameserver, aborting"
+    echo "Candle: no nameserver, aborting" >> /dev/kmsg
+    exit 1
+fi
+
+
 # make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; 
 then
