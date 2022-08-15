@@ -163,6 +163,13 @@ if ! findmnt | grep -q '/ro/dev'; then
 fi
 
 
+if ! findmnt | grep -q '/ro/lib'; then
+    echo "trying to mount /lib"
+    mkdir -p /ro/dev
+    mount /dev /ro/dev -o bind
+    #mount --rbind /dev dev/
+    mount -o remount,rw /ro/dev
+fi
 
 
 

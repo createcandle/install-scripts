@@ -201,6 +201,10 @@ then
     echo
     apt install chromium-browser -y --allow-change-held-packages
 
+    if [ ! -f /bin/chromium-browser ]; then
+        apt purge chromium-browser -y
+    fi
+
     echo
     echo "installing vlc"
     apt install vlc --no-install-recommends -y
@@ -436,21 +440,35 @@ then
     echo
     echo "INSTALLING RESPEAKER HAT DRIVERS"
     echo
+    
+    apt-get update
     cd /home/pi
     git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
     cd seeed-voicecard
-
+    
+    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
+        touch /home/pi/candle/installed_respeaker_version.txt
+    fi
+    
     if [ -d "/etc/voicecard" ];
     then
-        echo "ReSpeaker was already installed. Doing uninstall first"
-        ./uninstall.sh    
+        echo "ReSpeaker was already installed"
+        
+        if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
+            ./uninstall.sh
+            ./install.sh
+        fi
+        
+        cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+        
+    else
+        echo "Doing initial ReSpeaker install"
+        ./install.sh
     fi
-
-    apt-get update
-    ./install.sh
-
+    
     cd /home/pi
     rm -rf seeed-voicecard
+    
 fi
 
 
