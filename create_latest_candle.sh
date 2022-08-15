@@ -364,6 +364,7 @@ else
     exit 1
 fi
 
+
 # Check if browser installed succesfully
 dpkg -s chromium-browser &> /dev/null
 if [ $? -eq 0 ]; then
@@ -557,7 +558,15 @@ then
     if [ ! -f install_candle_controller.sh ]; then
         echo
         echo "ERROR, missing install_candle_controller.sh file"
+        echo "$(date) - Failed to download install_candle_controller script" >> /boot/candle_log.txt
         echo
+        
+        # Show error image
+        if [ -e "/bin/ply-image" ] && [ -f /boot/error.png ]; then
+            /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+        
         exit 1
     fi
     
@@ -776,22 +785,23 @@ if [ ! -d /home/pi/configuration-files ]; then
     echo 
     echo "ERROR, failed to download latest configuration files"
     echo "ERROR, failed to download latest configuration files" >> /dev/kmsg
-    
+    echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
     echo
     
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -f /boot/error.png ]; then
         /bin/ply-image /boot/error.png
+        sleep 7200
     fi
     
-    sleep 7200
     exit 1
 else
     echo "Configuration files download succeeded"
     echo "Configuration files download succeeded" >> /dev/kmsg
 fi
 
-
+echo "Copying configuration files into place"
+echo "Copying configuration files into place" >> /dev/kmsg
 rsync -vr /home/pi/configuration-files/* /
 
 
@@ -1086,6 +1096,7 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     else
         echo "ERROR: failed to download ro-root.sh"
         echo "ERROR: failed to download ro-root.sh" >> /dev/kmsg
+        echo "$(date) - failed to download ro-root.sh" >> /boot/candle_log.txt
         exit 1
     fi
     
