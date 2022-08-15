@@ -23,7 +23,7 @@ ssh pi@candle.local
 
 8. Once logged in via SSH, you can download and run the script to create the disk image.
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo bash
 ```
 
 9. The script will easily take an hour to run on a Raspberry Pi 3b. When it is complete it will shut down the Raspberry Pi.
@@ -41,19 +41,19 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 .
 
 ### Developer options
-Note: There are some other options which are described in the create_candle_disk_image.sh file. For example, it's possible to inspect what the script has generated before it shuts down with this command:
+Note: There are some other options which are described in the create_latest_candle.sh file. For example, it's possible to inspect what the script has generated before it shuts down with this command:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo STOP_EARLY=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes bash
 ```
 
 You could even try to use it as an update script:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo STOP_EARLY=yes REBOOT_WHEN_DONE=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes REBOOT_WHEN_DONE=yes bash
 ```
 
 Many parts of the script can be turned off. This command turns off most parts:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh | sudo STOP_EARLY=yes SKIP_PYTHON=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER_INSTALL=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes SKIP_PYTHON=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER_INSTALL=yes bash
 ```
 
 .
