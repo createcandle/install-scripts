@@ -1069,18 +1069,22 @@ echo
 # RASPI CONFIG
 echo "Set Raspi-config I2C, SPI, Camera"
 
-# enable i2c, needed for clock module support
-raspi-config nonint do_i2c 0
+if [ -d /sys/kernel/config/device-tree ];
+then
+    # enable i2c, needed for clock module support
+    raspi-config nonint do_i2c 0
 
-# enable SPI
-raspi-config nonint do_spi 0
+    # enable SPI
+    raspi-config nonint do_spi 0
 
-# enable Camera.
-raspi-config nonint do_camera 0 # This does nothing on Bullseye, but is needed for older versions of Raspberry Pi OS
+    # enable Camera.
+    raspi-config nonint do_camera 0 # This does nothing on Bullseye, but is needed for older versions of Raspberry Pi OS
 
-# enable old Camera.
-#raspi-config nonint do_legacy 0
-
+    # enable old Camera.
+    #raspi-config nonint do_legacy 0
+else
+    echo "Raspi-config setting skipped: missing device tree. In chroot?"
+fi
 
 
 # INSTALL AND UPDATE READ_ONLY MODE
