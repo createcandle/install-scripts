@@ -141,7 +141,7 @@ then
     
     sleep 10
     
-    if [ ls /dev/mmcblk0p4 ]; then
+    if ls /dev/mmcblk0p4; then
         echo "/dev/mmcblk0p4 exists. Mounting it to /home/pi/.webthings"
         mount /dev/mmcblk0p4 /home/pi/.webthings
         chown pi:pi /home/pi/.webthings
