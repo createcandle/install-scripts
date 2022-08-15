@@ -306,6 +306,7 @@ then
 
     # Try to fix anything that may have gone wrong
     apt-get update --fix-missing -y
+    apt-get install -f -y
     apt --fix-broken install -y
 fi
 
@@ -329,7 +330,7 @@ fi
 
 
 
-# SANITY CHECK
+# SANITY CHECKS
 
 # Check if GIT installed succesfully
 dpkg -s git &> /dev/null
@@ -352,6 +353,26 @@ else
     exit 1
 fi
 
+# Check if browser installed succesfully
+dpkg -s chromium-browser &> /dev/null
+if [ $? -eq 0 ]; then
+    echo "browser installed succesfully"
+else
+    echo
+    echo "ERROR"
+    echo
+    echo "Error detected in the packages install phase (browser is missing). Try running the Candle install script again."
+    echo ""
+    echo "Candle: error browser failed to install" >> /dev/kmsg
+    
+    # Show error image
+    if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+        /bin/ply-image /boot/error.png
+        sleep 7200
+    fi
+    
+    exit 1
+fi
 
 
 
@@ -749,6 +770,7 @@ rsync -vr /home/pi/configuration-files/* /
 chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
 chmod +x /home/pi/candle/debug.sh
+chmod +x /home/pi/candle/files_check.sh
 
 # CHOWN THE NEW FILES
 chown pi:pi /home/pi/*
