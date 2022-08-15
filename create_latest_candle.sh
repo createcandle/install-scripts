@@ -99,7 +99,7 @@ fi
 echo
 
 
-if [ ! -s /etc/resolve.conf ]; then
+if [ ! -s /etc/resolv.conf ]; then
     # no nameserver
     echo "no nameserver, aborting"
     echo "Candle: no nameserver, aborting" >> /dev/kmsg

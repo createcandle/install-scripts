@@ -30,8 +30,8 @@ echo "starting LIVE controller update" >> /dev/kmsg
 echo
 
 
-cat /etc/resolve.conf
-if [ ! -s /etc/resolve.conf ]; then
+cat /etc/resolv.conf
+if [ ! -s /etc/resolv.conf ]; then
     # no nameserver
     echo "no nameserver, aborting"
     echo "Candle: no nameserver, aborting" >> /dev/kmsg
@@ -68,10 +68,10 @@ mount -o remount,rw /ro
 echo "remount done"
 
 #echo "juggling /etc/resolv.conf"
-#cp /etc/resolve.conf /ro/etc/resolve.conf.jump
-#rm /rw/upper/etc/resolve.conf
-#rm /etc/resolve.conf
-#cp /ro/etc/resolve.conf.jump /ro/etc/resolve.conf
+#cp /etc/resolv.conf /ro/etc/resolv.conf.jump
+#rm /rw/upper/etc/resolv.conf
+#rm /etc/resolv.conf
+#cp /ro/etc/resolv.conf.jump /ro/etc/resolv.conf
 
 timedatectl set-ntp true
 
