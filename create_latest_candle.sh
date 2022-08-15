@@ -203,6 +203,7 @@ then
 
     if [ ! -f /bin/chromium-browser ]; then
         apt purge chromium-browser -y
+        apt install chromium-browser -y --allow-change-held-packages
     fi
 
     echo
@@ -246,6 +247,11 @@ then
     done
 
 
+    if [ ! -f /usr/sbin/mosquitto ]; then
+        apt install --reinstall mosquitto -y
+    fi
+    
+
     # removed from above list:
     #  libnanomsg-dev \
     #  libnanomsg5 \
@@ -260,6 +266,11 @@ then
         apt-get install --no-install-recommends -y $i
         echo
     done
+    
+    # double check that openbox is actually installed
+    if [ ! -f /bin/openbox ]; then
+        apt-get install --reinstall --no-install-recommends -y openbox
+    fi
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
     # get OMXPlayer for Internet Radio
@@ -450,7 +461,7 @@ then
         touch /home/pi/candle/installed_respeaker_version.txt
     fi
     
-    if [ -d "/etc/voicecard" ];
+    if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ];
     then
         echo "ReSpeaker was already installed"
         
