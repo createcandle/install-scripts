@@ -111,12 +111,14 @@ fi
 if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${CHROOTED}" ]]; 
 then
     
-    if [ -f /dev/mmcblk0p4 ]; then
+    #if [ -f /dev/mmcblk0p4 ]; then
+    if lsblk | grep -q 'mmcblk0p4'; then
         echo
         echo "partitions already created:"
     else
         #if ls /dev/mmcblk0p2; then
-        if [ -f /dev/mmcblk0p2 ]; then
+        #if [ -f /dev/mmcblk0p2 ]; then
+        if lsblk | grep -q 'mmcblk0p2'; then
             
             echo
             echo "CREATING PARTITIONS"
@@ -141,7 +143,8 @@ then
         mount /dev/mmcblk0p4 /home/pi/.webthings
         chown pi:pi /home/pi/.webthings
     else
-        echo "/dev/mmcblk0p4 was missing - in chroot?"
+        echo "Error, /dev/mmcblk0p4 was missing - in chroot?"
+        exit
     fi
     
     lsblk
@@ -187,6 +190,7 @@ then
     echo "calling apt update"
     apt update -y
     apt-get update -y
+    apt --fix-broken install
     echo
     if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
     then
