@@ -139,14 +139,29 @@ cp /etc/resolv.conf /ro/etc/resolv.conf
 
 echo "bind-mounting /boot into chroot"
 #if [ ! -f /boot/cmdline.txt ]; then
+
 if ! findmnt | grep -q '/ro/boot'; then
-mount /boot /ro/boot -o bind
+    mount /boot /ro/boot -o bind
 fi
 
+
 if ! findmnt | grep -q '/ro/home/pi/.webthings'; then
-mkdir -p /ro/home/pi/.webthings
-mount /home/pi/.webthings /ro/home/pi/.webthings -o bind
+    mkdir -p /ro/home/pi/.webthings
+    mount /home/pi/.webthings /ro/home/pi/.webthings -o bind
 fi
+
+
+if ! findmnt | grep -q '/ro/dev'; then
+    mkdir -p /ro/dev
+    mount /dev /ro/dev -o bind
+    #mount --rbind /dev dev/
+    mount -o remount,rw /ro/dev
+fi
+
+
+
+
+
 
 echo "starting chroot"
 echo "Candle: starting chroot" >> /dev/kmsg
