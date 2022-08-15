@@ -30,7 +30,7 @@ echo "starting LIVE controller update" >> /dev/kmsg
 echo
 
 
-
+cat /etc/resolve.conf
 if [ ! -s /etc/resolve.conf ]; then
     # no nameserver
     echo "no nameserver, aborting"
@@ -113,6 +113,7 @@ fi
 
 echo "Downloading latest install script from Github" 
 
+# TODO: change this to use the release, and only clone if developer mode active
 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /ro/home/pi/create_latest_candle.sh
 if [ -f /ro/home/pi/create_latest_candle.sh ]; then
     echo "Download succesful"
