@@ -139,9 +139,9 @@ then
         fi
     fi
     
-    sleep 10
+    sleep 5
     
-    if lsblk | grep -q 'mmcblk0p4'; then
+    if ls /dev/mmcblk0p4; then
         echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
         mount /dev/mmcblk0p4 /home/pi/.webthings
         chown pi:pi /home/pi/.webthings
