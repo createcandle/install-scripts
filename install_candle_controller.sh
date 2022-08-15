@@ -47,7 +47,7 @@ then
         echo "NVM lines already appended to .profile" | sudo tee -a /dev/kmsg
     else
         echo "Appending NVM lines to .profile"
-        echo " " >> /home/pi/.profile
+        echo >> /home/pi/.profile
         echo 'export NVM_DIR="/home/pi/.nvm"' >> /home/pi/.profile
         echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> /home/pi/.profile
         echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> /home/pi/.profile
@@ -72,7 +72,7 @@ fi
 
 
 
-echo " "
+echo
 echo "NODE AND NPM VERSIONS:"
 node --version
 npm --version
@@ -96,10 +96,10 @@ fi
 
 # Download Candle controller from Github and install it
 
-echo " "
+echo
 echo "DOWNLOADING AND INSTALLING CANDLE CONTROLLER"
 echo "Do not worry about the errors you will see with optipng and jpegtran"
-echo " "
+echo
 
 
 # Create a backup first
@@ -187,9 +187,9 @@ sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
 sudo setcap cap_net_raw+eip $(eval readlink -f `which python3`)
 
 
-echo " "
+echo
 #echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
-echo "Compiling Typescript and running Webpack" | sudo tee -a /dev/kmsg
+#echo "Compiling Typescript and running Webpack" | sudo tee -a /dev/kmsg
 
 #npm run build
 
@@ -204,7 +204,7 @@ echo "Compiling typescript. this will take a while..."
 echo "Compiling typescript. this will take a while..." | sudo tee -a /dev/kmsg
 npx tsc -p .
 echo "(it probably found some errors, don't worry about those)"
-echo " "
+echo
 #echo "Running webpack. this will take a while too..."
 echo "Running webpack. this will take a while too..." | sudo tee -a /dev/kmsg
 NODE_OPTIONS="--max-old-space-size=496" npx webpack
@@ -238,7 +238,7 @@ cat /home/pi/.webthings/.node_version
 cd /home/pi
 mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
 
-echo " "
+echo
 echo "Linking gateway addon"
 if [ -d /home/pi/webthings/gateway/node_modules/gateway-addon ];
 then
@@ -251,9 +251,9 @@ else
 fi
 
 
-echo " "
+echo
 echo "INSTALLING CANDLE ADDONS"
-echo " "
+echo
 
 mkdir -p /home/pi/.webthings/addons
 chown -R pi:pi /home/pi/.webthings/addons
@@ -414,7 +414,7 @@ rm /home/pi/.npm/anonymous-cli-metrics.json
 npm cache clean --force
 nvm cache clear
 
-echo " "
+echo
 #echo "sub-script that installs the Candle controller is done. Returning to the main install script."
 echo "sub-script that installs the Candle controller is done. Returning to the main install script." | sudo tee -a /dev/kmsg
 echo
