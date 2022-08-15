@@ -1448,9 +1448,10 @@ fi
 
 # Some final insurance
 chown pi:pi /home/pi/*
-timedatectl set-ntp true
-sleep 2
-fake-hwclock save
+#echo "setting internet time to true"
+#timedatectl set-ntp true
+#sleep 2
+#fake-hwclock save
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
 if [ -f /boot/bootup_actions.sh ]; then

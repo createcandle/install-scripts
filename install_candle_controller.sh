@@ -143,7 +143,8 @@ fi
 if [ -f /boot/developer.txt ]; then
     git clone --depth 1 https://github.com/createcandle/candle-controller.git
     if [ -d ./candle-controller ]; then
-        mv candle-controller /home/pi/webthings/gateway2
+        rm -rf /home/pi/webthings/gateway2
+        mv -f ./candle-controller /home/pi/webthings/gateway2
     else
         echo "ERROR, downloading cutting edge candle-controller dir from Github failed"
     fi
@@ -165,7 +166,8 @@ else
         for directory in createcandle-candle-controller*; do
           [[ -d $directory ]] || continue
           echo "Directory: $directory"
-          mv -- "$directory" ./gateway2
+          rm -rf ./gateway2
+          mv -f -- "$directory" ./gateway2
         done
     
         #mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
@@ -257,7 +259,9 @@ cd /home/pi
 if [ -d /home/pi/webthings/gateway2 ]; then
     
     echo "Copying gateway2 to gateway"
-    mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
+    #rm-rf /home/pi/webthings/gateway
+    rsync -rv --delete /home/pi/webthings/gateway2 /home/pi/webthings/gateway
+    rm -rf /home/pi/webthings/gateway2
     chown -R pi:pi /home/pi/webthings/gateway
 else
     echo "ERROR, gateway2 was just created.. but is missing?"
@@ -299,6 +303,8 @@ then
 fi
 
 
+# Once the Candle app store exists, this part is never run again.
+# TODO: what if part of this failed?
 if [ ! -d /home/pi/.webthings/addons/candleappstore ]; 
 then
     echo "Installing addons" | sudo tee -a /dev/kmsg
