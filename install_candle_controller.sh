@@ -19,7 +19,7 @@ echo "installing python gateway addon"
 echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
-if ! command -v npm &> /dev/null
+if [ ! command -v npm &> /dev/null ] || [ $(cat /home/pi/.webthings/.node_version) != 12 ];
 then
     echo
     echo "NPM could not be found. Installing it now."
@@ -87,13 +87,18 @@ then
   rm /home/pi/.npm/anonymous-cli-metrics.json
 fi
 
+
+
+
+# Download Candle controller from Github and install it
+
 echo " "
 echo "DOWNLOADING AND INSTALLING CANDLE CONTROLLER"
 echo "Do not worry about the errors you will see with optipng and jpegtran"
 echo " "
 
-# Download Candle controller from Github and install it
 
+# Create a backup first
 if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ];
 then
     echo "Detected old webthings directory! Creating aditional backup"
@@ -101,18 +106,64 @@ then
     #mv /home/pi/webthings /home/pi/webthings-old
     tar -czf ./controller_backup_fresh.tar ./webthings
 fi
-rm -rf /home/pi/webthings
+
+
+
+#rm -rf /home/pi/webthings
 
 echo "Starting controller installation" | sudo tee -a /dev/kmsg
 mkdir -p /home/pi/webthings
 chown pi:pi /home/pi/webthings
 cd /home/pi/webthings
-rm -rf candle-controller
-rm -rf gateway
-git clone --depth 1 https://github.com/createcandle/candle-controller.git
-mv candle-controller gateway
-chown -R pi:pi /home/pi/webthings/gateway
-cd gateway
+
+if [ -d ./candle-controller ]; then
+    echo "spotted candle-controller directory. Must be left over from interupted install"
+    rm -rf candle-controller
+fi
+
+
+#!/bin/bash
+
+# DOWNLOAD CANDLE CONTROLLER FROM GITHUB
+
+if [ -f /boot/developer.txt ]; then
+    git clone --depth 1 https://github.com/createcandle/candle-controller.git
+    mv candle-controller gateway
+    
+else
+    curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
+    | grep "tarball_url" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O candle-controller.tar
+
+    tar -xf candle-controller.tar
+    
+    for directory in createcandle-candle-controller*; do
+      [[ -d $directory ]] || continue
+      echo "Directory: $directory"
+      mv -- "$directory" ./gateway2
+    done
+    
+    #mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
+    echo
+    echo "result:"
+    ls ./gateway2
+fi
+
+if [ ! -d gateway2 ]; then
+    echo
+    echo "ERROR, missing gateway2 directory"
+    echo
+    exit 1
+fi
+
+
+
+
+chown -R pi:pi /home/pi/webthings/gateway2
+cd gateway2
 
 rm -rf node_modules/
 
@@ -151,7 +202,7 @@ echo "Running webpack. this will take a while too..." | sudo tee -a /dev/kmsg
 NODE_OPTIONS="--max-old-space-size=496" npx webpack
 
 
-if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ];
+if [ -f /home/pi/webthings/gateway2/build/app.js ] && [ -f /home/pi/webthings/gateway2/build/static/index.html ] && [ -d /home/pi/webthings/gateway2/node_modules ] && [ -d /home/pi/webthings/gateway2/build/static/bundle ];
 then
   touch .post_upgrade_complete
   #echo "Controller installation seems ok"
@@ -170,6 +221,11 @@ echo "Node version: ${_node_version}" | sudo tee -a /dev/kmsg
 echo "${_node_version}" > "/home/pi/.webthings/.node_version"
 echo "Node version in .node_version file:"
 cat /home/pi/.webthings/.node_version
+
+
+# Move the freshly created gateway into position
+cd /home/pi
+mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
 
 echo " "
 echo "Linking gateway addon"
@@ -316,8 +372,6 @@ then
     
 fi
 
-echo " "
-echo "running gateway for 15 seconds to create folders"
 #cd /home/pi/webthings/gateway
 #timeout 10 npm run run-only
 echo "controller installation should be complete"

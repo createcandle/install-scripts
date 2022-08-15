@@ -525,10 +525,44 @@ then
     cd /home/pi
     rm -rf /home/pi/webthings
     #rm -rf /home/pi/.webthings # too dangerous
+    
+    
+    
+    if [ -f /boot/developer.txt ]; then
+        wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
+    else
+        curl -s https://api.github.com/repos/createcandle/install-scripts/releases/latest \
+        | grep "tarball_url" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O install-scripts.tar
 
-    wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
+        tar -xf install-scripts.tar
+        
+        for directory in createcandle-install-scripts*; do
+          [[ -d $directory ]] || continue
+          echo "Directory: $directory"
+          mv -- "$directory" ./install-scripts
+        done
+        
+        mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
+        #echo
+        #echo "result:"
+        #ls install_candle_controller.sh
+    fi
+    
+    
+    # Check if the install_candle_controller.sh file now exists
+    if [ ! -f install_candle_controller.sh ]; then
+        echo
+        echo "ERROR, missing install_candle_controller.sh file"
+        echo
+        exit 1
+    fi
+    
     chmod +x ./install_candle_controller.sh
-    sudo -u pi ./install_candle_controller.sh &
+    sudo -u pi ./install_candle_controller.sh
     wait
     rm ./install_candle_controller.sh
 
@@ -1005,20 +1039,73 @@ raspi-config nonint do_camera 0 # This does nothing on Bullseye, but is needed f
 
 
 
-# Enable read-only mode
+# INSTALL AND UPDATE READ_ONLY MODE
+
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
-    # Install read-only file system
-    isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
-    if [ $isInFile4 -eq 0 ]
+    
+    
+    
+    if [ -f /boot/developer.txt ]; then
+        wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
+        
+    else
+        curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
+        | grep "tarball_url" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O ro-overlay.tar
+
+        tar -xf ro-overlay.tar
+    
+        for directory in createcandle-ro-overlay*; do
+          [[ -d $directory ]] || continue
+          echo "Directory: $directory"
+          mv -- "$directory" ./ro-overlay
+        done
+    
+        cp ./ro-overlay/ro-root.sh ./ro-root.sh
+        
+        rm -rf ./ro-overlay
+        rm ./ro-overlay.tar
+        
+    fi
+    
+    
+    # If the file exists, make it executable and move it into place
+    if [ -f ./ro-root.sh ]; then
+        chmod +x ./ro-root.sh
+        
+        # Avoid risky move if possible
+        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
+            echo "ro-root.sh file is different, moving it into place"
+            mv ./ro-root.sh /bin/ro-root.sh
+        else
+            echo "new ro-root.sh file is same as the old one, not moving it"
+        fi
+    else
+        echo "ERROR: failed to download ro-root.sh"
+        echo "ERROR: failed to download ro-root.sh" >> /dev/kmsg
+        exit 1
+    fi
+    
+    
+    
+    
+    
+    #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
+    if [ $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
     then
         echo
         echo "ADDING READ-ONLY MODE"
         echo
         echo "Candle: adding read-only mode" >> /dev/kmsg
+        
+        
+        
         mkinitramfs -o /boot/initrd
     
-        wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O /bin/ro-root.sh
-        chmod +x /bin/ro-root.sh
+        
     
     	echo "- Adding read only mode to config.txt"
         echo >> /boot/config.txt
@@ -1032,28 +1119,33 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         echo "Candle: read-only mode already existed" >> /dev/kmsg
     fi
 
-    isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
-    if [ $isInFile5 -eq 0 ]
+
+    if [ -f /bin/ro-root.sh ] && [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
     then
-    	echo "- Modifying cmdline.txt for read-only file system"
-        sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
-    else
-        echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
+        
+        #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
+        if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
+        then
+        	echo "- Modifying cmdline.txt for read-only file system"
+            sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
+            echo "Candle: read-only mode is now enabled" >> /dev/kmsg
+        else
+            echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
+            echo "Candle: read-only mode was already enabled" >> /dev/kmsg
+        fi
+        
     fi
     
-    # Remove files left over by Windows or MacOS
-    rm -rf /boot/.Spotlight*
-    if [ -f /boot/._cmdline.txt ]; then
-        rm /boot/._cmdline.txt
-    fi
+    
 fi
 
 
 
 
-# Add alias shortcuts to .profile
-isInFile6=$(cat /home/pi/.profile | grep -c "alias rw=")
-if [ $isInFile6 -eq 0 ]
+
+# Add RW and RO alias shortcuts to .profile
+
+if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
 then
     echo "adding ro and rw aliases to /home/pi/.profile"
     echo "" >> /home/pi/.profile
@@ -1065,10 +1157,14 @@ fi
 #touch /boot/candle_rw.txt
 
 
-cd /home/pi
+
+
+
 
 
 # CREATE BACKUPS
+
+cd /home/pi
 
 # Create tar backup up controller
 if [ ! -f /home/pi/controller_backup.tar ];
@@ -1175,6 +1271,11 @@ echo "Clearing /tmp"
 rm -rf /tmp/*
 
 
+# Remove files left over by Windows or MacOS
+rm -rf /boot/.Spotlight*
+if [ -f /boot/._cmdline.txt ]; then
+    rm /boot/._cmdline.txt
+fi
 
 
 # Set Candle as the hostname
