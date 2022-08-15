@@ -258,11 +258,17 @@ echo "New controller was created at $(pwd)"
 cd /home/pi
 if [ -d /home/pi/webthings/gateway2 ]; then
     
-    echo "Copying gateway2 to gateway"
+    echo "Starting copy of /home/pi/webthings/gateway2 to /home/pi/webthings/gateway using rsync"
     #rm-rf /home/pi/webthings/gateway
-    rsync -rv --delete /home/pi/webthings/gateway2 /home/pi/webthings/gateway
-    rm -rf /home/pi/webthings/gateway2
-    chown -R pi:pi /home/pi/webthings/gateway
+    if [ ! -d /home/pi/webthings/gateway ]; then
+        echo "gateway didn't exist, moving gateway2 into position"
+        mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
+    else
+        echo "gateway dir existed, doing rsync from gateway2"
+        rsync -r --delete /home/pi/webthings/gateway2/* /home/pi/webthings/gateway
+        chown -R pi:pi /home/pi/webthings/gateway
+        rm -rf /home/pi/webthings/gateway2
+    fi
 else
     echo "ERROR, gateway2 was just created.. but is missing?"
 fi
@@ -276,8 +282,8 @@ then
   npm link
   cd -
 else
-  echo "ERROR, home/pi/webthings/gateway/node_modules/gateway-addon was missing"
-  echo "ERROR, home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
+  echo "ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing"
+  echo "ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
 fi
 
 
