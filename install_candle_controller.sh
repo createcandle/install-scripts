@@ -146,6 +146,7 @@ else
     | wget -qi - -O candle-controller.tar
 
     tar -xf candle-controller.tar
+    rm candle-controller.tar
     
     for directory in createcandle-candle-controller*; do
       [[ -d $directory ]] || continue

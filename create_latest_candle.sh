@@ -543,6 +543,7 @@ then
         | wget -qi - -O install-scripts.tar
 
         tar -xf install-scripts.tar
+        rm install-scripts.tar
         
         for directory in createcandle-install-scripts*; do
           [[ -d $directory ]] || continue
@@ -551,6 +552,7 @@ then
         done
         
         mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
+        rm -rf ./install-scripts
         #echo
         #echo "result:"
         #ls install_candle_controller.sh
@@ -1070,7 +1072,8 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         | wget -qi - -O ro-overlay.tar
 
         tar -xf ro-overlay.tar
-    
+        rm ./ro-overlay.tar
+        
         for directory in createcandle-ro-overlay*; do
           [[ -d $directory ]] || continue
           echo "Directory: $directory"
@@ -1078,9 +1081,7 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         done
     
         cp ./ro-overlay/ro-root.sh ./ro-root.sh
-        
         rm -rf ./ro-overlay
-        rm ./ro-overlay.tar
         
     fi
     
