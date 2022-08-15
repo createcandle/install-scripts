@@ -888,9 +888,9 @@ echo "Candle: enabling services" >> /dev/kmsg
 echo
 #systemctl daemon-reload
 
-# disable triggerhappy
-systemctl disable triggerhappy.socket
-systemctl disable triggerhappy.service
+# disable triggerhappy. Wait, is this used to switch to the tty output?
+#systemctl disable triggerhappy.socket
+#systemctl disable triggerhappy.service
 
 # enable Candle services
 systemctl enable candle_first_run.service
