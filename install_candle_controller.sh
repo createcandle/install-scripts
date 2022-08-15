@@ -53,9 +53,6 @@ then
         echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> /home/pi/.profile
     fi
 
-    export NVM_DIR="/home/pi/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
     echo "starting nvm install"
     nvm install 12
@@ -64,6 +61,13 @@ then
 else
     echo "NPM seems to already be installed."
     echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
+fi
+
+
+if [ -d /home/pi/.nvm ]; then
+    export NVM_DIR="/home/pi/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 fi
 
 
@@ -99,7 +103,10 @@ echo " "
 
 
 # Create a backup first
-if [ -f /home/pi/webthings/gateway/build/app.js ] && [ -f /home/pi/webthings/gateway/build/static/index.html ] && [ -d /home/pi/webthings/gateway/node_modules ] && [ -d /home/pi/webthings/gateway/build/static/bundle ];
+if [ -f /home/pi/webthings/gateway/build/app.js ] \
+&& [ -f /home/pi/webthings/gateway/build/static/index.html ] \
+&& [ -d /home/pi/webthings/gateway/node_modules ] \
+&& [ -d /home/pi/webthings/gateway/build/static/bundle ];
 then
     echo "Detected old webthings directory! Creating aditional backup"
     echo "Detected old webthings directory! Creating additional backup" | sudo tee -a /dev/kmsg
@@ -128,7 +135,7 @@ fi
 
 if [ -f /boot/developer.txt ]; then
     git clone --depth 1 https://github.com/createcandle/candle-controller.git
-    mv candle-controller gateway
+    mv candle-controller gateway2
     
 else
     curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
@@ -202,7 +209,10 @@ echo "Running webpack. this will take a while too..." | sudo tee -a /dev/kmsg
 NODE_OPTIONS="--max-old-space-size=496" npx webpack
 
 
-if [ -f /home/pi/webthings/gateway2/build/app.js ] && [ -f /home/pi/webthings/gateway2/build/static/index.html ] && [ -d /home/pi/webthings/gateway2/node_modules ] && [ -d /home/pi/webthings/gateway2/build/static/bundle ];
+if [ -f /home/pi/webthings/gateway2/build/app.js ] \
+&& [ -f /home/pi/webthings/gateway2/build/static/index.html ] \
+&& [ -d /home/pi/webthings/gateway2/node_modules ] \
+&& [ -d /home/pi/webthings/gateway2/build/static/bundle ];
 then
   touch .post_upgrade_complete
   #echo "Controller installation seems ok"
