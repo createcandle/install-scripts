@@ -60,6 +60,8 @@ echo "remount done"
 #rm /etc/resolve.conf
 #cp /ro/etc/resolve.conf.jump /ro/etc/resolve.conf
 
+timedatectl set-ntp true
+
 
 if [ -d /ro/home/pi/webthings ]; then
     echo "calculating free space"
@@ -107,7 +109,10 @@ else
     exit 1
 fi
 
-sudo chroot /ro sh -c "whoami"
+# enable internet use inside the chroot
+cp /etc/resolv.conf /ro/etc/resolv.conf
+
+# sudo chroot /ro sh -c "whoami"
 # sudo chroot /ro sh -c "ls /dev"
 # sudo chroot /ro sh -c "ls /mnt"
 # sudo chroot /ro sh -c "apt update"
@@ -127,6 +132,16 @@ sudo chroot /ro sh -c "whoami"
 
 # sudo chroot /ro sh -c "ls /home/pi/alfred"
 
+echo "bind-mounting /boot into chroot"
+#if [ ! -f /boot/cmdline.txt ]; then
+if ! findmnt | grep -q '/ro/boot'; then
+mount /boot /ro/boot -o bind
+fi
+
+if ! findmnt | grep -q '/ro/home/pi/.webthings'; then
+mkdir -p /ro/home/pi/.webthings
+mount /home/pi/.webthings /ro/home/pi/.webthings -o bind
+fi
 
 echo "starting chroot"
 echo "Candle: starting chroot" >> /dev/kmsg
@@ -148,10 +163,25 @@ export STOP_EARLY=yes
 #fi
 
 #mount -t procfs
-sudo mount -t proc proc /proc
-sudo mount -t sysfs sysfs /sys
-sudo mount -t devfs devfs /dev
-sudo mount -t devfs devfs /dev
+if [ ! -l /proc/partitions ]; then
+mount -t proc proc /proc
+fi
+
+if [ ! -d /sys/kernel ]; then
+mount -t sysfs sysfs /sys
+fi
+
+if [ ! -d /dev/pts ]; then
+mount --rbind /dev dev/
+mount -o remount,rw /dev
+fi
+
+if [ ! -d /run/mount ]; then
+mount --rbind /run run/
+fi
+
+
+
 
 if [ -f /home/pi/create_candle_disk_image.sh ]; then
 echo "Install script found, starting it"
@@ -160,6 +190,12 @@ else
 echo "Error in chroot: create_candle_disk_image.sh not found"
 fi
 touch /home/pi/TEST_FILE_CREATED_IN_CHROOT.txt
+
+umount /run
+umount /dev
+umount /sys
+umount /proc
+umount /boot
 END
 )"
 
@@ -184,23 +220,30 @@ else
 fi
 
 
-if [ -d /ro/home/pi/configuration-files ]; then
-    echo "removing /ro/home/pi/configuration-files"
-else
-    echo "/ro/home/pi/configuration-files did not exist, so is not being deleted"
-    git clone --depth 1 https://github.com/createcandle/configuration-files /ro/home/pi/configuration-files
-fi
+# does not make sense:
+#if [ -d /ro/home/pi/configuration-files ]; then
+#    echo "removing /ro/home/pi/configuration-files"
+#else
+#    echo "/ro/home/pi/configuration-files did not exist, so is not being deleted"
+#    git clone --depth 1 https://github.com/createcandle/configuration-files /ro/home/pi/configuration-files
+#fi
 
 
-if [ -d /home/pi/configuration-files/boot ]; then
-    cp --verbose -r /ro/home/pi/configuration-files/boot/* /boot/
-    rm -rf /ro/home/pi/configuration-files
-else
-    echo "ERROR: configuration files not downloaded?"
-    echo "Candle: ERROR: could not update files in /boot" >> /dev/kmsg
-fi
+#if [ -d /home/pi/configuration-files/boot ]; then
+#    cp --verbose -r /ro/home/pi/configuration-files/boot/* /boot/
+#    rm -rf /ro/home/pi/configuration-files
+#else
+#    echo "ERROR: configuration files not downloaded?"
+#    echo "Candle: ERROR: could not update files in /boot" >> /dev/kmsg
+#fi
 
 
+
+umount /ro/run
+umount /ro/dev
+umount /ro/sys
+umount /ro/proc
+umount /ro/boot
 
 # re-enable read-only mode
 echo "Setting /ro back to RO"
