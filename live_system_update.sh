@@ -140,18 +140,22 @@ cp /etc/resolv.conf /ro/etc/resolv.conf
 echo "bind-mounting /boot into chroot"
 #if [ ! -f /boot/cmdline.txt ]; then
 
+
 if ! findmnt | grep -q '/ro/boot'; then
+    echo "trying to mount /boot"
     mount /boot /ro/boot -o bind
 fi
 
 
 if ! findmnt | grep -q '/ro/home/pi/.webthings'; then
+    echo "trying to mount .webthings"
     mkdir -p /ro/home/pi/.webthings
     mount /home/pi/.webthings /ro/home/pi/.webthings -o bind
 fi
 
 
 if ! findmnt | grep -q '/ro/dev'; then
+    echo "trying to mount /dev"
     mkdir -p /ro/dev
     mount /dev /ro/dev -o bind
     #mount --rbind /dev dev/
@@ -184,21 +188,24 @@ export STOP_EARLY=yes
 
 #mount -t procfs
 if [ ! -f /proc/partitions ]; then
+echo "chroot: mounting proc"
 mount -t proc proc /proc
 fi
 
 if [ ! -d /sys/kernel ]; then
+echo "chroot: mounting sys"
 mount -t sysfs sysfs /sys
 fi
 
-if [ ! -d /dev/pts ]; then
-mount --rbind /dev dev/
-mount -o remount,rw /dev
-fi
+#if [ ! -d /dev/pts ]; then
+#mount --rbind /dev dev/
+#mount -o remount,rw /dev
+#fi
 
-if [ ! -d /run/mount ]; then
-mount --rbind /run run/
-fi
+#if [ ! -d /run/mount ]; then
+#echo "chroot: mounting run"
+#mount --rbind /run run/
+#fi
 
 
 

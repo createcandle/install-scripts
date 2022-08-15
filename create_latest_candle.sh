@@ -112,6 +112,7 @@ then
             
             echo
             echo "CREATING PARTITIONS"
+            echo "Candle: creating partitions" >> /dev/kmsg
             echo
 
             printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7501MB\n14000MB\nquit" | parted
@@ -139,6 +140,7 @@ then
     
 else
     echo "Partitions seem to already exist (addons dir existed)"
+    echo "Candle: Partitions seem to already exist (addons dir existed)" >> /dev/kmsg
 fi
 
 echo
@@ -170,6 +172,7 @@ if [ "$SKIP_APT_INSTALL" = no ] || [[ -z "${SKIP_APT_INSTALL}" ]];
 then
     echo
     echo "INSTALLING APPLICATIONS AND LIBRARIES"
+    echo "Candle: installing packages and libraries" >> /dev/kmsg
     echo
 
     set -e
