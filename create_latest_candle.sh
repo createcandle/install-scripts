@@ -505,13 +505,19 @@ then
     
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
     git clone --depth 1 https://github.com/createcandle/bluez-alsa.git
-    cd bluez-alsa
-    autoreconf --install --force
-    mkdir build
-    cd build 
-    ../configure --enable-msbc --enable-mp3lame --enable-faststream --enable-systemd
-    make
-    make install
+    
+    if [ -d bluez-alsa ]; then
+        echo "generating bluealsa from source"
+        cd bluez-alsa
+        autoreconf --install --force
+        mkdir build
+        cd build 
+        ../configure --enable-msbc --enable-mp3lame --enable-faststream --enable-systemd
+        make
+        make install
+    else
+        echo "Failed to download bluealsa source from github"
+    fi
 
 else
     echo "Skipping BlueAlsa build"
