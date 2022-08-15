@@ -190,11 +190,11 @@ fi
 
 if [ -f /home/pi/create_latest_candle.sh ]; then
 echo "Install script found, starting it"
-/home/pi/create_latest_candle.sh > /home/pi/update_report.txt
+/home/pi/create_latest_candle.sh #> /home/pi/update_report.txt
 else
 echo "Error in chroot: create_latest_candle.sh not found"
 fi
-touch /home/pi/TEST_FILE_CREATED_IN_CHROOT.txt
+#touch /home/pi/TEST_FILE_CREATED_IN_CHROOT.txt
 
 umount /run
 umount /dev
