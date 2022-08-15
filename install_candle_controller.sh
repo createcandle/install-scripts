@@ -224,7 +224,7 @@ if [ -f /home/pi/webthings/gateway2/build/app.js ] \
 then
   touch .post_upgrade_complete
   #echo "Controller installation seems ok"
-  echo "Controller installation seems ok" | sudo tee -a /dev/kmsg
+  echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
 else
   echo  
   echo "ERROR, controller installation is mising parts"
@@ -240,10 +240,18 @@ echo "${_node_version}" > "/home/pi/.webthings/.node_version"
 echo "Node version in .node_version file:"
 cat /home/pi/.webthings/.node_version
 
-
+echo "New controller was created at $(pwd)"
 # Move the freshly created gateway into position
 cd /home/pi
-mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
+if [ -d /home/pi/webthings/gateway2 ]; then
+    
+    echo "Copying gateway2 to gateway"
+    mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
+    chown -R pi:pi /home/pi/webthings/gateway
+else
+    echo "ERROR, gateway2 was just created.. but is missing?"
+fi
+
 
 echo
 echo "Linking gateway addon"
@@ -253,8 +261,8 @@ then
   npm link
   cd -
 else
-  echo "ERROR, node_modules/gateway-addon was missing"
-  echo "ERROR, node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
+  echo "ERROR, home/pi/webthings/gateway/node_modules/gateway-addon was missing"
+  echo "ERROR, home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
 fi
 
 
@@ -266,7 +274,7 @@ mkdir -p /home/pi/.webthings/addons
 chown -R pi:pi /home/pi/.webthings/addons
 
 
-if [ ! -f /home/pi/.webthings/config/db.sqlite ] || [ ! -d /home/pi/.webthings/addons/power-settings ];
+if [ ! -f /home/pi/.webthings/config/db.sqlite3 ] || [ ! -d /home/pi/.webthings/addons/power-settings ];
 then
     rm -rf package
     rm -rf power-settings
