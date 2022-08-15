@@ -638,7 +638,23 @@ then
     #setcap cap_net_raw+eip $(eval readlink -f "$NODE_PATH")
     
     # Check if the installation of the controller succeeded
-    if [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ]; then
+    
+    if [ -d /ro ]; then
+        if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ]; then
+            echo 
+            echo "ERROR, failed to (fully) install candle-controller (/ro)"
+            echo "ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
+            echo
+
+            # Show error image
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                /bin/ply-image /boot/error.png
+                sleep 7200
+            fi
+
+            exit 1
+        fi
+    elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ]; then
     
         echo 
         echo "ERROR, failed to (fully) install candle-controller"
