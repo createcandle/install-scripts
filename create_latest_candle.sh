@@ -125,7 +125,7 @@ then
             echo "Candle: creating partitions" >> /dev/kmsg
             echo
 
-            printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7501MB\n14001MB\nquit" | parted
+            printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
             resize2fs /dev/mmcblk0p2
             #printf "y" | mkfs.ext4 /dev/mmcblk0p3
             printf "y" | mkfs.ext4 /dev/mmcblk0p4
