@@ -89,26 +89,26 @@ else
     echo "ERROR: /ro/home/pi/webthings does not exist??"
 fi
 
-mkdir -p /ro/home/pi/tmp/boot
-cp -r --verbose /boot/* /ro/home/pi/tmp/boot
+#mkdir -p /ro/home/pi/tmp/boot
+#cp -r --verbose /boot/* /ro/home/pi/tmp/boot
 
-mkdir -p /ro/home/pi/tmp/root
-cp -r --verbose /root/* /ro/home/pi/tmp/root
+#mkdir -p /ro/home/pi/tmp/root
+#cp -r --verbose /root/* /ro/home/pi/tmp/root
 
-cp -r --verbose /proc/device-tree /ro/home/pi/tmp/proc/device-tree
-cp -r --verbose /proc/mounts /ro/home/pi/tmp/proc/mounts
+#cp -r --verbose /proc/device-tree /ro/home/pi/tmp/proc/device-tree
+#cp -r --verbose /proc/mounts /ro/home/pi/tmp/proc/mounts
 
 
-mkdir -p /ro/home/pi/tmp/etc
-cp -r --verbose /ro/home/pi/.webthings/etc/hostname /ro/home/pi/tmp/etc/hostname
-cp -r --verbose /ro/home/pi/.webthings/etc/hosts /ro/home/pi/tmp/etc/hosts
+#mkdir -p /ro/home/pi/tmp/etc
+#cp -r --verbose /ro/home/pi/.webthings/etc/hostname /ro/home/pi/tmp/etc/hostname
+#cp -r --verbose /ro/home/pi/.webthings/etc/hosts /ro/home/pi/tmp/etc/hosts
 
 echo "Downloading latest install script from Github" 
 
-wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh -O /ro/home/pi/create_candle_disk_image.sh
-if [ -f /ro/home/pi/create_candle_disk_image.sh ]; then
+wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /ro/home/pi/create_latest_candle.sh
+if [ -f /ro/home/pi/create_latest_candle.sh ]; then
     echo "Download succesful"
-    chmod +x /ro/home/pi/create_candle_disk_image.sh
+    chmod +x /ro/home/pi/create_latest_candle.sh
 else
     echo "ERROR: DOWNLOADING LATEST SCRIPT FAILED"
     exit 1
@@ -122,7 +122,7 @@ cp /etc/resolv.conf /ro/etc/resolv.conf
 # sudo chroot /ro sh -c "ls /mnt"
 # sudo chroot /ro sh -c "apt update"
 # sudo chroot /ro sh -c "cat /proc/mounts"
-# sudo chroot /ro sh -c "wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_candle_disk_image.sh"
+# sudo chroot /ro sh -c "wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh"
 # sudo chroot /ro sh -c "ls /home/pi/alfred"
 
 # sudo chroot /ro sh -c "mount -t proc proc /proc && mount -t sysfs && ls /proc"
@@ -188,11 +188,11 @@ fi
 
 
 
-if [ -f /home/pi/create_candle_disk_image.sh ]; then
+if [ -f /home/pi/create_latest_candle.sh ]; then
 echo "Install script found, starting it"
-/home/pi/create_candle_disk_image.sh > /home/pi/update_report.txt
+/home/pi/create_latest_candle.sh > /home/pi/update_report.txt
 else
-echo "Error in chroot: create_candle_disk_image.sh not found"
+echo "Error in chroot: create_latest_candle.sh not found"
 fi
 touch /home/pi/TEST_FILE_CREATED_IN_CHROOT.txt
 
@@ -218,8 +218,8 @@ sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
 rm -rf /ro/home/pi/tmp
 
 
-if [ -f /ro/home/pi/create_candle_disk_image.sh ]; then
-    rm /ro/home/pi/create_candle_disk_image.sh
+if [ -f /ro/home/pi/create_latest_candle.sh ]; then
+    rm /ro/home/pi/create_latest_candle.sh
 else
     echo "strange, the install script is gone"
 fi
