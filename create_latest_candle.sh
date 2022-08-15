@@ -44,7 +44,7 @@ then
       echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
   
       # Show error image
-      if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+      if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
         /bin/ply-image /boot/error.png
         sleep 7200
       fi
@@ -64,7 +64,7 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         echo "Candle: detected OLD read-only mode. Aborting." >> /dev/kmsg
   
         # Show error image
-        if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
             /bin/ply-image /boot/error.png
             sleep 7200
         fi
@@ -374,7 +374,7 @@ else
     echo "Candle: error GIT failed to install" >> /dev/kmsg
     
     # Show error image
-    if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
         /bin/ply-image /boot/error.png
         sleep 7200
     fi
@@ -396,7 +396,7 @@ else
     echo "Candle: error browser failed to install" >> /dev/kmsg
     
     # Show error image
-    if [ -e "/bin/ply-image" ] && [ -f "/boot/error.png" ]; then
+    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
         /bin/ply-image /boot/error.png
         sleep 7200
     fi
@@ -596,7 +596,7 @@ then
         echo
         
         # Show error image
-        if [ -e "/bin/ply-image" ] && [ -f /boot/error.png ]; then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
             /bin/ply-image /boot/error.png
             sleep 7200
         fi
@@ -624,7 +624,7 @@ then
         echo
 
         # Show error image
-        if [ -e "/bin/ply-image" ] && [ -f /boot/error.png ]; then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
             /bin/ply-image /boot/error.png
             sleep 7200
         fi
@@ -823,7 +823,7 @@ if [ ! -d /home/pi/configuration-files ]; then
     echo
     
     # Show error image
-    if [ -e "/bin/ply-image" ] && [ -f /boot/error.png ]; then
+    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
         /bin/ply-image /boot/error.png
         sleep 7200
     fi
