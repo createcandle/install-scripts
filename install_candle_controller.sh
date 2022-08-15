@@ -4,10 +4,17 @@ set +e
 #part of the Candle disk image creation script
 
 # This script should be run as user pi (not root)
-if ! [ "$EUID" -ne 0 ]
+if ! [ "$EUID" -ne 0 ];
 then
   echo "Please run as user pi (do not use sudo)"
-  exit
+  exit 1
+fi
+
+if [ ! -s /etc/resolve.conf ]; then
+    # no nameserver
+    echo "no nameserver, aborting"
+    echo "Candle: no nameserver, aborting" >> /dev/kmsg
+    exit 1
 fi
 
 

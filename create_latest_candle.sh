@@ -962,14 +962,24 @@ systemctl disable getty@tty1.service
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 
     # Hides the Raspberry Pi logos normally shown at boot
-    isInFile2=$(cat /boot/config.txt | grep -c "disable_splash")
-    if [ $isInFile2 -eq 0 ];
+
+    if [ $(cat /boot/config.txt | grep -c "disable_splash") -eq 0 ];
     then
     	echo "- Adding disable_splash to config.txt"
     	echo 'disable_splash=1' >> /boot/config.txt
     else
         echo "- Splash was already disabled in config.txt"
     fi
+
+    # add HDMI always on
+    if [ $(cat /boot/config.txt | grep -c "hdmi_force_hotplug") -eq 0 ];
+    then
+    	echo "- Adding hdmi_force_hotplug=1 to config.txt"
+    	echo 'hdmi_force_hotplug=1' >> /boot/config.txt
+    else
+        echo "- hdmi_force_hotplug was already in config.txt"
+    fi
+
 
     # Hide the text normally shown when linux boots up
     isInFile=$(cat /boot/cmdline.txt | grep -c "tty3")
