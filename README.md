@@ -28,9 +28,9 @@ ssh pi@candle.local
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo bash
 ```
 
+NOTE: If you enabled developer mode, and the script detects that a bootloader or kernel update is available, then it will install these first and reboot the system. You can then log back in and run the install command again.
 
-
-9. The script will easily take an hour to run on a Raspberry Pi 3b. When it is complete it will shut down the Raspberry Pi.
+9. The script will easily take an hour to run on a Raspberry Pi 3b. When it is complete it will shut down the Raspberry Pi (assuming there are no errors).
 
 13. When you see the message that it is shutting down, wait 15 seconds until the shutdown is complete. Then take out the SD card and insert it back into your laptop again to turn it into a disk image file. On windows you can use the free version of Win32 Disk Imager for this. Make sure to check the box to only read the partitions. Name the file to be extracted something like `Candle_2.0.0.img` (depending on the intended version).
 
