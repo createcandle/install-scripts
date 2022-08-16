@@ -12,7 +12,7 @@ https://www.raspberrypi.com/software/
 
 4. Click "write". Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt” using a text editor. From it, delete “init=/usr/lib/raspi-config/init_resize.sh”, and save. Saving might seem to fail, but it probably saved anyway. Open the cmdline.txt file again to confirm.
 
-NOTE: if you want to get the "cutting edge" version of Candle, you will also have to create a file called developer.txt
+NOTE: If you want to get the "cutting edge" version of Candle, you will also have to create a file called `candle_cutting_edge.txt`
 
 5. Make sure there is no other "candle.local" device on the network already, since after a reboot the Raspberry Pi's hostname will change to `candle.local`. You must also plug a network cable into the Raspberry Pi.
 
