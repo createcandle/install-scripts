@@ -161,7 +161,7 @@ fi
 
 # CREATE PARTITIONS
 
-if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${SKIP_PARTITIONS}" ]] ]; 
+if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${SKIP_PARTITIONS}" ]]; 
 then
     
     #if [ -f /dev/mmcblk0p4 ]; then
