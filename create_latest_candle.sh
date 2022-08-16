@@ -73,9 +73,8 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     fi
 fi
 
-
-
-if iptables -L -v -n | grep "Failed to initialize"; then
+echo
+if iptables -L -v -n | grep -q 'Failed'; then
     echo "ERROR, IP tables warning indicates that a bootloader or kernel update has taken place. Please reboot first."
     echo "ERROR, IP tables warning indicates that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
     
@@ -86,6 +85,8 @@ if iptables -L -v -n | grep "Failed to initialize"; then
     fi
     
     exit 0
+else
+    echo "IPTables did not give a warning, OK"
 fi
 
 
