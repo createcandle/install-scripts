@@ -2,7 +2,7 @@
 set +e # continue on errors
 
 export PATH="/home/pi/.local/bin:$PATH"
-
+reinstall=" "
 # CANDLE INSTALL AND UPDATE SCRIPT
 
 # This script will turn a Raspberry Pi OS Lite installation into a Candle controller
@@ -73,6 +73,20 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     fi
 fi
 
+
+
+if iptables -L -v -n | grep "Failed to initialize"; then
+    echo "ERROR, IP tables warning indicates that a bootloader or kernel update has taken place. Please reboot first."
+    echo "ERROR, IP tables warning indicates that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
+    
+    # Show error image
+    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
+        /bin/ply-image /boot/error.png
+        sleep 7200
+    fi
+    
+    exit 0
+fi
 
 
 
@@ -168,7 +182,7 @@ if [ -f /home/pi/.webthings/zero.fill ]; then
   echo "removed /home/pi/.webthings/zero.fill"
 fi
 
-sleep 5
+sleep 3
 
 # make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
@@ -179,6 +193,32 @@ if [ -f /boot/candle_hardware_clock.txt ]; then
     /usr/sbin/fake-hwclock save
     echo "Candle: requested latest time. Date is now: $(date)" >> /dev/kmsg
 fi
+
+
+
+
+# Download splash images
+if [ -f /boot/cmdline.txt ]; then
+
+    echo
+    echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEOS"
+    echo "Candle: downloading splash images and videos" >> /dev/kmsg
+    echo
+    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
+    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
+    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
+    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
+    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
+    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
+    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
+    
+fi
+
+
+
+
 
 
 # INSTALL PROGRAMS AND UPDATE
@@ -194,6 +234,28 @@ then
     apt update -y
     apt-get update -y
     apt --fix-broken install
+    echo
+    
+    
+    
+    if apt list --upgradable | grep bootloader; then
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE"
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
+    fi
+    
+    if apt list --upgradable | grep kernel; then
+        echo "WARNING, KERNEL IS UPGRADEABLE"
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
+    fi
+    
+    # Set kernel to not automatically upgrade, but only during disk image creation
+    # Afterwards the power settings addon should handle this.
+    if [ ! -f /boot/candle_first_run_complete.txt ]; then
+        echo "Settting kernel to not automatically upgrade."
+        apt-mark hold raspberry-kernel
+        apt-mark hold raspberrypi-bootloader
+    fi
+    
     echo
     if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
     then
@@ -214,7 +276,7 @@ then
     echo "installing chromium-browser"
     echo "Candle: installing chromium-browser" >> /dev/kmsg
     echo
-    apt install chromium-browser -y --allow-change-held-packages
+    apt install chromium-browser -y --allow-change-held-packages "$reinstall"
 
     if [ ! -f /bin/chromium-browser ]; then
         apt purge chromium-browser -y
@@ -223,7 +285,7 @@ then
 
     echo
     echo "installing vlc"
-    apt install vlc --no-install-recommends -y
+    apt install vlc --no-install-recommends -y "$reinstall"
 
     #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
     #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
@@ -234,13 +296,13 @@ then
     echo "installing git"
     echo "Candle: installing git" >> /dev/kmsg
     echo
-    apt install git -y 
+    apt install git -y "$reinstall"
 
     echo
     echo "installing build tools"
     for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six; do
         echo "$i"
-        apt install -y $i
+        apt install -y "$reinstall" $i
         echo
     done
 
@@ -257,12 +319,13 @@ then
     for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install -y $i
+        apt install "$reinstall" -y $i
         echo
     done
 
-
+    # Quick sanity check
     if [ ! -f /usr/sbin/mosquitto ]; then
+        echo "ERROR, mosquitto failed to install the first time" >> /dev/kmsg
         apt install --reinstall mosquitto -y
     fi
     
@@ -278,12 +341,13 @@ then
     for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt-get install --no-install-recommends -y $i
+        apt-get install "$reinstall" --no-install-recommends -y $i
         echo
     done
     
     # double check that openbox is actually installed
     if [ ! -f /bin/openbox ]; then
+        echo "ERROR, openbox failed to install the first time" >> /dev/kmsg
         apt-get install --reinstall --no-install-recommends -y openbox
     fi
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
@@ -296,7 +360,7 @@ then
     for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt-get install -y $i
+        apt-get install "$reinstall" -y $i
         echo
     done
     #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
@@ -319,7 +383,7 @@ then
     for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install -y $i
+        apt install "$reinstall" -y $i
         echo
     done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
@@ -329,7 +393,7 @@ then
     for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install -y $i
+        apt install "$reinstall" -y $i
         echo
     done
     
@@ -337,18 +401,19 @@ then
     echo "INSTALLING HOSTAPD AND DNSMASQ"
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
 
-    apt install -y dnsmasq 
+    apt install "$reinstall" -y dnsmasq 
     systemctl disable dnsmasq.service
     systemctl stop dnsmasq.service
 
     echo 
-    apt install -y hostapd
+    apt install "$reinstall" -y hostapd
     systemctl unmask hostapd.service
     systemctl disable hostapd.service
     systemctl stop hostapd.service
     
 
     # Try to fix anything that may have gone wrong
+    apt update
     apt-get update --fix-missing -y
     apt-get install -f -y
     apt --fix-broken install -y
@@ -456,6 +521,31 @@ then
     echo "Installing Python gateway_addon"
     sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 fi
+
+
+
+
+# RASPI CONFIG
+echo "Set Raspi-config I2C, SPI, Camera"
+
+if [ -d /sys/kernel/config/device-tree ];
+then
+    # enable i2c, needed for clock module support
+    raspi-config nonint do_i2c 0
+
+    # enable SPI
+    raspi-config nonint do_spi 0
+
+    # enable Camera.
+    raspi-config nonint do_camera 0 # This does nothing on Bullseye, but is needed for older versions of Raspberry Pi OS
+
+    # enable old Camera.
+    #raspi-config nonint do_legacy 0
+else
+    echo "Raspi-config setting skipped: missing device tree. In chroot?"
+fi
+
+
 
 
 
@@ -1121,32 +1211,16 @@ echo
 # - jsonschema (if memory serves)
 
 
-# RASPI CONFIG
-echo "Set Raspi-config I2C, SPI, Camera"
 
-if [ -d /sys/kernel/config/device-tree ];
-then
-    # enable i2c, needed for clock module support
-    raspi-config nonint do_i2c 0
-
-    # enable SPI
-    raspi-config nonint do_spi 0
-
-    # enable Camera.
-    raspi-config nonint do_camera 0 # This does nothing on Bullseye, but is needed for older versions of Raspberry Pi OS
-
-    # enable old Camera.
-    #raspi-config nonint do_legacy 0
-else
-    echo "Raspi-config setting skipped: missing device tree. In chroot?"
-fi
 
 
 # INSTALL AND UPDATE READ_ONLY MODE
 
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     
-    
+    echo
+    echo "Downloading read only script"
+    echo
     
     if [ -f /boot/developer.txt ]; then
         wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
@@ -1159,18 +1233,34 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
         | sed 's/,*$//' \
         | wget -qi - -O ro-overlay.tar
 
-        tar -xf ro-overlay.tar
-        rm ./ro-overlay.tar
+        if [ -f ro-overlay.tar ]; then
+            tar -xf ro-overlay.tar
+            rm ./ro-overlay.tar
         
-        for directory in createcandle-ro-overlay*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          mv -- "$directory" ./ro-overlay
-        done
+            for directory in createcandle-ro-overlay*; do
+              [[ -d $directory ]] || continue
+              echo "Directory: $directory"
+              mv -- "$directory" ./ro-overlay
+            done
     
-        cp ./ro-overlay/ro-root.sh ./ro-root.sh
-        rm -rf ./ro-overlay
-        
+            if [ -d ./ro-overlay ]; then
+                cp ./ro-overlay/ro-root.sh ./ro-root.sh
+                rm -rf ./ro-overlay
+            else
+                echo "ERROR, ro-overlay folder missing"
+            fi
+        else
+            echo "Download of read-only overlay script failed" >> /dev/kmsg
+            echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
+            
+            # Show error image
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                /bin/ply-image /boot/error.png
+                sleep 7200
+            fi
+    
+            exit 1
+        fi
     fi
     
     
@@ -1444,28 +1534,6 @@ fi
 
 echo "Clearing /home/pi/configuration-files"
 rm -rf /home/pi/configuration-files
-
-
-# Downloading splash images
-if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
-
-    echo
-    echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEOS"
-    echo "Candle: downloading splash images and videos" >> /dev/kmsg
-    echo
-    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
-    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
-    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
-    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
-    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
-    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
-    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
-    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
-    
-fi
-
-
 
 
 
