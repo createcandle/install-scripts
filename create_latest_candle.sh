@@ -1255,6 +1255,11 @@ if [ -f /boot/config.txt ]; then
     	echo 'hdmi_force_hotplug=1' >> /boot/config.txt
     else
         echo "- hdmi_force_hotplug was already in config.txt"
+        if [ $(cat /boot/config.txt | grep -c "#hdmi_force_hotplug=1") -eq 0 ];
+        then
+            sed -i 's|#hdmi_force_hotplug=1|hdmi_force_hotplug=1|g' /boot/config.txt
+            
+        fi
     fi
 
 
@@ -1674,7 +1679,7 @@ fi
 
 
 # Set to boot from partition2
-sed -i 's|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' cmd.txt
+sed -i 's|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' /boot/cmdline.txt
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
 
