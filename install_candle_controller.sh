@@ -24,6 +24,11 @@ if [ -z "$(printenv PATH | grep /home/pi/.local/bin)" ]; then
 fi
 
 
+if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/splash.png ]; then
+    sudo /bin/ply-image /boot/error.png
+fi
+
+
 echo "HOME: $HOME"
 
 cd /home/pi || exit
@@ -32,7 +37,7 @@ echo "installing python gateway addon"
 echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
-if [ ! command -v npm &> /dev/null ] || [ $(cat /home/pi/.webthings/.node_version) != 12 ];
+if [ ! command -v npm &> /dev/null ] || [ "$(cat /home/pi/.webthings/.node_version)" != 12 ];
 then
     echo
     echo "NPM could not be found. Installing it now."
@@ -49,10 +54,42 @@ then
     #fi
     #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
     wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
+    if [ ! -f install_nvm.sh ]; then
+        echo "ERROR, install_nvm.sh failed to download"
+        
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            sudo /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+        
+        exit 1
+    fi
+    
     chmod +x install_nvm.sh
     ./install_nvm.sh
 
     #. ~/.bashrc
+    
+    
+    export NVM_DIR="/home/pi/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    
+    
+    if [ -z "$(nvm --version)" ]; then
+        echo "ERROR, nvm is not available. Installation failed?"
+        echo "ERROR, nvm is not available. Installation failed?" | sudo tee -a /dev/kmsg
+        
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            sudo /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+        
+        exit 1
+    else
+        echo "NVM is available now"
+    fi
+    
 
     if cat /home/pi/.profile | grep NVM
     then
@@ -66,7 +103,8 @@ then
         echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> /home/pi/.profile
     fi
 
-
+    
+    
     echo "starting nvm install"
     nvm install 12
     nvm use 12
@@ -153,6 +191,13 @@ if [ -f /boot/developer.txt ]; then
         mv -f ./candle-controller /home/pi/webthings/gateway2
     else
         echo "ERROR, downloading cutting edge candle-controller dir from Github failed"
+        
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            sudo /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+        
+        exit 1
     fi
     
     
@@ -183,6 +228,13 @@ else
         ls /home/pi/webthings/gateway2
     else
         echo "ERROR, downloading latest release of candle-controller source dir from Github failed"
+        
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            sudo /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+        
+        exit 1
     fi
 fi
 
@@ -191,7 +243,15 @@ if [ ! -d /home/pi/webthings/gateway2 ]; then
     echo "ERROR, missing gateway2 directory"
     echo "ERROR, missing gateway2 directory" | sudo tee -a /dev/kmsg
     echo
+    
+    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+        sudo /bin/ply-image /boot/error.png
+        sleep 7200
+    fi
+    
     exit 1
+else
+    echo "/home/pi/webthings/gateway2 exists, OK"
 fi
 
 echo

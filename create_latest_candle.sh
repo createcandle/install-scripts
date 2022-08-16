@@ -259,6 +259,11 @@ then
     echo
     
     
+    # Add option to download source code from RaspberryPi server
+    
+    echo "modifying /etc/apt/sources.list - allowing apt access to source code"
+    sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
+    
     
     if apt list --upgradable | grep raspberrypi-bootloader; then
         echo "WARNING, BOOTLOADER IS UPGRADEABLE"
@@ -709,14 +714,14 @@ then
         
             if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
                 ./uninstall.sh
-                ./install.sh
+                echo -e 'N\n' | ./install.sh
             fi
         
             cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
         
         else
             echo "Doing initial ReSpeaker install"
-            ./install.sh
+            echo -e 'N\n' | ./install.sh
         fi
         
         cd /home/pi
