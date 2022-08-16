@@ -74,9 +74,10 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 fi
 
 echo
-if iptables -L -v -n | grep -q 'Failed'; then
-    echo "ERROR, IP tables warning indicates that a bootloader or kernel update has taken place. Please reboot first."
-    echo "ERROR, IP tables warning indicates that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
+
+if [ -z $(iptables -L -v -n) ]; then
+    echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
+    echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
     
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
@@ -1487,7 +1488,7 @@ if [ ! -L /etc/hosts ]; then
 fi
 
 
-# Copying the fstab file is the last thing to do since it could rended the system inaccessible
+# Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
 
 if [ -f /home/pi/configuration-files/boot/fstab3.bak ] \
 && [ -f /home/pi/configuration-files/boot/fstab4.bak ] \
