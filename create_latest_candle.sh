@@ -1673,6 +1673,9 @@ if [ ! -L /etc/hosts ]; then
 fi
 
 
+# Set to boot from partition2
+sed -i 's|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' cmd.txt
+
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
 
 if [ -f /home/pi/configuration-files/boot/fstab3.bak ] \
