@@ -863,17 +863,6 @@ fi
 #fi
 
 
-# Create hosts file and its symlink
-if [ ! -f /home/pi/.webthings/etc/hosts ]; then
-    echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-    echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
-fi
-if [ ! -L /etc/hosts ]; then
-    echo "removing /etc/hosts and creating a symlink to /home/pi/.webthings/etc/hosts instead"
-    rm /etc/hosts
-    ln -s /home/pi/.webthings/etc/hosts /etc/hosts
-fi
-
 # move timezone file to user partition
 if [ ! -f /home/pi/.webthings/etc/timezone ]; then
     echo "copying /etc/timezone to /home/pi/.webthings/etc/timezone"
@@ -1472,6 +1461,8 @@ if [ -f /boot/._cmdline.txt ]; then
 fi
 
 
+
+
 # Set Candle as the hostname
 if [ ! -e /home/pi/.webthings/etc/hostname ]
 then
@@ -1483,6 +1474,17 @@ else
     echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
 fi
 
+
+# Create hosts file and its symlink
+if [ ! -f /home/pi/.webthings/etc/hosts ]; then
+    echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
+    echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
+fi
+if [ ! -L /etc/hosts ]; then
+    echo "removing /etc/hosts and creating a symlink to /home/pi/.webthings/etc/hosts instead"
+    rm /etc/hosts
+    ln -s /home/pi/.webthings/etc/hosts /etc/hosts
+fi
 
 
 # Copying the fstab file is the last thing to do since it could rended the system inaccessible
