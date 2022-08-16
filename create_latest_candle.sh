@@ -250,12 +250,12 @@ then
     
     
     
-    if apt list --upgradable | grep bootloader; then
+    if apt list --upgradable | grep raspberrypi-bootloader; then
         echo "WARNING, BOOTLOADER IS UPGRADEABLE"
         echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
     fi
     
-    if apt list --upgradable | grep kernel; then
+    if apt list --upgradable | grep raspberrypi-kernel; then
         echo "WARNING, KERNEL IS UPGRADEABLE"
         echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
     fi
@@ -264,7 +264,7 @@ then
     # Afterwards the power settings addon should handle this.
     if [ ! -f /boot/candle_first_run_complete.txt ]; then
         echo "Settting kernel to not automatically upgrade."
-        apt-mark hold raspberry-kernel
+        apt-mark hold raspberrypi-kernel
         apt-mark hold raspberrypi-bootloader
     fi
     
