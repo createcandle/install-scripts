@@ -75,7 +75,7 @@ fi
 
 echo
 
-if [ -z $(iptables -L -v -n) ]; then
+if [ -f /usr/sbin/iptables ] && [ -z $(iptables -L -v -n) ]; then
     echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
     echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
     echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
