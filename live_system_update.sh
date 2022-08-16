@@ -200,7 +200,7 @@ echo "Candle: starting chroot" >> /dev/kmsg
 chroot /ro sh -c "$(cat <<END
 echo "in chroot"
 whoami
-export CHROOTED=yes
+#export CHROOTED=yes
 echo "/etc/resolv.conf: $(cat /etc/resolv.conf)"
 echo "cat /mnt/etc/resolv.conf: $(cat /mnt/etc/resolv.conf)"
 cd /home/pi
