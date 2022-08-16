@@ -102,12 +102,7 @@ fi
 
 #reinstall=$(printenv APT_REINSTALL)
 
-if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
-    echo "reinstall not set"
-else
-    echo "reinstall environment variable detected"
-    reinstall="--reinstall"
-fi
+
 
 
 
@@ -126,7 +121,14 @@ echo "PATH       : $PATH"
 scriptname=$(basename "$0")
 echo "USER       : $(whoami)"
 echo "NAME       : $scriptname"
-echo "REINSTALL? : $reinstall"
+
+if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
+    echo "APT REINST : no"
+else
+    reinstall="--reinstall"
+    echo "APT REINST : yes"
+fi
+
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 echo "CHROOT     : Not in chroot"
 else
@@ -473,24 +475,24 @@ then
     libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
     do
-        if dpkg -s "$1" | grep "Status: install ok installed"; then
-            echo "$1 installed OK"
+        if dpkg -s "$i" | grep "Status: install ok installed"; then
+            echo "$i installed OK"
         else
             echo
-            echo "ERROR, $1 did not install ok"
-            dpkg -s "$1"
+            echo "ERROR, $i did not install ok"
+            dpkg -s "$i"
             
             echo
             echo "Trying to install it again..."
-            apt install --reinstall -y "$1"
+            apt install --reinstall -y "$i"
             
             echo
-            if dpkg -s "$1" | grep "Status: install ok installed"; then
-                echo "$1 installed OK"
+            if dpkg -s "$i" | grep "Status: install ok installed"; then
+                echo "$i installed OK"
             else
                 echo
-                echo "ERROR, $1 package still did not install. Aborting..." >> /dev/kmsg
-                dpkg -s "$1"
+                echo "ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
+                dpkg -s "$i"
                 
                 # Show error image
                 if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
