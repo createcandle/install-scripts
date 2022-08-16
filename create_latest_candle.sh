@@ -138,15 +138,6 @@ if [ ! -s /etc/resolv.conf ]; then
     exit 1
 fi
 
-if [ -z $(hostname -I) ]; then
-    # no nameserver
-    echo "no IP address, aborting"
-    echo "Candle: no IP address, aborting" >> /dev/kmsg
-    exit 1
-fi
-
-
-
 
 
 
@@ -214,6 +205,7 @@ fi
 
 sleep 3
 
+
 # make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
     rm /boot/candle_hardware_clock.txt
@@ -227,24 +219,15 @@ fi
 
 
 
-# Download splash images
+# Download error image first
 if [ -f /boot/cmdline.txt ]; then
-
-    echo
-    echo "DOWNLOADING CANDLE SPLASH IMAGES AND VIDEOS"
-    echo "Candle: downloading splash images and videos" >> /dev/kmsg
-    echo
-    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
-    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
-    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
-    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
-    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
     wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
-    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
-    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
-    
+    if [ ! -f /boot/error.png ]; then
+        echo "ERROR, download of error.png failed." >> /dev/kmsg
+        exit 1
+    fi      
 fi
+
 
 
 
@@ -349,7 +332,9 @@ then
 
     echo
     echo "installing build tools"
-    for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six; do
+    for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
+        libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six; do
+        
         echo "$i"
         apt install -y "$reinstall" $i
         echo
@@ -468,6 +453,47 @@ then
     apt-get update --fix-missing -y
     apt-get install -f -y
     apt --fix-broken install -y
+    
+    
+    for i in \
+    chromium-browser vlc git \
+    autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
+        libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six
+    arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables
+    liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 \
+    libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
+    python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
+    do
+        if dpkg -s "$1" | grep "Status: install ok installed"; then
+            echo "$1 installed OK"
+        else
+            echo
+            echo "ERROR, $1 did not install ok"
+            dpkg -s "$1"
+            
+            echo
+            echo "Trying to install it again..."
+            apt install --reinstall -y "$1"
+            
+            echo
+            if dpkg -s "$1" | grep "Status: install ok installed"; then
+                echo "$1 installed OK"
+            else
+                echo
+                echo "ERROR, $1 package still did not install. Aborting..." >> /dev/kmsg
+                dpkg -s "$1"
+                
+                # Show error image
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
+                    /bin/ply-image /boot/error.png
+                    sleep 7200
+                fi
+    
+                exit 1
+            fi
+        fi
+    done
+    
 fi
 
 
@@ -830,6 +856,25 @@ fi
 echo
 echo "INSTALLING OTHER FILES AND SERVICES"
 echo
+
+
+# Download splash images
+if [ -f /boot/cmdline.txt ]; then
+    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+    echo
+    echo "Candle: downloading splash images and videos" >> /dev/kmsg
+    echo
+    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
+    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
+    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
+    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
+    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
+    
+    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
+    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4    
+fi
+
 
 # switch back to root of home folder
 cd /home/pi
