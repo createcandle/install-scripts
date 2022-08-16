@@ -124,16 +124,16 @@ scriptname=$(basename "$0")
 echo "NAME         : $scriptname"
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
-echo "Cutting edge : yes"
+echo "CUTTING EDGE : yes"
 else
-echo "Cutting edge : no"
+echo "CUTTING EDGE : no"
 fi
 
 if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
-    echo "APT REINST : no"
+    echo "APT REINST  : no"
 else
     reinstall="--reinstall"
-    echo "APT REINST : yes"
+    echo "APT REINST  : yes"
 fi
 
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
