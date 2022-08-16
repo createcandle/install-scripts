@@ -328,7 +328,7 @@ then
 
     echo
     echo "installing vlc"
-    apt install vlc --no-install-recommends -y "$reinstall"
+    apt install vlc -y --no-install-recommends "$reinstall"
 
     #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
     #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
@@ -371,7 +371,7 @@ then
     # Quick sanity check
     if [ ! -f /usr/sbin/mosquitto ]; then
         echo "ERROR, mosquitto failed to install the first time" >> /dev/kmsg
-        apt install --reinstall mosquitto -y
+        apt install mosquitto  -y --reinstall 
     fi
     
 
@@ -386,7 +386,7 @@ then
     for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt-get install "$i" --no-install-recommends -y "$reinstall"
+        apt-get install "$i" -y --no-install-recommends "$reinstall"
         echo
     done
     
@@ -395,7 +395,7 @@ then
         echo "Openbox seems to have installed OK" >> /dev/kmsg
     else
         echo "ERROR, openbox failed to install the first time" >> /dev/kmsg
-        apt-get install --reinstall --no-install-recommends -y openbox
+        apt-get install openbox -y --no-install-recommends --reinstall
     fi
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
@@ -430,7 +430,7 @@ then
     for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install $i -y "$reinstall"
+        apt install "$i" -y "$reinstall"
         echo
     done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
@@ -440,7 +440,7 @@ then
     for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install $i -y "$reinstall"
+        apt install "$i" -y "$reinstall"
         echo
     done
     
@@ -464,10 +464,11 @@ then
     apt-get update --fix-missing -y
     apt-get install -f -y
     apt --fix-broken install -y
+    apt autoremove -y
     
     
     for i in \
-    chromium-browser vlc git \
+    chromium-browser git \
     autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six \
     arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables \
@@ -475,7 +476,8 @@ then
     libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
     do
-        if dpkg -s "$i" | grep "Status: install ok installed"; then
+        echo
+        if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
             echo "$i installed OK"
         else
             echo
@@ -484,10 +486,51 @@ then
             
             echo
             echo "Trying to install it again..."
-            apt install --reinstall -y "$i"
+            apt purge -y "$i"
+            sleep 2
+            apt install -y "$i"
             
             echo
-            if dpkg -s "$i" | grep "Status: install ok installed"; then
+            if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
+                echo "$i installed OK"
+            else
+                echo
+                echo "ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
+                dpkg -s "$i"
+                
+                # Show error image
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
+                    /bin/ply-image /boot/error.png
+                    sleep 7200
+                fi
+    
+                exit 1
+            fi
+        fi
+    done
+    
+    
+    # again, but this time with 'no-install-recommends
+    for i in \
+    vlc \
+    xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
+    do
+        echo
+        if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
+            echo "$i installed OK"
+        else
+            echo
+            echo "ERROR, $i did not install ok"
+            dpkg -s "$i"
+            
+            echo
+            echo "Trying to install it again..."
+            apt purge -y "$i"
+            sleep 2
+            apt install -y "$i"
+            
+            echo
+            if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
                 echo "$i installed OK"
             else
                 echo
@@ -512,7 +555,7 @@ fi
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
     echo
-    echo "UPGRADING LINUX"
+    echo "RUNNING APT UPGRADE"
     echo
     #apt upgrade -y
     apt-get update -y
