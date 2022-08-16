@@ -21,8 +21,12 @@ set +e # continue on errors
 # export SKIP_BLUEALSA=yes
 # export SKIP_CONTROLLER_INSTALL=yes
 
+# The script ca add the re-install option to every Apt install command.
+# export APT_REINSTALL=yes
+
 # If you also want this script to download all the installed packages' as .deb files, then set this environment variable:
 # export DOWNLOAD_DEB=yes
+
 
 # if you want to pretend that the script is running into a chroot at /ro:
 # export CHROOTED=yes
@@ -77,7 +81,7 @@ echo
 # Detect if a kernel or bootloader update has just occured. If so, the system must be rebooted first.
 
 if [ -f /usr/sbin/iptables ];then
-    if [ -z $(iptables -L -v -n) ]; then
+    if [ -z "$(iptables -L -v -n)" ]; then
         echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
         echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
         echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
@@ -98,12 +102,6 @@ if [ ! -f /boot/cmdline.txt ]; then
     echo "ERROR, missing cmdline.txt??" >> /dev/kmsg
     exit 1
 fi
-
-
-#reinstall=$(printenv APT_REINSTALL)
-
-
-
 
 
 
@@ -136,7 +134,7 @@ echo "CHROOT     : INSIDE CHROOT (boot partition is not mounted)"
 fi
 
 echo
-
+echo "reinstall flag: $reinstall"
 
 
 
@@ -339,7 +337,7 @@ then
     echo "installing git"
     echo "Candle: installing git" >> /dev/kmsg
     echo
-    apt install git -y "$reinstall"
+    apt -y install git "$reinstall" 
 
     echo
     echo "installing build tools"
@@ -347,7 +345,7 @@ then
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six; do
         
         echo "$i"
-        apt install "$i" -y "$reinstall" 
+        apt  -y install "$i" "$reinstall"
         echo
     done
 
@@ -364,14 +362,14 @@ then
     for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install "$i" -y "$reinstall" 
+        apt -y install "$i" "$reinstall" 
         echo
     done
 
     # Quick sanity check
     if [ ! -f /usr/sbin/mosquitto ]; then
         echo "ERROR, mosquitto failed to install the first time" >> /dev/kmsg
-        apt install mosquitto  -y --reinstall 
+        apt -y --reinstall install mosquitto  
     fi
     
 
@@ -386,18 +384,16 @@ then
     for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt-get install "$i" -y --no-install-recommends "$reinstall"
+        apt-get -y --no-install-recommends install "$i" "$reinstall" 
         echo
     done
     
-    # double check that openbox is actually installed
-    if [ -f /bin/openbox ] || [ -f /usr/bin/openbox ]; then
-        echo "Openbox seems to have installed OK" >> /dev/kmsg
-    else
-        echo "ERROR, openbox failed to install the first time" >> /dev/kmsg
-        apt-get install openbox -y --no-install-recommends --reinstall
-    fi
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
+
+
+    # OMPLAYER
+    # This player is deprecated, but Internet Radio currently still uses it (and perhaps other addons too). So here's an attempts to get it working again.
+    # The way forward is for all these addons to switch to VLC player
 
     # get OMXPlayer for Internet Radio
     # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
@@ -407,30 +403,38 @@ then
     for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt-get install $i -y "$reinstall"
+        apt-get -y install $i "$reinstall"
         echo
     done
     #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
+
     apt --fix-broken install -y
 
     wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb -O ./omxplayer.deb
-    dpkg -i ./omxplayer.deb
-    rm -rf ./omxplayer*
+    if [ -f ./omxplayer.deb ]; then
+        dpkg -i ./omxplayer.deb
+        rm -rf ./omxplayer*
 
-    #apt --fix-broken install -y
+        #apt --fix-broken install -y
 
-    mkdir -p /opt/vc/
-    wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
-    tar -xvf lib.tar -C /opt/vc/
-    rm ./lib.tar
-
+        mkdir -p /opt/vc/
+        wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
+        if [ -f ./lib.tar ]; then
+            tar -xvf lib.tar -C /opt/vc/
+            rm ./lib.tar
+        else
+            echo "ERROR DOWNLOAD OMXPLAYER LIB.TAR FROM CANDLE SERVER" >> /dev/kmsg
+        fi
+    else
+        echo "ERROR, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
+    fi
 
     # for BlueAlsa
     echo "installing bluealsa support packages"
     for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install "$i" -y "$reinstall"
+        apt -y install "$i" "$reinstall" 
         echo
     done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
@@ -440,7 +444,7 @@ then
     for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install "$i" -y "$reinstall"
+        apt -y install "$i" "$reinstall"
         echo
     done
     
@@ -448,12 +452,12 @@ then
     echo "INSTALLING HOSTAPD AND DNSMASQ"
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
 
-    apt install dnsmasq -y "$reinstall" 
+    apt -y install dnsmasq "$reinstall" 
     systemctl disable dnsmasq.service
     systemctl stop dnsmasq.service
 
     echo 
-    apt install hostapd -y "$reinstall"
+    apt -y install hostapd "$reinstall"
     systemctl unmask hostapd.service
     systemctl disable hostapd.service
     systemctl stop hostapd.service
@@ -486,9 +490,9 @@ then
             
             echo
             echo "Trying to install it again..."
-            apt purge -y "$i"
+            apt -y purge"$i"
             sleep 2
-            apt install -y "$i"
+            apt -y install "$i"
             
             echo
             if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
@@ -510,7 +514,7 @@ then
     done
     
     
-    # again, but this time with 'no-install-recommends
+    # again, but this time with 'no-install-recommends'
     for i in \
     vlc \
     xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
@@ -525,9 +529,9 @@ then
             
             echo
             echo "Trying to install it again..."
-            apt purge -y "$i"
+            apt -y purge "$i"
             sleep 2
-            apt install -y "$i"
+            apt -y --no-install-recommends install "$i"
             
             echo
             if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
