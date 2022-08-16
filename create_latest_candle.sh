@@ -75,6 +75,8 @@ fi
 
 echo
 
+# Detect if a kernel or bootloader update has just occured. If so, the system must be rebooted first.
+
 if [ -f /usr/sbin/iptables ];then
     if [ -z $(iptables -L -v -n) ]; then
         echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
@@ -102,7 +104,7 @@ fi
 
 
 
-# CREATE PARTITIONS
+# OUTPUT SOME INFORMATION
 
 cd /home/pi
 
@@ -125,6 +127,10 @@ fi
 echo
 
 
+
+
+# ADDITIONAL SANITY CHECKS
+
 if [ ! -s /etc/resolv.conf ]; then
     # no nameserver
     echo "no nameserver, aborting"
@@ -132,8 +138,20 @@ if [ ! -s /etc/resolv.conf ]; then
     exit 1
 fi
 
+if [ -z $(hostname -I) ]; then
+    # no nameserver
+    echo "no IP address, aborting"
+    echo "Candle: no IP address, aborting" >> /dev/kmsg
+    exit 1
+fi
 
-# Create disk partitions
+
+
+
+
+
+# CREATE PARTITIONS
+
 if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${CHROOTED}" ]]; 
 then
     
@@ -263,9 +281,28 @@ then
     # Set kernel to not automatically upgrade, but only during disk image creation
     # Afterwards the power settings addon should handle this.
     if [ ! -f /boot/candle_first_run_complete.txt ]; then
-        echo "Settting kernel to not automatically upgrade."
-        apt-mark hold raspberrypi-kernel
-        apt-mark hold raspberrypi-bootloader
+        
+        echo "/boot/candle_first_run_complete.txt does not exist yet"
+        
+        if [ ! -f /boot/developer.txt ]; then
+            echo "Settting kernel to not automatically upgrade."
+            apt-mark hold raspberrypi-kernel
+            apt-mark hold raspberrypi-bootloader
+        else
+            echo "developer.txt detected. Updating kernel and bootloader"
+            if [ $(apt list --upgradable | grep raspberrypi-kernel) ] || [ $(apt list --upgradable | grep raspberrypi-bootloader) ]; then
+                
+                wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
+                chmod +x /home/pi/create_latest_candle.sh
+                apt install -y raspberrypi-kernel
+                apt install -y raspberrypi-bootloader
+                echo
+                echo "Rebooting in 10 seconds..."
+                echo
+                sleep 10
+                reboot now
+            fi
+        fi
     fi
     
     echo
@@ -358,7 +395,9 @@ then
     done
     
     # double check that openbox is actually installed
-    if [ ! -f /bin/openbox ]; then
+    if [ -f /bin/openbox ] || [ -f /usr/bin/openbox ]; then
+        echo "Openbox seems to have installed OK" >> /dev/kmsg
+    else
         echo "ERROR, openbox failed to install the first time" >> /dev/kmsg
         apt-get install --reinstall --no-install-recommends -y openbox
     fi
@@ -1471,6 +1510,10 @@ if [ -f /boot/._cmdline.txt ]; then
     rm /boot/._cmdline.txt
 fi
 
+if [ -f /home/pi/create_latest_candle.sh ]; then
+    echo "Removing left-over /home/pi/create_latest_candle.sh"
+    rm /home/pi/create_latest_candle.sh
+fi
 
 
 
