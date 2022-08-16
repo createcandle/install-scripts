@@ -29,13 +29,24 @@ echo "Starting live controller update"
 echo "starting LIVE controller update" >> /dev/kmsg
 echo
 
-
+echo "/etc/resolv.conf: "
 cat /etc/resolv.conf
+echo
 if [ ! -s /etc/resolv.conf ]; then
     # no nameserver
     echo "no nameserver, aborting"
     echo "Candle: no nameserver, aborting" >> /dev/kmsg
     exit 1
+else
+    echo "/etc/resolv.conf did not seem to be empty"
+    # enable internet use inside the chroot
+    #cp /etc/resolv.conf /ro/etc/resolv.conf
+
+    echo "juggling /etc/resolv.conf"
+    cp /etc/resolv.conf /ro/etc/resolv.conf.jump
+    rm /rw/upper/etc/resolv.conf
+    rm /etc/resolv.conf
+    cp /ro/etc/resolv.conf.jump /ro/etc/resolv.conf
 fi
 
 
@@ -67,11 +78,6 @@ echo "Setting /ro to RW"
 mount -o remount,rw /ro
 echo "remount done"
 
-#echo "juggling /etc/resolv.conf"
-#cp /etc/resolv.conf /ro/etc/resolv.conf.jump
-#rm /rw/upper/etc/resolv.conf
-#rm /etc/resolv.conf
-#cp /ro/etc/resolv.conf.jump /ro/etc/resolv.conf
 
 timedatectl set-ntp true
 
@@ -123,8 +129,6 @@ else
     exit 1
 fi
 
-# enable internet use inside the chroot
-cp /etc/resolv.conf /ro/etc/resolv.conf
 
 # sudo chroot /ro sh -c "whoami"
 # sudo chroot /ro sh -c "ls /dev"
@@ -180,6 +184,11 @@ if ! findmnt | grep -q '/ro/lib'; then
     mount -o remount,rw /ro/dev
 fi
 
+if ! findmnt | grep -q '/ro/etc/resolv.conf'; then
+    echo "trying to mount /etc/resolv.conf"
+    mkdir -p /ro/etc
+    mount /etc/resolv.conf /ro/etc/resolv.conf -o bind
+fi
 
 
 
@@ -287,6 +296,7 @@ umount /ro/dev
 umount /ro/sys
 umount /ro/proc
 umount /ro/boot
+umount /ro/etc/resolv.conf
 
 # re-enable read-only mode
 echo "Setting /ro back to RO"
