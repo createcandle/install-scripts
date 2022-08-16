@@ -273,7 +273,7 @@ then
             apt-mark hold raspberrypi-bootloader
         else
             echo "developer.txt detected. Updating kernel and bootloader"
-            if [ $(apt list --upgradable | grep raspberrypi-kernel) ] || [ $(apt list --upgradable | grep raspberrypi-bootloader) ]; then
+            if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
                 
                 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
                 chmod +x /home/pi/create_latest_candle.sh
