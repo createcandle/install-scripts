@@ -78,6 +78,7 @@ echo
 if [ -z $(iptables -L -v -n) ]; then
     echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
     echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
+    echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
     
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
@@ -85,10 +86,17 @@ if [ -z $(iptables -L -v -n) ]; then
         sleep 7200
     fi
     
-    exit 0
+    exit 1
 else
-    echo "IPTables did not give a warning, OK"
+    echo "No recent kernel update detected"
 fi
+
+if [ ! -f /boot/cmdline.txt ]; then
+    echo "ERROR, missing cmdline.txt??" >> /dev/kmsg
+    exit 1
+fi
+
+
 
 
 
