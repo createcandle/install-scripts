@@ -306,7 +306,8 @@ then
                 apt install -y raspberrypi-kernel
                 apt install -y raspberrypi-bootloader
                 echo
-                echo "Rebooting in 10 seconds..."
+                echo "Rebooting in 10 seconds... ($(date))"
+                echo "Hostname: $(cat /etc/hostname)"
                 echo
                 sleep 10
                 reboot now

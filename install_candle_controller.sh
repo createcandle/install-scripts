@@ -339,7 +339,7 @@ if [ -d /home/pi/webthings/gateway2 ]; then
         mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
     else
         echo "gateway dir existed, doing rsync from gateway2"
-        rsync -r --delete /home/pi/webthings/gateway2/* /home/pi/webthings/gateway
+        rsync -r -q --delete /home/pi/webthings/gateway2/* /home/pi/webthings/gateway
         chown -R pi:pi /home/pi/webthings/gateway
         rm -rf /home/pi/webthings/gateway2
     fi
