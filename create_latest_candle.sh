@@ -1,8 +1,7 @@
 #!/bin/bash
 set +e # continue on errors
 
-export PATH="/home/pi/.local/bin:$PATH"
-reinstall=" "
+
 # CANDLE INSTALL AND UPDATE SCRIPT
 
 # This script will turn a Raspberry Pi OS Lite installation into a Candle controller
@@ -101,6 +100,16 @@ if [ ! -f /boot/cmdline.txt ]; then
 fi
 
 
+#reinstall=$(printenv APT_REINSTALL)
+
+if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
+    echo "reinstall not set"
+else
+    echo "reinstall environment variable detected"
+    reinstall="--reinstall"
+fi
+
+
 
 
 
@@ -117,7 +126,7 @@ echo "PATH       : $PATH"
 scriptname=$(basename "$0")
 echo "USER       : $(whoami)"
 echo "NAME       : $scriptname"
-
+echo "REINSTALL? : $reinstall"
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 echo "CHROOT     : Not in chroot"
 else
@@ -336,7 +345,7 @@ then
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six; do
         
         echo "$i"
-        apt install -y "$reinstall" $i
+        apt install "$i" -y "$reinstall" 
         echo
     done
 
@@ -353,7 +362,7 @@ then
     for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install "$reinstall" -y $i
+        apt install "$i" -y "$reinstall" 
         echo
     done
 
@@ -375,7 +384,7 @@ then
     for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt-get install "$reinstall" --no-install-recommends -y $i
+        apt-get install "$i" --no-install-recommends -y "$reinstall"
         echo
     done
     
@@ -396,7 +405,7 @@ then
     for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt-get install "$reinstall" -y $i
+        apt-get install $i -y "$reinstall"
         echo
     done
     #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
@@ -419,7 +428,7 @@ then
     for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install "$reinstall" -y $i
+        apt install $i -y "$reinstall"
         echo
     done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
@@ -429,7 +438,7 @@ then
     for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt install "$reinstall" -y $i
+        apt install $i -y "$reinstall"
         echo
     done
     
@@ -437,12 +446,12 @@ then
     echo "INSTALLING HOSTAPD AND DNSMASQ"
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
 
-    apt install "$reinstall" -y dnsmasq 
+    apt install dnsmasq -y "$reinstall" 
     systemctl disable dnsmasq.service
     systemctl stop dnsmasq.service
 
     echo 
-    apt install "$reinstall" -y hostapd
+    apt install hostapd -y "$reinstall"
     systemctl unmask hostapd.service
     systemctl disable hostapd.service
     systemctl stop hostapd.service

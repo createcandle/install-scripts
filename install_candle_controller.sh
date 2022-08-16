@@ -17,6 +17,12 @@ if [ ! -s /etc/resolv.conf ]; then
     exit 1
 fi
 
+# Add /home/pi/.local/bin to path
+if [ -z "$(printenv PATH | grep /home/pi/.local/bin)" ]; then 
+    export PATH="/home/pi/.local/bin:$PATH"
+    echo "added /home/pi/.local/bin to PATH"
+fi
+
 
 echo "HOME: $HOME"
 
