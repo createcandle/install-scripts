@@ -363,6 +363,7 @@ chown -R pi:pi /home/pi/.webthings/addons
 
 if [ ! -f /home/pi/.webthings/config/db.sqlite3 ] || [ ! -d /home/pi/.webthings/addons/power-settings ];
 then
+    echo "installing power settings addon"
     rm -rf package
     rm -rf power-settings
     wget https://github.com/createcandle/power-settings/releases/download/3.2.37/power-settings-3.2.37.tgz
@@ -372,6 +373,8 @@ then
     mv package power-settings
     chown -R pi:pi power-settings
     rm ./*.tgz
+else
+    echo "no need to (re-)install power-settings addon"
 fi
 
 
@@ -501,8 +504,13 @@ chown -R pi:pi /home/pi/.webthings/config
 if [ ! -f /home/pi/.webthings/config/db.sqlite3 ];
 then
     echo "copying initial Candle database from power settings addon"
-    cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
-    chown pi:pi /home/pi/.webthings/config/db.sqlite3
+    if [ -f /home/pi/.webthings/addons/power-settings/db.sqlite3 ]; then
+        cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
+        chown pi:pi /home/pi/.webthings/config/db.sqlite3
+    else
+        echo
+        echo "ERROR, /home/pi/.webthings/addons/power-settings/db.sqlite3 was missing"
+    fi
 else
     echo "warning, not copying default database since a database file already exists"
     echo "Database file already existed" | sudo tee -a /dev/kmsg

@@ -286,7 +286,10 @@ then
             apt-mark hold raspberrypi-kernel
             apt-mark hold raspberrypi-bootloader
         else
-            echo "developer.txt detected. Updating kernel and bootloader"
+            echo
+            echo
+            echo "developer.txt detected. Updating kernel and bootloader, and then rebooting."
+            echo
             if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
                 
                 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
@@ -322,16 +325,18 @@ then
     echo "installing chromium-browser"
     echo "Candle: installing chromium-browser" >> /dev/kmsg
     echo
-    apt install chromium-browser -y --allow-change-held-packages "$reinstall"
+    apt install chromium-browser -y --print-uris --allow-change-held-packages "$reinstall"
 
     if [ ! -f /bin/chromium-browser ]; then
+        echo
+        echo "browser install failed, retrying."
         apt purge chromium-browser -y
         apt install chromium-browser -y --allow-change-held-packages
     fi
 
     echo
     echo "installing vlc"
-    apt install vlc -y --no-install-recommends "$reinstall"
+    apt -y install vlc --print-uris --no-install-recommends "$reinstall"
 
     #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
     #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
@@ -350,7 +355,7 @@ then
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six; do
         
         echo "$i"
-        apt  -y install "$i" "$reinstall"
+        apt  -y install "$i"  --print-uris "$reinstall"
         echo
     done
 
@@ -367,7 +372,7 @@ then
     for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt -y install "$i" "$reinstall" 
+        apt -y install "$i"  --print-uris "$reinstall" 
         echo
     done
 
@@ -389,7 +394,7 @@ then
     for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt-get -y --no-install-recommends install "$i" "$reinstall" 
+        apt-get -y --no-install-recommends install "$i" --print-uris "$reinstall" 
         echo
     done
     
@@ -408,7 +413,7 @@ then
     for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt-get -y install $i "$reinstall"
+        apt-get -y install $i --print-uris "$reinstall"
         echo
     done
     #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
@@ -439,7 +444,7 @@ then
     for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt -y install "$i" "$reinstall" 
+        apt -y install "$i" --print-uris "$reinstall" 
         echo
     done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
@@ -449,7 +454,7 @@ then
     for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        apt -y install "$i" "$reinstall"
+        apt -y install "$i"  --print-uris "$reinstall"
         echo
     done
     
@@ -457,12 +462,12 @@ then
     echo "INSTALLING HOSTAPD AND DNSMASQ"
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
 
-    apt -y install dnsmasq "$reinstall" 
+    apt -y install dnsmasq  --print-uris "$reinstall" 
     systemctl disable dnsmasq.service
     systemctl stop dnsmasq.service
 
     echo 
-    apt -y install hostapd "$reinstall"
+    apt -y install hostapd  --print-uris "$reinstall"
     systemctl unmask hostapd.service
     systemctl disable hostapd.service
     systemctl stop hostapd.service
@@ -1146,6 +1151,7 @@ chmod +x /home/pi/candle/files_check.sh
 
 # CHOWN THE NEW FILES
 chown pi:pi /home/pi/*
+chown pi:pi /home/pi/candle/*
 
 chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
