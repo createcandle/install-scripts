@@ -113,12 +113,19 @@ cd /home/pi
 echo
 echo "CREATING CANDLE"
 echo
-echo "DATE       : $(date)"
-echo "IP ADDRESS : $(hostname -I)"
-echo "PATH       : $PATH"
+echo "DATE         : $(date)"
+echo "IP ADDRESS   : $(hostname -I)"
+echo "PATH         : $PATH"
+echo "USER         : $(whoami)"
+
 scriptname=$(basename "$0")
-echo "USER       : $(whoami)"
-echo "NAME       : $scriptname"
+echo "NAME         : $scriptname"
+
+if [ -f /boot/candle_cutting_edge.txt ]; then
+echo "Cutting edge : yes"
+else
+echo "Cutting edge : no"
+fi
 
 if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
     echo "APT REINST : no"
@@ -281,14 +288,14 @@ then
         
         echo "/boot/candle_first_run_complete.txt does not exist yet"
         
-        if [ ! -f /boot/developer.txt ]; then
+        if [ ! -f /boot/candle_cutting_edge.txt ]; then
             echo "Settting kernel to not automatically upgrade."
             apt-mark hold raspberrypi-kernel
             apt-mark hold raspberrypi-bootloader
         else
             echo
             echo
-            echo "developer.txt detected. Updating kernel and bootloader, and then rebooting."
+            echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting."
             echo
             if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
                 
@@ -825,7 +832,7 @@ then
     
     
     
-    if [ -f /boot/developer.txt ]; then
+    if [ -f /boot/candle_cutting_edge.txt ]; then
         wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
     else
         curl -s https://api.github.com/repos/createcandle/install-scripts/releases/latest \
@@ -1376,7 +1383,7 @@ if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
     echo "Downloading read only script"
     echo
     
-    if [ -f /boot/developer.txt ]; then
+    if [ -f /boot/candle_cutting_edge.txt ]; then
         wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
         
     else

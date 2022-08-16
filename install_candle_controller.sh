@@ -28,8 +28,18 @@ if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/splash.png ]; then
     sudo /bin/ply-image /boot/error.png
 fi
 
+echo "DATE         : $(date)"
+echo "IP ADDRESS   : $(hostname -I)"
+echo "USER         : $(whoami)"
+echo "PATH         : $PATH"
+scriptname=$(basename "$0")
+echo "NAME         : $scriptname"
 
-echo "HOME: $HOME"
+if [ -f /boot/candle_cutting_edge.txt ]; then
+echo "Cutting edge : yes"
+else
+echo "Cutting edge : no"
+fi
 
 cd /home/pi || exit
 
@@ -184,7 +194,7 @@ fi
 
 # DOWNLOAD CANDLE CONTROLLER FROM GITHUB
 
-if [ -f /boot/developer.txt ]; then
+if [ -f /boot/candle_cutting_edge.txt ]; then
     git clone --depth 1 https://github.com/createcandle/candle-controller.git
     if [ -d ./candle-controller ]; then
         rm -rf /home/pi/webthings/gateway2
@@ -199,8 +209,6 @@ if [ -f /boot/developer.txt ]; then
         
         exit 1
     fi
-    
-    
     
 else
     curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
