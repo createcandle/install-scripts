@@ -38,15 +38,17 @@ if [ ! -s /etc/resolv.conf ]; then
     echo "Candle: no nameserver, aborting" >> /dev/kmsg
     exit 1
 else
-    echo "/etc/resolv.conf did not seem to be empty"
+    echo "/etc/resolv.conf did not seem to be empty:"
+    cat /etc/resolv.conf
+    echo
     # enable internet use inside the chroot
     #cp /etc/resolv.conf /ro/etc/resolv.conf
 
-    echo "juggling /etc/resolv.conf"
-    cp /etc/resolv.conf /ro/etc/resolv.conf.jump
-    rm /rw/upper/etc/resolv.conf
-    rm /etc/resolv.conf
-    cp /ro/etc/resolv.conf.jump /ro/etc/resolv.conf
+    #echo "juggling /etc/resolv.conf"
+    #cp /etc/resolv.conf /ro/etc/resolv.conf.jump
+    #rm /rw/upper/etc/resolv.conf
+    #rm /etc/resolv.conf
+    #cp /ro/etc/resolv.conf.jump /ro/etc/resolv.conf
 fi
 
 
