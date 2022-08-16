@@ -49,15 +49,16 @@ Note: There are some other options which are described in the create_latest_cand
 ```
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes bash
 ```
+(It's the command we really use to create the Candle disk images, as we let the controller boot once to install Zigbee2MQTT properly)
 
 You could even try to use it as an update script:
 ```
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes REBOOT_WHEN_DONE=yes bash
 ```
 
-Many parts of the script can be turned off. This command turns off most parts:
+Many parts of the script can be turned off, details can be found in the create_latest_candle.sh script. This command turns off most parts:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes SKIP_PYTHON=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER_INSTALL=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes REBOOT_WHEN_DONE=yes SKIP_PYTHON=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER_INSTALL=yes bash
 ```
 
 .
@@ -71,7 +72,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 ### Live update script
 With the latest versions of Candle it's now possible to fully update the controller while the system is running. This is experimental, so use at your own risk. It automatically detects if your controller is compatible.
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo REBOOT_WHEN_DONE=yes bash
 ```
 
 
