@@ -14,21 +14,25 @@ set +e # continue on errors
 # export REBOOT_WHEN_DONE=yes
 
 # Other parts of the script that can be skipped:
+# export SKIP_PARTITIONS=yes
 # export SKIP_APT_INSTALL=yes
 # export SKIP_APT_UPGRADE=yes
 # export SKIP_PYTHON=yes
 # export SKIP_RESPEAKER=yes
 # export SKIP_BLUEALSA=yes
 # export SKIP_CONTROLLER_INSTALL=yes
+# export SKIP_DEBUG=yes
 
-# The script ca add the re-install option to every Apt install command.
+# The script can add the re-install option to every Apt install command.
 # export APT_REINSTALL=yes
+
+# To skip the creation of the read-only mode:
+# export SKIP_RO=yes
 
 # If you also want this script to download all the installed packages' as .deb files, then set this environment variable:
 # export DOWNLOAD_DEB=yes
 
-
-# if you want to pretend that the script is running into a chroot at /ro:
+# An indicator that the script is inside chroot. Now used less i favour of more finegrained control over turning of parts of the script.
 # export CHROOTED=yes
 
 
@@ -59,23 +63,21 @@ fi
 
 # Detect if old overlay system is active
 
-if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
-
+if [ -f /boot/cmdline.txt ]; then
     if grep -q "boot=overlay" /boot/cmdline.txt; then
         echo 
         echo "Detected the OLD raspi-config read-only overlay. Disable it under raspi-config -> performance (and then reboot)"
         echo "Candle: detected OLD read-only mode. Aborting." >> /dev/kmsg
-  
+
         # Show error image
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
             /bin/ply-image /boot/error.png
             sleep 7200
         fi
-  
+
         exit 1
     fi
 fi
-
 echo
 
 # Detect if a kernel or bootloader update has just occured. If so, the system must be rebooted first.
@@ -159,7 +161,7 @@ fi
 
 # CREATE PARTITIONS
 
-if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${CHROOTED}" ]]; 
+if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${SKIP_PARTITIONS}" ]] ]; 
 then
     
     #if [ -f /dev/mmcblk0p4 ]; then
@@ -1233,7 +1235,7 @@ systemctl disable getty@tty1.service
 
 # KIOSK
 
-if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
+if [ -f /boot/config.txt ]; then
 
     # Hides the Raspberry Pi logos normally shown at boot
 
@@ -1374,78 +1376,85 @@ echo
 
 
 
+# INSTALL/UPDATE READ_ONLY MODE SCRIPT
 
-# INSTALL AND UPDATE READ_ONLY MODE
+echo
+echo "Downloading read only script"
+echo
 
-if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
+if [ -f /boot/candle_cutting_edge.txt ]; then
+    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
     
-    echo
-    echo "Downloading read only script"
-    echo
-    
-    if [ -f /boot/candle_cutting_edge.txt ]; then
-        wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
-        
-    else
-        curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
-        | grep "tarball_url" \
-        | cut -d : -f 2,3 \
-        | tr -d \" \
-        | sed 's/,*$//' \
-        | wget -qi - -O ro-overlay.tar
+else
+    curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
+    | grep "tarball_url" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O ro-overlay.tar
 
-        if [ -f ro-overlay.tar ]; then
-            tar -xf ro-overlay.tar
-            rm ./ro-overlay.tar
-        
-            for directory in createcandle-ro-overlay*; do
-              [[ -d $directory ]] || continue
-              echo "Directory: $directory"
-              mv -- "$directory" ./ro-overlay
-            done
+    if [ -f ro-overlay.tar ]; then
+        tar -xf ro-overlay.tar
+        rm ./ro-overlay.tar
     
-            if [ -d ./ro-overlay ]; then
-                cp ./ro-overlay/ro-root.sh ./ro-root.sh
-                rm -rf ./ro-overlay
-            else
-                echo "ERROR, ro-overlay folder missing"
-            fi
+        for directory in createcandle-ro-overlay*; do
+          [[ -d $directory ]] || continue
+          echo "Directory: $directory"
+          mv -- "$directory" ./ro-overlay
+        done
+
+        if [ -d ./ro-overlay ]; then
+            cp ./ro-overlay/ro-root.sh ./ro-root.sh
+            rm -rf ./ro-overlay
         else
-            echo "Download of read-only overlay script failed" >> /dev/kmsg
-            echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
-            
-            # Show error image
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                /bin/ply-image /boot/error.png
-                sleep 7200
-            fi
-    
-            exit 1
-        fi
-    fi
-    
-    
-    # If the file exists, make it executable and move it into place
-    if [ -f ./ro-root.sh ]; then
-        chmod +x ./ro-root.sh
-        
-        # Avoid risky move if possible
-        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
-            echo "ro-root.sh file is different, moving it into place"
-            mv ./ro-root.sh /bin/ro-root.sh
-        else
-            echo "new ro-root.sh file is same as the old one, not moving it"
+            echo "ERROR, ro-overlay folder missing"
         fi
     else
-        echo "ERROR: failed to download ro-root.sh"
-        echo "ERROR: failed to download ro-root.sh" >> /dev/kmsg
-        echo "$(date) - failed to download ro-root.sh" >> /boot/candle_log.txt
+        echo "Download of read-only overlay script failed" >> /dev/kmsg
+        echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
+        
+        # Show error image
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+
         exit 1
     fi
+fi
+
+
+# If the file exists, make it executable and move it into place
+if [ -f ./ro-root.sh ]; then
+    chmod +x ./ro-root.sh
     
+    # Avoid risky move if possible
+    if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
+        echo "ro-root.sh file is different, moving it into place"
+        mv ./ro-root.sh /bin/ro-root.sh
+        chmod +x /bin/ro-root.sh
+    else
+        echo "new ro-root.sh file is same as the old one, not moving it"
+    fi
+else
+    echo "ERROR: failed to download ro-root.sh"
+    echo "ERROR: failed to download ro-root.sh" >> /dev/kmsg
+    echo "$(date) - failed to download ro-root.sh" >> /boot/candle_log.txt
+    exit 1
+fi
+
+
+
+
+
+
+
+
+# ENABLE READ_ONLY MODE
+
+if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
     
-    
-    
+
     
     #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
     if [ $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
@@ -1498,13 +1507,14 @@ fi
 
 
 # Add RW and RO alias shortcuts to .profile
-
-if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
-then
-    echo "adding ro and rw aliases to /home/pi/.profile"
-    echo "" >> /home/pi/.profile
-    echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
-    echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
+if [ -f /home/pi/.profile ]; then
+    if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
+    then
+        echo "adding ro and rw aliases to /home/pi/.profile"
+        echo "" >> /home/pi/.profile
+        echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
+        echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
+    fi
 fi
 
 # Allow the disk to remain RW on the next boot
@@ -1581,7 +1591,7 @@ apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk
 
 
 echo
-echo "Enabling NVM now"
+echo "Enabling NVM in create_latest_candle.sh for cleanup"
 export NVM_DIR="/home/pi/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
@@ -1717,6 +1727,7 @@ rm -rf /home/pi/configuration-files
 
 # Some final insurance
 chown pi:pi /home/pi/*
+chown pi:pi /home/pi/candle/*
 #echo "setting internet time to true"
 #timedatectl set-ntp true
 #sleep 2
@@ -1752,7 +1763,7 @@ fi
 
 # RUN DEBUG SCRIPT
 
-if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; 
+if [ "$SKIP_DEBUG" = no ] || [[ -z "${SKIP_DEBUG}" ]]; 
 then
     echo
     echo

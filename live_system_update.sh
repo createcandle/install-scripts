@@ -200,11 +200,13 @@ echo "Candle: starting chroot" >> /dev/kmsg
 chroot /ro sh -c "$(cat <<END
 echo "in chroot"
 whoami
-#export CHROOTED=yes
 echo "/etc/resolv.conf: $(cat /etc/resolv.conf)"
 echo "cat /mnt/etc/resolv.conf: $(cat /mnt/etc/resolv.conf)"
 cd /home/pi
+export CHROOTED=yes
 export STOP_EARLY=yes
+export SKIP_PARTITIONS=yes
+export SKIP_RO=yes
 
 #if [ -d /home/pi/tmp/boot ]; then
 #echo "creating bind mount over /boot"
