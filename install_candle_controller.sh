@@ -372,6 +372,7 @@ chown -R pi:pi /home/pi/.webthings/addons
 if [ ! -f /home/pi/.webthings/config/db.sqlite3 ] || [ ! -d /home/pi/.webthings/addons/power-settings ];
 then
     echo "installing power settings addon"
+    cd /home/pi/.webthings/addons
     rm -rf package
     rm -rf power-settings
     wget https://github.com/createcandle/power-settings/releases/download/3.2.37/power-settings-3.2.37.tgz
