@@ -165,7 +165,7 @@ if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${SKIP_PARTITIONS}" ]];
 then
     
     #if [ -f /dev/mmcblk0p4 ]; then
-    if lsblk | grep -q 'mmcblk0p4'; then
+    if lsblk | grep -q 'mmcblk0p3'; then
         echo
         echo "partitions already created:"
     else
@@ -478,7 +478,6 @@ then
 
     echo 
     apt -y install hostapd  --print-uris "$reinstall"
-    systemctl unmask hostapd.service
     systemctl disable hostapd.service
     systemctl stop hostapd.service
     
@@ -1161,7 +1160,8 @@ chmod +x /home/pi/candle/files_check.sh
 
 # CHOWN THE NEW FILES
 chown pi:pi /home/pi/*
-chown pi:pi /home/pi/candle/*
+chown -R pi:pi /home/pi/candle
+chown -R pi:pi /home/pi/.config
 
 chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
@@ -1640,6 +1640,10 @@ fi
 echo "Clearing /tmp"
 rm -rf /tmp/*
 
+rm /home/pi.wget-hsts
+rm -rf /home/pi/.config/chromium
+echo '{"optOut": true,"lastUpdateCheck": 0}' > /home/pi/.config/configstore/update-notifier-npm.json 
+chown pi:pi s/home/pi/.config/configstore/update-notifier-npm.json 
 
 # Remove files left over by Windows or MacOS
 rm -rf /boot/.Spotlight*
