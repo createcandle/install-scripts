@@ -226,7 +226,7 @@ else
           [[ -d $directory ]] || continue
           echo "Directory: $directory"
           rm -rf ./gateway2
-          mv -f -- "$directory" ./gateway2
+          mv -f "$directory" ./gateway2
         done
     
         #mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
@@ -335,16 +335,16 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     echo "Starting copy of /home/pi/webthings/gateway2 to /home/pi/webthings/gateway using rsync"
     #rm-rf /home/pi/webthings/gateway
     if [ ! -d /home/pi/webthings/gateway ]; then
-        echo "gateway didn't exist, moving gateway2 into position"
+        echo "Candle: gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
         mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
     else
-        echo "gateway dir existed, doing rsync from gateway2"
+        echo "Candle: gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
         rsync -r -q --delete /home/pi/webthings/gateway2/* /home/pi/webthings/gateway
         chown -R pi:pi /home/pi/webthings/gateway
         rm -rf /home/pi/webthings/gateway2
     fi
 else
-    echo "ERROR, gateway2 was just created.. but is missing?"
+    echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /dev/kmsg
 fi
 
 

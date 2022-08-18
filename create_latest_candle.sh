@@ -114,13 +114,6 @@ if [ ! -f /boot/cmdline.txt ]; then
 fi
 
 
-# Check if this script isn't already running
-if ps aux | grep -q bootup_actions.sh; then
-    echo "Candle: ERROR, create_latest_candle script is already running!" >> /dev/kmsg
-    exit 1
-fi
-
-
 
 # OUTPUT SOME INFORMATION
 
@@ -1131,6 +1124,11 @@ fi
 
 # Download ready-made settings files from the Candle github
 git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+if [ -d /home/pi/configuration-files ]; then
+    rm /home/pi/configuration-files/LICENSE
+    rm /home/pi/configuration-files/README.md
+    rm -rf /home/pi/configuration-files/.git
+fi
 
 
 # Check if download succeeded
@@ -1152,6 +1150,11 @@ if [ ! -d /home/pi/configuration-files ]; then
 else
     echo "Configuration files download succeeded"
     echo "Candle: Configuration files download succeeded" >> /dev/kmsg
+    
+    if [ ! -d /home/pi/candle/configuration-files-backup ]; then
+        echo "Created intial backup of the configuratino files"
+        cp -r /home/pi/configuration-files /home/pi/candle/configuration-files-backup
+    fi
 fi
 
 echo "Copying configuration files into place"
