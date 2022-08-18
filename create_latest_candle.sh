@@ -116,7 +116,7 @@ fi
 
 # Check if this script isn't already running
 if ps aux | grep -q bootup_actions.sh; then
-    echo "Candle: ERROR, update script is already running!" >> /dev/kmsg
+    echo "Candle: ERROR, create_latest_candle script is already running!" >> /dev/kmsg
     exit 1
 fi
 
