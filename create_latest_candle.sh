@@ -519,6 +519,35 @@ then
     apt autoremove -y
     
     
+    
+    
+    
+    # Check if the binaries eactually exist
+    for i in \
+        hostapd \
+        dnsmasq \
+        openbox \
+        xinit \
+        mosquitto \
+        wmctrl \
+        ffmpeg \
+        arping \
+        ufw \
+        sqlite3 \
+        nbtscan \
+        unclutter \
+        xinput \
+        autoconf;
+    do
+        if [ -z "$(which $i)" ]; then
+            echo "Candle: ERROR, according to which $i did not install ok"
+            apt -y purge "$i"
+            sleep 2
+            apt -y install "$i"
+        fi
+    done
+
+
     for i in \
     chromium-browser git \
     autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
