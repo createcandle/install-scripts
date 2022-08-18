@@ -18,7 +18,7 @@ fi
 
 # Check if script isn't already running
 if ps aux | grep -q live_system_update.sh; then
-    echo "Candle: ERROR, update script is already running!" >> /dev/kmsg
+    echo "Candle: ERROR, live update script is already running!" >> /dev/kmsg
     exit 1
 fi
 
@@ -225,6 +225,13 @@ if ! findmnt | grep -q '/ro/etc/resolv.conf'; then
     mount /etc/resolv.conf /ro/etc/resolv.conf -o bind
 fi
 
+if ! findmnt | grep -q '/ro/home/pi/.webthings'; then
+    echo "trying to mount /ro/home/pi/.webthings"
+    mkdir -p /ro/home/pi/.webthings
+    mount /home/pi/.webthings /ro/home/pi/.webthings -o bind
+fi
+
+
 
 
 echo "starting chroot"
@@ -334,6 +341,7 @@ umount /ro/dev
 umount /ro/sys
 umount /ro/proc
 umount /ro/boot
+umount /ro/home/pi/,webthings
 umount /ro/etc/resolv.conf
 
 # re-enable read-only mode
