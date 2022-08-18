@@ -16,6 +16,13 @@ else
   echo "running as user $(whoami)"
 fi
 
+# Check if script isn't already running
+if ps aux | grep -q live_system_update.sh; then
+    echo "Candle: ERROR, update script is already running!" >> /dev/kmsg
+    exit 1
+fi
+
+
 if [ ! -d /ro ]; then
     echo
     echo "Candle: no overlay detected, aborting." >> /dev/kmsg

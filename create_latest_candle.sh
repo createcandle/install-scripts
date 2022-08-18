@@ -101,6 +101,8 @@ if [ -f /usr/sbin/iptables ];then
     fi
 fi
 
+
+# Check if /boot is mounted
 if [ ! -f /boot/cmdline.txt ]; then
     echo "ERROR, missing cmdline.txt??" >> /dev/kmsg
     
@@ -111,6 +113,12 @@ if [ ! -f /boot/cmdline.txt ]; then
     exit 1
 fi
 
+
+# Check if this script isn't already running
+if ps aux | grep -q bootup_actions.sh; then
+    echo "Candle: ERROR, update script is already running!" >> /dev/kmsg
+    exit 1
+fi
 
 
 
@@ -1902,6 +1910,7 @@ if [[ -z "${REBOOT_WHEN_DONE}" ]] || [ "$REBOOT_WHEN_DONE" = no ]; then
     echo "(not rebooting)"
 else
     echo "rebooting in 10 seconds"
+    rm /boot/candle_rw_once.txt
     sleep 10
     reboot
 fi
