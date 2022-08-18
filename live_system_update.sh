@@ -111,8 +111,9 @@ timedatectl set-ntp true
 
 
 if [ -d /ro/home/pi/webthings ]; then
-    echo "Candle: calculating free space" >> /dev/kmsg
+    
     availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
+    echo "Candle: calculated free system space: $availMem" >> /dev/kmsg
     echo "calculating size of webthings folder"
     fileSize=$(du -k --max-depth=0 "/ro/home/pi/webthings" | awk '{print $1}')
 
@@ -179,7 +180,7 @@ fi
 # sudo chroot /ro sh -c "ls /home/pi/alfred"
 
 echo "bind-mounting /boot into chroot"
-echo "Candle: preparing disk" >> /dev/kmsg
+echo "Candle: preparing chroot mounts" >> /dev/kmsg
 #if [ ! -f /boot/cmdline.txt ]; then
 
 

@@ -197,10 +197,11 @@ fi
 if [ -f /boot/candle_cutting_edge.txt ]; then
     git clone --depth 1 https://github.com/createcandle/candle-controller.git
     if [ -d ./candle-controller ]; then
+        echo "Cutting edge download succeeded" | sudo tee -a /dev/kmsg
         rm -rf /home/pi/webthings/gateway2
         mv -f ./candle-controller /home/pi/webthings/gateway2
     else
-        echo "ERROR, downloading cutting edge candle-controller dir from Github failed"
+        echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a /dev/kmsg
         
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
             sudo /bin/ply-image /boot/error.png
@@ -219,6 +220,7 @@ else
     | wget -qi - -O candle-controller.tar
 
     if [ -f candle-controller.tar ]; then
+        echo "Stable Candle Controller release download succeeded" | sudo tee -a /dev/kmsg
         tar -xf candle-controller.tar
         rm candle-controller.tar
     
@@ -235,7 +237,7 @@ else
         echo "ls /home/pi/webthings/gateway2:"
         ls /home/pi/webthings/gateway2
     else
-        echo "ERROR, downloading latest release of candle-controller source dir from Github failed"
+        echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /dev/kmsg
         
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
             sudo /bin/ply-image /boot/error.png

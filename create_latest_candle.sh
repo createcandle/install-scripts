@@ -819,7 +819,7 @@ then
     
     echo
     echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
-    echo "Candle: building BlueAlsa (bluetooth audio streaming support)" >> /dev/kmsg
+    echo "Candle: building BlueAlsa (audio streaming)" >> /dev/kmsg
     echo
     
     adduser --system --group --no-create-home bluealsa
