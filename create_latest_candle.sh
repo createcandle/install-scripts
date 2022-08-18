@@ -207,7 +207,7 @@ then
     
 else
     echo "Partitions seem to already exist (addons dir existed)"
-    echo "Candle: Partitions seem to already exist (addons dir existed)" >> /dev/kmsg
+    echo "Candle: partitions seem to already exist (addons dir existed)" >> /dev/kmsg
 fi
 
 echo
@@ -241,12 +241,30 @@ fi
 if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
     if [ ! -f /boot/error.png ]; then
-        echo "ERROR, download of error.png failed." >> /dev/kmsg
+        echo "Candle: ERROR, download of error.png failed. How ironic." >> /dev/kmsg
         exit 1
     fi      
 fi
 
 
+
+
+# Download splash images
+if [ -f /boot/cmdline.txt ]; then
+    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+    echo
+    echo "Candle: downloading splash images and videos" >> /dev/kmsg
+    echo
+    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
+    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
+    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
+    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
+    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
+    
+    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
+    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4    
+fi
 
 
 
@@ -504,11 +522,11 @@ then
             echo "$i installed OK"
         else
             echo
-            echo "ERROR, $i did not install ok"
+            echo "Candle: ERROR, $i did not install ok"
             dpkg -s "$i"
             
             echo
-            echo "Trying to install it again..."
+            echo "Candle: trying to install it again..."
             apt -y purge"$i"
             sleep 2
             apt -y install "$i"
@@ -518,7 +536,7 @@ then
                 echo "$i installed OK"
             else
                 echo
-                echo "ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
+                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
                 dpkg -s "$i"
                 
                 # Show error image
@@ -543,11 +561,11 @@ then
             echo "$i installed OK"
         else
             echo
-            echo "ERROR, $i did not install ok"
+            echo "Candle: ERROR, $i did not install ok"
             dpkg -s "$i"
             
             echo
-            echo "Trying to install it again..."
+            echo "Candle: trying to install it again..."
             apt -y purge "$i"
             sleep 2
             apt -y --no-install-recommends install "$i"
@@ -557,7 +575,7 @@ then
                 echo "$i installed OK"
             else
                 echo
-                echo "ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
+                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
                 dpkg -s "$i"
                 
                 # Show error image
@@ -579,6 +597,7 @@ if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]];
 then
     echo
     echo "RUNNING APT UPGRADE"
+    echo "Candle: running apt upgrade command" >> /dev/kmsg
     echo
     #apt upgrade -y
     apt-get update -y
@@ -746,7 +765,8 @@ then
     fi
     
     
-    
+else
+    echo "Candle: skipping ReSpeaker drivers install" >> /dev/kmsg
 fi
 
 
@@ -758,6 +778,7 @@ then
     
     echo
     echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
+    echo "Candle: building BlueAlsa (bluetooth audio streaming support)" >> /dev/kmsg
     echo
     
     adduser --system --group --no-create-home bluealsa
@@ -787,7 +808,7 @@ then
     fi
 
 else
-    echo "Skipping BlueAlsa build"
+    echo "Candle: Skipping BlueAlsa build" >> /dev/kmsg
 fi
 
 cd /home/pi
@@ -825,7 +846,7 @@ then
     
     echo
     echo "INSTALLING CANDLE CONTROLLER"
-    echo "Candle: starting installing of candle controller" >> /dev/kmsg
+    echo "Candle: starting installing of Candle controller itself" >> /dev/kmsg
     echo
 
     cd /home/pi
@@ -865,6 +886,7 @@ then
     if [ ! -f install_candle_controller.sh ]; then
         echo
         echo "ERROR, missing install_candle_controller.sh file"
+        echo "Candle: ERROR, missing install_candle_controller.sh file. Aborting." >> /dev/kmsg
         echo "$(date) - Failed to download install_candle_controller script" >> /boot/candle_log.txt
         echo
         
@@ -894,7 +916,7 @@ then
         if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ]; then
             echo 
             echo "ERROR, failed to (fully) install candle-controller (/ro)"
-            echo "ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
+            echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
             echo
 
             # Show error image
@@ -909,7 +931,7 @@ then
     
         echo 
         echo "ERROR, failed to (fully) install candle-controller"
-        echo "ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
+        echo "Candle: ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
         echo
 
         # Show error image
@@ -935,22 +957,7 @@ echo "INSTALLING OTHER FILES AND SERVICES"
 echo
 
 
-# Download splash images
-if [ -f /boot/cmdline.txt ]; then
-    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
-    echo
-    echo "Candle: downloading splash images and videos" >> /dev/kmsg
-    echo
-    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
-    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
-    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
-    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
-    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
-    
-    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
-    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4    
-fi
+
 
 
 # switch back to root of home folder
@@ -1088,13 +1095,6 @@ fi
 
 
 
-
-
-
-
-
-
-
 # COPY SETTINGS
 
 echo
@@ -1115,7 +1115,7 @@ git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi
 if [ ! -d /home/pi/configuration-files ]; then
     echo 
     echo "ERROR, failed to download latest configuration files"
-    echo "ERROR, failed to download latest configuration files" >> /dev/kmsg
+    echo "Candle: ERROR, failed to download latest configuration files" >> /dev/kmsg
     echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
     echo
     
@@ -1128,11 +1128,11 @@ if [ ! -d /home/pi/configuration-files ]; then
     exit 1
 else
     echo "Configuration files download succeeded"
-    echo "Configuration files download succeeded" >> /dev/kmsg
+    echo "Candle: Configuration files download succeeded" >> /dev/kmsg
 fi
 
 echo "Copying configuration files into place"
-echo "Copying configuration files into place" >> /dev/kmsg
+echo "Candle: Copying configuration files into place" >> /dev/kmsg
 rsync -vr /home/pi/configuration-files/* /
 
 
@@ -1346,9 +1346,9 @@ echo
 #echo
 if iptables --list | grep 4443; then
     echo "IPTABLES ALREADY ADDED"
-    echo "Candle: ip tables already added" >> /dev/kmsg
+    echo "Candle: firewall already set up" >> /dev/kmsg
 else
-    echo "Candle: adding ip tables" >> /dev/kmsg
+    echo "Candle: setting up firewall" >> /dev/kmsg
     iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
     iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
     iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
@@ -1416,16 +1416,7 @@ else
             echo "ERROR, ro-overlay folder missing"
         fi
     else
-        echo "Download of read-only overlay script failed" >> /dev/kmsg
-        echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
-        
-        # Show error image
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            /bin/ply-image /boot/error.png
-            sleep 7200
-        fi
-
-        exit 1
+        echo "Ro-root tar file missing, download failed"
     fi
 fi
 
@@ -1444,8 +1435,15 @@ if [ -f ./ro-root.sh ]; then
     fi
 else
     echo "ERROR: failed to download ro-root.sh"
-    echo "ERROR: failed to download ro-root.sh" >> /dev/kmsg
-    echo "$(date) - failed to download ro-root.sh" >> /boot/candle_log.txt
+    echo "ERROR, download of read-only overlay script failed" >> /dev/kmsg
+    echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
+    
+    # Show error image
+    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+        /bin/ply-image /boot/error.png
+        sleep 7200
+    fi
+
     exit 1
 fi
 
@@ -1461,48 +1459,60 @@ fi
 if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
     
 
-    
-    #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
-    if [ $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
-    then
-        echo
-        echo "ADDING READ-ONLY MODE"
-        echo
-        echo "Candle: adding read-only mode" >> /dev/kmsg
-        
-        
-        
-        mkinitramfs -o /boot/initrd
-    
-        
-    
-    	echo "- Adding read only mode to config.txt"
-        echo >> /boot/config.txt
-        echo '# Read only mode' >> /boot/config.txt
-        echo 'initramfs initrd followkernel' >> /boot/config.txt
-        echo 'ramfsfile=initrd' >> /boot/config.txt
-        echo 'ramfsaddr=-1' >> /boot/config.txt
-    
-    else
-        echo "- Read only file system mode was already in config.txt"
-        echo "Candle: read-only mode already existed" >> /dev/kmsg
-    fi
-
-
-    if [ -f /bin/ro-root.sh ] && [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
-    then
-        
-        #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
-        if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
+    if [ -f /bin/ro-root.sh ]; then
+        #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
+        if [ $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
         then
-        	echo "- Modifying cmdline.txt for read-only file system"
-            sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
-            echo "Candle: read-only mode is now enabled" >> /dev/kmsg
+            echo
+            echo "ADDING READ-ONLY MODE"
+            echo
+            echo "Candle: adding read-only mode" >> /dev/kmsg
+        
+            mkinitramfs -o /boot/initrd
+    
+        	echo "- Adding read only mode to config.txt"
+            echo >> /boot/config.txt
+            echo '# Read only mode' >> /boot/config.txt
+            echo 'initramfs initrd followkernel' >> /boot/config.txt
+            echo 'ramfsfile=initrd' >> /boot/config.txt
+            echo 'ramfsaddr=-1' >> /boot/config.txt
+    
         else
-            echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
-            echo "Candle: read-only mode was already enabled" >> /dev/kmsg
+            echo "- Read only file system mode was already in config.txt"
+            echo "Candle: read-only mode already existed" >> /dev/kmsg
+        fi
+
+
+        if [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
+        then
+        
+            #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
+            if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
+            then
+            	echo "- Modifying cmdline.txt for read-only file system"
+                sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
+                echo "Candle: read-only mode is now enabled" >> /dev/kmsg
+            else
+                echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
+                echo "Candle: read-only mode was already enabled" >> /dev/kmsg
+            fi
+        
         fi
         
+        
+        # Add RW and RO alias shortcuts to .profile
+        if [ -f /home/pi/.profile ]; then
+            if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
+            then
+                echo "adding ro and rw aliases to /home/pi/.profile"
+                echo "" >> /home/pi/.profile
+                echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
+                echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
+            fi
+        fi
+        
+    else
+        echo "ERROR, /bin/ro-root.sh is missing, not even attempting to further install read-only mode"
     fi
     
     
@@ -1512,27 +1522,8 @@ fi
 
 
 
-# Add RW and RO alias shortcuts to .profile
-if [ -f /home/pi/.profile ]; then
-    if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
-    then
-        echo "adding ro and rw aliases to /home/pi/.profile"
-        echo "" >> /home/pi/.profile
-        echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
-        echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
-    fi
-fi
 
-# Allow the disk to remain RW on the next boot
-#touch /boot/candle_rw.txt
-
-
-
-
-
-
-
-# CREATE BACKUPS
+# CREATE INITIAL BACKUPS
 
 cd /home/pi
 
@@ -1551,7 +1542,7 @@ then
     else
         echo
         echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
-        echo "Candle: ERROR, missing (parts of) webthings directory" >> /dev/kmsg
+        echo "Candle: ERROR, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
         echo
     fi
 fi
@@ -1610,7 +1601,7 @@ export NVM_DIR="/home/pi/.nvm"
 echo
 echo "CLEANING UP"
 echo
-echo "Candle: cleaning up" >> /dev/kmsg
+echo "Candle: almost done, cleaning up" >> /dev/kmsg
 
 #npm cache clean --force # already done in install_candle_controller script
 #nvm cache clear
@@ -1623,15 +1614,17 @@ apt autoremove
 rm -rf /var/lib/apt/lists/*
 
 echo "removing swap"
-echo "Candle: removing swap" >> /dev/kmsg
+
 dphys-swapfile swapoff
 dphys-swapfile uninstall
 update-rc.d dphys-swapfile remove
 if [ -f /home/pi/.webthings/swap ]; then
+    # TODO: don't remove this if the syetem is low on memory (which is why it's there in the first place)
     swapoff /home/pi/.webthings/swap
     rm /home/pi/.webthings/swap
 fi
 if [ -f /var/swap ]; then
+    echo "Candle: removing swap" >> /dev/kmsg
     swapoff /var/swap
     rm /var/swap
 fi
@@ -1728,7 +1721,7 @@ then
 else
     echo
     echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST"
-    echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST" >> /dev/kmsg
+    echo "Candle: ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST" >> /dev/kmsg
     echo
 fi
 
@@ -1764,7 +1757,6 @@ if [ ! -e /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ];
   echo
   echo "Candle: added symlink for missing audio firmware"
   echo
-  echo "Candle: added symlink for missing audio firmware" >> /dev/kmsg
 fi
 
 
@@ -1794,7 +1786,7 @@ then
         echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPGRADE PROCESS" >> /boot/debug.txt
         cat /boot/debug.txt
     
-        echo "Candle: DONE. Debug output placed in /boot/debug.txt" >> /dev/kmsg
+        echo "Candle: DONE. Debug output placed in debug.txt" >> /dev/kmsg
         echo "Candle: Rebooting in 5 seconds..." >> /dev/kmsg
         sleep 5
         reboot

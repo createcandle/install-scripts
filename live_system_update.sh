@@ -5,10 +5,12 @@
 
 echo
 echo "CANDLE LIVE UPDATE"
+echo "Candle: starting live update" >> /dev/kmsg
 
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]; then 
   echo "Please run as root (use sudo)"
+  echo "Candle: Could not continue (use sudo)" >> /dev/kmsg
   exit
 else
   echo "running as user $(whoami)"
@@ -16,7 +18,7 @@ fi
 
 if [ ! -d /ro ]; then
     echo
-    echo "no overlay detected, aborting."
+    echo "Candle: no overlay detected, aborting." >> /dev/kmsg
     exit 1
 fi
     
@@ -26,7 +28,6 @@ cd /ro/home/pi || exit
 
 echo
 echo "Starting live controller update"
-echo "starting LIVE controller update" >> /dev/kmsg
 echo
 
 echo "/etc/resolv.conf: "
@@ -55,7 +56,7 @@ fi
 # make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; 
 then
-    echo "Detected hardware clock indicator. Trying to get latest time update from NTP server"
+    echo "Candle: Detected hardware clock indicator. Trying to get latest time update from NTP server"
     rm /boot/candle_hardware_clock.txt
     systemctl restart systemd-timesyncd.service
     timedatectl set-ntp true
@@ -63,14 +64,14 @@ then
     /usr/sbin/fake-hwclock save
     echo "Candle: attempted requested of latest time from internet." >> /dev/kmsg
 else
-    echo "no hardware clock detected, assuming time is current"
+    echo "Candle: no hardware clock detected, assuming time is current" >> /dev/kmsg
 fi
 
 timedatectl set-ntp true
 sleep 2
 /usr/sbin/fake-hwclock save
 
-echo "current date: $(date)"
+echo "Candle: current date: $(date)" >> /dev/kmsg
 echo
 
 echo "Setting /ro to RW"
@@ -85,7 +86,7 @@ timedatectl set-ntp true
 
 
 if [ -d /ro/home/pi/webthings ]; then
-    echo "calculating free space"
+    echo "calculating free space" >> /dev/kmsg
     availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
     echo "calculating size of webthings folder"
     fileSize=$(du -k --max-depth=0 "/ro/home/pi/webthings" | awk '{print $1}')
@@ -95,7 +96,7 @@ if [ -d /ro/home/pi/webthings ]; then
         echo "WARNING: NOT ENOUGH DISK SPACE TO CREATE WEBTHINGS BACKUP. SKIPPING."
         echo "Candle: WARNING: LOW DISK SPACE, NOT CREATING BACKUP FIRST" >> /dev/kmsg
     else
-        echo "Creating fresh backup tar of webthings folder"
+        echo "Creating fresh backup of webthings folder" >> /dev/kmsg
         echo "Candle: creating fresh backup copy" >> /dev/kmsg
         # cp -r /ro/home/pi/webthings /ro/home/pi/webthings-old
         tar -czf /ro/home/pi//controller_backup_fresh.tar /ro/home/pi/webthings
@@ -119,15 +120,15 @@ fi
 #cp -r --verbose /ro/home/pi/.webthings/etc/hostname /ro/home/pi/tmp/etc/hostname
 #cp -r --verbose /ro/home/pi/.webthings/etc/hosts /ro/home/pi/tmp/etc/hosts
 
-echo "Downloading latest install script from Github" 
+echo "Candle: Downloading latest install script" >> /dev/kmsg
 
 # TODO: change this to use the release, and only clone if developer mode active
 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /ro/home/pi/create_latest_candle.sh
 if [ -f /ro/home/pi/create_latest_candle.sh ]; then
-    echo "Download succesful"
+    echo "Candle: Download succesful" >> /dev/kmsg
     chmod +x /ro/home/pi/create_latest_candle.sh
 else
-    echo "ERROR: DOWNLOADING LATEST SCRIPT FAILED"
+    echo "Candle: ERROR: DOWNLOADING LATEST SCRIPT FAILED" >> /dev/kmsg
     exit 1
 fi
 
@@ -153,6 +154,7 @@ fi
 # sudo chroot /ro sh -c "ls /home/pi/alfred"
 
 echo "bind-mounting /boot into chroot"
+echo "Candle: preparing disk" >> /dev/kmsg
 #if [ ! -f /boot/cmdline.txt ]; then
 
 
@@ -195,7 +197,7 @@ fi
 
 
 echo "starting chroot"
-echo "Candle: starting chroot" >> /dev/kmsg
+echo "Candle: starting actual update process" >> /dev/kmsg
 
 chroot /ro sh -c "$(cat <<END
 echo "in chroot"
@@ -257,7 +259,7 @@ END
 
 
 echo "Finalising outside of chroot"
-echo "Candle: Finalising update outside of chroot" >> /dev/kmsg
+echo "Candle: Finalising update" >> /dev/kmsg
 
 sleep 5
 
@@ -294,6 +296,7 @@ fi
 #fi
 
 
+echo "Candle: restoring disk to normal" >> /dev/kmsg
 
 umount /ro/run
 umount /ro/dev
@@ -306,7 +309,7 @@ umount /ro/etc/resolv.conf
 echo "Setting /ro back to RO"
 mount -l -o remount,ro /ro
 
-echo "LIVE controller update done" >> /dev/kmsg
+echo "Candle: live controller update done" >> /dev/kmsg
 
 
 exit 0
