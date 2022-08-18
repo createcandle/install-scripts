@@ -21,7 +21,28 @@ if [ ! -d /ro ]; then
     echo "Candle: no overlay detected, aborting." >> /dev/kmsg
     exit 1
 fi
-    
+
+
+
+if [ -f /boot/cmdline.txt ]; then
+    if grep -q "boot=overlay" /boot/cmdline.txt; then
+        echo 
+        echo "Detected the OLD raspi-config read-only overlay. Disable it under raspi-config -> performance (and then reboot)"
+        echo "Candle: live update detected OLD read-only mode. Aborting." >> /dev/kmsg
+        echo "Candle: live update detected OLD read-only mode. Aborting." >> /boot/candle_log.txt
+
+        # Show error image
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
+            /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+
+        exit 1
+    fi
+fi
+echo
+
+
 
 cd /ro/home/pi || exit
 
