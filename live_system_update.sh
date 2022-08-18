@@ -292,7 +292,7 @@ sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
 
 
 # delete the temporary directory
-rm -rf /ro/home/pi/tmp
+#rm -rf /ro/home/pi/tmp
 
 
 if [ -f /ro/home/pi/create_latest_candle.sh ]; then

@@ -858,7 +858,7 @@ then
     echo
 
     cd /home/pi
-    rm -rf /home/pi/webthings
+    #rm -rf /home/pi/webthings
     #rm -rf /home/pi/.webthings # too dangerous
     
     
