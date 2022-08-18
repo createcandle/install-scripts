@@ -111,7 +111,7 @@ timedatectl set-ntp true
 
 
 if [ -d /ro/home/pi/webthings ]; then
-    echo "calculating free space" >> /dev/kmsg
+    echo "Candle: calculating free space" >> /dev/kmsg
     availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
     echo "calculating size of webthings folder"
     fileSize=$(du -k --max-depth=0 "/ro/home/pi/webthings" | awk '{print $1}')
@@ -232,7 +232,7 @@ echo "starting chroot"
 echo "Candle: starting actual update process" >> /dev/kmsg
 
 chroot /ro sh -c "$(cat <<END
-echo "in chroot"
+echo "Candle: live update in chroot"
 whoami
 echo "/etc/resolv.conf: $(cat /etc/resolv.conf)"
 echo "cat /mnt/etc/resolv.conf: $(cat /mnt/etc/resolv.conf)"
@@ -343,7 +343,7 @@ echo "Setting /ro back to RO"
 mount -l -o remount,ro /ro
 
 echo "Candle: live controller update done" >> /dev/kmsg
-
+reboot
 
 exit 0
 

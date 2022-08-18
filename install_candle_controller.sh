@@ -13,7 +13,7 @@ fi
 if [ ! -s /etc/resolv.conf ]; then
     # no nameserver
     echo "no nameserver, aborting"
-    echo "Candle: no nameserver, aborting" >> /dev/kmsg
+    echo "Candle: No nameserver, aborting" >> /dev/kmsg
     exit 1
 fi
 
@@ -51,7 +51,7 @@ if [ ! command -v npm &> /dev/null ] || [ "$(cat /home/pi/.webthings/.node_versi
 then
     echo
     echo "NPM could not be found. Installing it now."
-    echo "Candle: installing NVM" | sudo tee -a /dev/kmsg
+    echo "Candle: Installing NVM" | sudo tee -a /dev/kmsg
     
     
     if [ -f ./install_nvm.sh ]; then
@@ -137,8 +137,8 @@ echo
 echo "NODE AND NPM VERSIONS:"
 node --version
 npm --version
-echo "Candle: node --version: $(node --version)" | sudo tee -a /dev/kmsg
-echo "Candle: npm --version: $(npm --version)" | sudo tee -a /dev/kmsg
+echo "Candle: Node --version: $(node --version)" | sudo tee -a /dev/kmsg
+echo "Candle: NPM --version: $(npm --version)" | sudo tee -a /dev/kmsg
 
 
 npm cache verify
@@ -170,7 +170,7 @@ if [ -f /home/pi/webthings/gateway/build/app.js ] \
 && [ -d /home/pi/webthings/gateway/build/static/bundle ];
 then
     echo "Detected old webthings directory! Creating aditional backup"
-    echo "Candle: Detected old webthings directory! Creating additional backup" | sudo tee -a /dev/kmsg
+    echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /dev/kmsg
     #mv /home/pi/webthings /home/pi/webthings-old
     tar -czf ./controller_backup_fresh.tar ./webthings
 fi
@@ -335,10 +335,10 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     echo "Starting copy of /home/pi/webthings/gateway2 to /home/pi/webthings/gateway using rsync"
     #rm-rf /home/pi/webthings/gateway
     if [ ! -d /home/pi/webthings/gateway ]; then
-        echo "Candle: gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
+        echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
         mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
     else
-        echo "Candle: gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
+        echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
         rsync -r -q --delete /home/pi/webthings/gateway2/* /home/pi/webthings/gateway
         chown -R pi:pi /home/pi/webthings/gateway
         rm -rf /home/pi/webthings/gateway2
@@ -349,7 +349,7 @@ fi
 
 
 echo
-echo "Linking gateway addon"
+echo "Candle: Linking gateway addon" | sudo tee -a /dev/kmsg
 if [ -d /home/pi/webthings/gateway/node_modules/gateway-addon ];
 then
   cd "/home/pi/webthings/gateway/node_modules/gateway-addon"
@@ -512,17 +512,17 @@ mkdir -p /home/pi/.webthings/config
 chown -R pi:pi /home/pi/.webthings/config
 if [ ! -f /home/pi/.webthings/config/db.sqlite3 ];
 then
-    echo "copying initial Candle database from power settings addon"
+    echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a /dev/kmsg
     if [ -f /home/pi/.webthings/addons/power-settings/db.sqlite3 ]; then
         cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
         chown pi:pi /home/pi/.webthings/config/db.sqlite3
     else
         echo
-        echo "ERROR, /home/pi/.webthings/addons/power-settings/db.sqlite3 was missing"
+        echo "Candle: ERROR, /home/pi/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /dev/kmsg
     fi
 else
     echo "warning, not copying default database since a database file already exists"
-    echo "Candle: database file already existed, not replacing it" | sudo tee -a /dev/kmsg
+    echo "Candle: Database file already existed, not replacing it" | sudo tee -a /dev/kmsg
 fi
 
 
@@ -537,7 +537,7 @@ nvm cache clear
 
 echo
 #echo "sub-script that installs the Candle controller is done. Returning to the main install script."
-echo "Candle: sub-script that installs the Candle controller is done. Returning to the main install script." | sudo tee -a /dev/kmsg
+echo "Candle: Sub-script that installs the Candle controller is done. Returning to the main install script." | sudo tee -a /dev/kmsg
 echo
 exit 0
 
