@@ -1122,12 +1122,35 @@ if [ -d /home/pi/configuration-files ]; then
     rm -rf /home/pi/configuration-files
 fi
 
+
+
 # Download ready-made settings files from the Candle github
-git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
-if [ -d /home/pi/configuration-files ]; then
-    rm /home/pi/configuration-files/LICENSE
-    rm /home/pi/configuration-files/README.md
-    rm -rf /home/pi/configuration-files/.git
+if [ -f /boot/candle_cutting_edge.txt ]; then
+    
+    git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+    if [ -d /home/pi/configuration-files ]; then
+        rm /home/pi/configuration-files/LICENSE
+        rm /home/pi/configuration-files/README.md
+        rm -rf /home/pi/configuration-files/.git
+    fi
+    
+else
+    curl -s https://api.github.com/repos/createcandle/configuration-files/releases/latest \
+    | grep "tarball_url" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O configuration-files.tar
+
+    tar -xf configuration-files.tar
+    rm configuration-files.tar
+    
+    for directory in createcandle-configuration-files*; do
+      [[ -d $directory ]] || continue
+      echo "Directory: $directory"
+      mv -- "$directory" ./configuration-files
+    done
+    
 fi
 
 
@@ -1150,6 +1173,10 @@ if [ ! -d /home/pi/configuration-files ]; then
 else
     echo "Configuration files download succeeded"
     echo "Candle: Configuration files download succeeded" >> /dev/kmsg
+    
+    rm /home/pi/configuration-files/LICENSE
+    rm /home/pi/configuration-files/README.md
+    rm -rf /home/pi/configuration-files/.git
     
     if [ ! -d /home/pi/candle/configuration-files-backup ]; then
         echo "Created intial backup of the configuratino files"
