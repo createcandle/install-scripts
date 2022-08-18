@@ -208,6 +208,7 @@ then
 else
     echo "Partitions seem to already exist (addons dir existed)"
     echo "Candle: partitions seem to already exist (addons dir existed)" >> /dev/kmsg
+    echo "$(date) - starting system update" >> /home/pi/.webthings/candle.log
 fi
 
 echo
@@ -576,6 +577,7 @@ then
             else
                 echo
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
+                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
                 dpkg -s "$i"
                 
                 # Show error image
@@ -888,6 +890,7 @@ then
         echo "ERROR, missing install_candle_controller.sh file"
         echo "Candle: ERROR, missing install_candle_controller.sh file. Aborting." >> /dev/kmsg
         echo "$(date) - Failed to download install_candle_controller script" >> /boot/candle_log.txt
+        echo "$(date) - Failed to download install_candle_controller script" >> /home/pi/.webthings/candle.log
         echo
         
         # Show error image
@@ -917,6 +920,7 @@ then
             echo 
             echo "ERROR, failed to (fully) install candle-controller (/ro)"
             echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
+            echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /home/pi/.webthings/candle.log
             echo
 
             # Show error image
@@ -932,6 +936,7 @@ then
         echo 
         echo "ERROR, failed to (fully) install candle-controller"
         echo "Candle: ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
+        echo "Candle: ERROR, failed to (fully) install candle-controller" >> /home/pi/.webthings/candle.log
         echo
 
         # Show error image
@@ -1117,6 +1122,7 @@ if [ ! -d /home/pi/configuration-files ]; then
     echo "ERROR, failed to download latest configuration files"
     echo "Candle: ERROR, failed to download latest configuration files" >> /dev/kmsg
     echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
+    echo "$(date) - failed to download latest configuration files" >> /home/pi/.webthings/candle.log
     echo
     
     # Show error image
@@ -1435,9 +1441,9 @@ if [ -f ./ro-root.sh ]; then
     fi
 else
     echo "ERROR: failed to download ro-root.sh"
-    echo "ERROR, download of read-only overlay script failed" >> /dev/kmsg
+    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
     echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
-    
+    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
         /bin/ply-image /boot/error.png
@@ -1764,7 +1770,7 @@ fi
 # cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
 
 
-
+echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
 
 # RUN DEBUG SCRIPT
 
