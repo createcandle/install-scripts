@@ -27,7 +27,10 @@ cd /ro/home/pi || exit
 
 
 echo
-echo "Starting live controller update"
+echo "Starting live system update"
+echo "$(date) - starting live system update" >> /boot/candle_log.txt
+echo "$(date) - starting live system update" >> /home/pi/.webthings/candle.log
+
 echo
 
 echo "/etc/resolv.conf: "
