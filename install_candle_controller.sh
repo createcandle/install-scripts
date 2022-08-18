@@ -51,7 +51,7 @@ if [ ! command -v npm &> /dev/null ] || [ "$(cat /home/pi/.webthings/.node_versi
 then
     echo
     echo "NPM could not be found. Installing it now."
-    echo "candle: installing NVM" | sudo tee -a /dev/kmsg
+    echo "Candle: installing NVM" | sudo tee -a /dev/kmsg
     
     
     if [ -f ./install_nvm.sh ]; then
@@ -137,8 +137,8 @@ echo
 echo "NODE AND NPM VERSIONS:"
 node --version
 npm --version
-echo "candle: node --version: $(node --version)" | sudo tee -a /dev/kmsg
-echo "candle: npm --version: $(npm --version)" | sudo tee -a /dev/kmsg
+echo "Candle: node --version: $(node --version)" | sudo tee -a /dev/kmsg
+echo "Candle: npm --version: $(npm --version)" | sudo tee -a /dev/kmsg
 
 
 npm cache verify
@@ -170,7 +170,7 @@ if [ -f /home/pi/webthings/gateway/build/app.js ] \
 && [ -d /home/pi/webthings/gateway/build/static/bundle ];
 then
     echo "Detected old webthings directory! Creating aditional backup"
-    echo "Detected old webthings directory! Creating additional backup" | sudo tee -a /dev/kmsg
+    echo "Candle: Detected old webthings directory! Creating additional backup" | sudo tee -a /dev/kmsg
     #mv /home/pi/webthings /home/pi/webthings-old
     tar -czf ./controller_backup_fresh.tar ./webthings
 fi
@@ -179,7 +179,7 @@ fi
 
 #rm -rf /home/pi/webthings
 
-echo "Starting controller installation" | sudo tee -a /dev/kmsg
+echo "Candle: Starting controller source code download" | sudo tee -a /dev/kmsg
 mkdir -p /home/pi/webthings
 chown pi:pi /home/pi/webthings
 cd /home/pi/webthings
@@ -249,7 +249,7 @@ fi
 if [ ! -d /home/pi/webthings/gateway2 ]; then
     echo
     echo "ERROR, missing gateway2 directory"
-    echo "ERROR, missing gateway2 directory" | sudo tee -a /dev/kmsg
+    echo "Candle: ERROR, missing gateway2 directory" | sudo tee -a /dev/kmsg
     echo
     
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
@@ -295,12 +295,12 @@ cp -rL static build/static
 find build -name '*.ts' -delete
 echo
 echo "Compiling typescript. this will take a while..."
-echo "Compiling typescript. this will take a while..." | sudo tee -a /dev/kmsg
+echo "Candle: Compiling typescript. this will take a while..." | sudo tee -a /dev/kmsg
 npx tsc -p .
 echo "(it probably found some errors, don't worry about those)"
 echo
 #echo "Running webpack. this will take a while too..."
-echo "Running webpack. this will take a while too..." | sudo tee -a /dev/kmsg
+echo "Candle: Running webpack. this will take a while too..." | sudo tee -a /dev/kmsg
 NODE_OPTIONS="--max-old-space-size=496" npx webpack
 
 
@@ -357,7 +357,7 @@ then
   cd -
 else
   echo "ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing"
-  echo "ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
+  echo "Candle: ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
 fi
 
 
@@ -391,7 +391,7 @@ fi
 # TODO: what if part of this failed?
 if [ ! -d /home/pi/.webthings/addons/candleappstore ]; 
 then
-    echo "Installing addons" | sudo tee -a /dev/kmsg
+    echo "Candle: Installing addons" | sudo tee -a /dev/kmsg
         
     cd /home/pi/.webthings/addons
   
@@ -522,7 +522,7 @@ then
     fi
 else
     echo "warning, not copying default database since a database file already exists"
-    echo "Database file already existed" | sudo tee -a /dev/kmsg
+    echo "Candle: database file already existed, not replacing it" | sudo tee -a /dev/kmsg
 fi
 
 
@@ -537,7 +537,7 @@ nvm cache clear
 
 echo
 #echo "sub-script that installs the Candle controller is done. Returning to the main install script."
-echo "sub-script that installs the Candle controller is done. Returning to the main install script." | sudo tee -a /dev/kmsg
+echo "Candle: sub-script that installs the Candle controller is done. Returning to the main install script." | sudo tee -a /dev/kmsg
 echo
 exit 0
 
