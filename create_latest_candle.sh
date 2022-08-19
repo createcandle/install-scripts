@@ -752,6 +752,10 @@ then
     DEBIAN_FRONTEND=noninteractive apt upgrade -y &
     wait
     echo ""
+    
+    # Fix potential issue with dhcpdp on Bullseye
+    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf
+    
     echo "calling autoremove"
     apt autoremove -y
 fi
