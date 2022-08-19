@@ -273,7 +273,20 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
     
     wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
-    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4    
+    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
+    
+
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
+            if [ -f /boot/rotate180.txt ]; then
+                /bin/ply-image /boot/splash_updating180.png
+            else
+                /bin/ply-image /boot/splash_updating.png
+            fi
+        fi
+    fi
+    
 fi
 
 
@@ -1249,6 +1262,7 @@ chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
 chmod +x /home/pi/candle/debug.sh
 chmod +x /home/pi/candle/files_check.sh
+chmod +x /home/pi/candle/unsnap.sh
 
 # CHOWN THE NEW FILES
 chown pi:pi /home/pi/*
