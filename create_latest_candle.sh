@@ -400,9 +400,9 @@ then
 
 
     # remove the Candle conf file, just in case it exists from an earlier install attempt
-    if [ -f /etc/mosquitto/mosquitto.conf ]; then
-      rm /etc/mosquitto/mosquitto.conf
-    fi
+    #if [ -f /etc/mosquitto/mosquitto.conf ]; then
+    #  rm /etc/mosquitto/mosquitto.conf
+    #fi
 
     echo
     echo "installing support packages like ffmpeg, arping, libolm, sqlite, mosquitto"
@@ -1037,6 +1037,10 @@ chown pi:pi /home/pi/candle
 mkdir -p /var/run/mosquitto/
 chown mosquitto: /var/run/mosquitto
 chmod 755 /var/run/mosquitto
+
+# TODO: would this help with mosquitto?
+#addgroup -S -g 1883 mosquitto 2>/dev/null && \
+#adduser -S -u 1883 -D -H -h /var/empty -s /sbin/nologin -G mosquitto -g mosquitto mosquitto 2>/dev/null && \
 
 # Make folders that should be owned by root
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
@@ -1972,7 +1976,10 @@ else
 fi
 
 if [ ! -f /boot/developer.txt ]; then
-    systemctl disable ssh.service
+    # Disable SSH access
+    #systemctl disable ssh.service
+    raspi-config nonint do_ssh 1 # 0 is enable, 1 is disable
+
 fi
 
 
