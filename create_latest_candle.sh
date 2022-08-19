@@ -164,8 +164,6 @@ if [ ! -s /etc/resolv.conf ]; then
 fi
 
 
-
-
 # CREATE PARTITIONS
 
 if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${SKIP_PARTITIONS}" ]]; 
@@ -214,7 +212,7 @@ then
     
 else
     echo "Partitions seem to already exist (addons dir existed)"
-    echo "Candle: partitions seem to already exist (addons dir existed)" >> /dev/kmsg
+    echo "Candle: partitions seem to already exist" >> /dev/kmsg
     echo "$(date) - starting create_latest_candle" >> /home/pi/.webthings/candle.log
     echo "$(date) - starting create_latest_candle" >> /boot/candle_log.txt
 fi
@@ -330,6 +328,7 @@ then
             echo
             if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
                 
+                # Save the install file for after the reboot
                 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
                 chmod +x /home/pi/create_latest_candle.sh
                 apt install -y raspberrypi-kernel
@@ -472,10 +471,10 @@ then
             tar -xvf lib.tar -C /opt/vc/
             rm ./lib.tar
         else
-            echo "ERROR DOWNLOAD OMXPLAYER LIB.TAR FROM CANDLE SERVER" >> /dev/kmsg
+            echo "Candle: ERROR DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER" >> /dev/kmsg
         fi
     else
-        echo "ERROR, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
+        echo "Candle: ERROR, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
     fi
 
     # for BlueAlsa
@@ -540,7 +539,7 @@ then
         autoconf;
     do
         if [ -z "$(which $i)" ]; then
-            echo "Candle: ERROR, according to which $i did not install ok"
+            echo "Candle: ERROR, according to which $i did not install ok. Reinstalling."  >> /dev/kmsg
             apt -y purge "$i"
             sleep 2
             apt -y install "$i"
@@ -1282,9 +1281,11 @@ echo
 #systemctl disable triggerhappy.socket
 #systemctl disable triggerhappy.service
 
+# Disable old bootup actions service
+systemctl disable candle_bootup_actions.service
+
 # enable Candle services
 systemctl enable candle_first_run.service
-#systemctl enable candle_bootup_actions.service
 #systemctl enable candle_start_swap.service
 systemctl enable candle_early.service
 systemctl enable candle_late.service
