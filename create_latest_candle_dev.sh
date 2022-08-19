@@ -86,7 +86,7 @@ echo
 if [ -f /usr/sbin/iptables ];then
     if [ -z "$(iptables -L -v -n)" ]; then
         echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
-        echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
+        echo "Candle: ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
         echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
     
         # Show error image
@@ -104,12 +104,13 @@ fi
 
 # Check if /boot is mounted
 if [ ! -f /boot/cmdline.txt ]; then
-    echo "ERROR, missing cmdline.txt??" >> /dev/kmsg
+    echo "Candle: ERROR, missing cmdline.txt??" >> /dev/kmsg
     
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
         /bin/ply-image /boot/error.png
         sleep 7200
     fi
+    
     exit 1
 fi
 
@@ -416,7 +417,7 @@ then
 
     # Quick sanity check
     if [ ! -f /usr/sbin/mosquitto ]; then
-        echo "ERROR, mosquitto failed to install the first time" >> /dev/kmsg
+        echo "Candle: WARNING, mosquitto failed to install the first time" >> /dev/kmsg
         apt -y --reinstall install mosquitto  
     fi
     
@@ -471,10 +472,10 @@ then
             tar -xvf lib.tar -C /opt/vc/
             rm ./lib.tar
         else
-            echo "Candle: ERROR DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER" >> /dev/kmsg
+            echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /dev/kmsg
         fi
     else
-        echo "Candle: ERROR, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
+        echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
     fi
 
     # for BlueAlsa
@@ -539,7 +540,7 @@ then
         autoconf;
     do
         if [ -z "$(which $i)" ]; then
-            echo "Candle: ERROR, according to which $i did not install ok. Reinstalling."  >> /dev/kmsg
+            echo "Candle: WARNING, $i binary not found. Reinstalling."  >> /dev/kmsg
             apt -y purge "$i"
             sleep 2
             apt -y install "$i"
@@ -561,7 +562,7 @@ then
             echo "$i installed OK"
         else
             echo
-            echo "Candle: ERROR, $i did not install ok"
+            echo "Candle: WARNING, $i did not install ok"
             dpkg -s "$i"
             
             echo
@@ -576,6 +577,7 @@ then
             else
                 echo
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
+                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
                 dpkg -s "$i"
                 
                 # Show error image
@@ -600,7 +602,7 @@ then
             echo "$i installed OK"
         else
             echo
-            echo "Candle: ERROR, $i did not install ok"
+            echo "Candle: WARNING, $i did not install ok"
             dpkg -s "$i"
             
             echo
@@ -725,7 +727,7 @@ then
         echo "adding /home/pi/.local/bin to path"
         PATH="/home/pi/.local/bin:$PATH"
     else
-        echo "ERROR, /home/pi/.local/bin does not exist"
+        echo "WARNING, /home/pi/.local/bin does not exist"
     fi
 
     echo "Updating existing python packages"
@@ -1079,7 +1081,7 @@ then
     chown pi:pi /home/pi/.webthings/floorplan.svg
 else
     echo ""
-    echo "ERROR: missing floorplan"
+    echo "WARNING: missing floorplan"
     echo ""
 fi
 
@@ -1634,7 +1636,7 @@ then
     else
         echo
         echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
-        echo "Candle: ERROR, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
+        echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
         echo
     fi
 fi
@@ -1813,7 +1815,7 @@ then
 else
     echo
     echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST"
-    echo "Candle: ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST" >> /dev/kmsg
+    echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
     echo
 fi
 
