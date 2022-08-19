@@ -1857,6 +1857,9 @@ fi
 
 # cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
 
+if [ -f /boot/candle_first_run_complete.txt ] && [ ! -f /boot/candle_original_version.txt ]; then
+    echo "2.0.0-beta" > /boot/candle_original_version.txt
+fi
 
 echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
 
