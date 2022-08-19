@@ -45,9 +45,12 @@ NOTE: If you enabled developer mode, and the script detects that a bootloader or
 .
 
 ### Developer options
-Note: There are some other options which are described in the create_latest_candle.sh file. For example, it's possible to inspect what the script has generated before it shuts down with this command:
+Note: To get the cutting edge release, use the `_dev` version.
+Note: There are some other options which are described in the create_latest_candle.sh file. 
+
+For example, this command installs the cutting-edge version of Candle and then stops for inspection:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo STOP_EARLY=yes bash
 ```
 (It's the command we really use to create the Candle disk images, as we let the controller boot once to install Zigbee2MQTT properly)
 
