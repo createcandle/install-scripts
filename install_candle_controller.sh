@@ -274,7 +274,9 @@ rm -rf node_modules/
 export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
 # CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
 # npm install typescript --save-dev # TODO: check if this is now in package.json already
+
 # npm install
+echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
 CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 
 #echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
@@ -297,12 +299,12 @@ cp -rL static build/static
 find build -name '*.ts' -delete
 echo
 echo "Compiling typescript. this will take a while..."
-echo "Candle: Compiling typescript. this will take a while..." | sudo tee -a /dev/kmsg
+echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
 npx tsc -p .
 echo "(it probably found some errors, don't worry about those)"
 echo
 #echo "Running webpack. this will take a while too..."
-echo "Candle: Running webpack. this will take a while too..." | sudo tee -a /dev/kmsg
+echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
 NODE_OPTIONS="--max-old-space-size=496" npx webpack
 
 
@@ -317,9 +319,9 @@ then
 else
   echo  
   echo "ERROR, controller installation is mising parts"
-  echo
   echo "Candle: ERROR, controller installation is mising parts" | sudo tee -a /dev/kmsg
   echo "$(date) - ERROR, controller installation is mising parts" | sudo tee -a /boot/candle.log
+  echo
 fi
 
 _node_version=$(node --version | grep -E -o '[0-9]+' | head -n1)
@@ -334,7 +336,7 @@ echo "New controller was created at $(pwd)"
 cd /home/pi
 if [ -d /home/pi/webthings/gateway2 ]; then
     
-    echo "Starting copy of /home/pi/webthings/gateway2 to /home/pi/webthings/gateway using rsync"
+    echo "Starting move/copy of /home/pi/webthings/gateway2 to /home/pi/webthings/gateway"
     #rm-rf /home/pi/webthings/gateway
     if [ ! -d /home/pi/webthings/gateway ]; then
         echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg

@@ -1973,9 +1973,9 @@ fi
 
 # If STOP_EARLY is enabled, then here it's possible to also ask the script to reboot. This is useful for upgrading the system.
 if [[ -z "${REBOOT_WHEN_DONE}" ]] || [ "$REBOOT_WHEN_DONE" = no ]; then
-    echo "(not rebooting)"
+    echo "Candle: Not rebooting" >> /dev/kmsg
 else
-    echo "rebooting in 10 seconds"
+    echo "Candle: Rebooting in 10 seconds" >> /dev/kmsg
     rm /boot/candle_rw_once.txt
     sleep 10
     reboot
