@@ -49,6 +49,9 @@ then
       echo 
       echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
       echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
+      echo "Candle: detected read-only mode. Aborting." >> /boot/candle_log.txt
+      
+      
   
       # Show error image
       if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
@@ -88,6 +91,7 @@ if [ -f /usr/sbin/iptables ];then
         echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
         echo "Candle: ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
         echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
+        echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /boot/candle_log.txt
     
         # Show error image
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
@@ -105,6 +109,7 @@ fi
 # Check if /boot is mounted
 if [ ! -f /boot/cmdline.txt ]; then
     echo "Candle: ERROR, missing cmdline.txt??" >> /dev/kmsg
+    echo "Candle: ERROR, missing cmdline.txt??" >> /boot/candle_log.txt
     
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
         /bin/ply-image /boot/error.png
@@ -154,6 +159,25 @@ echo
 echo "reinstall flag: $reinstall"
 
 
+# Wait for IP address for at most 30 seconds
+echo "Waiting for IP address..." >> /dev/kmsg
+echo "Waiting for IP address..." >> /boot/candle_log.txt
+for i in {1..30}
+do
+  #echo "current IP: $(hostname -I)"
+  if [ "$(hostname -I)" = "" ]
+  then
+    echo "Candle: early.sh: no network yet $i" >> /dev/kmsg
+    echo "no network yet $i"
+    sleep 1    
+  else
+    echo "Candle: early.sh: IP address detected: $(hostname -I)" >> /dev/kmsg
+    echo "Candle: early.sh: IP address detected: $(hostname -I)" >> /boot/candle_log.txt
+    break
+  fi
+done
+
+
 
 # ADDITIONAL SANITY CHECKS
 
@@ -161,6 +185,7 @@ if [ ! -s /etc/resolv.conf ]; then
     # no nameserver
     echo "no nameserver, aborting"
     echo "Candle: no nameserver, aborting" >> /dev/kmsg
+    echo "Candle: no nameserver, aborting" >> /boot/candle_log.txt
     exit 1
 fi
 
@@ -182,6 +207,7 @@ then
             echo
             echo "CREATING PARTITIONS"
             echo "Candle: creating partitions" >> /dev/kmsg
+            echo "Candle: creating partitions" >> /boot/candle_log.txt
             echo
 
             printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
@@ -234,7 +260,7 @@ fi
 sleep 3
 
 
-# make sure there is a current time
+# Make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
     rm /boot/candle_hardware_clock.txt
     systemctl restart systemd-timesyncd.service
@@ -242,6 +268,7 @@ if [ -f /boot/candle_hardware_clock.txt ]; then
     sleep 2
     /usr/sbin/fake-hwclock save
     echo "Candle: requested latest time. Date is now: $(date)" >> /dev/kmsg
+    echo "Candle: requested latest time. Date is now: $(date)" >> /boot/candle_log.txt
 fi
 
 
@@ -252,6 +279,7 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
     if [ ! -f /boot/error.png ]; then
         echo "Candle: ERROR, download of error.png failed. How ironic." >> /dev/kmsg
+        echo "Candle: ERROR, download of error.png failed. How ironic." >> /boot/candle_log.txt
         exit 1
     fi      
 fi
@@ -264,6 +292,7 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
     echo
     echo "Candle: downloading splash images and videos" >> /dev/kmsg
+    echo "Candle: downloading splash images and videos" >> /boot/candle_log.txt
     echo
     wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
     wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
@@ -280,18 +309,28 @@ if [ -f /boot/cmdline.txt ]; then
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
             echo "Candle: showing updating splash image" >> /dev/kmsg
+            echo "Candle: showing updating splash image" >> /boot/candle_log.txt
             if [ -f /boot/rotate180.txt ]; then
                 /bin/ply-image /boot/splash_updating180.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating180.png
+                fi
+                    
             else
                 /bin/ply-image /boot/splash_updating.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating.png
+                fi
             fi
         fi
         
         # also start SSH
         if [ -f /boot/developer.txt ]; then
             echo "Candle: starting ssh" >> /dev/kmsg
+            echo "Candle: starting ssh" >> /boot/candle_log.txt
             systemctl start ssh.service
         fi
+        
     fi
     
 fi
@@ -306,8 +345,30 @@ then
     echo
     echo "INSTALLING APPLICATIONS AND LIBRARIES"
     echo "Candle: installing packages and libraries" >> /dev/kmsg
+    echo "Candle: installing packages and libraries" >> /boot/candle_log.txt
     echo
 
+
+    # Make sure Bullseye sources are used
+    if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
+        echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
+        echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
+        sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
+    fi
+
+    if cat /etc/apt/sources.list | grep -q buster; then
+        echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
+        echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
+        sed -i 's/buster/bullseye/' /etc/apt/sources.list
+    fi
+    
+    
+    # Add option to download source code from RaspberryPi server
+    echo "modifying /etc/apt/sources.list - allowing apt access to source code"
+    sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
+
+
+    # Update apt sources
     set -e
     echo "calling apt update"
     apt update -y
@@ -316,20 +377,16 @@ then
     echo
     
     
-    # Add option to download source code from RaspberryPi server
-    
-    echo "modifying /etc/apt/sources.list - allowing apt access to source code"
-    sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
-    
-    
+    # Check if kernel or bootloader can be updated
     if apt list --upgradable | grep raspberrypi-bootloader; then
         echo "WARNING, BOOTLOADER IS UPGRADEABLE"
         echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
     fi
-    
     if apt list --upgradable | grep raspberrypi-kernel; then
         echo "WARNING, KERNEL IS UPGRADEABLE"
         echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
     fi
     
     # Set kernel to not automatically upgrade, but only during disk image creation
@@ -369,6 +426,7 @@ then
     then
         echo "calling apt upgrade"
         echo "Candle: doing apt upgrade" >> /dev/kmsg
+        echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
         #apt DEBIAN_FRONTEND=noninteractive upgrade -y
         DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
         wait
@@ -383,8 +441,21 @@ then
     echo
     echo "installing chromium-browser"
     echo "Candle: installing chromium-browser" >> /dev/kmsg
+    echo "Candle: installing chromium-browser" >> /boot/candle_log.txt
     echo
+    
+    if chromium-browser --version | grep -q 'Chromium 88'; then
+        echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
+        echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+        apt purge chromium-browser -y
+        apt purge chromium-codecs-ffmpeg-extra -y
+        apt autoremove
+        apt install chromium-browser -y
+    fi
+    
+    
     apt install chromium-browser -y --print-uris --allow-change-held-packages "$reinstall"
+    apt install chromium-browser -y
 
     if [ ! -f /bin/chromium-browser ]; then
         echo
@@ -405,6 +476,7 @@ then
     echo
     echo "installing git"
     echo "Candle: installing git" >> /dev/kmsg
+    echo "Candle: installing git" >> /boot/candle_log.txt
     echo
     apt -y install git "$reinstall" 
 
@@ -427,10 +499,12 @@ then
     echo
     echo "installing support packages like ffmpeg, arping, libolm, sqlite, mosquitto"
     echo "Candle: installing support packages" >> /dev/kmsg
+    echo "Candle: installing support packages" >> /boot/candle_log.txt
     echo
     for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
+        echo "Candle: installing $i" >> /boot/candle_log.txt
         apt -y install "$i"  --print-uris "$reinstall" 
         echo
     done
@@ -438,6 +512,7 @@ then
     # Quick sanity check
     if [ ! -f /usr/sbin/mosquitto ]; then
         echo "Candle: WARNING, mosquitto failed to install the first time" >> /dev/kmsg
+        echo "Candle: WARNING, mosquitto failed to install the first time" >> /boot/candle_log.txt
         apt -y --reinstall install mosquitto  
     fi
     
@@ -453,6 +528,7 @@ then
     for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
+        echo "Candle: installing $i" >> /boot/candle_log.txt
         apt-get -y --no-install-recommends install "$i" --print-uris "$reinstall" 
         echo
     done
@@ -472,6 +548,7 @@ then
     for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
+        echo "Candle: installing $i" >> /boot/candle_log.txt
         apt-get -y install $i --print-uris "$reinstall"
         echo
     done
@@ -493,9 +570,11 @@ then
             rm ./lib.tar
         else
             echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /dev/kmsg
+            echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /boot/candle_log.txt
         fi
     else
         echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
+        echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /boot/candle_log.txt
     fi
 
     # for BlueAlsa
@@ -503,6 +582,7 @@ then
     for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
+        echo "Candle: installing $i" >> /boot/candle_log.txt
         apt -y install "$i" --print-uris "$reinstall" 
         echo
     done
@@ -513,6 +593,7 @@ then
     for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
+        echo "Candle: installing $i" >> /boot/candle_log.txt
         apt -y install "$i"  --print-uris "$reinstall"
         echo
     done
@@ -520,6 +601,7 @@ then
     echo
     echo "INSTALLING HOSTAPD AND DNSMASQ"
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
+    echo "Candle: installing hostapd and dnsmasq" >> /boot/candle_log.txt
 
     apt -y install dnsmasq  --print-uris "$reinstall" 
     systemctl disable dnsmasq.service
@@ -561,6 +643,7 @@ then
     do
         if [ -z "$(which $i)" ]; then
             echo "Candle: WARNING, $i binary not found. Reinstalling."  >> /dev/kmsg
+            echo "Candle: WARNING, $i binary not found. Reinstalling."  >> /boot/candle_log.txt
             apt -y purge "$i"
             sleep 2
             apt -y install "$i"
@@ -598,6 +681,7 @@ then
                 echo
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
+                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /boot/candle_log.txt
                 dpkg -s "$i"
                 
                 # Show error image
@@ -638,6 +722,7 @@ then
                 echo
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
+                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /boot/candle_log.txt
                 dpkg -s "$i"
                 
                 # Show error image
@@ -660,6 +745,7 @@ then
     echo
     echo "RUNNING APT UPGRADE"
     echo "Candle: running apt upgrade command" >> /dev/kmsg
+    echo "Candle: running apt upgrade command" >> /boot/candle_log.txt
     echo
     #apt upgrade -y
     apt-get update -y
@@ -687,6 +773,7 @@ else
     echo "Error detected in the packages install phase (git is missing). Try running the Candle install script again."
     echo ""
     echo "Candle: error GIT failed to install" >> /dev/kmsg
+    echo "Candle: error GIT failed to install" >> /boot/candle_log.txt
     
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
@@ -709,6 +796,7 @@ else
     echo "Error detected in the packages install phase (browser is missing). Try running the Candle install script again."
     echo ""
     echo "Candle: error browser failed to install" >> /dev/kmsg
+    echo "Candle: error browser failed to install" >> /boot/candle_log.txt
     
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
@@ -829,6 +917,7 @@ then
     
 else
     echo "Candle: skipping ReSpeaker drivers install" >> /dev/kmsg
+    echo "Candle: skipping ReSpeaker drivers install" >> /boot/candle_log.txt
 fi
 
 
@@ -841,6 +930,7 @@ then
     echo
     echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
     echo "Candle: building BlueAlsa (audio streaming)" >> /dev/kmsg
+    echo "Candle: building BlueAlsa (audio streaming)" >> /boot/candle_log.txt
     echo
     
     adduser --system --group --no-create-home bluealsa
@@ -871,6 +961,7 @@ then
 
 else
     echo "Candle: Skipping BlueAlsa build" >> /dev/kmsg
+    echo "Candle: Skipping BlueAlsa build" >> /boot/candle_log.txt
 fi
 
 cd /home/pi
@@ -909,6 +1000,7 @@ then
     echo
     echo "INSTALLING CANDLE CONTROLLER"
     echo "Candle: starting installing of Candle controller itself" >> /dev/kmsg
+    echo "Candle: starting installing of Candle controller itself" >> /boot/candle_log.txt
     echo
 
     cd /home/pi
@@ -954,6 +1046,7 @@ then
         echo "Candle: ERROR, missing install_candle_controller.sh file. Aborting." >> /dev/kmsg
         echo "$(date) - Failed to download install_candle_controller script" >> /boot/candle_log.txt
         echo "$(date) - Failed to download install_candle_controller script" >> /home/pi/.webthings/candle.log
+        echo "$(date) - Failed to download install_candle_controller script" >> /boot/candle_log.txt
         echo
         
         # Show error image
@@ -984,6 +1077,7 @@ then
             echo "ERROR, failed to (fully) install candle-controller (/ro)"
             echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
             echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /home/pi/.webthings/candle.log
+            echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /boot/candle_log.txt
             echo
 
             # Show error image
@@ -1000,6 +1094,7 @@ then
         echo "ERROR, failed to (fully) install candle-controller"
         echo "Candle: ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
         echo "Candle: ERROR, failed to (fully) install candle-controller" >> /home/pi/.webthings/candle.log
+        echo "Candle: ERROR, failed to (fully) install candle-controller" >> /boot/candle_log.txt
         echo
 
         # Show error image
@@ -1172,6 +1267,7 @@ fi
 echo
 echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
 echo "Candle: downloading configuration files from Github" >> /dev/kmsg
+echo "Candle: downloading configuration files from Github" >> /boot/candle_log.txt
 echo
 
 if [ -d /home/pi/configuration-files ]; then
@@ -1184,7 +1280,8 @@ fi
 # Download ready-made settings files from the Candle github
 if [ -f /boot/candle_cutting_edge.txt ]; then
     
-    echo "Candle: Starting download of cutting edge configuration files" | sudo tee -a /dev/kmsg
+    echo "Candle: Starting download of cutting edge configuration files" >> /dev/kmsg
+    echo "Candle: Starting download of cutting edge configuration files" >> /boot/candle_log.txt
     git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
     if [ -d /home/pi/configuration-files ]; then
         rm /home/pi/configuration-files/LICENSE
@@ -1193,7 +1290,8 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
     fi
     
 else
-    echo "Candle: Starting download of stable configuration files" | sudo tee -a /dev/kmsg
+    echo "Candle: Starting download of stable configuration files" >> /dev/kmsg
+    echo "Candle: Starting download of stable configuration files" >> /boot/candle_log.txt
     curl -s https://api.github.com/repos/createcandle/configuration-files/releases/latest \
     | grep "tarball_url" \
     | cut -d : -f 2,3 \
@@ -1220,6 +1318,7 @@ if [ ! -d /home/pi/configuration-files ]; then
     echo "Candle: ERROR, failed to download latest configuration files" >> /dev/kmsg
     echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
     echo "$(date) - failed to download latest configuration files" >> /home/pi/.webthings/candle.log
+    echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
     echo
     
     # Show error image
@@ -1245,6 +1344,7 @@ fi
 
 echo "Copying configuration files into place"
 echo "Candle: Copying configuration files into place" >> /dev/kmsg
+echo "Candle: Copying configuration files into place" >> /boot/candle_log.txt
 rsync -vr /home/pi/configuration-files/* /
 
 
@@ -1297,6 +1397,7 @@ fi
 echo
 echo "ENABLING AND DISABLING SERVICES"
 echo "Candle: enabling services" >> /dev/kmsg
+echo "Candle: enabling services" >> /boot/candle_log.txt
 echo
 #systemctl daemon-reload
 
@@ -1304,8 +1405,6 @@ echo
 #systemctl disable triggerhappy.socket
 #systemctl disable triggerhappy.service
 
-# Disable old bootup actions service
-systemctl disable candle_bootup_actions.service
 
 # enable Candle services
 systemctl enable candle_first_run.service
@@ -1384,6 +1483,7 @@ if [ -f /boot/config.txt ]; then
     then    
     	echo "- Modifying cmdline.txt"
         echo "Candle: adding kiosk parameters to cmdline.txt" >> /dev/kmsg
+        echo "Candle: adding kiosk parameters to cmdline.txt" >> /boot/candle_log.txt
     	# change text output to third console. press alt-shift-F3 during boot to see it again.
         sed -i 's/tty1/tty3/' /boot/cmdline.txt
     	# hide all the small things normally shown at boot
@@ -1391,6 +1491,7 @@ if [ -f /boot/config.txt ]; then
     else
         echo "- The cmdline.txt file was already modified"
         echo "Candle: cmdline.txt kiosk parameters were already present" >> /dev/kmsg
+        echo "Candle: cmdline.txt kiosk parameters were already present" >> /boot/candle_log.txt
     fi
     
     # Use the older display driver for now, as this solves many audio headaches.
@@ -1462,8 +1563,10 @@ echo
 if iptables --list | grep 4443; then
     echo "IPTABLES ALREADY ADDED"
     echo "Candle: firewall already set up" >> /dev/kmsg
+    echo "Candle: firewall already set up" >> /boot/candle_log.txt
 else
-    echo "Candle: setting up firewall" >> /dev/kmsg
+    echo "Candle: setting up firewall (iptables)" >> /dev/kmsg
+    echo "Candle: setting up firewall (iptables)" >> /boot/candle_log.txt
     iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
     iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
     iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
@@ -1553,6 +1656,7 @@ else
     echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
     echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
     echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
+    echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
         /bin/ply-image /boot/error.png
@@ -1595,6 +1699,7 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
         else
             echo "- Read only file system mode was already in config.txt"
             echo "Candle: read-only mode already existed" >> /dev/kmsg
+            echo "Candle: read-only mode already existed" >> /boot/candle_log.txt
         fi
 
 
@@ -1607,9 +1712,11 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
             	echo "- Modifying cmdline.txt for read-only file system"
                 sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
                 echo "Candle: read-only mode is now enabled" >> /dev/kmsg
+                echo "Candle: read-only mode is now enabled" >> /boot/candle_log.txt
             else
                 echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
                 echo "Candle: read-only mode was already enabled" >> /dev/kmsg
+                echo "Candle: read-only mode was already enabled" >> /boot/candle_log.txt
             fi
         
         fi
@@ -1653,11 +1760,13 @@ then
     then
         echo "Creating initial backup of webthings folder"
         echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
+        echo "Candle: creating initial backup of webthings folder" >> /boot/candle_log.txt
         tar -czf ./controller_backup.tar ./webthings
     else
         echo
         echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
         echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
+        echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /boot/candle_log.txt
         echo
     fi
 fi
@@ -1717,6 +1826,7 @@ echo
 echo "CLEANING UP"
 echo
 echo "Candle: almost done, cleaning up" >> /dev/kmsg
+echo "Candle: almost done, cleaning up" >> /boot/candle_log.txt
 
 #npm cache clean --force # already done in install_candle_controller script
 #nvm cache clear
@@ -1740,6 +1850,7 @@ if [ -f /home/pi/.webthings/swap ]; then
 fi
 if [ -f /var/swap ]; then
     echo "Candle: removing swap" >> /dev/kmsg
+    echo "Candle: removing swap" >> /boot/candle_log.txt
     swapoff /var/swap
     rm /var/swap
 fi
@@ -1772,9 +1883,11 @@ then
     echo "candle" > /etc/hostname
     echo "candle" > /home/pi/.webthings/etc/hostname
     echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
+    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /boot/candle_log.txt
 else
     echo "/home/pi/.webthings/etc/hostname already existed"
     echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
+    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /boot/candle_log.txt
 fi
 
 
@@ -1813,6 +1926,7 @@ then
     then
         echo "copying 4 partition version of fstab"
         echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
+        echo "Candle: copying 4 partition version of fstab" >> /boot/candle_log.txt
         
         if ! diff -q /home/pi/configuration-files/boot/fstab4.bak /etc/fstab &>/dev/null; then
             echo "fstab file is different, copying it"
@@ -1824,6 +1938,7 @@ then
     else
         echo "copying 3 partition version of fstab"
         echo "Candle: copying 3 partition version of fstab" >> /dev/kmsg
+        echo "Candle: copying 3 partition version of fstab" >> /boot/candle_log.txt
         
         if ! diff -q /home/pi/configuration-files/boot/fstab3.bak /etc/fstab &>/dev/null; then
             echo "fstab file is different, copying it"
@@ -1837,7 +1952,9 @@ else
     echo
     echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST"
     echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
+    echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
     echo
+    
 fi
 
 
@@ -1883,6 +2000,11 @@ if [ -f /boot/candle_first_run_complete.txt ] && [ ! -f /boot/candle_original_ve
 fi
 
 echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
+echo "$(date) - system update complete" >> /boot/candle_log.txt
+
+# Disable old bootup actions service
+systemctl disable candle_bootup_actions.service
+
 
 # RUN DEBUG SCRIPT
 
