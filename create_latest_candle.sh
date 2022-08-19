@@ -732,8 +732,8 @@ then
     echo "Updating existing python packages"
     sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro requests RPi.GPIO ssh-import-id urllib3 wheel libevdev
 
-    echo "Installing Python gateway_addon"
-    sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
+    #echo "Installing Python gateway_addon"
+    #sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 fi
 
 
@@ -897,8 +897,11 @@ then
     
     
     if [ -f /boot/candle_cutting_edge.txt ]; then
+        echo "Candle: Starting download of cutting edge controller install script" | sudo tee -a /dev/kmsg
         wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
+        
     else
+        echo "Candle: Starting download of stable controller install script" | sudo tee -a /dev/kmsg
         curl -s https://api.github.com/repos/createcandle/install-scripts/releases/latest \
         | grep "tarball_url" \
         | cut -d : -f 2,3 \
@@ -1156,6 +1159,7 @@ fi
 # Download ready-made settings files from the Candle github
 if [ -f /boot/candle_cutting_edge.txt ]; then
     
+    echo "Candle: Starting download of cutting edge configuration files" | sudo tee -a /dev/kmsg
     git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
     if [ -d /home/pi/configuration-files ]; then
         rm /home/pi/configuration-files/LICENSE
@@ -1164,6 +1168,7 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
     fi
     
 else
+    echo "Candle: Starting download of stable configuration files" | sudo tee -a /dev/kmsg
     curl -s https://api.github.com/repos/createcandle/configuration-files/releases/latest \
     | grep "tarball_url" \
     | cut -d : -f 2,3 \
