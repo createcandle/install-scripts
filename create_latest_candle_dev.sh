@@ -260,7 +260,7 @@ fi
 sleep 3
 
 
-# make sure there is a current time
+# Make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
     rm /boot/candle_hardware_clock.txt
     systemctl restart systemd-timesyncd.service
@@ -340,6 +340,27 @@ then
     echo "Candle: installing packages and libraries" >> /boot/candle_log.txt
     echo
 
+
+    # Make sure Bullseye sources are used
+    if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
+        echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
+        echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
+        sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
+    fi
+
+    if cat /etc/apt/sources.list | grep -q buster; then
+        echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
+        echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
+        sed -i 's/buster/bullseye/' /etc/apt/sources.list
+    fi
+    
+    # Add option to download source code from RaspberryPi server
+    echo "modifying /etc/apt/sources.list - allowing apt access to source code"
+    sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
+
+    
+
+    # Update apt sources
     set -e
     echo "calling apt update"
     apt update -y
@@ -348,18 +369,12 @@ then
     echo
     
     
-    # Add option to download source code from RaspberryPi server
-    
-    echo "modifying /etc/apt/sources.list - allowing apt access to source code"
-    sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
-    
-    
+    # Check if kernel or bootloader can be updated
     if apt list --upgradable | grep raspberrypi-bootloader; then
         echo "WARNING, BOOTLOADER IS UPGRADEABLE"
         echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
         echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
     fi
-    
     if apt list --upgradable | grep raspberrypi-kernel; then
         echo "WARNING, KERNEL IS UPGRADEABLE"
         echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
@@ -420,7 +435,19 @@ then
     echo "Candle: installing chromium-browser" >> /dev/kmsg
     echo "Candle: installing chromium-browser" >> /boot/candle_log.txt
     echo
+    
+    if chromium-browser --version | grep -q 'Chromium 88'; then
+        echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
+        echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+        apt purge chromium-browser -y
+        apt purge chromium-codecs-ffmpeg-extra -y
+        apt autoremove
+        apt install chromium-browser -y
+    fi
+    
+    
     apt install chromium-browser -y --print-uris --allow-change-held-packages "$reinstall"
+    apt install chromium-browser -y
 
     if [ ! -f /bin/chromium-browser ]; then
         echo
