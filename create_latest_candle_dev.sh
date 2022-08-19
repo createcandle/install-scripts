@@ -279,11 +279,18 @@ if [ -f /boot/cmdline.txt ]; then
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
+            echo "Candle: showing updating splash image" >> /dev/kmsg
             if [ -f /boot/rotate180.txt ]; then
                 /bin/ply-image /boot/splash_updating180.png
             else
                 /bin/ply-image /boot/splash_updating.png
             fi
+        fi
+        
+        # also start SSH
+        if [ -f /boot/developer.txt ]; then
+            echo "Candle: starting ssh" >> /dev/kmsg
+            systemctl start ssh.service
         fi
     fi
     
