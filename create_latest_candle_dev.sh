@@ -312,8 +312,15 @@ if [ -f /boot/cmdline.txt ]; then
             echo "Candle: showing updating splash image" >> /boot/candle_log.txt
             if [ -f /boot/rotate180.txt ]; then
                 /bin/ply-image /boot/splash_updating180.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating180.png
+                fi
+                    
             else
                 /bin/ply-image /boot/splash_updating.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating.png
+                fi
             fi
         fi
         
@@ -323,6 +330,7 @@ if [ -f /boot/cmdline.txt ]; then
             echo "Candle: starting ssh" >> /boot/candle_log.txt
             systemctl start ssh.service
         fi
+        
     fi
     
 fi
@@ -354,11 +362,11 @@ then
         sed -i 's/buster/bullseye/' /etc/apt/sources.list
     fi
     
+    
     # Add option to download source code from RaspberryPi server
     echo "modifying /etc/apt/sources.list - allowing apt access to source code"
     sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
-    
 
     # Update apt sources
     set -e
@@ -744,6 +752,10 @@ then
     DEBIAN_FRONTEND=noninteractive apt upgrade -y &
     wait
     echo ""
+    
+    # Fix potential issue with dhcpdp on Bullseye
+    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf
+    
     echo "calling autoremove"
     apt autoremove -y
 fi
