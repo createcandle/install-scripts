@@ -24,10 +24,6 @@ if [ -z "$(printenv PATH | grep /home/pi/.local/bin)" ]; then
 fi
 
 
-if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/splash.png ]; then
-    sudo /bin/ply-image /boot/error.png
-fi
-
 echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
 echo "USER         : $(whoami)"
@@ -68,6 +64,8 @@ then
     wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
     if [ ! -f install_nvm.sh ]; then
         echo "ERROR, install_nvm.sh failed to download"
+        echo "ERROR, install_nvm.sh failed to download" | sudo tee -a /dev/kmsg
+        echo "ERROR, install_nvm.sh failed to download" | sudo tee -a /boot/candle_log.txt
         
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
             sudo /bin/ply-image /boot/error.png
@@ -143,9 +141,9 @@ echo "NODE AND NPM VERSIONS:"
 node --version
 npm --version
 echo "Candle: Node --version: $(node --version)" | sudo tee -a /dev/kmsg
-echo "Candle: NPM --version: $(npm --version)" | sudo tee -a /dev/kmsg
+echo "Candle: NPM --version: $(npm --version)"   | sudo tee -a /dev/kmsg
 echo "Candle: Node --version: $(node --version)" | sudo tee -a /boot/candle_log.txt
-echo "Candle: NPM --version: $(npm --version)" | sudo tee -a /boot/candle_log.txt
+echo "Candle: NPM --version: $(npm --version)"   | sudo tee -a /boot/candle_log.txt
 
 npm cache verify
 
@@ -454,7 +452,7 @@ then
 
     rm -rf package
     rm -rf photo-frame
-    wget https://github.com/flatsiedatsie/photo-frame/releases/download/1.4.16/photo-frame-1.4.16.tgz
+    wget https://github.com/flatsiedatsie/photo-frame/releases/download/1.4.17/photo-frame-1.4.17.tgz
     for f in photo-frame*.tgz; do
         tar -xf "$f"
     done
