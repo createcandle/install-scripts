@@ -396,12 +396,12 @@ then
 
 
     # Update apt sources
-    set -e
+    #set -e
     echo "calling apt update" >> /dev/kmsg
     echo "calling apt update" >> /boot/candle_log.txt 
     apt update -y
     apt-get update -y
-    apt --fix-broken install
+    apt --fix-broken install -y
     echo
     
     
@@ -476,17 +476,36 @@ then
     echo
     if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
     then
-        echo "calling apt upgrade"
-        echo "Candle: doing apt upgrade" >> /dev/kmsg
-        echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
-        #apt DEBIAN_FRONTEND=noninteractive upgrade -y
-        DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
-        wait
         echo
-        echo "Upgrade complete"
+        #echo "calling apt upgrade"
+        #echo "Candle: doing apt upgrade" >> /dev/kmsg
+        #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
+        #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+        #wait
+        #echo
+        #echo "Upgrade complete"
     fi
 
-    set +e
+#    set +e
+
+    # Just to be safe, try showing the splash images again
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
+            if [ -f /boot/rotate180.txt ]; then
+                /bin/ply-image /boot/splash_updating180.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating180.png
+                fi
+                    
+            else
+                /bin/ply-image /boot/splash_updating.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating.png
+                fi
+            fi
+        fi
+    fi
 
     # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
     # TODO: maybe use version 88?
