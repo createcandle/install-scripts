@@ -42,6 +42,12 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
+
+scriptname=$(basename "$0")
+
+echo "" >> /boot/candle_log.txt
+echo "$(date) - $scriptname" >> /boot/candle_log.txt
+
 if [ -f /proc/mounts ]; 
 then
     # Detect is read-only mode is active
@@ -133,8 +139,7 @@ echo "IP ADDRESS   : $(hostname -I)"
 echo "PATH         : $PATH"
 echo "USER         : $(whoami)"
 
-scriptname=$(basename "$0")
-echo "NAME         : $scriptname"
+echo "SCRIPT NAME  : $scriptname"
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
 echo "CUTTING EDGE : yes"
@@ -258,7 +263,7 @@ if [ -f /home/pi/.webthings/zero.fill ]; then
 fi
 
 sleep 3
-
+cd /home/pi
 
 # Make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
@@ -287,6 +292,25 @@ fi
 
 
 
+# PLYMOUTH LITE
+if [ ! -f /bin/ply-image ]; 
+then
+    echo
+    echo "creating Plymouth lite (to show splash images)" >> /dev/kmsg
+    echo "creating Plymouth lite (to show splash images)" >> /boot/candle_log.txt
+    echo
+    git clone --depth 1 https://github.com/T4d3o/Plymouth-lite.git
+    cd Plymouth-lite
+    ./configure
+    make
+    cp ply-image /usr/bin
+
+    cd /home/pi
+    rm -rf Plymouth-lite
+fi
+
+
+
 # Download splash images
 if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
@@ -294,17 +318,11 @@ if [ -f /boot/cmdline.txt ]; then
     echo "Candle: downloading splash images and videos" >> /dev/kmsg
     echo "Candle: downloading splash images and videos" >> /boot/candle_log.txt
     echo
-    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
-    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
-    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
-    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
+    
     wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
     wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
     
-    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
-    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
     
-
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
@@ -331,9 +349,18 @@ if [ -f /boot/cmdline.txt ]; then
             systemctl start ssh.service
         fi
         
+        # Download the rest of the images
+        wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
+        wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
+        wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
+        wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
+        wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
+        wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
+        
     fi
     
 fi
+
 
 
 
@@ -377,6 +404,26 @@ then
     echo
     
     
+    # Just to be safe, try showing the splash images again
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
+            if [ -f /boot/rotate180.txt ]; then
+                /bin/ply-image /boot/splash_updating180.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating180.png
+                fi
+                    
+            else
+                /bin/ply-image /boot/splash_updating.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating.png
+                fi
+            fi
+        fi
+    fi
+    
+    
     # Check if kernel or bootloader can be updated
     if apt list --upgradable | grep raspberrypi-bootloader; then
         echo "WARNING, BOOTLOADER IS UPGRADEABLE"
@@ -396,13 +443,17 @@ then
         echo "/boot/candle_first_run_complete.txt does not exist yet"
         
         if [ ! -f /boot/candle_cutting_edge.txt ]; then
-            echo "Settting kernel to not automatically upgrade."
+            echo "Settting kernel to not automatically upgrade." >> /dev/kmsg
+            echo "Settting kernel to not automatically upgrade." >> /boot/candle_log.txt
+
             apt-mark hold raspberrypi-kernel
             apt-mark hold raspberrypi-bootloader
         else
             echo
             echo
-            echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting."
+            echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /dev/kmsg
+            echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /boot/candle_log.txt
+            
             echo
             if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
                 
@@ -974,21 +1025,7 @@ rm -rf bluez-alsa
 
 
 
-# PLYMOUTH LITE
-if [ ! -f /bin/ply-image ]; 
-then
-    echo
-    echo "creating Plymouth lite"
-    echo
-    git clone --depth 1 https://github.com/T4d3o/Plymouth-lite.git
-    cd Plymouth-lite
-    ./configure
-    make
-    cp ply-image /usr/bin
 
-    cd /home/pi
-    rm -rf Plymouth-lite
-fi
 
 # sudo update-rc.d gateway-iptables defaults
 
@@ -1875,7 +1912,7 @@ if [ -f /boot/._cmdline.txt ]; then
 fi
 
 if [ -f /home/pi/create_latest_candle.sh ]; then
-    echo "Removing left-over /home/pi/create_latest_candle.sh"
+    echo "Removing left-over /home/pi/create_latest_candle.sh" >> /dev/kmsg
     rm /home/pi/create_latest_candle.sh
 fi
 
