@@ -397,7 +397,8 @@ then
 
     # Update apt sources
     set -e
-    echo "calling apt update"
+    echo "calling apt update" >> /dev/kmsg
+    echo "calling apt update" >> /boot/candle_log.txt 
     apt update -y
     apt-get update -y
     apt --fix-broken install
@@ -498,9 +499,10 @@ then
     if chromium-browser --version | grep -q 'Chromium 88'; then
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+        apt-get purge chromium-browser -y
         apt purge chromium-browser -y
         apt purge chromium-codecs-ffmpeg-extra -y
-        apt autoremove
+        apt autoremove -y
         apt install chromium-browser -y
     fi
     
