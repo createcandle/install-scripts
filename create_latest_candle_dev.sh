@@ -617,39 +617,45 @@ then
     # get OMXPlayer for Internet Radio
     # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
 
-    echo
-    echo "installing omxplayer"
-    for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
-        echo "$i"
-        echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> /boot/candle_log.txt
-        apt-get -y install $i --print-uris "$reinstall"
+    if [ ! -f /bin/omxplayer ];
+    then
+
         echo
-    done
-    #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
+        echo "installing omxplayer"
+        for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
+            echo "$i"
+            echo "Candle: installing $i" >> /dev/kmsg
+            echo "Candle: installing $i" >> /boot/candle_log.txt
+            apt-get -y install $i --print-uris "$reinstall"
+            echo
+        done
+        #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
 
-    apt --fix-broken install -y
+        apt --fix-broken install -y
 
-    wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb -O ./omxplayer.deb
-    if [ -f ./omxplayer.deb ]; then
-        dpkg -i ./omxplayer.deb
-        rm -rf ./omxplayer*
+        wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb -O ./omxplayer.deb
+        if [ -f ./omxplayer.deb ]; then
+            dpkg -i ./omxplayer.deb
+            rm -rf ./omxplayer*
 
-        #apt --fix-broken install -y
+            #apt --fix-broken install -y
 
-        mkdir -p /opt/vc/
-        wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
-        if [ -f ./lib.tar ]; then
-            tar -xvf lib.tar -C /opt/vc/
-            rm ./lib.tar
+            mkdir -p /opt/vc/
+            wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
+            if [ -f ./lib.tar ]; then
+                rm -rf /opt/vc/*
+                tar -xvf lib.tar -C /opt/vc/
+                rm ./lib.tar
+            else
+                echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /dev/kmsg
+                echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /boot/candle_log.txt
+            fi
         else
-            echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /dev/kmsg
-            echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /boot/candle_log.txt
+            echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
+            echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /boot/candle_log.txt
         fi
-    else
-        echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
-        echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /boot/candle_log.txt
     fi
+    
 
     # for BlueAlsa
     echo "installing bluealsa support packages"
@@ -1095,7 +1101,7 @@ then
           mv -- "$directory" ./install-scripts
         done
         
-        mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
+        mv -f ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
         rm -rf ./install-scripts
         #echo
         #echo "result:"
@@ -1671,9 +1677,13 @@ echo "Downloading read only script"
 echo
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
+    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
+    echo "Candle: Downloading cutting edge read-only script" >> /boot/candle_log.txt
     wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
     
 else
+    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
+    echo "Candle: Downloading stable edge read-only script" >> /boot/candle_log.txt
     curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
     | grep "tarball_url" \
     | cut -d : -f 2,3 \
@@ -1682,6 +1692,12 @@ else
     | wget -qi - -O ro-overlay.tar
 
     if [ -f ro-overlay.tar ]; then
+        
+        if [ -d ./ro-overlay ]; then
+            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
+            rm -rf ./ro-overlay
+            
+        echo "unpacking ro-overlay.tar"
         tar -xf ro-overlay.tar
         rm ./ro-overlay.tar
     
@@ -1692,28 +1708,41 @@ else
         done
 
         if [ -d ./ro-overlay ]; then
+            echo "ro-overlay folder exists, OK"
             cp ./ro-overlay/ro-root.sh ./ro-root.sh
             rm -rf ./ro-overlay
         else
             echo "ERROR, ro-overlay folder missing"
+            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
+            echo "Candle: WARNING, ro-overlay folder missing" >> /boot/candle_log.txt
         fi
     else
         echo "Ro-root tar file missing, download failed"
+        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
+        echo "Candle: ERROR, stable read-only tar download failed" >> /boot/candle_log.txt
     fi
 fi
 
 
 # If the file exists, make it executable and move it into place
 if [ -f ./ro-root.sh ]; then
+    echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
+    echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
     chmod +x ./ro-root.sh
     
     # Avoid risky move if possible
     if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
         echo "ro-root.sh file is different, moving it into place"
-        mv ./ro-root.sh /bin/ro-root.sh
+        echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
+        echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
+        rm /bin/ro-root.sh
+        mv -f ./ro-root.sh /bin/ro-root.sh
         chmod +x /bin/ro-root.sh
+        
     else
         echo "new ro-root.sh file is same as the old one, not moving it"
+        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
+        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
     fi
 else
     echo "ERROR: failed to download ro-root.sh"
@@ -1721,6 +1750,7 @@ else
     echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
     echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
     echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
+    
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
         /bin/ply-image /boot/error.png
@@ -1968,7 +1998,10 @@ fi
 
 
 # Set to boot from partition2
-sed -i 's|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' /boot/cmdline.txt
+if cat /boot/cmdline.txt | grep -q PARTUUID; then
+    echo "replacing PARTUUID= in bootcmd.txt with /dev/mmcblk0p2"
+    sed -i 's|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' /boot/cmdline.txt
+fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
 
