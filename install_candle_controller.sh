@@ -168,18 +168,23 @@ echo
 
 
 # Create a backup first
-if [ -f /home/pi/webthings/gateway/build/app.js ] \
-&& [ -f /home/pi/webthings/gateway/build/static/index.html ] \
-&& [ -d /home/pi/webthings/gateway/node_modules ] \
-&& [ -d /home/pi/webthings/gateway/build/static/bundle ];
-then
-    echo "Detected old webthings directory! Creating aditional backup"
-    echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /dev/kmsg
-    echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /boot/candle_log.txt
-    #mv /home/pi/webthings /home/pi/webthings-old
-    tar -czf ./controller_backup_fresh.tar ./webthings
-fi
 
+availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
+if [ "$availMem" -gt "200000" ]; 
+then
+    if [ -f /home/pi/webthings/gateway/build/app.js ] \
+    && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
+    && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
+    && [ -d /home/pi/webthings/gateway/node_modules ] \
+    && [ -d /home/pi/webthings/gateway/build/static/bundle ];
+    then
+        echo "Detected old webthings directory! Creating aditional backup"
+        echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /dev/kmsg
+        echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /boot/candle_log.txt
+        #mv /home/pi/webthings /home/pi/webthings-old
+        tar -czf ./controller_backup_fresh.tar ./webthings
+    fi
+fi
 
 
 #rm -rf /home/pi/webthings
