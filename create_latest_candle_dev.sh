@@ -603,8 +603,8 @@ then
             if [ ! -f /boot/candle_original_version.txt ]; then
                 #apt install -y raspberrypi-kernel
                 #apt install -y raspberrypi-bootloader
-                echo "Candle: WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /dev/kmsg
-                echo "WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
+                echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /dev/kmsg
+                echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
 
                 # make sure the system is read-write and accessible again after the reboot.
                 touch /boot/candle_rw_once.txt
@@ -1560,10 +1560,20 @@ echo "Candle: Copying configuration files into place" >> /dev/kmsg
 echo "Candle: Copying configuration files into place" >> /boot/candle_log.txt
 rsync -vr /home/pi/configuration-files/* /
 
-# Copy the Candle cmdline over the old one. This one is disk UUID agnostic.
-if [ -f /boot/cmdline-candle.txt ]; then
-    rm /boot/cmdline.txt
-    cp /boot/cmdline-candle.txt /boot/cmdline.txt
+# if this is not a cutting edge build, then use the cmdline.txt and config.txt from the configuration files
+if [ ! -f /boot/candle_cutting_edge.txt ]; then
+    
+    # Copy the Candle cmdline over the old one. This one is disk UUID agnostic.
+    if [ -f /boot/cmdline-candle.txt ]; then
+        rm /boot/cmdline.txt
+        cp /boot/cmdline-candle.txt /boot/cmdline.txt
+    fi
+
+    # Copy the Candle config.txt over the old one.
+    if [ -f /boot/config.txt.bak ]; then
+        rm /boot/config.txt
+        cp /boot/config.txt.bak /boot/config.txt
+    fi
 fi
 
 #if [ ! -f /boot/candle_config_version.txt ]; then
@@ -2033,7 +2043,9 @@ fi
 if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
     cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
 fi
-
+if [ ! -f /boot/config.txt.bak ]; then
+    cp /boot/config.txt /boot/config.txt.bak
+fi
 
 
 # SAVE STATE
