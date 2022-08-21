@@ -13,6 +13,9 @@ set +e # continue on errors
 # If STOP_EARLY is set, then you also have the option to ask the script to reboot when done. This is useful if it's acting as an update script.
 # export REBOOT_WHEN_DONE=yes
 
+# Set the script to download the very latest available version. Risky.
+# export CUTTING_EDGE=yes
+
 # Other parts of the script that can be skipped:
 # export SKIP_PARTITIONS=yes
 # export SKIP_APT_INSTALL=yes
@@ -131,6 +134,8 @@ if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
 then
     echo "no environment indication to go cutting edge"
 else
+    echo "spotted environment indicator to go cutting edge" >> /dev/kmsg
+    echo "spotted environment indicator to go cutting edge" >> /boot/candle_log.txt
     touch /boot/candle_cutting_edge.txt
 fi
 
@@ -150,20 +155,24 @@ echo "USER         : $(whoami)"
 echo "SCRIPT NAME  : $scriptname"
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
-echo "CUTTING EDGE : yes"
+    echo "CUTTING EDGE : yes" >> /dev/kmesg
+    echo "CUTTING EDGE : yes" >> /boot/candle_log.txt
 else
-echo "CUTTING EDGE : no"
+    echo "CUTTING EDGE : no" >> /dev/kmesg
+    echo "CUTTING EDGE : no" >> /boot/candle_log.txt
 fi
 
 if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
-    echo "APT REINSTALL: no"
+    echo "APT REINSTALL: no" >> /dev/kmesg
 else
     reinstall="--reinstall"
-    echo "APT REINSTALL: yes"
+    echo "APT REINSTALL: yes" >> /dev/kmesg
+    echo "APT REINSTALL: yes" >> /boot/candle_log.txt
 fi
 
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 echo "CHROOT       : Not in chroot"
+echo "CHROOT       : Not in chroot" >> /boot/candle_log.txt
 else
 echo "CHROOT       : INSIDE CHROOT (boot partition is not mounted)"
 fi
