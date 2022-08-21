@@ -127,6 +127,14 @@ fi
 
 
 
+if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
+then
+    echo "no environment indication to go cutting edge"
+else
+    touch /boot/candle_cutting_edge.txt
+fi
+
+
 # OUTPUT SOME INFORMATION
 
 cd /home/pi
@@ -481,14 +489,22 @@ then
             if [ ! -f /boot/candle_original_version.txt ]; then
                 #apt install -y raspberrypi-kernel
                 #apt install -y raspberrypi-bootloader
-                echo "WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /dev/kmsg
+                echo "Candle: WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /dev/kmsg
                 echo "WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
 
+                # make sure the system is read-write again after the reboot.
+                touch /boot/candle_rw_once.txt
+                
+                # do the upgrade
                 apt upgrade -y
+                
+                # cleanup
                 apt --fix-broken install -y
                 apt clean
-                echo "Full upgrade complete. Rebooting." >> /dev/kmsg
+                echo "Candle: Full upgrade complete. Rebooting." >> /dev/kmsg
                 echo "Full upgrade complete. Rebooting." >> /boot/candle_log.txt
+                
+                # reboot
                 sleep 1
                 reboot
             fi
@@ -2082,6 +2098,8 @@ rm -rf /home/pi/configuration-files
 
 
 
+
+
 # Some final insurance
 chown pi:pi /home/pi/*
 chown pi:pi /home/pi/candle/*
@@ -2090,11 +2108,8 @@ chown pi:pi /home/pi/candle/*
 #sleep 2
 #fake-hwclock save
 
-# delete bootup_actions, just in case this script is being run as a bootup_actions script.
-if [ -f /boot/bootup_actions.sh ]; then
-    echo "removed /boot/bootup_actions.sh"
-    rm /boot/bootup_actions.sh
-fi
+
+
 
 
 
@@ -2118,11 +2133,37 @@ if [ -f /boot/candle_first_run_complete.txt ] && [ ! -f /boot/candle_original_ve
     echo "2.0.0-beta" > /boot/candle_original_version.txt
 fi
 
-echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
-echo "$(date) - system update complete" >> /boot/candle_log.txt
 
 # Disable old bootup actions service
 systemctl disable candle_bootup_actions.service
+
+
+# delete bootup_actions, just in case this script is being run as a bootup_actions script.
+if [ -f /boot/bootup_actions.sh ]; then
+    echo "removed /boot/bootup_actions.sh"
+    rm /boot/bootup_actions.sh
+fi
+
+
+# Remove cutting edge
+if [ -f /boot/candle_cutting_edge.txt ]; then
+    echo "disabling cutting edge" >> /dev/kmsg
+    echo "disabling cutting edge" >> /boot/candle_log.txt
+    /boot/candle_cutting_edge.txt
+fi
+
+
+# DONE!
+echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
+echo "$(date) - system update complete" >> /boot/candle_log.txt
+
+
+
+
+
+
+
+
 
 
 # RUN DEBUG SCRIPT
