@@ -148,16 +148,16 @@ echo "CUTTING EDGE : no"
 fi
 
 if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
-    echo "APT REINST  : no"
+    echo "APT REINSTALL: no"
 else
     reinstall="--reinstall"
-    echo "APT REINST  : yes"
+    echo "APT REINSTALL: yes"
 fi
 
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
-echo "CHROOT     : Not in chroot"
+echo "CHROOT       : Not in chroot"
 else
-echo "CHROOT     : INSIDE CHROOT (boot partition is not mounted)"
+echo "CHROOT       : INSIDE CHROOT (boot partition is not mounted)"
 fi
 
 echo
@@ -342,7 +342,7 @@ if [ -f /boot/cmdline.txt ]; then
             fi
         fi
         
-        # also start SSH
+        # Also start SSH
         if [ -f /boot/developer.txt ]; then
             echo "Candle: starting ssh" >> /dev/kmsg
             echo "Candle: starting ssh" >> /boot/candle_log.txt
@@ -515,24 +515,26 @@ then
     echo "Candle: installing chromium-browser" >> /boot/candle_log.txt
     echo
     
+    apt-mark unhold chromium-browser
+    
     if chromium-browser --version | grep -q 'Chromium 88'; then
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
-        apt-get purge chromium-browser -y
-        apt purge chromium-browser -y
-        apt purge chromium-codecs-ffmpeg-extra -y
-        apt autoremove -y
-        apt install chromium-browser -y
+        apt-get purge chromium-browser -y  --allow-change-held-packages
+        apt purge chromium-browser -y  --allow-change-held-packages
+        apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
+        apt autoremove -y  --allow-change-held-packages
+        apt install chromium-browser -y  --allow-change-held-packages
     fi
     
     
     apt install chromium-browser -y --print-uris --allow-change-held-packages "$reinstall"
-    apt install chromium-browser -y
+    apt install chromium-browser -y  --allow-change-held-packages
 
     if [ ! -f /bin/chromium-browser ]; then
         echo
         echo "browser install failed, retrying."
-        apt purge chromium-browser -y
+        apt purge chromium-browser -y  --allow-change-held-packages
         apt install chromium-browser -y --allow-change-held-packages
     fi
 
