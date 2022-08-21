@@ -41,14 +41,14 @@ set +e # continue on errors
 
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root (use sudo)"
+  echo "Please run candle update script as root (use sudo)"
   exit
 fi
-
 
 scriptname=$(basename "$0")
 
 echo "" >> /boot/candle_log.txt
+echo "$(date) - $scriptname" >> /dev/kmsg
 echo "$(date) - $scriptname" >> /boot/candle_log.txt
 
 if [ -f /proc/mounts ]; 
@@ -155,18 +155,18 @@ echo "USER         : $(whoami)"
 echo "SCRIPT NAME  : $scriptname"
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
-    echo "CUTTING EDGE : yes" >> /dev/kmesg
+    echo "CUTTING EDGE : yes" >> /dev/kmsg
     echo "CUTTING EDGE : yes" >> /boot/candle_log.txt
 else
-    echo "CUTTING EDGE : no" >> /dev/kmesg
+    echo "CUTTING EDGE : no" >> /dev/kmsg
     echo "CUTTING EDGE : no" >> /boot/candle_log.txt
 fi
 
 if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
-    echo "APT REINSTALL: no" >> /dev/kmesg
+    echo "APT REINSTALL: no" >> /dev/kmsg
 else
     reinstall="--reinstall"
-    echo "APT REINSTALL: yes" >> /dev/kmesg
+    echo "APT REINSTALL: yes" >> /dev/kmsg
     echo "APT REINSTALL: yes" >> /boot/candle_log.txt
 fi
 
@@ -188,18 +188,17 @@ echo
 
 # Wait for IP address for at most 30 seconds
 echo "Waiting for IP address..." >> /dev/kmsg
-echo "Waiting for IP address..." >> /boot/candle_log.txt
 for i in {1..30}
 do
   #echo "current IP: $(hostname -I)"
   if [ "$(hostname -I)" = "" ]
   then
-    echo "Candle: early.sh: no network yet $i" >> /dev/kmsg
+    echo "Candle: no network yet $i"
     echo "no network yet $i"
     sleep 1    
   else
-    echo "Candle: early.sh: IP address detected: $(hostname -I)" >> /dev/kmsg
-    echo "Candle: early.sh: IP address detected: $(hostname -I)" >> /boot/candle_log.txt
+    echo "Candle: IP address detected: $(hostname -I)" >> /dev/kmsg
+    echo "Candle: IP address detected: $(hostname -I)" >> /boot/candle_log.txt
     break
   fi
 done
