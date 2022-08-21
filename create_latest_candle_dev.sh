@@ -163,6 +163,11 @@ fi
 echo
 echo "reinstall flag: $reinstall"
 
+echo
+echo "Current version of Raspbery Pi OS:"
+cat /etc/os-release
+echo
+
 
 # Wait for IP address for at most 30 seconds
 echo "Waiting for IP address..." >> /dev/kmsg
@@ -323,7 +328,7 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
     
     
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh"];
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
             echo "Candle: showing updating splash image" >> /dev/kmsg
@@ -343,7 +348,7 @@ if [ -f /boot/cmdline.txt ]; then
         fi
         
         # Also start SSH
-        if [ -f /boot/developer.txt ]; then
+        if [ -f /boot/developer.txt ] || [ -f /boot/candle_cutting_edge.txt ]; then
             echo "Candle: starting ssh" >> /dev/kmsg
             echo "Candle: starting ssh" >> /boot/candle_log.txt
             systemctl start ssh.service
@@ -469,6 +474,23 @@ then
                 echo
                 sleep 10
                 reboot now
+            fi
+        fi
+    else
+        if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
+            if [ ! -f /boot/candle_original_version.txt ]; then
+                #apt install -y raspberrypi-kernel
+                #apt install -y raspberrypi-bootloader
+                echo "WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /dev/kmsg
+                echo "WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
+
+                apt full-upgrade -y
+                apt clean
+                
+                echo "Full upgrade complete. Rebooting." >> /dev/kmsg
+                echo "Full upgrade complete. Rebooting." >> /boot/candle_log.txt
+                sleep 1
+                reboot
             fi
         fi
     fi
