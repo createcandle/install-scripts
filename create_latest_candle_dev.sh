@@ -1590,6 +1590,7 @@ fi
 
 # CHMOD THE NEW FILES
 chmod +x /home/pi/candle/early.sh
+chmod +x /home/pi/candle/late.sh
 chmod +x /etc/rc.local
 chmod +x /home/pi/candle/debug.sh
 chmod +x /home/pi/candle/files_check.sh
