@@ -484,9 +484,9 @@ then
                 echo "WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /dev/kmsg
                 echo "WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
 
-                apt full-upgrade -y
+                apt upgrade -y
+                apt --fix-broken install -y
                 apt clean
-                
                 echo "Full upgrade complete. Rebooting." >> /dev/kmsg
                 echo "Full upgrade complete. Rebooting." >> /boot/candle_log.txt
                 sleep 1
