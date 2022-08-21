@@ -47,8 +47,8 @@ fi
 scriptname=$(basename "$0")
 
 echo "" >> /boot/candle_log.txt
-echo "$(date) - $scriptname" >> /dev/kmsg
-echo "$(date) - $scriptname" >> /boot/candle_log.txt
+echo "Candle: starting update - $(date) - $scriptname" >> /dev/kmsg
+echo "starting update - $(date) - $scriptname" >> /boot/candle_log.txt
 
 if [ -f /proc/mounts ]; 
 then
@@ -602,7 +602,7 @@ then
             if [ ! -f /boot/candle_original_version.txt ]; then
                 #apt install -y raspberrypi-kernel
                 #apt install -y raspberrypi-bootloader
-                echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /dev/kmsg
+                echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
                 echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
 
                 # make sure the system is read-write and accessible again after the reboot.
