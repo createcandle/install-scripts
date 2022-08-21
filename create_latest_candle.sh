@@ -10,8 +10,6 @@ set +e # continue on errors
 # If you want to avoid the shutdown at the end you can skip the finalization step by first setting an environment variable:
 # export STOP_EARLY=yes
 
-# If STOP_EARLY is set, then you also have the option to ask the script to reboot when done. This is useful if it's acting as an update script.
-# export REBOOT_WHEN_DONE=yes
 
 # Set the script to download the very latest available version. Risky.
 # export CUTTING_EDGE=yes
@@ -25,6 +23,7 @@ set +e # continue on errors
 # export SKIP_BLUEALSA=yes
 # export SKIP_CONTROLLER_INSTALL=yes
 # export SKIP_DEBUG=yes
+# export SKIP_REBOOT=yes
 
 # The script can add the re-install option to every Apt install command.
 # export APT_REINSTALL=yes
@@ -2428,7 +2427,7 @@ fi
 
 
 # If STOP_EARLY is enabled, then here it's possible to also ask the script to reboot. This is useful for upgrading the system.
-if [[ -z "${REBOOT_WHEN_DONE}" ]] || [ "$REBOOT_WHEN_DONE" = no ]; then
+if [[ -z "${SKIP_REBOOT}" ]] || [ "$SKIP_REBOOT" = yes ]; then
     echo "Candle: Not rebooting" >> /dev/kmsg
 else
     echo "Candle: Rebooting in 10 seconds" >> /dev/kmsg
