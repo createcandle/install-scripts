@@ -94,23 +94,44 @@ fi
 echo
 
 # Detect if a kernel or bootloader update has just occured. If so, the system must be rebooted first.
-
-if [ -f /usr/sbin/iptables ];then
-    if [ -z "$(iptables -L -v -n)" ]; then
-        echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
-        echo "Candle: ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
-        echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
-        echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /boot/candle_log.txt
+if [ "$SKIP_IPTABLES" = no ] || [[ -z "${SKIP_IPTABLES}" ]];
+then
+    if [ -f /usr/sbin/iptables ];then
+        if [ -z "$(iptables -L -v -n)" ]; then
+            echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
+            echo "Candle: ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
+            echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
+            echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /boot/candle_log.txt
     
-        # Show error image
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-            /bin/ply-image /boot/error.png
-            sleep 7200
+            # Show error image
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
+                /bin/ply-image /boot/error.png
+                sleep 7200
+            fi
+    
+            exit 1
+        else
+            echo "No recent kernel update detected"
+        
+            echo
+            echo "ADDING IPTABLES EARLY"
+            echo
+            if iptables --list | grep 4443; then
+                echo "IPTABLES ALREADY ADDED"
+                echo "Candle: firewall already set up" >> /dev/kmsg
+                echo "Candle: firewall already set up" >> /boot/candle_log.txt
+            else
+                echo "Candle: setting up firewall (iptables)" >> /dev/kmsg
+                echo "Candle: setting up firewall (iptables)" >> /boot/candle_log.txt
+                iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
+                iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
+                iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+                iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
+                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
+                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
+            fi
+        
         fi
-    
-        exit 1
-    else
-        echo "No recent kernel update detected"
     fi
 fi
 
@@ -134,6 +155,7 @@ if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
 then
     echo "no environment indication to go cutting edge"
 else
+    echo "going cutting edge"
     echo "spotted environment indicator to go cutting edge" >> /dev/kmsg
     echo "spotted environment indicator to go cutting edge" >> /boot/candle_log.txt
     touch /boot/candle_cutting_edge.txt
@@ -291,6 +313,7 @@ if [ -f /boot/candle_hardware_clock.txt ]; then
     rm /boot/candle_hardware_clock.txt
     systemctl restart systemd-timesyncd.service
     timedatectl set-ntp true
+    timedatectl
     sleep 2
     /usr/sbin/fake-hwclock save
     echo "Candle: requested latest time. Date is now: $(date)" >> /dev/kmsg
@@ -344,7 +367,7 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
     
     
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh"];
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
             echo "Candle: showing updating splash image" >> /dev/kmsg
@@ -381,6 +404,87 @@ if [ -f /boot/cmdline.txt ]; then
     fi
     
 fi
+
+
+
+
+
+echo
+echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
+echo
+
+
+# Remove old left-over configuration files if they exist
+if [ -d /home/pi/configuration-files ]; then
+    echo "Warning, found a left over configuration-files directory"
+    rm -rf /home/pi/configuration-files
+fi
+
+# Download ready-made settings files from the Candle github
+if [ -f /boot/candle_cutting_edge.txt ]; then
+    
+    echo "Candle: Starting download of cutting edge configuration files" >> /dev/kmsg
+    echo "Candle: Starting download of cutting edge configuration files" >> /boot/candle_log.txt
+    git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+    if [ -d /home/pi/configuration-files ]; then
+        rm /home/pi/configuration-files/LICENSE
+        rm /home/pi/configuration-files/README.md
+        rm -rf /home/pi/configuration-files/.git
+    fi
+    
+else
+    echo "Candle: Starting download of stable configuration files" >> /dev/kmsg
+    echo "Candle: Starting download of stable configuration files" >> /boot/candle_log.txt
+    curl -s https://api.github.com/repos/createcandle/configuration-files/releases/latest \
+    | grep "tarball_url" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O configuration-files.tar
+
+    tar -xf configuration-files.tar
+    rm configuration-files.tar
+    
+    for directory in createcandle-configuration-files*; do
+      [[ -d $directory ]] || continue
+      echo "Directory: $directory"
+      mv -- "$directory" ./configuration-files
+    done
+    
+fi
+
+
+# Check if download succeeded
+if [ ! -d /home/pi/configuration-files ]; then
+    echo 
+    echo "ERROR, failed to download latest configuration files"
+    echo "Candle: ERROR, failed to download latest configuration files" >> /dev/kmsg
+    echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
+    echo "$(date) - failed to download latest configuration files" >> /home/pi/.webthings/candle.log
+    echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
+    echo
+    
+    # Show error image
+    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+        /bin/ply-image /boot/error.png
+        sleep 7200
+    fi
+    
+    exit 1
+else
+    echo "Configuration files download succeeded"
+    echo "Candle: Configuration files download succeeded" >> /dev/kmsg
+    
+    rm /home/pi/configuration-files/LICENSE
+    rm /home/pi/configuration-files/README.md
+    rm -rf /home/pi/configuration-files/.git
+    
+    if [ ! -d /home/pi/candle/configuration-files-backup ]; then
+        echo "Created intial backup of the configuratino files" >> /dev/kmsg
+        cp -r /home/pi/configuration-files /home/pi/candle/configuration-files-backup
+    fi
+fi
+
 
 
 
@@ -469,6 +573,7 @@ then
             echo "Settting kernel to not automatically upgrade." >> /boot/candle_log.txt
 
             apt-mark hold raspberrypi-kernel
+            apt-mark hold raspberrypi-kernel-headers 
             apt-mark hold raspberrypi-bootloader
         else
             echo
@@ -483,6 +588,7 @@ then
                 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
                 chmod +x /home/pi/create_latest_candle.sh
                 apt install -y raspberrypi-kernel
+                apt install -y raspberrypi-kernel-headers 
                 apt install -y raspberrypi-bootloader
                 echo
                 echo "Rebooting in 10 seconds... ($(date))"
@@ -500,21 +606,89 @@ then
                 echo "Candle: WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /dev/kmsg
                 echo "WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
 
-                # make sure the system is read-write again after the reboot.
+                # make sure the system is read-write and accessible again after the reboot.
                 touch /boot/candle_rw_once.txt
+                touch /boot/ssh.txt
                 
-                # do the upgrade
-                apt upgrade -y
+                apt-mark unhold chromium-browser
                 
-                # cleanup
+                if [ -d seeed-voicecard]; then
+                    rm -rf seeed-voicecard
+                fi
+                git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
+    
+                if [ -d seeed-voicecard ]; then
+                    cd seeed-voicecard
+    
+                    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
+                        touch /home/pi/candle/installed_respeaker_version.txt
+                    fi
+                    
+                    ./uninstall.sh
+    
+                    cd /home/pi
+                    rm -rf seeed-voicecard
+        
+                else
+                    echo "Error, failed to download respeaker source"
+                fi
+                
+                echo "" > /etc/modules
+                
+                
+                
+                apt-get update -y
+                DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+                wait
                 apt --fix-broken install -y
-                apt clean
-                echo "Candle: Full upgrade complete. Rebooting." >> /dev/kmsg
-                echo "Full upgrade complete. Rebooting." >> /boot/candle_log.txt
+                sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+                echo ""
+                
+                
+                #rm -rf /opt/vc/lib
+                
+                apt-get update -y
+                DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+                wait
+                apt --fix-broken install -y
+                sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+                echo ""
+    
+    
+                apt-get update -y
+                DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+                wait
+                apt --fix-broken install -y
+                sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+                echo ""
+                
+                
+                apt autoremove -y
+                apt clean -y
+                #echo "Candle: Full upgrade cleanup complete. Rebooting."
+                #echo "Candle: Full upgrade complete. Rebooting."
+                #echo "Candle: Full upgrade complete. Rebooting." >> /dev/kmsg
+                #echo "Full upgrade complete. Rebooting." >> /boot/candle_log.txt
+                
+                
+                #echo "changing fstab"
+                
+                #echo "proc            /proc           proc    defaults          0       0" > /etc/fstab
+                #echo "/dev/mmcblk0p1  /boot           vfat    defaults          0       2" >> /etc/fstab
+                #echo "/dev/mmcblk0p2  /               ext4    defaults,noatime  0       1" >> /etc/fstab
+                #echo "/dev/mmcblk0p3  /home/pi/.webthings  ext4    defaults,rw  1       2" >> /etc/fstab
+
+                #echo "/home/pi/.webthings/etc/wpa_supplicant  /etc/wpa_supplicant  none defaults,bind" >> /etc/fstab
+                #echo "/home/pi/.webthings/var/lib/bluetooth   /var/lib/bluetooth   none defaults,bind" >> /etc/fstab
+                #echo "/home/pi/.webthings/etc/ssh             /etc/ssh             none defaults,bind" >> /etc/fstab
+                #echo "/home/pi/.webthings/etc/hostname        /etc/hostname        none defaults,bind" >> /etc/fstab
+                #echo "/home/pi/.webthings/tmp                 /tmp                 none defaults,bind" >> /etc/fstab
+                #echo "/home/pi/.webthings/arduino/.arduino15  /home/pi/.arduino15  none defaults,bind" >> /etc/fstab
+                #echo "/home/pi/.webthings/arduino/Arduino     /home/pi/Arduino     none defaults,bind" >> /etc/fstab
                 
                 # reboot
-                sleep 1
-                reboot
+                #sleep 1
+                #reboot
             fi
         fi
     fi
@@ -566,11 +740,11 @@ then
     if chromium-browser --version | grep -q 'Chromium 88'; then
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
-        apt-get purge chromium-browser -y  --allow-change-held-packages
-        apt purge chromium-browser -y  --allow-change-held-packages
+        apt-get purge chromium-browser -y --allow-change-held-packages
+        apt purge chromium-browser -y --allow-change-held-packages
         apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
-        apt autoremove -y  --allow-change-held-packages
-        apt install chromium-browser -y  --allow-change-held-packages
+        apt autoremove -y --allow-change-held-packages
+        apt install chromium-browser -y --allow-change-held-packages
     fi
     
     
@@ -796,7 +970,7 @@ then
             
             echo
             echo "Candle: trying to install it again..."
-            apt -y purge"$i"
+            apt -y purge "$i"
             sleep 2
             apt -y install "$i"
             
@@ -1380,89 +1554,17 @@ fi
 
 # COPY SETTINGS
 
-echo
-echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
-echo "Candle: downloading configuration files from Github" >> /dev/kmsg
-echo "Candle: downloading configuration files from Github" >> /boot/candle_log.txt
-echo
-
-if [ -d /home/pi/configuration-files ]; then
-    echo "Warning, found a left over configuration-files directory"
-    rm -rf /home/pi/configuration-files
-fi
-
-
-
-# Download ready-made settings files from the Candle github
-if [ -f /boot/candle_cutting_edge.txt ]; then
-    
-    echo "Candle: Starting download of cutting edge configuration files" >> /dev/kmsg
-    echo "Candle: Starting download of cutting edge configuration files" >> /boot/candle_log.txt
-    git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
-    if [ -d /home/pi/configuration-files ]; then
-        rm /home/pi/configuration-files/LICENSE
-        rm /home/pi/configuration-files/README.md
-        rm -rf /home/pi/configuration-files/.git
-    fi
-    
-else
-    echo "Candle: Starting download of stable configuration files" >> /dev/kmsg
-    echo "Candle: Starting download of stable configuration files" >> /boot/candle_log.txt
-    curl -s https://api.github.com/repos/createcandle/configuration-files/releases/latest \
-    | grep "tarball_url" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | sed 's/,*$//' \
-    | wget -qi - -O configuration-files.tar
-
-    tar -xf configuration-files.tar
-    rm configuration-files.tar
-    
-    for directory in createcandle-configuration-files*; do
-      [[ -d $directory ]] || continue
-      echo "Directory: $directory"
-      mv -- "$directory" ./configuration-files
-    done
-    
-fi
-
-
-# Check if download succeeded
-if [ ! -d /home/pi/configuration-files ]; then
-    echo 
-    echo "ERROR, failed to download latest configuration files"
-    echo "Candle: ERROR, failed to download latest configuration files" >> /dev/kmsg
-    echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
-    echo "$(date) - failed to download latest configuration files" >> /home/pi/.webthings/candle.log
-    echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
-    echo
-    
-    # Show error image
-    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-        /bin/ply-image /boot/error.png
-        sleep 7200
-    fi
-    
-    exit 1
-else
-    echo "Configuration files download succeeded"
-    echo "Candle: Configuration files download succeeded" >> /dev/kmsg
-    
-    rm /home/pi/configuration-files/LICENSE
-    rm /home/pi/configuration-files/README.md
-    rm -rf /home/pi/configuration-files/.git
-    
-    if [ ! -d /home/pi/candle/configuration-files-backup ]; then
-        echo "Created intial backup of the configuratino files"
-        cp -r /home/pi/configuration-files /home/pi/candle/configuration-files-backup
-    fi
-fi
 
 echo "Copying configuration files into place"
 echo "Candle: Copying configuration files into place" >> /dev/kmsg
 echo "Candle: Copying configuration files into place" >> /boot/candle_log.txt
 rsync -vr /home/pi/configuration-files/* /
 
+# Copy the Candle cmdline over the old one. This one is disk UUID agnostic.
+if [ -f /boot/cmdline-candle.txt ]; then
+    rm /boot/cmdline.txt
+    cp /boot/cmdline-candle.txt /boot/cmdline.txt
+fi
 
 #if [ ! -f /boot/candle_config_version.txt ]; then
 #    touch /boot/candle_config_version.txt
@@ -1563,6 +1665,10 @@ systemctl enable getty@tty3.service
 systemctl disable getty@tty1.service
 
 
+if [ -f /home/pi/candle/ready.sh ]; then
+    systemctl disable gateway-iptables.service
+fi
+
 
 # KIOSK
 
@@ -1601,7 +1707,7 @@ if [ -f /boot/config.txt ]; then
         echo "Candle: adding kiosk parameters to cmdline.txt" >> /dev/kmsg
         echo "Candle: adding kiosk parameters to cmdline.txt" >> /boot/candle_log.txt
     	# change text output to third console. press alt-shift-F3 during boot to see it again.
-        sed -i 's/tty1/tty3/' /boot/cmdline.txt
+        sed -i ' 1 s/tty1/tty3/' /boot/cmdline.txt
     	# hide all the small things normally shown at boot
     	sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' /boot/cmdline.txt        
     else
@@ -1668,34 +1774,37 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFi
 
 
 # ADD IP-TABLES
-echo
-echo "ADDING IPTABLES"
-echo
-#echo "before:"
-#iptables -t nat --list
-#echo
-#echo "Redirecting :80 to :8080 and :443 to :4443"
-#echo
-if iptables --list | grep 4443; then
-    echo "IPTABLES ALREADY ADDED"
-    echo "Candle: firewall already set up" >> /dev/kmsg
-    echo "Candle: firewall already set up" >> /boot/candle_log.txt
-else
-    echo "Candle: setting up firewall (iptables)" >> /dev/kmsg
-    echo "Candle: setting up firewall (iptables)" >> /boot/candle_log.txt
-    iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
-    iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
-    iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-    iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
-    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
-    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
-fi
-#iptables -L -v -n
-#echo "after"
-#iptables -t nat --list
+if [ "$SKIP_IPTABLES" = no ] || [[ -z "${SKIP_IPTABLES}" ]];
+then
+    echo
+    echo "ADDING IPTABLES"
+    echo
+    #echo "before:"
+    #iptables -t nat --list
+    #echo
+    #echo "Redirecting :80 to :8080 and :443 to :4443"
+    #echo
+    if iptables --list | grep 4443; then
+        echo "IPTABLES ALREADY ADDED"
+        echo "Candle: firewall already set up" >> /dev/kmsg
+        echo "Candle: firewall already set up" >> /boot/candle_log.txt
+    else
+        echo "Candle: setting up firewall (iptables)" >> /dev/kmsg
+        echo "Candle: setting up firewall (iptables)" >> /boot/candle_log.txt
+        iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
+        iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
+        iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+        iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
+        iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
+        iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
+    fi
+    #iptables -L -v -n
+    #echo "after"
+    #iptables -t nat --list
 
-#echo "\n\n" | apt install iptables-persistent -y
-#apt install iptables-persistent -y
+    #echo "\n\n" | apt install iptables-persistent -y
+    #apt install iptables-persistent -y
+fi
 
 echo
 
@@ -1742,7 +1851,7 @@ else
         if [ -d ./ro-overlay ]; then
             echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
             rm -rf ./ro-overlay
-            
+        fi
         echo "unpacking ro-overlay.tar"
         tar -xf ro-overlay.tar
         rm ./ro-overlay.tar
@@ -1781,7 +1890,9 @@ if [ -f ./ro-root.sh ]; then
         echo "ro-root.sh file is different, moving it into place"
         echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
         echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
-        rm /bin/ro-root.sh
+        if [ -f /bin/ro-root.sh ]; then
+            rm /bin/ro-root.sh
+        fi
         mv -f ./ro-root.sh /bin/ro-root.sh
         chmod +x /bin/ro-root.sh
         
@@ -1820,7 +1931,7 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
     if [ -f /bin/ro-root.sh ]; then
         #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
-        if [ $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
+        if [ $(cat /boot/config.txt | grep -c ramfsaddr) -eq 0 ];
         then
             echo
             echo "ADDING READ-ONLY MODE"
@@ -1902,6 +2013,7 @@ then
         echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
         echo "Candle: creating initial backup of webthings folder" >> /boot/candle_log.txt
         tar -czf ./controller_backup.tar ./webthings
+        
     else
         echo
         echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
@@ -1972,10 +2084,10 @@ echo "Candle: almost done, cleaning up" >> /boot/candle_log.txt
 #nvm cache clear
 
 echo "Clearing Apt leftovers"
-apt clean
-apt-get clean
-apt remove --purge
-apt autoremove
+apt clean -y
+apt-get clean -y
+#apt remove --purge
+apt autoremove -y
 rm -rf /var/lib/apt/lists/*
 
 echo "removing swap"
@@ -2046,7 +2158,8 @@ fi
 # Set to boot from partition2
 if cat /boot/cmdline.txt | grep -q PARTUUID; then
     echo "replacing PARTUUID= in bootcmd.txt with /dev/mmcblk0p2"
-    sed -i 's|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' /boot/cmdline.txt
+    sed -i ' 1 s|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' /boot/cmdline.txt # should that g be there?
+    #sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' /boot/cmdline.txt   
 fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
@@ -2091,6 +2204,8 @@ then
         fi
         
     fi
+
+    
 else
     echo
     echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST"
@@ -2275,10 +2390,10 @@ else
     echo
     echo "MOSTLY DONE"
     echo
-    echo "To finalise the process, delete the deb folder:"
-    echo "sudo rm -rf /home/pi/.webthings/deb_packages"
-    echo
-    echo "then enter this command:"
+    #echo "To finalise the process, delete the deb folder:"
+    #echo "sudo rm -rf /home/pi/.webthings/deb_packages"
+    #echo
+    echo "To finalise enter this command:"
     echo "sudo /home/pi/prepare_for_disk_image.sh"
     echo
     echo "Once that script is done the pi will shut down and can be imaged."
