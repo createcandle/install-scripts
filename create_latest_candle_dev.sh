@@ -2123,10 +2123,10 @@ fi
 echo "Clearing /tmp"
 rm -rf /tmp/*
 
-rm /home/pi.wget-hsts
+rm /home/pi/.wget-hsts
 rm -rf /home/pi/.config/chromium
 echo '{"optOut": true,"lastUpdateCheck": 0}' > /home/pi/.config/configstore/update-notifier-npm.json 
-chown pi:pi s/home/pi/.config/configstore/update-notifier-npm.json 
+chown pi:pi /home/pi/.config/configstore/update-notifier-npm.json 
 
 # Remove files left over by Windows or MacOS
 rm -rf /boot/.Spotlight*
@@ -2311,7 +2311,7 @@ then
     echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
     echo
 
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
         rm /boot/bootup_actions.sh
         rm /boot/bootup_actions_failed.sh
@@ -2348,77 +2348,80 @@ fi
 echo
 
 
-
-if [[ -z "${STOP_EARLY}" ]] || [ "$STOP_EARLY" = no ]; 
-then
-    echo "STARTING FINAL PHASE"
-    echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
-    chmod +x /home/pi/candle/prepare_for_disk_image.sh 
-    /home/pi/candle/prepare_for_disk_image.sh 
-    exit 0
+if [ ! -f /boot/candle_first_run_complete.txt ]; then
+    
+    if [[ -z "${STOP_EARLY}" ]] || [ "$STOP_EARLY" = no ]; 
+    then
+        echo "STARTING FINAL PHASE"
+        echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
+        chmod +x /home/pi/candle/prepare_for_disk_image.sh 
+        /home/pi/candle/prepare_for_disk_image.sh 
+        exit 0
   
-else
-    echo "NOT RUNNING PREPARE_FOR_DISK_IMAGE SCRIPT YET. Stopping early."
-    
-    # To be safe, start SSH on the first run
-    #touch /boot/ssh.txt
-    
-    # Optional download of .deb files
-    if [[ -z "${DOWNLOAD_DEB}" ]] || [ "$DOWNLOAD_DEB" = no ]; then
-        echo "Skipping download of .deb files"
-        echo "Candle: skipping download of .deb files" >> /dev/kmsg
     else
-        #printf 'Do you want to download all the .deb files? (y/n)'
-        #read answer
-        #if [ "$answer" != "${answer#[Yy]}" ] ;then
+        echo "NOT RUNNING PREPARE_FOR_DISK_IMAGE SCRIPT YET. Stopping early."
+    
+        # To be safe, start SSH on the first run
+        #touch /boot/ssh.txt
+    
+        # Optional download of .deb files
+        if [[ -z "${DOWNLOAD_DEB}" ]] || [ "$DOWNLOAD_DEB" = no ]; then
+            echo "Skipping download of .deb files"
+            echo "Candle: skipping download of .deb files" >> /dev/kmsg
+        else
+            #printf 'Do you want to download all the .deb files? (y/n)'
+            #read answer
+            #if [ "$answer" != "${answer#[Yy]}" ] ;then
         
-        echo 
-        echo "DOWNLOADING ALL INSTALLED PACKAGES AS .DEB FILES"
-        echo "Candle: downloading all .deb files" >> /dev/kmsg
+            echo 
+            echo "DOWNLOADING ALL INSTALLED PACKAGES AS .DEB FILES"
+            echo "Candle: downloading all .deb files" >> /dev/kmsg
         
 
-        cd /home/pi/.webthings/deb_packages
-        chmod +x ./candle_packages_downloader.sh
-        sudo -u pi ./candle_packages_downloader.sh
+            cd /home/pi/.webthings/deb_packages
+            chmod +x ./candle_packages_downloader.sh
+            sudo -u pi ./candle_packages_downloader.sh
         
-        # fix the filenames. Replaces "%3a" with ":".
-        # for f in *; do mv "$f" "${f//%3a/:}"; done
+            # fix the filenames. Replaces "%3a" with ":".
+            # for f in *; do mv "$f" "${f//%3a/:}"; done
   
+            echo
+            echo "Downloaded packages in /home/pi/.webthings/deb_packages:"
+            ls -l
+            du /home/pi/.webthings/deb_packages -h
+        
+        fi
+    
+        cd /home/pi/
+  
+        # On the next boot allow the system partition to be writeable
+        # touch /boot/candle_rw_once.txt
+    
+        #MY_SCRIPT_VARIABLE="${CANDLE_DEV}"
         echo
-        echo "Downloaded packages in /home/pi/.webthings/deb_packages:"
-        ls -l
-        du /home/pi/.webthings/deb_packages -h
-        
+        echo "MOSTLY DONE"
+        echo
+        #echo "To finalise the process, delete the deb folder:"
+        #echo "sudo rm -rf /home/pi/.webthings/deb_packages"
+        #echo
+        echo "To finalise enter this command:"
+        echo "sudo /home/pi/prepare_for_disk_image.sh"
+        echo
+        echo "Once that script is done the pi will shut down and can be imaged."
+        echo
+        echo "Note that if you reboot, the read-only mode will become active."
+        echo "If you want to delay this once, then use this command:"
+        echo "touch /boot/candle_rw_once.txt"
+        echo "...or if you want skip read-only mode permanently:"
+        echo "touch /boot/candle_rw_keep.txt"
+        echo ""
+    
     fi
-    
-  
-  
-    cd /home/pi/
-  
-    # On the next boot allow the system partition to be writeable
-    # touch /boot/candle_rw_once.txt
-    
-    #MY_SCRIPT_VARIABLE="${CANDLE_DEV}"
-    echo
-    echo "MOSTLY DONE"
-    echo
-    #echo "To finalise the process, delete the deb folder:"
-    #echo "sudo rm -rf /home/pi/.webthings/deb_packages"
-    #echo
-    echo "To finalise enter this command:"
-    echo "sudo /home/pi/prepare_for_disk_image.sh"
-    echo
-    echo "Once that script is done the pi will shut down and can be imaged."
-    echo
-    echo "Note that if you reboot, the read-only mode will become active."
-    echo "If you want to delay this once, then use this command:"
-    echo "touch /boot/candle_rw_once.txt"
-    echo "...or if you want skip read-only mode permanently:"
-    echo "touch /boot/candle_rw_keep.txt"
-    echo ""
-    
+
 fi
 
+
+# If developer mode is active during a system update, then the system will permanently have SSH enabled
 if [ ! -f /boot/developer.txt ]; then
     # Disable SSH access
     #systemctl disable ssh.service
