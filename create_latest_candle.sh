@@ -13,6 +13,9 @@ set +e # continue on errors
 # If STOP_EARLY is set, then you also have the option to ask the script to reboot when done. This is useful if it's acting as an update script.
 # export REBOOT_WHEN_DONE=yes
 
+# Set the script to download the very latest available version. Risky.
+# export CUTTING_EDGE=yes
+
 # Other parts of the script that can be skipped:
 # export SKIP_PARTITIONS=yes
 # export SKIP_APT_INSTALL=yes
@@ -38,14 +41,14 @@ set +e # continue on errors
 
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root (use sudo)"
+  echo "Please run candle update script as root (use sudo)"
   exit
 fi
-
 
 scriptname=$(basename "$0")
 
 echo "" >> /boot/candle_log.txt
+echo "$(date) - $scriptname" >> /dev/kmsg
 echo "$(date) - $scriptname" >> /boot/candle_log.txt
 
 if [ -f /proc/mounts ]; 
@@ -127,6 +130,16 @@ fi
 
 
 
+if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
+then
+    echo "no environment indication to go cutting edge"
+else
+    echo "spotted environment indicator to go cutting edge" >> /dev/kmsg
+    echo "spotted environment indicator to go cutting edge" >> /boot/candle_log.txt
+    touch /boot/candle_cutting_edge.txt
+fi
+
+
 # OUTPUT SOME INFORMATION
 
 cd /home/pi
@@ -142,20 +155,24 @@ echo "USER         : $(whoami)"
 echo "SCRIPT NAME  : $scriptname"
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
-echo "CUTTING EDGE : yes"
+    echo "CUTTING EDGE : yes" >> /dev/kmsg
+    echo "CUTTING EDGE : yes" >> /boot/candle_log.txt
 else
-echo "CUTTING EDGE : no"
+    echo "CUTTING EDGE : no" >> /dev/kmsg
+    echo "CUTTING EDGE : no" >> /boot/candle_log.txt
 fi
 
 if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
-    echo "APT REINSTALL: no"
+    echo "APT REINSTALL: no" >> /dev/kmsg
 else
     reinstall="--reinstall"
-    echo "APT REINSTALL: yes"
+    echo "APT REINSTALL: yes" >> /dev/kmsg
+    echo "APT REINSTALL: yes" >> /boot/candle_log.txt
 fi
 
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 echo "CHROOT       : Not in chroot"
+echo "CHROOT       : Not in chroot" >> /boot/candle_log.txt
 else
 echo "CHROOT       : INSIDE CHROOT (boot partition is not mounted)"
 fi
@@ -163,21 +180,25 @@ fi
 echo
 echo "reinstall flag: $reinstall"
 
+echo
+echo "Current version of Raspbery Pi OS:"
+cat /etc/os-release
+echo
+
 
 # Wait for IP address for at most 30 seconds
 echo "Waiting for IP address..." >> /dev/kmsg
-echo "Waiting for IP address..." >> /boot/candle_log.txt
 for i in {1..30}
 do
   #echo "current IP: $(hostname -I)"
   if [ "$(hostname -I)" = "" ]
   then
-    echo "Candle: early.sh: no network yet $i" >> /dev/kmsg
+    echo "Candle: no network yet $i"
     echo "no network yet $i"
     sleep 1    
   else
-    echo "Candle: early.sh: IP address detected: $(hostname -I)" >> /dev/kmsg
-    echo "Candle: early.sh: IP address detected: $(hostname -I)" >> /boot/candle_log.txt
+    echo "Candle: IP address detected: $(hostname -I)" >> /dev/kmsg
+    echo "Candle: IP address detected: $(hostname -I)" >> /boot/candle_log.txt
     break
   fi
 done
@@ -323,7 +344,7 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
     
     
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh"];
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
             echo "Candle: showing updating splash image" >> /dev/kmsg
@@ -343,7 +364,7 @@ if [ -f /boot/cmdline.txt ]; then
         fi
         
         # Also start SSH
-        if [ -f /boot/developer.txt ]; then
+        if [ -f /boot/developer.txt ] || [ -f /boot/candle_cutting_edge.txt ]; then
             echo "Candle: starting ssh" >> /dev/kmsg
             echo "Candle: starting ssh" >> /boot/candle_log.txt
             systemctl start ssh.service
@@ -469,6 +490,31 @@ then
                 echo
                 sleep 10
                 reboot now
+            fi
+        fi
+    else
+        if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
+            if [ ! -f /boot/candle_original_version.txt ]; then
+                #apt install -y raspberrypi-kernel
+                #apt install -y raspberrypi-bootloader
+                echo "Candle: WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /dev/kmsg
+                echo "WARNING, DOING FULL UPGRADE, AND THEN REBOOT. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
+
+                # make sure the system is read-write again after the reboot.
+                touch /boot/candle_rw_once.txt
+                
+                # do the upgrade
+                apt upgrade -y
+                
+                # cleanup
+                apt --fix-broken install -y
+                apt clean
+                echo "Candle: Full upgrade complete. Rebooting." >> /dev/kmsg
+                echo "Full upgrade complete. Rebooting." >> /boot/candle_log.txt
+                
+                # reboot
+                sleep 1
+                reboot
             fi
         fi
     fi
@@ -617,39 +663,45 @@ then
     # get OMXPlayer for Internet Radio
     # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
 
-    echo
-    echo "installing omxplayer"
-    for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
-        echo "$i"
-        echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> /boot/candle_log.txt
-        apt-get -y install $i --print-uris "$reinstall"
+    if [ ! -f /bin/omxplayer ];
+    then
+
         echo
-    done
-    #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
+        echo "installing omxplayer"
+        for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
+            echo "$i"
+            echo "Candle: installing $i" >> /dev/kmsg
+            echo "Candle: installing $i" >> /boot/candle_log.txt
+            apt-get -y install $i --print-uris "$reinstall"
+            echo
+        done
+        #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
 
-    apt --fix-broken install -y
+        apt --fix-broken install -y
 
-    wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb -O ./omxplayer.deb
-    if [ -f ./omxplayer.deb ]; then
-        dpkg -i ./omxplayer.deb
-        rm -rf ./omxplayer*
+        wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb -O ./omxplayer.deb
+        if [ -f ./omxplayer.deb ]; then
+            dpkg -i ./omxplayer.deb
+            rm -rf ./omxplayer*
 
-        #apt --fix-broken install -y
+            #apt --fix-broken install -y
 
-        mkdir -p /opt/vc/
-        wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
-        if [ -f ./lib.tar ]; then
-            tar -xvf lib.tar -C /opt/vc/
-            rm ./lib.tar
+            mkdir -p /opt/vc/
+            wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
+            if [ -f ./lib.tar ]; then
+                rm -rf /opt/vc/*
+                tar -xvf lib.tar -C /opt/vc/
+                rm ./lib.tar
+            else
+                echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /dev/kmsg
+                echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /boot/candle_log.txt
+            fi
         else
-            echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /dev/kmsg
-            echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /boot/candle_log.txt
+            echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
+            echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /boot/candle_log.txt
         fi
-    else
-        echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
-        echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /boot/candle_log.txt
     fi
+    
 
     # for BlueAlsa
     echo "installing bluealsa support packages"
@@ -1095,7 +1147,7 @@ then
           mv -- "$directory" ./install-scripts
         done
         
-        mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
+        mv -f ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
         rm -rf ./install-scripts
         #echo
         #echo "result:"
@@ -1671,9 +1723,13 @@ echo "Downloading read only script"
 echo
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
+    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
+    echo "Candle: Downloading cutting edge read-only script" >> /boot/candle_log.txt
     wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
     
 else
+    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
+    echo "Candle: Downloading stable edge read-only script" >> /boot/candle_log.txt
     curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
     | grep "tarball_url" \
     | cut -d : -f 2,3 \
@@ -1682,6 +1738,12 @@ else
     | wget -qi - -O ro-overlay.tar
 
     if [ -f ro-overlay.tar ]; then
+        
+        if [ -d ./ro-overlay ]; then
+            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
+            rm -rf ./ro-overlay
+            
+        echo "unpacking ro-overlay.tar"
         tar -xf ro-overlay.tar
         rm ./ro-overlay.tar
     
@@ -1692,28 +1754,41 @@ else
         done
 
         if [ -d ./ro-overlay ]; then
+            echo "ro-overlay folder exists, OK"
             cp ./ro-overlay/ro-root.sh ./ro-root.sh
             rm -rf ./ro-overlay
         else
             echo "ERROR, ro-overlay folder missing"
+            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
+            echo "Candle: WARNING, ro-overlay folder missing" >> /boot/candle_log.txt
         fi
     else
         echo "Ro-root tar file missing, download failed"
+        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
+        echo "Candle: ERROR, stable read-only tar download failed" >> /boot/candle_log.txt
     fi
 fi
 
 
 # If the file exists, make it executable and move it into place
 if [ -f ./ro-root.sh ]; then
+    echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
+    echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
     chmod +x ./ro-root.sh
     
     # Avoid risky move if possible
     if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
         echo "ro-root.sh file is different, moving it into place"
-        mv ./ro-root.sh /bin/ro-root.sh
+        echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
+        echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
+        rm /bin/ro-root.sh
+        mv -f ./ro-root.sh /bin/ro-root.sh
         chmod +x /bin/ro-root.sh
+        
     else
         echo "new ro-root.sh file is same as the old one, not moving it"
+        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
+        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
     fi
 else
     echo "ERROR: failed to download ro-root.sh"
@@ -1721,6 +1796,7 @@ else
     echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
     echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
     echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
+    
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
         /bin/ply-image /boot/error.png
@@ -1968,7 +2044,10 @@ fi
 
 
 # Set to boot from partition2
-sed -i 's|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' /boot/cmdline.txt
+if cat /boot/cmdline.txt | grep -q PARTUUID; then
+    echo "replacing PARTUUID= in bootcmd.txt with /dev/mmcblk0p2"
+    sed -i 's|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' /boot/cmdline.txt
+fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
 
@@ -2027,6 +2106,8 @@ rm -rf /home/pi/configuration-files
 
 
 
+
+
 # Some final insurance
 chown pi:pi /home/pi/*
 chown pi:pi /home/pi/candle/*
@@ -2035,11 +2116,8 @@ chown pi:pi /home/pi/candle/*
 #sleep 2
 #fake-hwclock save
 
-# delete bootup_actions, just in case this script is being run as a bootup_actions script.
-if [ -f /boot/bootup_actions.sh ]; then
-    echo "removed /boot/bootup_actions.sh"
-    rm /boot/bootup_actions.sh
-fi
+
+
 
 
 
@@ -2063,11 +2141,37 @@ if [ -f /boot/candle_first_run_complete.txt ] && [ ! -f /boot/candle_original_ve
     echo "2.0.0-beta" > /boot/candle_original_version.txt
 fi
 
-echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
-echo "$(date) - system update complete" >> /boot/candle_log.txt
 
 # Disable old bootup actions service
 systemctl disable candle_bootup_actions.service
+
+
+# delete bootup_actions, just in case this script is being run as a bootup_actions script.
+if [ -f /boot/bootup_actions.sh ]; then
+    echo "removed /boot/bootup_actions.sh"
+    rm /boot/bootup_actions.sh
+fi
+
+
+# Remove cutting edge
+if [ -f /boot/candle_cutting_edge.txt ]; then
+    echo "disabling cutting edge" >> /dev/kmsg
+    echo "disabling cutting edge" >> /boot/candle_log.txt
+    /boot/candle_cutting_edge.txt
+fi
+
+
+# DONE!
+echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
+echo "$(date) - system update complete" >> /boot/candle_log.txt
+
+
+
+
+
+
+
+
 
 
 # RUN DEBUG SCRIPT
