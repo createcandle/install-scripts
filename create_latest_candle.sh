@@ -148,16 +148,16 @@ echo "CUTTING EDGE : no"
 fi
 
 if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
-    echo "APT REINST  : no"
+    echo "APT REINSTALL: no"
 else
     reinstall="--reinstall"
-    echo "APT REINST  : yes"
+    echo "APT REINSTALL: yes"
 fi
 
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
-echo "CHROOT     : Not in chroot"
+echo "CHROOT       : Not in chroot"
 else
-echo "CHROOT     : INSIDE CHROOT (boot partition is not mounted)"
+echo "CHROOT       : INSIDE CHROOT (boot partition is not mounted)"
 fi
 
 echo
@@ -342,7 +342,7 @@ if [ -f /boot/cmdline.txt ]; then
             fi
         fi
         
-        # also start SSH
+        # Also start SSH
         if [ -f /boot/developer.txt ]; then
             echo "Candle: starting ssh" >> /dev/kmsg
             echo "Candle: starting ssh" >> /boot/candle_log.txt
@@ -396,12 +396,12 @@ then
 
 
     # Update apt sources
-    set -e
+    #set -e
     echo "calling apt update" >> /dev/kmsg
     echo "calling apt update" >> /boot/candle_log.txt 
     apt update -y
     apt-get update -y
-    apt --fix-broken install
+    apt --fix-broken install -y
     echo
     
     
@@ -476,17 +476,36 @@ then
     echo
     if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
     then
-        echo "calling apt upgrade"
-        echo "Candle: doing apt upgrade" >> /dev/kmsg
-        echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
-        #apt DEBIAN_FRONTEND=noninteractive upgrade -y
-        DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
-        wait
         echo
-        echo "Upgrade complete"
+        #echo "calling apt upgrade"
+        #echo "Candle: doing apt upgrade" >> /dev/kmsg
+        #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
+        #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+        #wait
+        #echo
+        #echo "Upgrade complete"
     fi
 
-    set +e
+#    set +e
+
+    # Just to be safe, try showing the splash images again
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
+            if [ -f /boot/rotate180.txt ]; then
+                /bin/ply-image /boot/splash_updating180.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating180.png
+                fi
+                    
+            else
+                /bin/ply-image /boot/splash_updating.png
+                if ps aux | grep -q /usr/bin/startx; then
+                    DISPLAY=:0 feh --bg-fill /boot/splash_updating.png
+                fi
+            fi
+        fi
+    fi
 
     # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
     # TODO: maybe use version 88?
@@ -496,24 +515,26 @@ then
     echo "Candle: installing chromium-browser" >> /boot/candle_log.txt
     echo
     
+    apt-mark unhold chromium-browser
+    
     if chromium-browser --version | grep -q 'Chromium 88'; then
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
-        apt-get purge chromium-browser -y
-        apt purge chromium-browser -y
-        apt purge chromium-codecs-ffmpeg-extra -y
-        apt autoremove -y
-        apt install chromium-browser -y
+        apt-get purge chromium-browser -y  --allow-change-held-packages
+        apt purge chromium-browser -y  --allow-change-held-packages
+        apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
+        apt autoremove -y  --allow-change-held-packages
+        apt install chromium-browser -y  --allow-change-held-packages
     fi
     
     
     apt install chromium-browser -y --print-uris --allow-change-held-packages "$reinstall"
-    apt install chromium-browser -y
+    apt install chromium-browser -y  --allow-change-held-packages
 
     if [ ! -f /bin/chromium-browser ]; then
         echo
         echo "browser install failed, retrying."
-        apt purge chromium-browser -y
+        apt purge chromium-browser -y  --allow-change-held-packages
         apt install chromium-browser -y --allow-change-held-packages
     fi
 
