@@ -248,10 +248,10 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
         fi
     fi
     
+    
+# Stable controller. Now simply downloads the entire folder and puts it into place.
 else
-    
-    
-    
+
     if [ -f /home/pi/latest_stable_controller.tar ]; then
         
         cd /home/pi
@@ -396,8 +396,8 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /boot/candle_log.txt
     
-    totalk=$(awk '/^MemTotal:/{print $2}' /proc/meminfo)
-    echo "memory size: $(totalk)"
+    totalk="$(awk '/^MemTotal:/{print $2}' /proc/meminfo)"
+    echo "memory size: $totalk"
     if [ "$totalk" -lt 600000 ]
     then
         echo "very low memory, --max-old-space-size=496"

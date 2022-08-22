@@ -446,6 +446,7 @@ fi
 # Download ready-made settings files from the Candle github
 if [ -f /boot/candle_cutting_edge.txt ]; then
     
+    echo "Candle: Starting download of cutting edge configuration files"
     echo "Candle: Starting download of cutting edge configuration files" >> /dev/kmsg
     echo "Candle: Starting download of cutting edge configuration files" >> /boot/candle_log.txt
     git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
@@ -456,6 +457,7 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
     fi
     
 else
+    echo "Candle: Starting download of stable configuration files"
     echo "Candle: Starting download of stable configuration files" >> /dev/kmsg
     echo "Candle: Starting download of stable configuration files" >> /boot/candle_log.txt
     curl -s https://api.github.com/repos/createcandle/configuration-files/releases/latest \
@@ -503,7 +505,8 @@ else
     rm -rf /home/pi/configuration-files/.git
     
     if [ ! -d /home/pi/candle/configuration-files-backup ]; then
-        cp -r /home/pi/configuration-files /home/pi/candle/configuration-files-backup
+        mkdir -p /home/pi/candle/configuration-files-backup
+        cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
         echo "Created intial backup of the configuration files" >> /dev/kmsg
         echo "Created intial backup of the configuration files" >> /boot/candle_log.txt
     fi
@@ -860,13 +863,11 @@ then
             apt-mark hold raspberrypi-bootloader
         else
             echo
-            echo
-            echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /dev/kmsg
-            echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /boot/candle_log.txt
-            
-            echo
             if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
-                
+                echo
+                echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /dev/kmsg
+                echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /boot/candle_log.txt
+                echo
                 # Save the install file for after the reboot
                 wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
                 chmod +x /home/pi/create_latest_candle.sh
@@ -2195,10 +2196,6 @@ if [ -f /boot/._cmdline.txt ]; then
     rm /boot/._cmdline.txt
 fi
 
-if [ -f /home/pi/create_latest_candle.sh ]; then
-    echo "Removing left-over /home/pi/create_latest_candle.sh" >> /dev/kmsg
-    rm /home/pi/create_latest_candle.sh
-fi
 
 
 
@@ -2435,12 +2432,18 @@ fi
 
 
 
-
+#
+#  ADDITIONAL CLEANUP
+#
+if [ -f /home/pi/create_latest_candle.sh ]; then
+    echo "Removing left-over /home/pi/create_latest_candle.sh" >> /dev/kmsg
+    rm /home/pi/create_latest_candle.sh
+fi
 
 
 # Some final insurance
 chown pi:pi /home/pi/*
-chown pi:pi /home/pi/candle/*
+chown -R pi:pi /home/pi/candle/*
 
 
 
