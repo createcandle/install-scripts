@@ -686,16 +686,18 @@ then
             echo "warning, latest_stable_controller.tar already existed. Removing."
             rm /home/pi/latest_stable_controller.tar
         fi
-        if [ -f /home/pi/latest_stable_controller.tar.md5 ]; then
-            echo "warning, latest_stable_controller.tar.md5 already existed. Removing."
-            rm /home/pi/latest_stable_controller.tar.md5
+        if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
+            echo "warning, latest_stable_controller.tar.txt already existed. Removing."
+            rm /home/pi/latest_stable_controller.tar.txt
         fi
         
         wget https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O /home/pi/latest_stable_controller.tar
-        wget https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.md5 -O /home/pi/latest_stable_controller.tar.md5
+        wget https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O /home/pi/latest_stable_controller.tar.txt
         
-        if [ -f /home/pi/latest_stable_controller.tar ] && [ -f /home/pi/latest_stable_controller.tar.md5 ]; then
-            if [ "$(md5sum latest_stable_controller.tar)" = "$(cat /home/pi/latest_stable_controller.tar.md5)" ]; then
+        if [ -f /home/pi/latest_stable_controller.tar ] && [ -f /home/pi/latest_stable_controller.tar.txt ]; then
+            echo "controller tar & md5 downloaded OK"
+            
+            if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat /home/pi/latest_stable_controller.tar.txt)" ]; then
                 echo "MD5 checksum of latest_stable_controller.tar matched"
                 
                 chown pi:pi /home/pi/latest_stable_controller.tar
@@ -705,14 +707,15 @@ then
                 fi
                 
             else
+                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?"
                 echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /dev/kmsg
                 echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /boot/candle_log.txt
                 
                 if [ -f /home/pi/latest_stable_controller.tar ]; then
-                    rm /home/pi/latest_stable_controller.tar
+                    #rm /home/pi/latest_stable_controller.tar
                 fi
-                if [ -f /home/pi/latest_stable_controller.tar.md5 ]; then
-                    rm /home/pi/latest_stable_controller.tar.md5
+                if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
+                    #rm /home/pi/latest_stable_controller.tar.txt
                 fi
                 
                 # Show error image
@@ -728,14 +731,15 @@ then
             fi
             
         else
+            echo "Candle: download of stable controller tar or md5 failed. Aborting."
             echo "Candle: download of stable controller tar or md5 failed. Aborting." >> /dev/kmsg
             echo "$(date) - download of stable controller tar or md5 failed. Aborting." >> /boot/candle_log.txt
             
             if [ -f /home/pi/latest_stable_controller.tar ]; then
                 rm /home/pi/latest_stable_controller.tar
             fi
-            if [ -f /home/pi/latest_stable_controller.tar.md5 ]; then
-                rm /home/pi/latest_stable_controller.tar.md5
+            if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
+                rm /home/pi/latest_stable_controller.tar.txt
             fi
             
             # Show error image
