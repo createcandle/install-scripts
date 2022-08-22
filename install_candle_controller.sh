@@ -559,6 +559,7 @@ then
     chown -R pi:pi candle-theme
     rm ./*.tgz
 
+
     rm -rf package
     rm -rf tutorial
     wget https://github.com/createcandle/tutorial/releases/download/1.0.7/tutorial-1.0.7.tgz
@@ -568,6 +569,7 @@ then
     mv package tutorial
     chown -R pi:pi tutorial
     rm ./*.tgz
+
 
     rm -rf package
     rm -rf bluetoothpairing
@@ -579,6 +581,7 @@ then
     chown -R pi:pi bluetoothpairing
     rm ./*.tgz
 
+
     rm -rf package
     rm -rf photo-frame
     wget https://github.com/flatsiedatsie/photo-frame/releases/download/1.4.17/photo-frame-1.4.17.tgz
@@ -588,6 +591,7 @@ then
     mv package photo-frame
     chown -R pi:pi photo-frame
     rm ./*.tgz
+
 
     rm -rf package
     rm -rf followers
@@ -599,6 +603,7 @@ then
     chown -R pi:pi followers
     rm ./*.tgz
 
+
     rm -rf package
     rm -rf internet-radio
     wget https://github.com/flatsiedatsie/internet-radio/releases/download/2.1.32/internet-radio-2.1.32.tgz
@@ -608,6 +613,7 @@ then
     mv package internet-radio
     chown -R pi:pi internet-radio
     rm ./*.tgz
+
 
     rm -rf package
     rm -rf zigbee2mqtt-adapter
@@ -620,6 +626,7 @@ then
     chown -R pi:pi zigbee2mqtt-adapter
     rm ./*.tgz
 
+
     rm -rf package
     rm -rf privacy-manager
     wget https://github.com/createcandle/privacy-manager/releases/download/0.2.8/privacy-manager-0.2.8.tgz
@@ -629,6 +636,7 @@ then
     mv package privacy-manager
     chown -R pi:pi privacy-manager
     rm ./*.tgz
+
 
     rm -rf package
     rm -rf webinterface
@@ -640,7 +648,7 @@ then
     chown -R pi:pi webinterface
     rm ./*.tgz
     
-    rm candleappstore-0.4.18-linux-arm-v3.9.tgz
+    
     rm -rf package
     rm -rf candleappstore
     wget https://github.com/createcandle/candleappstore/releases/download/0.4.18/candleappstore-0.4.18-linux-arm-v3.9.tgz

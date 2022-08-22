@@ -1670,16 +1670,6 @@ find /home/pi/.webthings/tmp \
 
 cd /home/pi
 
-if [ -e /home/pi/webthings/gateway/static/images/floorplan.svg ];
-then
-    cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/floorplan.svg
-    chown pi:pi /home/pi/.webthings/floorplan.svg
-else
-    echo ""
-    echo "WARNING: missing floorplan"
-    echo ""
-fi
-
 # SYMLINKS
 
 # move hosts file to user partition
@@ -1788,6 +1778,7 @@ chmod +x /home/pi/candle/late.sh
 chmod +x /etc/rc.local
 chmod +x /home/pi/candle/debug.sh
 chmod +x /home/pi/candle/files_check.sh
+chmod +x /home/pi/candle/prepare_for_disk_image.sh
 chmod +x /home/pi/candle/unsnap.sh
 
 # CHOWN THE NEW FILES
@@ -1829,6 +1820,7 @@ echo
 systemctl enable candle_first_run.service
 #systemctl enable candle_start_swap.service
 systemctl enable candle_early.service
+systemctl enable candle_late.service 
 systemctl enable candle_late.service
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
@@ -2440,6 +2432,15 @@ then
 fi
 
 
+if [ -e /home/pi/webthings/gateway/static/images/floorplan.svg ];
+then
+    cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/floorplan.svg
+    chown pi:pi /home/pi/.webthings/floorplan.svg
+else
+    echo ""
+    echo "WARNING: missing floorplan"
+    echo ""
+fi
 
 
 
@@ -2449,6 +2450,10 @@ fi
 if [ -f /home/pi/create_latest_candle.sh ]; then
     echo "Removing left-over /home/pi/create_latest_candle.sh" >> /dev/kmsg
     rm /home/pi/create_latest_candle.sh
+fi
+
+if [ -f /home/pi/ro-root.sh ]; then
+    rm /home/pi/ro-root.sh
 fi
 
 
@@ -2463,6 +2468,11 @@ chown -R pi:pi /home/pi/candle/*
 #
 
 
+if [ -f /boot/cmdline-candle.txt ]; then
+    echo "copying default Candle cmdline.txt into place"
+    rm /boot/cmdline.txt
+    cp /boot/cmdline-candle.txt /boot/cmdline.txt
+fi
 
 
 # cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
@@ -2477,7 +2487,7 @@ if [ ! -f /home/pi/candle/creation_date.txt ]; then
 fi
 
 # remember when the update script was last run
-echo "$(date +%s)" > /home/pi/candle/update_date
+echo "$(date +%s)" > /home/pi/candle/update_date.txt
 
 # Disable old bootup actions service
 systemctl disable candle_bootup_actions.service
