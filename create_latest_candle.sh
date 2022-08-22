@@ -307,7 +307,6 @@ fi
 
 echo
 
-
 # Clean up any files that may be left over to make sure there is enough space
 if [ -f /zero.fill ]; then
   rm /zero.fill
@@ -325,6 +324,10 @@ fi
 if [ -f /home/pi/latest_stable_controller.tar ]; then
     rm /home/pi/latest_stable_controller.tar
     echo "Warning, removed /home/pi/latest_stable_controller.tar"
+fi
+if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
+    rm /home/pi/latest_stable_controller.tar.txt
+    echo "Warning, removed /home/pi/latest_stable_controller.tar.txt"
 fi
 
 
@@ -645,9 +648,9 @@ if [[ -z "${SKIP_CONTROLLER_INSTALL}" ]] || [ "$SKIP_CONTROLLER_INSTALL" = no ];
 then
     
     echo
-    echo "INSTALLING CANDLE CONTROLLER"
-    echo "Candle: starting installing of Candle controller itself" >> /dev/kmsg
-    echo "Candle: starting installing of Candle controller itself" >> /boot/candle_log.txt
+    echo "PRE-DOWNLOADING CANDLE CONTROLLER"
+    echo "Candle: starting download of Candle controller" >> /dev/kmsg
+    echo "Candle: starting download of Candle controller" >> /boot/candle_log.txt
     echo
 
     cd /home/pi
@@ -658,7 +661,6 @@ then
     
     if [ -f /boot/candle_cutting_edge.txt ]; then
         echo "Candle: Starting download of cutting edge controller install script" >> /dev/kmsg
-        echo "Candle: Starting download of cutting edge controller install script" >> /boot/candle_log.txt
         wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
         
     else
@@ -712,10 +714,10 @@ then
                 echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /boot/candle_log.txt
                 
                 if [ -f /home/pi/latest_stable_controller.tar ]; then
-                    #rm /home/pi/latest_stable_controller.tar
+                    rm /home/pi/latest_stable_controller.tar
                 fi
                 if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
-                    #rm /home/pi/latest_stable_controller.tar.txt
+                    rm /home/pi/latest_stable_controller.tar.txt
                 fi
                 
                 # Show error image
@@ -732,7 +734,7 @@ then
             
         else
             echo "Candle: download of stable controller tar or md5 failed. Aborting."
-            echo "Candle: download of stable controller tar or md5 failed. Aborting." >> /dev/kmsg
+            echo "Candle: Error, download of stable controller tar or md5 failed. Aborting." >> /dev/kmsg
             echo "$(date) - download of stable controller tar or md5 failed. Aborting." >> /boot/candle_log.txt
             
             if [ -f /home/pi/latest_stable_controller.tar ]; then
@@ -753,7 +755,6 @@ then
     
             exit 1
         fi
-        
         
     fi
     
@@ -777,6 +778,7 @@ then
         fi
     
         exit 1
+        
     fi
     
 fi
