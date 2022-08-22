@@ -427,17 +427,16 @@ if [ -f /boot/cmdline.txt ]; then
             echo "Candle: starting ssh" >> /boot/candle_log.txt
             systemctl start ssh.service
         fi
-        
-        # Download the rest of the images
-        wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
-        wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
-        wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
-        wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
-        wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
-        wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
-        
+                
     fi
     
+    # Download the rest of the images
+    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
+    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
+    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
+    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
+    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
+    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
 fi
 
 
