@@ -556,7 +556,7 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
     
 else
     echo "Candle: Downloading stable read-only script" >> /dev/kmsg
-    echo "Candle: Downloading stable edge read-only script" >> /boot/candle_log.txt
+    echo "Candle: Downloading stable read-only script" >> /boot/candle_log.txt
     curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
     | grep "tarball_url" \
     | cut -d : -f 2,3 \
@@ -670,10 +670,12 @@ then
     
     if [ -f /boot/candle_cutting_edge.txt ]; then
         echo "Candle: Starting download of cutting edge controller install script" >> /dev/kmsg
+        echo "Candle: Starting download of cutting edge controller install script" >> /boot/candle_log.txt
         wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
         
     else
         echo "Candle: Starting download of stable controller install script" >> /dev/kmsg
+        echo "Candle: Starting download of stable controller install script" >> /boot/candle_log.txt
         curl -s https://api.github.com/repos/createcandle/install-scripts/releases/latest \
         | grep "tarball_url" \
         | cut -d : -f 2,3 \
@@ -708,6 +710,8 @@ then
         if [ -f /home/pi/latest_stable_controller.tar ] && [ -f /home/pi/latest_stable_controller.tar.txt ]; then
             
             echo "controller tar & md5 downloaded OK"
+            echo "Candle: controller tar & md5 downloaded OK" >> /dev/kmsg
+            echo "Candle: controller tar & md5 downloaded OK" >> /boot/candle_log.txt
             
             if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat /home/pi/latest_stable_controller.tar.txt)" ]; then
                 echo "MD5 checksum of latest_stable_controller.tar matched"
@@ -2533,7 +2537,7 @@ fi
 if [ -f /boot/candle_cutting_edge.txt ]; then
     echo "disabling cutting edge" >> /dev/kmsg
     echo "disabling cutting edge" >> /boot/candle_log.txt
-    /boot/candle_cutting_edge.txt
+    rm /boot/candle_cutting_edge.txt
 fi
 
 
