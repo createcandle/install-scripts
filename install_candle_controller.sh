@@ -374,9 +374,26 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     #echo "Running webpack. this will take a while too..."
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /boot/candle_log.txt
-    NODE_OPTIONS="--max-old-space-size=496" npx webpack
-
-
+    
+    totalk=$(awk '/^MemTotal:/{print $2}' /proc/meminfo)
+    echo "memory size: $(totalk)"
+    if [ "$totalk" -lt 600000 ]
+    then
+        echo "very low memory, --max-old-space-size=496"
+        NODE_OPTIONS="--max-old-space-size=496" npx webpack
+    elif [ "$totalk" -lt 1200000 ]
+    then
+        echo "low memory, --max-old-space-size=750"
+        NODE_OPTIONS="--max-old-space-size=750" npx webpack
+    elif [ "$totalk" -lt 2200000 ]
+    then
+        echo "normal memory, --max-old-space-size=1024"
+        NODE_OPTIONS="--max-old-space-size=1024" npx webpack
+    else
+        echo "big memory, --max-old-space-size=2048"
+        NODE_OPTIONS="--max-old-space-size=2048" npx webpack
+    fi
+    
     if [ -f /home/pi/webthings/gateway2/build/app.js ] \
     && [ -f /home/pi/webthings/gateway2/build/static/index.html ] \
     && [ -d /home/pi/webthings/gateway2/node_modules ] \
