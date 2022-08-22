@@ -7,11 +7,12 @@ set +e # continue on errors
 # This script will turn a Raspberry Pi OS Lite installation into a Candle controller
 # It can also update a Candle controller to the latest available version (with some limitations)
 
+# By default it acts as an upgrade script (not doing a factory reset at the end, rebooting the system when done)
+
 # If you want to avoid the shutdown at the end you can skip the finalization step by first setting an environment variable:
 # export STOP_EARLY=yes
 
-
-# Set the script to download the very latest available version. Risky.
+# Set the script to download the very latest available version. Risky. Enabling this creates the /boot/candle_cutting_edge.txt file
 # export CUTTING_EDGE=yes
 
 # Other parts of the script that can be skipped:
@@ -53,14 +54,12 @@ echo "starting update - $(date) - $scriptname" >> /boot/candle_log.txt
 if [ -f /proc/mounts ]; 
 then
     # Detect is read-only mode is active
-    if [ ! -z "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; then
+    if [ -n "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; then
       echo 
       echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
       echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
       echo "Candle: detected read-only mode. Aborting." >> /boot/candle_log.txt
       
-      
-  
       # Show error image
       if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
         /bin/ply-image /boot/error.png
@@ -155,8 +154,6 @@ then
     echo "no environment indication to go cutting edge"
 else
     echo "going cutting edge"
-    echo "spotted environment indicator to go cutting edge" >> /dev/kmsg
-    echo "spotted environment indicator to go cutting edge" >> /boot/candle_log.txt
     touch /boot/candle_cutting_edge.txt
 fi
 
@@ -295,14 +292,27 @@ fi
 
 echo
 
+
+# Clean up any files that may be left over to make sure there is enough space
 if [ -f /zero.fill ]; then
   rm /zero.fill
-  echo "removed /zero.fill"
+  echo "Warning, removed /zero.fill"
 fi
 if [ -f /home/pi/.webthings/zero.fill ]; then
   rm /home/pi/.webthings/zero.fill
-  echo "removed /home/pi/.webthings/zero.fill"
+  echo "Warning, removed /home/pi/.webthings/zero.fill"
 fi
+
+if [ -d /home/pi/webthings/gateway2 ]; then
+    rm -rf /home/pi/webthings/gateway2
+    echo "Warning, removed /home/pi/webthings/gateway2"
+fi
+if [ -f /home/pi/latest_stable_controller.tar ]; then
+    rm /home/pi/latest_stable_controller.tar
+    echo "Warning, removed /home/pi/latest_stable_controller.tar"
+fi
+
+
 
 sleep 3
 cd /home/pi
@@ -490,6 +500,265 @@ fi
 
 
 
+
+
+echo
+echo "Downloading read only script"
+echo
+
+if [ -f /boot/candle_cutting_edge.txt ]; then
+    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
+    echo "Candle: Downloading cutting edge read-only script" >> /boot/candle_log.txt
+    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
+    
+else
+    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
+    echo "Candle: Downloading stable edge read-only script" >> /boot/candle_log.txt
+    curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
+    | grep "tarball_url" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O ro-overlay.tar
+
+    if [ -f ro-overlay.tar ]; then
+        
+        if [ -d ./ro-overlay ]; then
+            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
+            rm -rf ./ro-overlay
+        fi
+        echo "unpacking ro-overlay.tar"
+        tar -xf ro-overlay.tar
+        rm ./ro-overlay.tar
+    
+        for directory in createcandle-ro-overlay*; do
+          [[ -d $directory ]] || continue
+          echo "Directory: $directory"
+          mv -- "$directory" ./ro-overlay
+        done
+
+        if [ -d ./ro-overlay ]; then
+            echo "ro-overlay folder exists, OK"
+            cp ./ro-overlay/bin/ro-root.sh ./ro-root.sh
+            rm -rf ./ro-overlay
+        else
+            echo "ERROR, ro-overlay folder missing"
+            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
+            echo "Candle: WARNING, ro-overlay folder missing" >> /boot/candle_log.txt
+        fi
+    else
+        echo "Ro-root tar file missing, download failed"
+        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
+        echo "Candle: ERROR, stable read-only tar download failed" >> /boot/candle_log.txt
+        
+        # Show error image
+        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+        then
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                /bin/ply-image /boot/error.png
+                sleep 7200
+            fi
+        fi
+
+        exit 1
+        
+    fi
+fi
+
+
+# If the file exists, make it executable and move it into place
+if [ -f ./ro-root.sh ]; then
+    echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
+    echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
+    chmod +x ./ro-root.sh
+    
+    # Avoid risky move if possible
+    if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
+        echo "ro-root.sh file is different, moving it into place"
+        echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
+        echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
+        if [ -f /bin/ro-root.sh ]; then
+            rm /bin/ro-root.sh
+        fi
+        mv -f ./ro-root.sh /bin/ro-root.sh
+        chmod +x /bin/ro-root.sh
+        
+    else
+        echo "new ro-root.sh file is same as the old one, not moving it"
+        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
+        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
+    fi
+else
+    echo "ERROR: failed to download ro-root.sh"
+    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
+    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
+    echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
+    
+    # Show error image
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+    then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+    fi
+
+    exit 1
+fi
+
+
+
+
+
+# DOWNLOAD CANDLE CONTROLLER INSTALLER
+
+if [[ -z "${SKIP_CONTROLLER_INSTALL}" ]] || [ "$SKIP_CONTROLLER_INSTALL" = no ]; 
+then
+    
+    echo
+    echo "INSTALLING CANDLE CONTROLLER"
+    echo "Candle: starting installing of Candle controller itself" >> /dev/kmsg
+    echo "Candle: starting installing of Candle controller itself" >> /boot/candle_log.txt
+    echo
+
+    cd /home/pi
+    #rm -rf /home/pi/webthings
+    #rm -rf /home/pi/.webthings # too dangerous
+    
+    
+    
+    if [ -f /boot/candle_cutting_edge.txt ]; then
+        echo "Candle: Starting download of cutting edge controller install script" >> /dev/kmsg
+        echo "Candle: Starting download of cutting edge controller install script" >> /boot/candle_log.txt
+        wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
+        
+    else
+        echo "Candle: Starting download of stable controller install script" >> /dev/kmsg
+        curl -s https://api.github.com/repos/createcandle/install-scripts/releases/latest \
+        | grep "tarball_url" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O install-scripts.tar
+
+        tar -xf install-scripts.tar
+        rm install-scripts.tar
+        
+        for directory in createcandle-install-scripts*; do
+          [[ -d $directory ]] || continue
+          echo "Directory: $directory"
+          mv -- "$directory" ./install-scripts
+        done
+        
+        mv -f ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
+        rm -rf ./install-scripts
+        
+        if [ -f /home/pi/latest_stable_controller.tar ]; then
+            echo "warning, latest_stable_controller.tar already existed. Removing."
+            rm /home/pi/latest_stable_controller.tar
+        fi
+        if [ -f /home/pi/latest_stable_controller.tar.md5 ]; then
+            echo "warning, latest_stable_controller.tar.md5 already existed. Removing."
+            rm /home/pi/latest_stable_controller.tar.md5
+        fi
+        
+        wget https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O /home/pi/latest_stable_controller.tar
+        wget https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.md5 -O /home/pi/latest_stable_controller.tar.md5
+        
+        if [ -f /home/pi/latest_stable_controller.tar ] && [ -f /home/pi/latest_stable_controller.tar.md5 ]; then
+            if [ "$(md5sum latest_stable_controller.tar)" = "$(cat /home/pi/latest_stable_controller.tar.md5)" ]; then
+                echo "MD5 checksum of latest_stable_controller.tar matched"
+                
+                chown pi:pi /home/pi/latest_stable_controller.tar
+                
+                if [ -f /home/pi/controller_backup_fresh.tar ]; then
+                    rm /home/pi/controller_backup_fresh.tar
+                fi
+                
+            else
+                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /dev/kmsg
+                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /boot/candle_log.txt
+                
+                if [ -f /home/pi/latest_stable_controller.tar ]; then
+                    rm /home/pi/latest_stable_controller.tar
+                fi
+                if [ -f /home/pi/latest_stable_controller.tar.md5 ]; then
+                    rm /home/pi/latest_stable_controller.tar.md5
+                fi
+                
+                # Show error image
+                if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+                then
+                    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                        /bin/ply-image /boot/error.png
+                        sleep 7200
+                    fi
+                fi
+    
+                exit 1
+            fi
+            
+        else
+            echo "Candle: download of stable controller tar or md5 failed. Aborting." >> /dev/kmsg
+            echo "$(date) - download of stable controller tar or md5 failed. Aborting." >> /boot/candle_log.txt
+            
+            if [ -f /home/pi/latest_stable_controller.tar ]; then
+                rm /home/pi/latest_stable_controller.tar
+            fi
+            if [ -f /home/pi/latest_stable_controller.tar.md5 ]; then
+                rm /home/pi/latest_stable_controller.tar.md5
+            fi
+            
+            # Show error image
+            if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+            then
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                    /bin/ply-image /boot/error.png
+                    sleep 7200
+                fi
+            fi
+    
+            exit 1
+        fi
+        
+        
+    fi
+    
+    
+    # Check if the install_candle_controller.sh file now exists
+    if [ ! -f install_candle_controller.sh ]; then
+        echo
+        echo "ERROR, missing install_candle_controller.sh file"
+        echo "Candle: ERROR, missing install_candle_controller.sh file. Aborting." >> /dev/kmsg
+        echo "$(date) - Failed to download install_candle_controller script" >> /boot/candle_log.txt
+        echo "$(date) - Failed to download install_candle_controller script" >> /home/pi/.webthings/candle.log
+        echo
+    
+        # Show error image
+        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+        then
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                /bin/ply-image /boot/error.png
+                sleep 7200
+            fi
+        fi
+    
+        exit 1
+    fi
+    
+fi
+
+
+
+
+
+
+
+
+
+
+
+
 # INSTALL PROGRAMS AND UPDATE
 if [ "$SKIP_APT_INSTALL" = no ] || [[ -z "${SKIP_APT_INSTALL}" ]];
 then
@@ -530,7 +799,7 @@ then
     
     
     # Just to be safe, try showing the splash images again
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
             if [ -f /boot/rotate180.txt ]; then
@@ -611,7 +880,7 @@ then
                 
                 apt-mark unhold chromium-browser
                 
-                if [ -d seeed-voicecard]; then
+                if [ -d seeed-voicecard ]; then
                     rm -rf seeed-voicecard
                 fi
                 git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
@@ -708,7 +977,7 @@ then
 #    set +e
 
     # Just to be safe, try showing the splash images again
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ];
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
             if [ -f /boot/rotate180.txt ]; then
@@ -1022,9 +1291,12 @@ then
                 dpkg -s "$i"
                 
                 # Show error image
-                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-                    /bin/ply-image /boot/error.png
-                    sleep 7200
+                if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+                then
+                    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
+                        /bin/ply-image /boot/error.png
+                        sleep 7200
+                    fi
                 fi
     
                 exit 1
@@ -1076,9 +1348,12 @@ else
     echo "Candle: error GIT failed to install" >> /boot/candle_log.txt
     
     # Show error image
-    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-        /bin/ply-image /boot/error.png
-        sleep 7200
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+    then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
+            /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
     fi
     
     exit 1
@@ -1099,9 +1374,12 @@ else
     echo "Candle: error browser failed to install" >> /boot/candle_log.txt
     
     # Show error image
-    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-        /bin/ply-image /boot/error.png
-        sleep 7200
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+    then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
+            /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
     fi
     
     exit 1
@@ -1279,120 +1557,9 @@ rm -rf bluez-alsa
 
 
 
-# INSTALL CANDLE CONTROLLER
-if [[ -z "${SKIP_CONTROLLER_INSTALL}" ]] || [ "$SKIP_CONTROLLER_INSTALL" = no ]; 
-then
-    
-    echo
-    echo "INSTALLING CANDLE CONTROLLER"
-    echo "Candle: starting installing of Candle controller itself" >> /dev/kmsg
-    echo "Candle: starting installing of Candle controller itself" >> /boot/candle_log.txt
-    echo
 
-    cd /home/pi
-    #rm -rf /home/pi/webthings
-    #rm -rf /home/pi/.webthings # too dangerous
-    
-    
-    
-    if [ -f /boot/candle_cutting_edge.txt ]; then
-        echo "Candle: Starting download of cutting edge controller install script" | sudo tee -a /dev/kmsg
-        wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
-        
-    else
-        echo "Candle: Starting download of stable controller install script" | sudo tee -a /dev/kmsg
-        curl -s https://api.github.com/repos/createcandle/install-scripts/releases/latest \
-        | grep "tarball_url" \
-        | cut -d : -f 2,3 \
-        | tr -d \" \
-        | sed 's/,*$//' \
-        | wget -qi - -O install-scripts.tar
 
-        tar -xf install-scripts.tar
-        rm install-scripts.tar
-        
-        for directory in createcandle-install-scripts*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          mv -- "$directory" ./install-scripts
-        done
-        
-        mv -f ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
-        rm -rf ./install-scripts
-        #echo
-        #echo "result:"
-        #ls install_candle_controller.sh
-    fi
-    
-    
-    # Check if the install_candle_controller.sh file now exists
-    if [ ! -f install_candle_controller.sh ]; then
-        echo
-        echo "ERROR, missing install_candle_controller.sh file"
-        echo "Candle: ERROR, missing install_candle_controller.sh file. Aborting." >> /dev/kmsg
-        echo "$(date) - Failed to download install_candle_controller script" >> /boot/candle_log.txt
-        echo "$(date) - Failed to download install_candle_controller script" >> /home/pi/.webthings/candle.log
-        echo "$(date) - Failed to download install_candle_controller script" >> /boot/candle_log.txt
-        echo
-        
-        # Show error image
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            /bin/ply-image /boot/error.png
-            sleep 7200
-        fi
-        
-        exit 1
-    fi
-    
-    chmod +x ./install_candle_controller.sh
-    sudo -u pi ./install_candle_controller.sh
-    wait
-    rm ./install_candle_controller.sh
 
-    cd /home/pi
-
-    # This should work now, but setcap has been move to install_candle_controller script instead
-    #NODE_PATH=$(sudo -i -u pi which node)
-    #setcap cap_net_raw+eip $(eval readlink -f "$NODE_PATH")
-    
-    # Check if the installation of the controller succeeded
-    
-    if [ -d /ro ]; then
-        if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ]; then
-            echo 
-            echo "ERROR, failed to (fully) install candle-controller (/ro)"
-            echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
-            echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /home/pi/.webthings/candle.log
-            echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /boot/candle_log.txt
-            echo
-
-            # Show error image
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                /bin/ply-image /boot/error.png
-                sleep 7200
-            fi
-
-            exit 1
-        fi
-    elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ]; then
-    
-        echo 
-        echo "ERROR, failed to (fully) install candle-controller"
-        echo "Candle: ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
-        echo "Candle: ERROR, failed to (fully) install candle-controller" >> /home/pi/.webthings/candle.log
-        echo "Candle: ERROR, failed to (fully) install candle-controller" >> /boot/candle_log.txt
-        echo
-
-        # Show error image
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            /bin/ply-image /boot/error.png
-            sleep 7200
-        fi
-
-        exit 1
-    fi
-    
-fi
 
 
 
@@ -1404,9 +1571,6 @@ fi
 echo
 echo "INSTALLING OTHER FILES AND SERVICES"
 echo
-
-
-
 
 
 # switch back to root of home folder
@@ -1832,103 +1996,6 @@ echo
 
 
 
-# INSTALL/UPDATE READ_ONLY MODE SCRIPT
-
-echo
-echo "Downloading read only script"
-echo
-
-if [ -f /boot/candle_cutting_edge.txt ]; then
-    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
-    echo "Candle: Downloading cutting edge read-only script" >> /boot/candle_log.txt
-    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
-    
-else
-    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
-    echo "Candle: Downloading stable edge read-only script" >> /boot/candle_log.txt
-    curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
-    | grep "tarball_url" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | sed 's/,*$//' \
-    | wget -qi - -O ro-overlay.tar
-
-    if [ -f ro-overlay.tar ]; then
-        
-        if [ -d ./ro-overlay ]; then
-            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
-            rm -rf ./ro-overlay
-        fi
-        echo "unpacking ro-overlay.tar"
-        tar -xf ro-overlay.tar
-        rm ./ro-overlay.tar
-    
-        for directory in createcandle-ro-overlay*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          mv -- "$directory" ./ro-overlay
-        done
-
-        if [ -d ./ro-overlay ]; then
-            echo "ro-overlay folder exists, OK"
-            cp ./ro-overlay/ro-root.sh ./ro-root.sh
-            rm -rf ./ro-overlay
-        else
-            echo "ERROR, ro-overlay folder missing"
-            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
-            echo "Candle: WARNING, ro-overlay folder missing" >> /boot/candle_log.txt
-        fi
-    else
-        echo "Ro-root tar file missing, download failed"
-        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
-        echo "Candle: ERROR, stable read-only tar download failed" >> /boot/candle_log.txt
-    fi
-fi
-
-
-# If the file exists, make it executable and move it into place
-if [ -f ./ro-root.sh ]; then
-    echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
-    echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
-    chmod +x ./ro-root.sh
-    
-    # Avoid risky move if possible
-    if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
-        echo "ro-root.sh file is different, moving it into place"
-        echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
-        echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
-        if [ -f /bin/ro-root.sh ]; then
-            rm /bin/ro-root.sh
-        fi
-        mv -f ./ro-root.sh /bin/ro-root.sh
-        chmod +x /bin/ro-root.sh
-        
-    else
-        echo "new ro-root.sh file is same as the old one, not moving it"
-        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
-        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
-    fi
-else
-    echo "ERROR: failed to download ro-root.sh"
-    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
-    echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
-    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
-    echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
-    
-    # Show error image
-    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-        /bin/ply-image /boot/error.png
-        sleep 7200
-    fi
-
-    exit 1
-fi
-
-
-
-
-
-
 
 
 # ENABLE READ_ONLY MODE
@@ -2030,6 +2097,10 @@ then
     fi
 fi
 
+if [ -f /home/pi/controller_backup.tar ];
+    chown pi:pi /home/pi/controller_backup.tar
+fi
+
 # important boot files backup
 if [ ! -f /etc/rc.local.bak ]; then
     cp /etc/rc.local /etc/rc.local.bak
@@ -2060,7 +2131,7 @@ apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "a
 # Prepare for potential download of all current versions of the packages
 mkdir -p /home/pi/.webthings/deb_packages
 chown pi:pi /home/pi/.webthings/deb_packages
-apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "echo '" $1 "' | sudo tee -a /dev/kmsg && apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
+apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "echo '" $1 "' >> /dev/kmsg && apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
 
 #if [ -f /home/pi/.webthings/deb_packages/candle_packages_downloader.sh ]; then
 #sed -i '' '1i\
@@ -2259,6 +2330,97 @@ fi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+
+if [[ -z "${SKIP_CONTROLLER_INSTALL}" ]] || [ "$SKIP_CONTROLLER_INSTALL" = no ]; 
+then
+    
+    if [ -f install_candle_controller.sh ]; then
+        chmod +x ./install_candle_controller.sh
+        sudo -u pi ./install_candle_controller.sh
+        wait
+        rm ./install_candle_controller.sh
+
+        cd /home/pi
+
+        # This should work now, but setcap has been move to install_candle_controller script instead
+        #NODE_PATH=$(sudo -i -u pi which node)
+        #setcap cap_net_raw+eip $(eval readlink -f "$NODE_PATH")
+    
+        # Check if the installation of the controller succeeded
+    
+        if [ -d /ro ]; then
+            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ]; then
+                echo 
+                echo "ERROR, failed to (fully) install candle-controller (/ro)"
+                echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
+                echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /home/pi/.webthings/candle.log
+                echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /boot/candle_log.txt
+                echo
+
+                # Show error image
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                    /bin/ply-image /boot/error.png
+                    sleep 7200
+                fi
+
+                exit 1
+            fi
+        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ]; then
+    
+            echo 
+            echo "ERROR, failed to (fully) install candle-controller"
+            echo "Candle: ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
+            echo "Candle: ERROR, failed to (fully) install candle-controller" >> /home/pi/.webthings/candle.log
+            echo "Candle: ERROR, failed to (fully) install candle-controller" >> /boot/candle_log.txt
+            echo
+
+            # Show error image
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                /bin/ply-image /boot/error.png
+                sleep 7200
+            fi
+
+            exit 1
+        fi
+    fi
+    
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+#  DONE
+#
+
+
+
+
 # cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
 
 if [ -f /boot/candle_first_run_complete.txt ] && [ ! -f /boot/candle_original_version.txt ]; then
@@ -2423,17 +2585,18 @@ if [ ! -f /boot/developer.txt ]; then
     # Disable SSH access
     #systemctl disable ssh.service
     raspi-config nonint do_ssh 1 # 0 is enable, 1 is disable
-
 fi
 
 
-# If STOP_EARLY is enabled, then here it's possible to also ask the script to reboot. This is useful for upgrading the system.
-if [[ -z "${SKIP_REBOOT}" ]] || [ "$SKIP_REBOOT" = yes ]; then
+# Here it's possible to also ask the script to not reboot.
+if [[ -n "${SKIP_REBOOT}" ]] || [ "$SKIP_REBOOT" = yes ]; then
     echo "Candle: Not rebooting" >> /dev/kmsg
 else
+    echo
     echo "Candle: Rebooting in 10 seconds" >> /dev/kmsg
-    rm /boot/candle_rw_once.txt
+    echo
     sleep 10
+    rm /boot/candle_rw_once.txt
     reboot
 fi
 

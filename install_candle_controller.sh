@@ -122,7 +122,6 @@ then
     nvm use 12
     nvm alias default 12
 else
-    echo "NPM seems to already be installed."
     echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
     echo "NPM seems to already be installed." | sudo tee -a /boot/candle_log.txt
 fi
@@ -157,6 +156,17 @@ then
 fi
 
 
+_node_version=$(node --version | grep -E -o '[0-9]+' | head -n1)
+echo "Node version: ${_node_version}" | sudo tee -a /dev/kmsg
+echo "Node version: ${_node_version}" | sudo tee -a /boot/candle_log.txt
+
+echo "${_node_version}" > "/home/pi/.webthings/.node_version"
+echo "Node version in .node_version file:"
+cat /home/pi/.webthings/.node_version
+
+
+sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
+sudo setcap cap_net_raw+eip $(eval readlink -f `which python3`)
 
 
 # Download Candle controller from Github and install it
@@ -169,20 +179,23 @@ echo
 
 # Create a backup first
 
+
 availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
-if [ "$availMem" -gt "200000" ]; 
-then
-    if [ -f /home/pi/webthings/gateway/build/app.js ] \
-    && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
-    && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-    && [ -d /home/pi/webthings/gateway/node_modules ] \
-    && [ -d /home/pi/webthings/gateway/build/static/bundle ];
+if [ -f /home/pi/latest_stable_controller.tar ]; then
+    if [ "$availMem" -gt "200000" ]; 
     then
-        echo "Detected old webthings directory! Creating aditional backup"
-        echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /dev/kmsg
-        echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /boot/candle_log.txt
-        #mv /home/pi/webthings /home/pi/webthings-old
-        tar -czf ./controller_backup_fresh.tar ./webthings
+        if [ -f /home/pi/webthings/gateway/build/app.js ] \
+        && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
+        && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
+        && [ -d /home/pi/webthings/gateway/node_modules ] \
+        && [ -d /home/pi/webthings/gateway/build/static/bundle ];
+        then
+            echo "Detected old webthings directory! Creating fresh backup"
+            echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /dev/kmsg
+            echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /boot/candle_log.txt
+            #mv /home/pi/webthings /home/pi/webthings-old
+            tar -czf ./controller_backup_fresh.tar ./webthings
+        fi
     fi
 fi
 
@@ -225,45 +238,84 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
     fi
     
 else
-    curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
-    | grep "tarball_url" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | sed 's/,*$//' \
-    | wget -qi - -O candle-controller.tar
-
-    if [ -f candle-controller.tar ]; then
-        echo "Stable Candle Controller release download succeeded" | sudo tee -a /dev/kmsg
-        echo "Stable Candle Controller release download succeeded" | sudo tee -a /boot/candle_log.txt
-        tar -xf candle-controller.tar
-        rm candle-controller.tar
     
-        for directory in createcandle-candle-controller*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          rm -rf ./gateway2
-          mv -f "$directory" ./gateway2
-        done
     
-        #mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
-        echo
-        echo "PWD: $(pwd)"
-        echo "ls /home/pi/webthings/gateway2:"
-        ls /home/pi/webthings/gateway2
-    else
-        echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /dev/kmsg
-        echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /boot/candle_log.txt
+    
+    if [ -f /home/pi/latest_stable_controller.tar ]; then
         
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            sudo /bin/ply-image /boot/error.png
-            sleep 7200
+        cd /home/pi
+        
+        if [ -d /home/pi/webthings/gateway2 ]; then
+            rm -rf /home/pi/webthings/gateway2
+        fi
+
+        availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
+        if [ "$availMem" -gt "1000000" ]; 
+        then
+            echo "Candle: Doing safe unpack of latest_stable_controller.tar" | sudo tee -a /dev/kmsg
+            echo "Doing safe unpack of latest_stable_controller.tar" | sudo tee -a /boot/candle_log.txt
+            mkdir -p /home/pi/downloaded_controller
+            rm -rf /home/pi/downloaded_controller/*
+            tar -xf latest_stable_controller.tar -O /home/pi/downloaded_controller/
+            
+            if [ -f /home/pi/downloaded_controller/webthings/gateway/.post_upgrade_complete ]; then
+                if [ -d /home/pi/webthings/gateway ]; then
+                    rm -rf /home/pi/webthings/gateway
+                fi
+                mv /home/pi/downloaded_controller/webthings/gateway /home/pi/webthings/gateway
+            fi
+            rm -rf /home/pi/downloaded_controller
+        else
+            # more risky move because of low disk space
+            if [ -d /home/pi/webthings ]; then
+                sudo rm -rf /home/pi/webthings
+            fi
+            tar -xf latest_stable_controller.tar
         fi
         
-        exit 1
+    else
+        curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
+        | grep "tarball_url" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O candle-controller.tar
+
+        if [ -f candle-controller.tar ]; then
+            echo "Stable Candle Controller release download succeeded" | sudo tee -a /dev/kmsg
+            echo "Stable Candle Controller release download succeeded" | sudo tee -a /boot/candle_log.txt
+            tar -xf candle-controller.tar
+            rm candle-controller.tar
+    
+            for directory in createcandle-candle-controller*; do
+              [[ -d $directory ]] || continue
+              echo "Directory: $directory"
+              rm -rf ./gateway2
+              mv -f "$directory" ./gateway2
+            done
+    
+            #mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
+            echo
+            echo "PWD: $(pwd)"
+            echo "ls /home/pi/webthings/gateway2:"
+            ls /home/pi/webthings/gateway2
+        else
+            echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /dev/kmsg
+            echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /boot/candle_log.txt
+        
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                sudo /bin/ply-image /boot/error.png
+                sleep 7200
+            fi
+        
+            exit 1
+        fi
     fi
+
 fi
 
-if [ ! -d /home/pi/webthings/gateway2 ]; then
+
+if [ -f /boot/candle_cutting_edge.txt ] && [ ! -d /home/pi/webthings/gateway2 ]; then
     echo
     echo "ERROR, missing gateway2 directory"
     echo "Candle: ERROR, missing gateway2 directory" | sudo tee -a /dev/kmsg
@@ -276,118 +328,146 @@ if [ ! -d /home/pi/webthings/gateway2 ]; then
     fi
     
     exit 1
-else
-    echo "/home/pi/webthings/gateway2 exists, OK"
 fi
 
-echo
 
-
-cd /home/pi/webthings/gateway2
-
-rm -rf node_modules/
-
-export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
-# CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
-# npm install typescript --save-dev # TODO: check if this is now in package.json already
-
-# npm install
-echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
-echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /boot/candle_log.txt
-CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
-
-#echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
-
-sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
-sudo setcap cap_net_raw+eip $(eval readlink -f `which python3`)
-
-
-echo
-#echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
-#echo "Compiling Typescript and running Webpack" | sudo tee -a /dev/kmsg
-
-#npm run build
-
-#npm install -D webpack-cli
-
-rm -rf build
-cp -rL src build
-cp -rL static build/static
-find build -name '*.ts' -delete
-echo
-echo "Compiling typescript. this will take a while..."
-echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
-echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /boot/candle_log.txt
-npx tsc -p .
-echo "(it probably found some errors, don't worry about those)"
-echo
-#echo "Running webpack. this will take a while too..."
-echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
-echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /boot/candle_log.txt
-NODE_OPTIONS="--max-old-space-size=496" npx webpack
-
-
-if [ -f /home/pi/webthings/gateway2/build/app.js ] \
-&& [ -f /home/pi/webthings/gateway2/build/static/index.html ] \
-&& [ -d /home/pi/webthings/gateway2/node_modules ] \
-&& [ -d /home/pi/webthings/gateway2/build/static/bundle ];
-then
-  touch .post_upgrade_complete
-  #echo "Controller installation seems ok"
-  echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
-else
-  echo  
-  echo "ERROR, controller installation is mising parts"
-  echo "Candle: ERROR, controller installation is mising parts" | sudo tee -a /dev/kmsg
-  echo "$(date) - ERROR, controller installation is mising parts" | sudo tee -a /boot/candle_log.txt
-  echo
-fi
-
-_node_version=$(node --version | grep -E -o '[0-9]+' | head -n1)
-echo "Node version: ${_node_version}" | sudo tee -a /dev/kmsg
-echo "Node version: ${_node_version}" | sudo tee -a /boot/candle_log.txt
-
-echo "${_node_version}" > "/home/pi/.webthings/.node_version"
-echo "Node version in .node_version file:"
-cat /home/pi/.webthings/.node_version
-
-echo "New controller was created at $(pwd)"
-# Move the freshly created gateway into position
-cd /home/pi
 if [ -d /home/pi/webthings/gateway2 ]; then
+    echo "/home/pi/webthings/gateway2 exists"
     
-    echo "Starting move/copy of /home/pi/webthings/gateway2 to /home/pi/webthings/gateway"
-    #rm-rf /home/pi/webthings/gateway
-    if [ ! -d /home/pi/webthings/gateway ]; then
-        echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
-        echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /boot/candle_log.txt
-        mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
+    cd /home/pi/webthings/gateway2
+
+    rm -rf node_modules/
+
+    export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
+    # CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
+    # npm install typescript --save-dev # TODO: check if this is now in package.json already
+
+    # npm install
+    echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
+    echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /boot/candle_log.txt
+    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
+
+    #echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
+
+
+
+
+    echo
+    #echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
+    #echo "Compiling Typescript and running Webpack" | sudo tee -a /dev/kmsg
+
+    #npm run build
+
+    #npm install -D webpack-cli
+
+    rm -rf build
+    cp -rL src build
+    cp -rL static build/static
+    find build -name '*.ts' -delete
+    echo
+    echo "Compiling typescript. this will take a while..."
+    echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
+    echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /boot/candle_log.txt
+    npx tsc -p .
+    echo "(it probably found some errors, don't worry about those)"
+    echo
+    #echo "Running webpack. this will take a while too..."
+    echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
+    echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /boot/candle_log.txt
+    NODE_OPTIONS="--max-old-space-size=496" npx webpack
+
+
+    if [ -f /home/pi/webthings/gateway2/build/app.js ] \
+    && [ -f /home/pi/webthings/gateway2/build/static/index.html ] \
+    && [ -d /home/pi/webthings/gateway2/node_modules ] \
+    && [ -d /home/pi/webthings/gateway2/build/static/bundle ];
+    then
+      touch .post_upgrade_complete
+      #echo "Controller installation seems ok"
+      echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
     else
-        echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
-        echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /boot/candle_log.txt
-        rsync -r -q --delete /home/pi/webthings/gateway2/* /home/pi/webthings/gateway
-        chown -R pi:pi /home/pi/webthings/gateway
-        rm -rf /home/pi/webthings/gateway2
+      echo  
+      echo "ERROR, controller installation is missing parts"
+      echo "Candle: ERROR, controller installation is mising parts" | sudo tee -a /dev/kmsg
+      echo "$(date) - ERROR, controller installation is mising parts" | sudo tee -a /boot/candle_log.txt
+      echo
     fi
-else
-    echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /dev/kmsg
-    echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /boot/candle_log.txt
+
+
+    echo "New controller was created at $(pwd)"
+    # Move the freshly created gateway into position
+    cd /home/pi
+    if [ -d /home/pi/webthings/gateway2 ]; then
+    
+        echo "Starting move/copy of /home/pi/webthings/gateway2 to /home/pi/webthings/gateway"
+        #rm-rf /home/pi/webthings/gateway
+        if [ ! -d /home/pi/webthings/gateway ]; then
+            echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
+            echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /boot/candle_log.txt
+            mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
+        else
+            echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
+            echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /boot/candle_log.txt
+            rsync -r -q --delete /home/pi/webthings/gateway2/* /home/pi/webthings/gateway
+            chown -R pi:pi /home/pi/webthings/gateway
+            rm -rf /home/pi/webthings/gateway2
+        fi
+    else
+        echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /dev/kmsg
+        echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /boot/candle_log.txt
+    fi
+    
 fi
 
 
+
+
+echo
 echo
 echo "Candle: Linking gateway addon" | sudo tee -a /dev/kmsg
-cho "Candle: Linking gateway addon" | sudo tee -a /boot/candle_log.txt
+echo "Candle: Linking gateway addon" | sudo tee -a /boot/candle_log.txt
 if [ -d /home/pi/webthings/gateway/node_modules/gateway-addon ];
 then
-  cd "/home/pi/webthings/gateway/node_modules/gateway-addon"
-  npm link
-  cd -
+    cd "/home/pi/webthings/gateway/node_modules/gateway-addon"
+    npm link
+    cd /home/pi
 else
-  echo "ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing"
-  echo "Candle: ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
-  echo "Candle: ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /boot/candle_log.txt
+    echo "ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing"
+    echo "Candle: ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
+    echo "Candle: ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /boot/candle_log.txt
 fi
+
+
+
+
+# TODO: maybe do another sanity check and restore a backup if need be?
+
+# Create tar backup up controller
+if [ -f /home/pi/controller_backup.tar ];
+then
+    if [ ! -f /home/pi/webthings/gateway/build/app.js ] \
+    || [ ! -f /home/pi/webthings/gateway/build/static/index.html ] \
+    || [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
+    || [ ! -d /home/pi/webthings/gateway/node_modules ] \
+    || [ ! -d /home/pi/webthings/gateway/build/static/bundle ]; 
+    then
+        echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP" >> /dev/kmsg
+        echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP" >> /boot/candle_log.txt
+        
+        cd /home/pi
+        sudo rm -rf /home/pi/webthings
+        tar -xf ./controller_backup.tar
+        
+    else
+        echo
+        echo "Everything looks good"
+        echo "Candle: a valid controller exists" >> /dev/kmsg
+        echo "Candle: a valid controller exists" >> /boot/candle_log.txt
+        echo
+    fi
+fi
+
+
 
 
 echo
