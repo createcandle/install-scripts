@@ -13,7 +13,7 @@ fi
 if [ ! -s /etc/resolv.conf ]; then
     # no nameserver
     echo "no nameserver, aborting"
-    echo "Candle: No nameserver, aborting" >> /dev/kmsg
+    echo "Candle: No nameserver, aborting" | sudo tee -a /dev/kmsg
     exit 1
 fi
 
@@ -442,7 +442,7 @@ fi
 
 # TODO: maybe do another sanity check and restore a backup if need be?
 
-# Create tar backup up controller
+# restore the backup in case something has gone very wrong
 if [ -f /home/pi/controller_backup.tar ];
 then
     if [ ! -f /home/pi/webthings/gateway/build/app.js ] \
@@ -451,8 +451,8 @@ then
     || [ ! -d /home/pi/webthings/gateway/node_modules ] \
     || [ ! -d /home/pi/webthings/gateway/build/static/bundle ]; 
     then
-        echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP" >> /dev/kmsg
-        echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP" >> /boot/candle_log.txt
+        echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP"   | sudo tee -a /dev/kmsg
+        echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP" | sudo tee -a /boot/candle_log.txt
         
         cd /home/pi
         sudo rm -rf /home/pi/webthings
@@ -461,8 +461,8 @@ then
     else
         echo
         echo "Everything looks good"
-        echo "Candle: a valid controller exists" >> /dev/kmsg
-        echo "Candle: a valid controller exists" >> /boot/candle_log.txt
+        echo "Candle: a valid controller exists" | sudo tee -a /dev/kmsg
+        echo "Candle: a valid controller exists" | sudo tee -a /boot/candle_log.txt
         echo
     fi
 fi

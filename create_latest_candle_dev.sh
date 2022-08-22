@@ -9,8 +9,11 @@ set +e # continue on errors
 
 # By default it acts as an upgrade script (not doing a factory reset at the end, rebooting the system when done)
 
-# If you want to avoid the shutdown at the end you can skip the finalization step by first setting an environment variable:
-# export STOP_EARLY=yes
+# If you want to use this script to directly create disk images, then you can use:
+# export CREATE_DISK_IMAGE=yes
+# This is not recommended however. It's better to restart the controller and allow it to install Zigbee2MQTT fully, 
+# and only then run the prepare_for_disk_image script.
+
 
 # Set the script to download the very latest available version. Risky. Enabling this creates the /boot/candle_cutting_edge.txt file
 # export CUTTING_EDGE=yes
@@ -26,7 +29,7 @@ set +e # continue on errors
 # export SKIP_DEBUG=yes
 # export SKIP_REBOOT=yes
 
-# The script can add the re-install option to every Apt install command.
+# The script can add the re-install option to every Apt install command. This feature may be removed in the future.
 # export APT_REINSTALL=yes
 
 # To skip the creation of the read-only mode:
@@ -35,7 +38,7 @@ set +e # continue on errors
 # If you also want this script to download all the installed packages' as .deb files, then set this environment variable:
 # export DOWNLOAD_DEB=yes
 
-# An indicator that the script is inside chroot. Now used less i favour of more finegrained control over turning of parts of the script.
+# An indicator that the script is inside chroot. It doesn't do anything at the moment.
 # export CHROOTED=yes
 
 
@@ -489,8 +492,9 @@ else
     rm -rf /home/pi/configuration-files/.git
     
     if [ ! -d /home/pi/candle/configuration-files-backup ]; then
-        echo "Created intial backup of the configuratino files" >> /dev/kmsg
         cp -r /home/pi/configuration-files /home/pi/candle/configuration-files-backup
+        echo "Created intial backup of the configuration files" >> /dev/kmsg
+        echo "Created intial backup of the configuration files" >> /boot/candle_log.txt
     fi
 fi
 
@@ -904,6 +908,7 @@ then
                 echo "" > /etc/modules
                 
                 
+                # A little overkill:
                 
                 apt-get update -y
                 DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
@@ -2074,32 +2079,6 @@ fi
 
 cd /home/pi
 
-# Create tar backup up controller
-if [ ! -f /home/pi/controller_backup.tar ];
-then
-    if [ -f /home/pi/webthings/gateway/build/app.js ] \
-    && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
-    && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-    && [ -d /home/pi/webthings/gateway/node_modules ] \
-    && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
-    then
-        echo "Creating initial backup of webthings folder"
-        echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
-        echo "Candle: creating initial backup of webthings folder" >> /boot/candle_log.txt
-        tar -czf ./controller_backup.tar ./webthings
-        
-    else
-        echo
-        echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
-        echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
-        echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /boot/candle_log.txt
-        echo
-    fi
-fi
-
-if [ -f /home/pi/controller_backup.tar ];
-    chown pi:pi /home/pi/controller_backup.tar
-fi
 
 # important boot files backup
 if [ ! -f /etc/rc.local.bak ]; then
@@ -2111,12 +2090,39 @@ fi
 if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
     cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
 fi
-if [ ! -f /boot/config.txt.bak ]; then
-    cp /boot/config.txt /boot/config.txt.bak
-fi
 
 
-# SAVE STATE
+
+
+
+
+
+
+
+
+
+# CLEANUP
+
+echo
+echo "CLEANING UP"
+echo
+echo "Candle: almost done, cleaning up" >> /dev/kmsg
+echo "Candle: almost done, cleaning up" >> /boot/candle_log.txt
+
+
+
+#npm cache clean --force # already done in install_candle_controller script
+#nvm cache clear
+
+echo "Clearing Apt leftovers"
+apt clean -y
+apt-get clean -y
+#apt remove --purge
+apt autoremove -y
+rm -rf /var/lib/apt/lists/*
+
+
+# SAVE STATE OF INSTALLED PACKAGES
 
 # Generate file that can be used to re-install this exact combination of Python packages's versions
 pip3 list --format=freeze > /home/pi/candle/candle_requirements.txt
@@ -2143,32 +2149,6 @@ apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk
 
 
 
-echo
-echo "Enabling NVM in create_latest_candle.sh for cleanup"
-export NVM_DIR="/home/pi/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-
-
-
-# CLEANUP
-
-echo
-echo "CLEANING UP"
-echo
-echo "Candle: almost done, cleaning up" >> /dev/kmsg
-echo "Candle: almost done, cleaning up" >> /boot/candle_log.txt
-
-#npm cache clean --force # already done in install_candle_controller script
-#nvm cache clear
-
-echo "Clearing Apt leftovers"
-apt clean -y
-apt-get clean -y
-#apt remove --purge
-apt autoremove -y
-rm -rf /var/lib/apt/lists/*
 
 echo "removing swap"
 
@@ -2303,9 +2283,7 @@ rm -rf /home/pi/configuration-files
 
 
 
-# Some final insurance
-chown pi:pi /home/pi/*
-chown pi:pi /home/pi/candle/*
+
 #echo "setting internet time to true"
 #timedatectl set-ntp true
 #sleep 2
@@ -2340,7 +2318,10 @@ fi
 
 
 
-
+#
+#  AT THIS POINT THE SYSTEM UPDATE IS MOSTLY DONE
+#  PART 2: INSTALL UPDATED CANDLE CONTROLLER SOFTWARE
+#
 
 
 
@@ -2398,8 +2379,41 @@ then
 
             exit 1
         fi
+    
+    else
+        echo "Error, install_candle_controller.sh was missing. Should not be possible."
     fi
     
+fi
+
+
+cd /home/pi
+
+# Create tar backup up controller
+if [ ! -f /home/pi/controller_backup.tar ];
+then
+    if [ -f /home/pi/webthings/gateway/build/app.js ] \
+    && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
+    && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
+    && [ -d /home/pi/webthings/gateway/node_modules ] \
+    && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
+    then
+        echo "Creating initial backup of webthings folder"
+        echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
+        echo "Candle: creating initial backup of webthings folder" >> /boot/candle_log.txt
+        tar -czf ./controller_backup.tar ./webthings
+        
+    else
+        echo
+        echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
+        echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
+        echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /boot/candle_log.txt
+        echo
+    fi
+fi
+
+if [ -f /home/pi/controller_backup.tar ];
+    chown pi:pi /home/pi/controller_backup.tar
 fi
 
 
@@ -2407,10 +2421,9 @@ fi
 
 
 
-
-
-
-
+# Some final insurance
+chown pi:pi /home/pi/*
+chown pi:pi /home/pi/candle/*
 
 
 
@@ -2470,38 +2483,18 @@ then
     echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
     echo
 
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-    then
-        rm /boot/bootup_actions.sh
-        rm /boot/bootup_actions_failed.sh
-        /home/pi/candle/debug.sh > /boot/debug.txt
-    
-        echo "" >> /boot/debug.txt
-        echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPGRADE PROCESS" >> /boot/debug.txt
-        cat /boot/debug.txt
-    
-        echo "Candle: DONE. Debug output placed in debug.txt" >> /dev/kmsg
-        echo "Candle: Rebooting in 5 seconds..." >> /dev/kmsg
-        sleep 5
-        reboot
-        exit 0
-    else
-        /home/pi/candle/debug.sh > /home/pi/candle/debug.txt
-        cat /home/pi/candle/debug.txt
-        rm /home/pi/candle/debug.txt
-    fi
+    rm /boot/bootup_actions.sh
+    rm /boot/bootup_actions_failed.sh
+    /home/pi/candle/debug.sh > /boot/debug.txt
 
+    echo "" >> /boot/debug.txt
+    echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPDATE PROCESS" >> /boot/debug.txt
+    cat /boot/debug.txt
+
+    echo "Candle: DONE. Debug output placed in /boot/debug.txt" >> /dev/kmsg
     echo
     echo
-    
-else
-    echo
-    echo
-    echo "boot partition not mounted, so DONE"
-    echo
-    echo
-    echo "boot partition not mounted, so DONE" >> /dev/kmsg
-    exit 0
+   
 fi
 
 echo
@@ -2509,16 +2502,16 @@ echo
 
 if [ ! -f /boot/candle_first_run_complete.txt ]; then
     
-    if [[ -z "${STOP_EARLY}" ]] || [ "$STOP_EARLY" = no ]; 
+    if [[ -n "${CREATE_DISK_IMAGE}" ]] || [ "$CREATE_DISK_IMAGE" = yes ]; 
     then
-        echo "STARTING FINAL PHASE"
+        echo "CREATING DISK IMAGE"
         echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
         chmod +x /home/pi/candle/prepare_for_disk_image.sh 
         /home/pi/candle/prepare_for_disk_image.sh 
         exit 0
   
     else
-        echo "NOT RUNNING PREPARE_FOR_DISK_IMAGE SCRIPT YET. Stopping early."
+        echo "NOT RUNNING PREPARE_FOR_DISK_IMAGE SCRIPT. Stopping early."
     
         # To be safe, start SSH on the first run
         #touch /boot/ssh.txt
