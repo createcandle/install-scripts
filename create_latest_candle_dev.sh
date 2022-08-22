@@ -2444,6 +2444,13 @@ if [ -f /boot/candle_first_run_complete.txt ] && [ ! -f /boot/candle_original_ve
     echo "2.0.0-beta" > /boot/candle_original_version.txt
 fi
 
+# remember when the disk image was created
+if [ ! -f /home/pi/candle/creation_date.txt ]; then
+    echo "$(date +%s)" > /home/pi/candle/creation_date.txt
+fi
+
+# remember when the update script was last run
+echo "$(date +%s)" > /home/pi/candle/update_date
 
 # Disable old bootup actions service
 systemctl disable candle_bootup_actions.service

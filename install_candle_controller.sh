@@ -37,9 +37,11 @@ else
 echo "Cutting edge : no"
 fi
 
+echo
+echo
+
 cd /home/pi || exit
 
-echo "installing python gateway addon"
 echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 echo "candle: installing python gateway addon" | sudo tee -a /boot/candle_log.txt
 python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
@@ -419,7 +421,9 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     && [ -d /home/pi/webthings/gateway2/build/static/bundle ];
     then
       touch .post_upgrade_complete
+      echo "$(date +%s)" > update_date.txt
       #echo "Controller installation seems ok"
+      
       echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
     else
       echo  
