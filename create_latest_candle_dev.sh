@@ -347,6 +347,17 @@ fi
 
 
 
+if [ -z "$(which git)" ]; then
+    echo
+    echo "installing git"
+    echo "Candle: installing git" >> /dev/kmsg
+    echo "Candle: installing git" >> /boot/candle_log.txt
+    echo
+    apt -y install git "$reinstall" 
+fi
+
+
+
 
 # PLYMOUTH LITE
 if [ ! -f /bin/ply-image ]; 
@@ -614,7 +625,7 @@ fi
 
 
 
-# DOWNLOAD CANDLE CONTROLLER INSTALLER
+# PRE-DOWNLOAD CANDLE CONTROLLER INSTALLER
 
 if [[ -z "${SKIP_CONTROLLER_INSTALL}" ]] || [ "$SKIP_CONTROLLER_INSTALL" = no ]; 
 then
@@ -1031,6 +1042,15 @@ then
         apt install chromium-browser -y --allow-change-held-packages
     fi
 
+
+    echo
+    echo "installing git"
+    echo "Candle: installing git" >> /dev/kmsg
+    echo "Candle: installing git" >> /boot/candle_log.txt
+    echo
+    apt -y install git "$reinstall" 
+
+
     echo
     echo "installing vlc"
     apt -y install vlc --print-uris --no-install-recommends "$reinstall"
@@ -1039,13 +1059,6 @@ then
     #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
     #apt update
     #apt install ungoogled-chromium -y
-
-    echo
-    echo "installing git"
-    echo "Candle: installing git" >> /dev/kmsg
-    echo "Candle: installing git" >> /boot/candle_log.txt
-    echo
-    apt -y install git "$reinstall" 
 
     echo
     echo "installing build tools"
