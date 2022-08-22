@@ -2596,9 +2596,6 @@ if [ ! -f /boot/candle_first_run_complete.txt ]; then
         echo
         echo "MOSTLY DONE"
         echo
-        #echo "To finalise the process, delete the deb folder:"
-        #echo "sudo rm -rf /home/pi/.webthings/deb_packages"
-        #echo
         echo "To finalise enter this command:"
         echo "sudo /home/pi/prepare_for_disk_image.sh"
         echo
