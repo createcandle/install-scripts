@@ -45,23 +45,19 @@ NOTE: If you enabled developer mode, and the script detects that a bootloader or
 .
 
 ### Developer options
-Note: To get the cutting edge release, use the `_dev` version.
+Note: To get the cutting edge release, use the `_dev.sh` version.
 Note: There are some other options which are described in the create_latest_candle.sh file. 
 
 For example, this command installs the cutting-edge version of Candle and then stops for inspection:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo STOP_EARLY=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | CUTTING_EDGE=yes sudo STOP_EARLY=yes bash
 ```
-(It's the command we really use to create the Candle disk images, as we let the controller boot once to install Zigbee2MQTT properly)
+(It's the command we really use to create the Candle disk images. Once done, do `touch /boot/candle_rw_once.txt` and then reboot the controller. Log in, wait for Zigbee2MQTT to be fully installed, and only then run the `prepare_for_disk_image.sh` script)
 
-You could even try to use it as an update script:
-```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes REBOOT_WHEN_DONE=yes bash
-```
 
 Many parts of the script can be turned off, details can be found in the create_latest_candle.sh script. This command turns off most parts:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo STOP_EARLY=yes REBOOT_WHEN_DONE=yes SKIP_PYTHON=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER_INSTALL=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes SKIP_REBOOT=yes SKIP_PYTHON=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER_INSTALL=yes SKIP_DEBUG=yes bash
 ```
 
 .
@@ -73,7 +69,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 .
 
 ### Live update script
-With the latest versions of Candle it's now possible to fully update the controller while the system is running. This is experimental, so use at your own risk. It automatically detects if your controller is compatible.
+With the latest versions of Candle it's now possible to fully update the controller even when read-only protection is enabled, with out needing a reboot first. This is experimental, so use at your own risk. It automatically detects if your controller is compatible. We prefer to just disable read-only first through a reboot.
 ```
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo REBOOT_WHEN_DONE=yes bash
 ```
