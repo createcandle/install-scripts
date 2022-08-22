@@ -64,9 +64,12 @@ then
       echo "Candle: detected read-only mode. Aborting." >> /boot/candle_log.txt
       
       # Show error image
-      if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-        /bin/ply-image /boot/error.png
-        sleep 7200
+      if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+      then
+          if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+              /bin/ply-image /boot/error.png
+              #sleep 7200
+          fi
       fi
   
       exit 1
@@ -84,9 +87,12 @@ if [ -f /boot/cmdline.txt ]; then
         echo "Candle: detected OLD read-only mode. Aborting." >> /boot/candle_log.txt
 
         # Show error image
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-            /bin/ply-image /boot/error.png
-            sleep 7200
+        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+        then
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                /bin/ply-image /boot/error.png
+                #sleep 7200
+            fi
         fi
 
         exit 1
@@ -105,9 +111,12 @@ then
             echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /boot/candle_log.txt
     
             # Show error image
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-                /bin/ply-image /boot/error.png
-                sleep 7200
+            if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+            then
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                    /bin/ply-image /boot/error.png
+                    #sleep 7200
+                fi
             fi
     
             exit 1
@@ -142,9 +151,12 @@ if [ ! -f /boot/cmdline.txt ]; then
     echo "Candle: ERROR, missing cmdline.txt??" >> /dev/kmsg
     echo "Candle: ERROR, missing cmdline.txt??" >> /boot/candle_log.txt
     
-    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-        /bin/ply-image /boot/error.png
-        sleep 7200
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+    then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            /bin/ply-image /boot/error.png
+            #sleep 7200
+        fi
     fi
     
     exit 1
@@ -492,7 +504,7 @@ if [ ! -d /home/pi/configuration-files ]; then
     # Show error image
     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
         /bin/ply-image /boot/error.png
-        sleep 7200
+        #sleep 7200
     fi
     
     exit 1
@@ -574,7 +586,7 @@ else
         then
             if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
                 /bin/ply-image /boot/error.png
-                sleep 7200
+                #sleep 7200
             fi
         fi
 
@@ -617,7 +629,7 @@ else
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
             /bin/ply-image /boot/error.png
-            sleep 7200
+            #sleep 7200
         fi
     fi
 
@@ -709,7 +721,7 @@ then
                 then
                     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
                         /bin/ply-image /boot/error.png
-                        sleep 7200
+                        #sleep 7200
                     fi
                 fi
     
@@ -732,7 +744,7 @@ then
             then
                 if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
                     /bin/ply-image /boot/error.png
-                    sleep 7200
+                    #sleep 7200
                 fi
             fi
     
@@ -757,7 +769,7 @@ then
         then
             if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
                 /bin/ply-image /boot/error.png
-                sleep 7200
+                #sleep 7200
             fi
         fi
     
@@ -1271,7 +1283,7 @@ then
                 # Show error image
                 if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
                     /bin/ply-image /boot/error.png
-                    sleep 7200
+                    #sleep 7200
                 fi
     
                 exit 1
@@ -1314,7 +1326,7 @@ then
                 then
                     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
                         /bin/ply-image /boot/error.png
-                        sleep 7200
+                        #sleep 7200
                     fi
                 fi
     
@@ -1371,7 +1383,7 @@ else
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
             /bin/ply-image /boot/error.png
-            sleep 7200
+            #sleep 7200
         fi
     fi
     
@@ -1397,7 +1409,7 @@ else
     then
         if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
             /bin/ply-image /boot/error.png
-            sleep 7200
+            #sleep 7200
         fi
     fi
     
@@ -2367,11 +2379,12 @@ then
                 # Show error image
                 if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
                     /bin/ply-image /boot/error.png
-                    sleep 7200
+                    #sleep 7200
                 fi
 
                 exit 1
             fi
+            
         elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ]; then
     
             echo 
@@ -2384,7 +2397,7 @@ then
             # Show error image
             if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
                 /bin/ply-image /boot/error.png
-                sleep 7200
+                #sleep 7200
             fi
 
             exit 1
@@ -2394,41 +2407,40 @@ then
         echo "Error, install_candle_controller.sh was missing. Should not be possible."
     fi
     
-fi
+    
+    cd /home/pi
 
 
-cd /home/pi
-
-
-
-
-
-# Create initial tar backup of controller
-if [ ! -f /home/pi/controller_backup.tar ];
-then
-    if [ -f /home/pi/webthings/gateway/build/app.js ] \
-    && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
-    && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-    && [ -d /home/pi/webthings/gateway/node_modules ] \
-    && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
+    # Create initial tar backup of controller
+    if [ ! -f /home/pi/controller_backup.tar ];
     then
-        echo "Creating initial backup of webthings folder"
-        echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
-        echo "Candle: creating initial backup of webthings folder" >> /boot/candle_log.txt
-        tar -czf ./controller_backup.tar ./webthings
+        if [ -f /home/pi/webthings/gateway/build/app.js ] \
+        && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
+        && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
+        && [ -d /home/pi/webthings/gateway/node_modules ] \
+        && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
+        then
+            echo "Creating initial backup of webthings folder"
+            echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
+            echo "Candle: creating initial backup of webthings folder" >> /boot/candle_log.txt
+            tar -czf ./controller_backup.tar ./webthings
         
-    else
-        echo
-        echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
-        echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
-        echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /boot/candle_log.txt
-        echo
+        else
+            echo
+            echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
+            echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
+            echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /boot/candle_log.txt
+            echo
+        fi
     fi
+
+    if [ -f /home/pi/controller_backup.tar ]; then
+        chown pi:pi /home/pi/controller_backup.tar
+    fi
+    
 fi
 
-if [ -f /home/pi/controller_backup.tar ];
-    chown pi:pi /home/pi/controller_backup.tar
-fi
+
 
 
 
@@ -2474,10 +2486,22 @@ systemctl disable candle_bootup_actions.service
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
 if [ -f /boot/bootup_actions.sh ]; then
-    echo "removed /boot/bootup_actions.sh"
     rm /boot/bootup_actions.sh
+    echo "removed /boot/bootup_actions.sh"
+fi
+if [ -f /boot/bootup_actions_failed.sh ]; then
+    rm /boot/bootup_actions_failed.sh
+    echo "removed /boot/bootup_actions_failed.sh"
 fi
 
+if [ -f /boot/post_bootup_actions.sh ]; then
+    rm /boot/post_bootup_actions.sh
+    echo "removed /boot/post_bootup_actions.sh"
+fi
+if [ -f /boot/post_bootup_actions_failed.sh ]; then
+    rm /boot/post_bootup_actions_failed.sh
+    echo "removed /boot/post_bootup_actions_failed.sh"
+fi
 
 # Remove cutting edge
 if [ -f /boot/candle_cutting_edge.txt ]; then
@@ -2494,12 +2518,6 @@ echo "$(date) - system update complete" >> /boot/candle_log.txt
 
 
 
-
-
-
-
-
-
 # RUN DEBUG SCRIPT
 
 if [ "$SKIP_DEBUG" = no ] || [[ -z "${SKIP_DEBUG}" ]]; 
@@ -2510,8 +2528,6 @@ then
     echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
     echo
 
-    rm /boot/bootup_actions.sh
-    rm /boot/bootup_actions_failed.sh
     /home/pi/candle/debug.sh > /boot/debug.txt
 
     echo "" >> /boot/debug.txt
