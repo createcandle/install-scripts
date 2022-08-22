@@ -2389,7 +2389,11 @@ fi
 
 cd /home/pi
 
-# Create tar backup up controller
+
+
+
+
+# Create initial tar backup of controller
 if [ ! -f /home/pi/controller_backup.tar ];
 then
     if [ -f /home/pi/webthings/gateway/build/app.js ] \
