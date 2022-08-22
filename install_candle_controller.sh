@@ -91,12 +91,14 @@ then
         echo "ERROR, nvm is not available. Installation failed?" | sudo tee -a /dev/kmsg
         echo "ERROR, nvm is not available. Installation failed?" | sudo tee -a /boot/candle_log.txt
         
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            sudo /bin/ply-image /boot/error.png
-            sleep 7200
-        fi
+        if [ ! -f /boot/candle_first_run_complete.txt ]; then
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                sudo /bin/ply-image /boot/error.png
+                sleep 7200
+            fi
         
-        exit 1
+            exit 1
+        fi
     else
         echo "NVM is available now"
     fi
@@ -133,6 +135,11 @@ if [ -d /home/pi/.nvm ]; then
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 fi
 
+
+if [ -f ./install_nvm.sh ]; then
+    echo "removing install_nvm.sh"
+    rm ./install_nvm.sh
+fi
 
 
 echo
@@ -229,12 +236,14 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
         echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a /dev/kmsg
         echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a /boot/candle_log.txt
         
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            sudo /bin/ply-image /boot/error.png
-            sleep 7200
-        fi
+        if [ ! -f /boot/candle_first_run_complete.txt ]; then
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                sudo /binif [ ! -f /boot/candle_first_run_complete.txt ]; then/ply-image /boot/error.png
+                sleep 7200
+            fi
         
-        exit 1
+            exit 1
+        fi
     fi
     
 else
@@ -274,19 +283,23 @@ else
         fi
         
     else
+        
+        cd /home/pi/webthings
+        
         curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
         | grep "tarball_url" \
         | cut -d : -f 2,3 \
         | tr -d \" \
         | sed 's/,*$//' \
-        | wget -qi - -O candle-controller.tar
+        | wget -qi - -O candle-controller-git.tar
 
-        if [ -f candle-controller.tar ]; then
-            echo "Stable Candle Controller release download succeeded" | sudo tee -a /dev/kmsg
-            echo "Stable Candle Controller release download succeeded" | sudo tee -a /boot/candle_log.txt
-            tar -xf candle-controller.tar
-            rm candle-controller.tar
+        if [ -f candle-controller-git.tar ]; then
+            echo "Stable Github Candle Controller release download succeeded" | sudo tee -a /dev/kmsg
+            echo "Stable Github Candle Controller release download succeeded" | sudo tee -a /boot/candle_log.txt
+            tar -xf candle-controller-git.tar
+            rm candle-controller-git.tar
     
+            
             for directory in createcandle-candle-controller*; do
               [[ -d $directory ]] || continue
               echo "Directory: $directory"
@@ -303,12 +316,15 @@ else
             echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /dev/kmsg
             echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /boot/candle_log.txt
         
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                sudo /bin/ply-image /boot/error.png
-                sleep 7200
-            fi
+            if [ ! -f /boot/candle_first_run_complete.txt ]; then
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                    sudo /bin/ply-image /boot/error.png
+                    sleep 7200
+                fi
         
-            exit 1
+                exit 1
+            fi
+            
         fi
     fi
 
@@ -322,12 +338,15 @@ if [ -f /boot/candle_cutting_edge.txt ] && [ ! -d /home/pi/webthings/gateway2 ];
     echo "Candle: ERROR, missing gateway2 directory" | sudo tee -a /boot/candle_log.txt
     echo
     
-    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-        sudo /bin/ply-image /boot/error.png
-        sleep 7200
-    fi
     
-    exit 1
+    if [ ! -f /boot/candle_first_run_complete.txt ]; then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            sudo /bin/ply-image /boot/error.png
+            sleep 7200
+        fi
+
+        exit 1
+    fi
 fi
 
 
@@ -430,6 +449,7 @@ if [ -d /home/pi/webthings/gateway2 ]; then
             rm -rf /home/pi/webthings/gateway2
         fi
     else
+        # This should never happen
         echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /dev/kmsg
         echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /boot/candle_log.txt
     fi
@@ -459,32 +479,35 @@ fi
 
 # TODO: maybe do another sanity check and restore a backup if need be?
 
-# restore the backup in case something has gone very wrong
-if [ -f /home/pi/controller_backup.tar ];
+
+if [ ! -f /home/pi/webthings/gateway/build/app.js ] \
+|| [ ! -f /home/pi/webthings/gateway/build/static/index.html ] \
+|| [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
+|| [ ! -d /home/pi/webthings/gateway/node_modules ] \
+|| [ ! -d /home/pi/webthings/gateway/build/static/bundle ]; 
 then
-    if [ ! -f /home/pi/webthings/gateway/build/app.js ] \
-    || [ ! -f /home/pi/webthings/gateway/build/static/index.html ] \
-    || [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-    || [ ! -d /home/pi/webthings/gateway/node_modules ] \
-    || [ ! -d /home/pi/webthings/gateway/build/static/bundle ]; 
+    echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP"   | sudo tee -a /dev/kmsg
+    echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP" | sudo tee -a /boot/candle_log.txt
+    
+    # restore the backup in case something has gone very wrong
+    if [ -f /home/pi/controller_backup.tar ];
     then
-        echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP"   | sudo tee -a /dev/kmsg
-        echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP" | sudo tee -a /boot/candle_log.txt
-        
         cd /home/pi
         sudo rm -rf /home/pi/webthings
         tar -xf ./controller_backup.tar
-        
-    else
-        echo
-        echo "Everything looks good"
-        echo "Candle: a valid controller exists" | sudo tee -a /dev/kmsg
-        echo "Candle: a valid controller exists" | sudo tee -a /boot/candle_log.txt
-        echo
     fi
+    
+    
+else
+    echo
+    echo "Everything looks good"
+    echo "Candle: a valid controller exists" | sudo tee -a /dev/kmsg
+    echo "Candle: a valid controller exists" | sudo tee -a /boot/candle_log.txt
+    echo
 fi
 
 
+cd /home/pi
 
 
 echo
@@ -633,7 +656,8 @@ echo "ls /home/pi/.webthings:"
 #ls /home/pi/.webthings
 
 cd /home/pi
-rm ./install_nvm.sh
+
+
 
 mkdir -p /home/pi/.webthings/config
 chown -R pi:pi /home/pi/.webthings/config
