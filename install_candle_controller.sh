@@ -303,6 +303,9 @@ else
         
     else
         
+        echo "Stable, but latest_stable_controller.tar missing. Attempting build." | sudo tee -a /dev/kmsg
+        echo "Stable, but latest_stable_controller.tar missing. Attempting build." | sudo tee -a /boot/candle_log.txt
+        
         mkdir -p /home/pi/webthings
         chown pi:pi /home/pi/webthings
         cd /home/pi/webthings
@@ -725,8 +728,8 @@ nvm cache clear
 
 echo
 #echo "sub-script that installs the Candle controller is done. Returning to the main install script."
-echo "Candle: Sub-script that installs the Candle controller is done. Returning to the main install script." | sudo tee -a /dev/kmsg
-echo "Candle: Sub-script that installs the Candle controller is done. Returning to the main install script." | sudo tee -a /boot/candle_log.txt
+echo "Candle: Returning to the main install script." | sudo tee -a /dev/kmsg
+echo "Candle: Returning to the main install script." | sudo tee -a /boot/candle_log.txt
 echo
 exit 0
 
