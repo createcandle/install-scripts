@@ -50,7 +50,7 @@ Note: There are some other options which are described in the create_latest_cand
 
 For example, this command installs the cutting-edge version of Candle and then stops for inspection:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | CUTTING_EDGE=yes sudo STOP_EARLY=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes STOP_EARLY=yes bash
 ```
 (It's the command we really use to create the Candle disk images. Once done, do `touch /boot/candle_rw_once.txt` and then reboot the controller. Log in, wait for Zigbee2MQTT to be fully installed, and only then run the `prepare_for_disk_image.sh` script)
 
