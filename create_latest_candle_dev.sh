@@ -307,7 +307,6 @@ fi
 
 echo
 
-
 # Clean up any files that may be left over to make sure there is enough space
 if [ -f /zero.fill ]; then
   rm /zero.fill
@@ -325,6 +324,10 @@ fi
 if [ -f /home/pi/latest_stable_controller.tar ]; then
     rm /home/pi/latest_stable_controller.tar
     echo "Warning, removed /home/pi/latest_stable_controller.tar"
+fi
+if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
+    rm /home/pi/latest_stable_controller.tar.txt
+    echo "Warning, removed /home/pi/latest_stable_controller.tar.txt"
 fi
 
 
