@@ -181,13 +181,13 @@ sudo setcap cap_net_raw+eip $(eval readlink -f `which python3`)
 # Download Candle controller from Github and install it
 
 echo
-echo "DOWNLOADING AND INSTALLING CANDLE CONTROLLER"
-echo "Do not worry about the errors you will see with optipng and jpegtran"
+echo "INSTALLING CANDLE CONTROLLER"
+
 echo
 
 
-# Create a backup first
 
+# Create a backup first
 
 availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
 if [ -f /home/pi/latest_stable_controller.tar ]; then
@@ -200,8 +200,8 @@ if [ -f /home/pi/latest_stable_controller.tar ]; then
         && [ -d /home/pi/webthings/gateway/build/static/bundle ];
         then
             echo "Detected old webthings directory! Creating fresh backup"
-            echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /dev/kmsg
-            echo "Candle: Detected old webthings directory. Creating additional backup" | sudo tee -a /boot/candle_log.txt
+            echo "Candle: Detected old webthings directory. Creating fresh backup" | sudo tee -a /dev/kmsg
+            echo "Candle: Detected old webthings directory. Creating fresh backup" | sudo tee -a /boot/candle_log.txt
             #mv /home/pi/webthings /home/pi/webthings-old
             tar -czf ./controller_backup_fresh.tar ./webthings
         fi
@@ -210,12 +210,6 @@ fi
 
 
 #rm -rf /home/pi/webthings
-
-echo "Candle: Starting controller source code download" | sudo tee -a /dev/kmsg
-echo "Candle: Starting controller source code download" | sudo tee -a /boot/candle_log.txt
-mkdir -p /home/pi/webthings
-chown pi:pi /home/pi/webthings
-cd /home/pi/webthings
 
 if [ -d ./candle-controller ]; then
     echo "spotted candle-controller directory. Must be left over from interupted install"
@@ -228,6 +222,13 @@ fi
 # DOWNLOAD CANDLE CONTROLLER FROM GITHUB
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
+    
+    echo "Candle: Starting controller source code download" | sudo tee -a /dev/kmsg
+    echo "Candle: Starting controller source code download" | sudo tee -a /boot/candle_log.txt
+    mkdir -p /home/pi/webthings
+    chown pi:pi /home/pi/webthings
+    cd /home/pi/webthings
+    
     git clone --depth 1 https://github.com/createcandle/candle-controller.git
     if [ -d ./candle-controller ]; then
         echo "Cutting edge controller download succeeded" | sudo tee -a /dev/kmsg
@@ -254,6 +255,8 @@ else
 
     if [ -f /home/pi/latest_stable_controller.tar ]; then
         
+        echo "Will extract latest_stable_controller.tar"
+        
         cd /home/pi
         
         if [ -d /home/pi/webthings/gateway2 ]; then
@@ -263,21 +266,35 @@ else
         availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
         if [ "$availMem" -gt "1000000" ]; 
         then
+            echo "Candle: Doing safe unpack of latest_stable_controller.tar"
             echo "Candle: Doing safe unpack of latest_stable_controller.tar" | sudo tee -a /dev/kmsg
             echo "Doing safe unpack of latest_stable_controller.tar" | sudo tee -a /boot/candle_log.txt
             mkdir -p /home/pi/downloaded_controller
             rm -rf /home/pi/downloaded_controller/*
-            tar -xf latest_stable_controller.tar -O /home/pi/downloaded_controller/
+            echo "extracting"
+            tar -xf latest_stable_controller.tar -C /home/pi/downloaded_controller
+            
+            ls /home/pi/downloaded_controller
             
             if [ -f /home/pi/downloaded_controller/webthings/gateway/.post_upgrade_complete ]; then
+                echo "extraction worked fine"
                 if [ -d /home/pi/webthings/gateway ]; then
                     rm -rf /home/pi/webthings/gateway
                 fi
+                echo "moving extracted gateway dir into place"
                 mv /home/pi/downloaded_controller/webthings/gateway /home/pi/webthings/gateway
+            else
+                echo "extraction did not go as planned"    
             fi
+            
+            echo "removing extracted files"
             rm -rf /home/pi/downloaded_controller
+            
         else
             # more risky move because of low disk space
+            echo "Candle: Low disk space, doing direct unpack of latest_stable_controller.tar" | sudo tee -a /dev/kmsg
+            echo "Low disk space, doing direct unpack of latest_stable_controller.tar" | sudo tee -a /boot/candle_log.txt
+            
             if [ -d /home/pi/webthings ]; then
                 sudo rm -rf /home/pi/webthings
             fi
@@ -286,6 +303,8 @@ else
         
     else
         
+        mkdir -p /home/pi/webthings
+        chown pi:pi /home/pi/webthings
         cd /home/pi/webthings
         
         curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
@@ -366,6 +385,9 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     # npm install
     echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
     echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /boot/candle_log.txt
+    
+    echo "Do not worry about the errors you will see with optipng and jpegtran"
+    
     CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
 
     #echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
