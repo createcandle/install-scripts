@@ -58,21 +58,21 @@ if [ -f /proc/mounts ];
 then
     # Detect is read-only mode is active
     if [ -n "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; then
-      echo 
-      echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
-      echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
-      echo "Candle: detected read-only mode. Aborting." >> /boot/candle_log.txt
+        echo 
+        echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
+        echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
+        echo "Candle: detected read-only mode. Aborting." >> /boot/candle_log.txt
       
-      # Show error image
-      if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-      then
-          if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-              /bin/ply-image /boot/error.png
-              #sleep 7200
-          fi
-      fi
+        # Show error image
+        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+        then
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                /bin/ply-image /boot/error.png
+                #sleep 7200
+            fi
+        fi
   
-      exit 1
+        exit 1
     fi
 fi
 
@@ -98,6 +98,8 @@ if [ -f /boot/cmdline.txt ]; then
         exit 1
     fi
 fi
+
+
 echo
 
 # Detect if a kernel or bootloader update has just occured. If so, the system must be rebooted first.
@@ -188,34 +190,44 @@ echo "USER         : $(whoami)"
 echo "SCRIPT NAME  : $scriptname"
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
+    echo "CUTTING EDGE : yes"
     echo "CUTTING EDGE : yes" >> /dev/kmsg
     echo "CUTTING EDGE : yes" >> /boot/candle_log.txt
 else
+    echo "CUTTING EDGE : no"
     echo "CUTTING EDGE : no" >> /dev/kmsg
     echo "CUTTING EDGE : no" >> /boot/candle_log.txt
 fi
 
-if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
-    echo "APT REINSTALL: no" >> /dev/kmsg
-else
-    reinstall="--reinstall"
-    echo "APT REINSTALL: yes" >> /dev/kmsg
-    echo "APT REINSTALL: yes" >> /boot/candle_log.txt
-fi
 
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 echo "CHROOT       : Not in chroot"
 echo "CHROOT       : Not in chroot" >> /boot/candle_log.txt
 else
-echo "CHROOT       : INSIDE CHROOT (boot partition is not mounted)"
+echo "CHROOT       : Inside chroot"
 fi
 
-echo
-echo "reinstall flag: $reinstall"
 
+if [[ -z "${APT_REINSTALL}" ]] || [ "$APT_REINSTALL" = no ] ; then
+    echo "APT REINSTALL: no"
+    echo "APT REINSTALL: no" >> /dev/kmsg
+else
+    reinstall="--reinstall"
+    echo "APT REINSTALL: yes"
+    echo "APT REINSTALL: yes" >> /dev/kmsg
+    echo "APT REINSTALL: yes" >> /boot/candle_log.txt
+    echo
+    echo "reinstall flag: $reinstall"
+fi
+
+
+
+
+echo
 echo
 echo "Current version of Raspbery Pi OS:"
 cat /etc/os-release
+echo
 echo
 
 
@@ -335,6 +347,7 @@ fi
 sleep 3
 cd /home/pi
 
+
 # Make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
     rm /boot/candle_hardware_clock.txt
@@ -346,7 +359,6 @@ if [ -f /boot/candle_hardware_clock.txt ]; then
     echo "Candle: requested latest time. Date is now: $(date)" >> /dev/kmsg
     echo "Candle: requested latest time. Date is now: $(date)" >> /boot/candle_log.txt
 fi
-
 
 
 
@@ -362,6 +374,7 @@ fi
 
 
 
+# Quickly install Git if it hasn't been already
 if [ -z "$(which git)" ]; then
     echo
     echo "installing git"
@@ -370,7 +383,6 @@ if [ -z "$(which git)" ]; then
     echo
     apt -y install git "$reinstall" 
 fi
-
 
 
 
@@ -403,7 +415,6 @@ if [ -f /boot/cmdline.txt ]; then
     
     wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
     wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
-    
     
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
@@ -447,7 +458,7 @@ fi
 
 
 echo
-echo "DOWNLOADING AND COPYING CONFIGURATION FILES FROM GITHUB"
+echo "PRE-DOWNLOADING CONFIGURATION FILES FROM GITHUB"
 echo
 
 
@@ -657,8 +668,6 @@ then
     #rm -rf /home/pi/webthings
     #rm -rf /home/pi/.webthings # too dangerous
     
-    
-    
     if [ -f /boot/candle_cutting_edge.txt ]; then
         echo "Candle: Starting download of cutting edge controller install script" >> /dev/kmsg
         wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
@@ -697,6 +706,7 @@ then
         wget https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O /home/pi/latest_stable_controller.tar.txt
         
         if [ -f /home/pi/latest_stable_controller.tar ] && [ -f /home/pi/latest_stable_controller.tar.txt ]; then
+            
             echo "controller tar & md5 downloaded OK"
             
             if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat /home/pi/latest_stable_controller.tar.txt)" ]; then
@@ -1103,7 +1113,7 @@ then
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
-        apt -y install "$i"  --print-uris "$reinstall" 
+        apt -y install "$i" --print-uris "$reinstall" 
         echo
     done
 
@@ -1113,11 +1123,7 @@ then
         echo "Candle: WARNING, mosquitto failed to install the first time" >> /boot/candle_log.txt
         apt -y --reinstall install mosquitto  
     fi
-    
 
-    # removed from above list:
-    #  libnanomsg-dev \
-    #  libnanomsg5 \
 
     # additional programs for Candle kiosk mode:
     echo
@@ -1195,7 +1201,7 @@ then
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
-        apt -y install "$i"  --print-uris "$reinstall"
+        apt -y install "$i" --print-uris "$reinstall"
         echo
     done
     
@@ -1204,12 +1210,12 @@ then
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
     echo "Candle: installing hostapd and dnsmasq" >> /boot/candle_log.txt
 
-    apt -y install dnsmasq  --print-uris "$reinstall" 
+    apt -y install dnsmasq --print-uris "$reinstall" 
     systemctl disable dnsmasq.service
     systemctl stop dnsmasq.service
 
     echo 
-    apt -y install hostapd  --print-uris "$reinstall"
+    apt -y install hostapd --print-uris "$reinstall"
     systemctl disable hostapd.service
     systemctl stop hostapd.service
     
@@ -1220,9 +1226,6 @@ then
     apt-get install -f -y
     apt --fix-broken install -y
     apt autoremove -y
-    
-    
-    
     
     
     # Check if the binaries eactually exist
@@ -2652,7 +2655,9 @@ else
     echo "Candle: Rebooting in 10 seconds" >> /dev/kmsg
     echo
     sleep 10
-    rm /boot/candle_rw_once.txt
+    if [ -f /boot/candle_rw_once.txt ]; then
+        rm /boot/candle_rw_once.txt
+    fi
     reboot
 fi
 
