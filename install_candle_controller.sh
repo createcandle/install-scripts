@@ -642,7 +642,7 @@ then
 
     rm -rf package
     rm -rf zigbee2mqtt-adapter
-    wget https://github.com/kabbi/zigbee2mqtt-adapter/releases/download/1.1.3/zigbee2mqtt-adapter-1.1.3.tgz
+    wget https://github.com/kabbi/zigbee2mqtt-adapter/releases/download/1.1.4/zigbee2mqtt-adapter-1.1.4.tgz
     #tar -xf zigbee2mqtt-adapter-1.1.3.tgz
     for f in zigbee2mqtt-adapter*.tgz; do
         tar -xf "$f"
