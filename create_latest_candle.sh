@@ -1753,21 +1753,7 @@ echo "Candle: Copying configuration files into place" >> /dev/kmsg
 echo "Candle: Copying configuration files into place" >> /boot/candle_log.txt
 rsync -vr /home/pi/configuration-files/* /
 
-# if this is not a cutting edge build, then use the cmdline.txt and config.txt from the configuration files
-if [ ! -f /boot/candle_cutting_edge.txt ]; then
-    
-    # Copy the Candle cmdline over the old one. This one is disk UUID agnostic.
-    if [ -f /boot/cmdline-candle.txt ]; then
-        rm /boot/cmdline.txt
-        cp /boot/cmdline-candle.txt /boot/cmdline.txt
-    fi
 
-    # Copy the Candle config.txt over the old one.
-    if [ -f /boot/config.txt.bak ]; then
-        rm /boot/config.txt
-        cp /boot/config.txt.bak /boot/config.txt
-    fi
-fi
 
 #if [ ! -f /boot/candle_config_version.txt ]; then
 #    touch /boot/candle_config_version.txt
@@ -2054,6 +2040,7 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
             echo "ADDING READ-ONLY MODE"
             echo
             echo "Candle: adding read-only mode" >> /dev/kmsg
+            echo "Candle: adding read-only mode" >> /boot/candle_log.txt
         
             mkinitramfs -o /boot/initrd
     
@@ -2316,6 +2303,22 @@ rm -rf /home/pi/configuration-files
 
 
 
+
+# if this is not a cutting edge build, then use the cmdline.txt and config.txt from the configuration files
+if [ ! -f /boot/candle_cutting_edge.txt ]; then
+    
+    # Copy the Candle cmdline over the old one. This one is disk UUID agnostic.
+    if [ -f /boot/cmdline-candle.txt ]; then
+        rm /boot/cmdline.txt
+        cp /boot/cmdline-candle.txt /boot/cmdline.txt
+    fi
+
+    # Copy the Candle config.txt over the old one.
+    if [ -f /boot/config.txt.bak ]; then
+        rm /boot/config.txt
+        cp /boot/config.txt.bak /boot/config.txt
+    fi
+fi
 
 
 #echo "setting internet time to true"
