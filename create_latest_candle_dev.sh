@@ -1063,8 +1063,7 @@ then
         apt install chromium-browser -y --allow-change-held-packages
     fi
     
-    
-    apt install chromium-browser -y --print-uris --allow-change-held-packages "$reinstall"
+    apt install chromium-browser -y  --allow-change-held-packages "$reinstall" #--print-uris
     apt install chromium-browser -y  --allow-change-held-packages
 
     if [ ! -f /bin/chromium-browser ]; then
@@ -1085,7 +1084,7 @@ then
 
     echo
     echo "installing vlc"
-    apt -y install vlc --print-uris --no-install-recommends "$reinstall"
+    apt -y install vlc --no-install-recommends "$reinstall" #--print-uris
 
     #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
     #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
@@ -1143,50 +1142,6 @@ then
     
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
-
-    # OMPLAYER
-    # This player is deprecated, but Internet Radio currently still uses it (and perhaps other addons too). So here's an attempts to get it working again.
-    # The way forward is for all these addons to switch to VLC player
-
-    # get OMXPlayer for Internet Radio
-    # http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/
-
-    
-    echo
-    echo "installing omxplayer"
-    for i in liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58; do
-        echo "$i"
-        echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> /boot/candle_log.txt
-        apt-get -y install $i --print-uris "$reinstall"
-        echo
-    done
-    #apt install liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 -y
-
-    apt --fix-broken install -y
-
-    wget http://archive.raspberrypi.org/debian/pool/main/o/omxplayer/omxplayer_20190723+gitf543a0d-1+bullseye_armhf.deb -O ./omxplayer.deb
-    if [ -f ./omxplayer.deb ]; then
-        dpkg -i ./omxplayer.deb
-        rm -rf ./omxplayer*
-
-        #apt --fix-broken install -y
-
-        mkdir -p /opt/vc/
-        wget https://www.candlesmarthome.com/tools/lib.tar -O ./lib.tar # files from https://github.com/raspberrypi/firmware/tree/master/opt/vc/lib
-        if [ -f ./lib.tar ]; then
-            rm -rf /opt/vc/*
-            tar -xvf lib.tar -C /opt/vc/
-            rm ./lib.tar
-        else
-            echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /dev/kmsg
-            echo "Candle: WARNING, DOWNLOADING OMXPLAYER LIB.TAR FROM CANDLE SERVER FAILED" >> /boot/candle_log.txt
-        fi
-    else
-        echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /dev/kmsg
-        echo "Candle: WARNING, OMXPLAYER .DEB DOWNLOAD FAILED" >> /boot/candle_log.txt
-    fi
-    
 
     # for BlueAlsa
     echo "installing bluealsa support packages"
