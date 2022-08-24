@@ -553,7 +553,7 @@ then
     cd /home/pi/.webthings/addons
     rm -rf package
     rm -rf power-settings
-    wget https://github.com/createcandle/power-settings/releases/download/3.2.37/power-settings-3.2.37.tgz
+    wget https://github.com/createcandle/power-settings/releases/download/3.3.10/power-settings-3.3.10.tgz
     for f in power-settings*.tgz; do
         tar -xf "$f"
     done
