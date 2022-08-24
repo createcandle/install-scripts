@@ -521,24 +521,7 @@ if [ ! -d /home/pi/configuration-files ]; then
     fi
     
     exit 1
-else
-    echo "Configuration files download succeeded"
-    echo "Candle: Configuration files download succeeded" >> /dev/kmsg
-    
-    rm /home/pi/configuration-files/LICENSE
-    rm /home/pi/configuration-files/README.md
-    rm -rf /home/pi/configuration-files/.git
-    
-    if [ ! -d /home/pi/candle/configuration-files-backup ]; then
-        mkdir -p /home/pi/candle/configuration-files-backup
-        cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
-        echo "Created intial backup of the configuration files" >> /dev/kmsg
-        echo "Created intial backup of the configuration files" >> /boot/candle_log.txt
-    fi
 fi
-
-
-
 
 
 
@@ -900,8 +883,8 @@ then
                 echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /boot/candle_log.txt
                 echo
                 # Save the install file for after the reboot
-                wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
-                chmod +x /home/pi/create_latest_candle.sh
+                #wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
+                #chmod +x /home/pi/create_latest_candle.sh
                 apt install -y raspberrypi-kernel
                 apt install -y raspberrypi-kernel-headers 
                 apt install -y raspberrypi-bootloader
@@ -1136,7 +1119,7 @@ then
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
-        apt-get -y --no-install-recommends install "$i" --print-uris "$reinstall" 
+        apt-get -y --no-install-recommends install "$i"  "$reinstall" #--print-uris
         echo
     done
     
@@ -1149,7 +1132,7 @@ then
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
-        apt -y install "$i" --print-uris "$reinstall" 
+        apt -y install "$i" "$reinstall"  #--print-uris
         echo
     done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
@@ -1160,7 +1143,7 @@ then
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
-        apt -y install "$i" --print-uris "$reinstall"
+        apt -y install "$i"  "$reinstall" #--print-uris
         echo
     done
     
@@ -1169,12 +1152,12 @@ then
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
     echo "Candle: installing hostapd and dnsmasq" >> /boot/candle_log.txt
 
-    apt -y install dnsmasq --print-uris "$reinstall" 
+    apt -y install dnsmasq  "$reinstall" #--print-uris
     systemctl disable dnsmasq.service
     systemctl stop dnsmasq.service
 
     echo 
-    apt -y install hostapd --print-uris "$reinstall"
+    apt -y install hostapd "$reinstall" #--print-uris 
     systemctl disable hostapd.service
     systemctl stop hostapd.service
     
@@ -1578,8 +1561,8 @@ cd /home/pi
 mkdir /home/pi/Arduino
 chown pi:pi /home/pi/Arduino
 
-mkdir /home/pi/.arduino
-chown pi:pi /home/pi/.arduino
+mkdir /home/pi/.arduino15
+chown pi:pi /home/pi/.arduino15
 
 mkdir -p /home/pi/.webthings/arduino/.arduino15
 chown pi:pi /home/pi/.webthings/arduino/.arduino15
@@ -1702,11 +1685,44 @@ fi
 
 # COPY SETTINGS
 
+if [ -d /home/pi/configuration-files ]; then
 
-echo "Copying configuration files into place"
-echo "Candle: Copying configuration files into place" >> /dev/kmsg
-echo "Candle: Copying configuration files into place" >> /boot/candle_log.txt
-rsync -vr /home/pi/configuration-files/* /
+    echo "Copying configuration files into place"
+    echo "Candle: Copying configuration files into place" >> /dev/kmsg
+    echo "Candle: Copying configuration files into place" >> /boot/candle_log.txt
+    
+    rm /home/pi/configuration-files/LICENSE
+    rm /home/pi/configuration-files/README.md
+    rm -rf /home/pi/configuration-files/.git
+    
+    if [ ! -d /home/pi/candle/configuration-files-backup ]; then
+        echo "Creating intial backup of the configuration files" >> /dev/kmsg
+        echo "Creating intial backup of the configuration files" >> /boot/candle_log.txt
+    fi
+    
+    if [ -d /home/pi/candle/configuration-files-backup ]; then
+        rm -rf /home/pi/candle/configuration-files-backup/*
+        echo "Updating backup of the configuration files" >> /dev/kmsg
+        echo "Updating backup of the configuration files" >> /boot/candle_log.txt
+    else
+        echo "Creating intial backup of the configuration files" >> /dev/kmsg
+        echo "Creating intial backup of the configuration files" >> /boot/candle_log.txt
+        mkdir -p /home/pi/candle/configuration-files-backup
+    fi
+    
+    cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
+    
+    rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
+    
+    rm -rf /home/pi/configuration-files
+    
+    
+else
+   
+    echo "Error, configuration files directory missing"
+    echo "Candle: Error, configuration files directory missing" >> /dev/kmsg
+    echo "Error, configuration files directory missing" >> /boot/candle_log.txt
+fi
 
 
 
@@ -2426,10 +2442,10 @@ fi
 #
 #  ADDITIONAL CLEANUP
 #
-if [ -f /home/pi/create_latest_candle.sh ]; then
-    echo "Removing left-over /home/pi/create_latest_candle.sh" >> /dev/kmsg
-    rm /home/pi/create_latest_candle.sh
-fi
+#if [ -f /home/pi/create_latest_candle.sh ]; then
+#    echo "Removing left-over /home/pi/create_latest_candle.sh" >> /dev/kmsg
+#    rm /home/pi/create_latest_candle.sh
+#fi
 
 if [ -f /home/pi/ro-root.sh ]; then
     rm /home/pi/ro-root.sh
@@ -2612,6 +2628,7 @@ fi
 # Here it's possible to also ask the script to not reboot.
 if [[ -n "${SKIP_REBOOT}" ]] || [ "$SKIP_REBOOT" = yes ]; then
     echo "Candle: Not rebooting" >> /dev/kmsg
+    echo "DONE"
 else
     echo
     echo "Candle: Rebooting in 10 seconds" >> /dev/kmsg
