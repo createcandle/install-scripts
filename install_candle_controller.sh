@@ -553,13 +553,30 @@ then
     cd /home/pi/.webthings/addons
     rm -rf package
     rm -rf power-settings
-    wget https://github.com/createcandle/power-settings/releases/download/3.3.11/power-settings-3.3.11.tgz
-    for f in power-settings*.tgz; do
-        tar -xf "$f"
+    #wget https://github.com/createcandle/power-settings/releases/download/3.3.11/power-settings-3.3.11.tgz
+    
+    curl -s https://api.github.com/repos/createcandle/power-settings/releases/latest \
+    | grep "tarball_url" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O addon.tgz
+    
+    #for f in power-settings*.tgz; do
+    #    tar -xf "$f"
+    #done
+    tar -xf addon.tgz
+    rm addon.tgz
+    
+    for directory in createcandle-power-settings*; do
+      [[ -d $directory ]] || continue
+      echo "Directory: $directory"
+      mv -- "$directory" ./power-settings
     done
-    mv package power-settings
+    
     chown -R pi:pi power-settings
     rm ./*.tgz
+    
 else
     echo "no need to (re-)install power-settings addon"
 fi
@@ -573,116 +590,70 @@ then
     echo "Candle: Installing addons" | sudo tee -a /boot/candle_log.txt
         
     cd /home/pi/.webthings/addons
-  
-    rm -rf package
-    rm -rf candle-theme
-    wget https://github.com/createcandle/candle-theme/releases/download/2.5.0/candle-theme-2.5.0.tgz
-    for f in candle-theme*.tgz; do
-        tar -xf "$f"
+
+
+    # Install Zigbee2MQTT
+    
+    curl -s https://api.github.com/repos/kabbi/zigbee2mqtt-adapter/releases/latest \
+    | grep "tarball_url" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O addon.tgz
+    tar -xf addon.tgz
+    rm addon.tgz
+    for directory in kabbi-zigbee2mqtt-adapter*; do
+      [[ -d $directory ]] || continue
+      echo "Directory: $directory"
+      mv -- "$directory" ./zigbee2mqtt-adapter
     done
-    mv package candle-theme
-    chown -R pi:pi candle-theme
-    rm ./*.tgz
-
-
-    rm -rf package
-    rm -rf tutorial
-    wget https://github.com/createcandle/tutorial/releases/download/1.0.7/tutorial-1.0.7.tgz
-    for f in tutorial*.tgz; do
-        tar -xf "$f"
-    done
-    mv package tutorial
-    chown -R pi:pi tutorial
-    rm ./*.tgz
-
-
-    rm -rf package
-    rm -rf bluetoothpairing
-    wget https://github.com/createcandle/bluetoothpairing/releases/download/0.5.8/bluetoothpairing-0.5.8.tgz
-    for f in bluetoothpairing*.tgz; do
-        tar -xf "$f"
-    done
-    mv package bluetoothpairing
-    chown -R pi:pi bluetoothpairing
-    rm ./*.tgz
-
-
-    rm -rf package
-    rm -rf photo-frame
-    wget https://github.com/flatsiedatsie/photo-frame/releases/download/1.4.17/photo-frame-1.4.17.tgz
-    for f in photo-frame*.tgz; do
-        tar -xf "$f"
-    done
-    mv package photo-frame
-    chown -R pi:pi photo-frame
-    rm ./*.tgz
-
-
-    rm -rf package
-    rm -rf followers
-    wget https://github.com/flatsiedatsie/followers-addon/releases/download/0.6.8/followers-0.6.8.tgz
-    for f in followers*.tgz; do
-        tar -xf "$f"
-    done
-    mv package followers
-    chown -R pi:pi followers
-    rm ./*.tgz
-
-
-    rm -rf package
-    rm -rf internet-radio
-    wget https://github.com/flatsiedatsie/internet-radio/releases/download/2.2.3/internet-radio-2.2.3.tgz
-    for f in internet-radio*.tgz; do
-        tar -xf "$f"
-    done
-    mv package internet-radio
-    chown -R pi:pi internet-radio
-    rm ./*.tgz
-
-
-    rm -rf package
-    rm -rf zigbee2mqtt-adapter
-    wget https://github.com/kabbi/zigbee2mqtt-adapter/releases/download/1.1.4/zigbee2mqtt-adapter-1.1.4.tgz
-    #tar -xf zigbee2mqtt-adapter-1.1.3.tgz
-    for f in zigbee2mqtt-adapter*.tgz; do
-        tar -xf "$f"
-    done
-    mv package zigbee2mqtt-adapter
     chown -R pi:pi zigbee2mqtt-adapter
     rm ./*.tgz
 
-
-    rm -rf package
-    rm -rf privacy-manager
-    wget https://github.com/createcandle/privacy-manager/releases/download/0.2.8/privacy-manager-0.2.8.tgz
-    for f in privacy-manager*.tgz; do
-        tar -xf "$f"
-    done
-    mv package privacy-manager
-    chown -R pi:pi privacy-manager
-    rm ./*.tgz
-
-
-    rm -rf package
-    rm -rf webinterface
-    wget https://github.com/createcandle/webinterface/releases/download/0.2.3/webinterface-0.2.3.tgz
-    for f in webinterface*.tgz; do
-        tar -xf "$f"
-    done
-    mv package webinterface
-    chown -R pi:pi webinterface
-    rm ./*.tgz
     
+    # Install Flatsiedatsie addons
     
-    rm -rf package
-    rm -rf candleappstore
-    wget https://github.com/createcandle/candleappstore/releases/download/0.4.18/candleappstore-0.4.18-linux-arm-v3.9.tgz
-    for f in candleappstore*.tgz; do
-        tar -xf "$f"
+    for addon in photo-frame followers internet-radio;
+    do
+        curl -s https://api.github.com/repos/flatsiedatsie/$addon/releases/latest \
+        | grep "tarball_url" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O addon.tgz
+        tar -xf addon.tgz
+        rm addon.tgz
+        for directory in "flatsiedatsie-$addon*"; do
+          [[ -d $directory ]] || continue
+          echo "Directory: $directory"
+          mv -- "$directory" ./$addon
+        done
+        chown -R pi:pi $addon
     done
-    mv package candleappstore
-    chown -R pi:pi candleappstore
+
+
+    # Install Candle addons
+    
+    for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface candleappstore; 
+    do
+        curl -s https://api.github.com/repos/createcandle/$addon/releases/latest \
+        | grep "tarball_url" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O addon.tgz
+        tar -xf addon.tgz
+        rm addon.tgz
+        for directory in "createcandle-$addon*"; do
+          [[ -d $directory ]] || continue
+          echo "Directory: $directory"
+          mv -- "$directory" ./$addon
+        done
+        chown -R pi:pi $addon
+    done
+    
     rm ./*.tgz
+
     
 fi
 
