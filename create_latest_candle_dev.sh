@@ -883,8 +883,8 @@ then
                 echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /boot/candle_log.txt
                 echo
                 # Save the install file for after the reboot
-                wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
-                chmod +x /home/pi/create_latest_candle.sh
+                #wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
+                #chmod +x /home/pi/create_latest_candle.sh
                 apt install -y raspberrypi-kernel
                 apt install -y raspberrypi-kernel-headers 
                 apt install -y raspberrypi-bootloader
@@ -2442,10 +2442,10 @@ fi
 #
 #  ADDITIONAL CLEANUP
 #
-if [ -f /home/pi/create_latest_candle.sh ]; then
-    echo "Removing left-over /home/pi/create_latest_candle.sh" >> /dev/kmsg
-    rm /home/pi/create_latest_candle.sh
-fi
+#if [ -f /home/pi/create_latest_candle.sh ]; then
+#    echo "Removing left-over /home/pi/create_latest_candle.sh" >> /dev/kmsg
+#    rm /home/pi/create_latest_candle.sh
+#fi
 
 if [ -f /home/pi/ro-root.sh ]; then
     rm /home/pi/ro-root.sh
