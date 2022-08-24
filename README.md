@@ -50,7 +50,7 @@ Note: There are some other options which are described in the create_latest_cand
 
 For example, this command installs the cutting-edge version of Candle and then stops for inspection:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes STOP_EARLY=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes SKIP_REBOOT=yes bash
 ```
 (It's the command we really use to create the Candle disk images. Once done, do `touch /boot/candle_rw_once.txt` and then reboot the controller. Log in, wait for Zigbee2MQTT to be fully installed, and only then run the `prepare_for_disk_image.sh` script)
 
@@ -71,7 +71,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 ### Live update script
 With the latest versions of Candle it's now possible to fully update the controller even when read-only protection is enabled, with out needing a reboot first. This is experimental, so use at your own risk. It automatically detects if your controller is compatible. We prefer to just disable read-only first through a reboot.
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo REBOOT_WHEN_DONE=yes bash
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo bash
 ```
 
 
