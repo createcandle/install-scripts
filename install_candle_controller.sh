@@ -631,7 +631,7 @@ then
 
     rm -rf package
     rm -rf internet-radio
-    wget https://github.com/flatsiedatsie/internet-radio/releases/download/2.2.2/internet-radio-2.2.2.tgz
+    wget https://github.com/flatsiedatsie/internet-radio/releases/download/2.2.3/internet-radio-2.2.3.tgz
     for f in internet-radio*.tgz; do
         tar -xf "$f"
     done
