@@ -608,14 +608,14 @@ then
       mv -- "$directory" ./zigbee2mqtt-adapter
     done
     chown -R pi:pi zigbee2mqtt-adapter
-    rm ./*.tgz
+    #rm ./*.tgz
 
     
     # Install Flatsiedatsie addons
     
-    for addon in photo-frame followers internet-radio;
+    for addon in photo-frame followers-addon internet-radio;
     do
-        curl -s https://api.github.com/repos/flatsiedatsie/$addon/releases/latest \
+        curl -s "https://api.github.com/repos/flatsiedatsie/$addon/releases/latest" \
         | grep "tarball_url" \
         | cut -d : -f 2,3 \
         | tr -d \" \
@@ -623,9 +623,10 @@ then
         | wget -qi - -O addon.tgz
         tar -xf addon.tgz
         rm addon.tgz
-        for directory in "flatsiedatsie-$addon*"; do
+        for directory in flatsiedatsie-"$addon"*; do
           [[ -d $directory ]] || continue
           echo "Directory: $directory"
+          rm -rf ./"$addon"
           mv -- "$directory" ./$addon
         done
         chown -R pi:pi $addon
@@ -636,7 +637,7 @@ then
     
     for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface candleappstore; 
     do
-        curl -s https://api.github.com/repos/createcandle/$addon/releases/latest \
+        curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
         | grep "tarball_url" \
         | cut -d : -f 2,3 \
         | tr -d \" \
@@ -644,9 +645,10 @@ then
         | wget -qi - -O addon.tgz
         tar -xf addon.tgz
         rm addon.tgz
-        for directory in "createcandle-$addon*"; do
+        for directory in createcandle-"$addon"*; do
           [[ -d $directory ]] || continue
           echo "Directory: $directory"
+          rm -rf ./"$addon"
           mv -- "$directory" ./$addon
         done
         chown -R pi:pi $addon
@@ -677,7 +679,7 @@ then
         cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
         chown pi:pi /home/pi/.webthings/config/db.sqlite3
     else
-        echo
+        echo "ERROR, /home/pi/.webthings/addons/power-settings/db.sqlite3 was missing"
         echo "Candle: ERROR, /home/pi/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /dev/kmsg
         echo "Candle: ERROR, /home/pi/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /boot/candle_log.txt
     fi
