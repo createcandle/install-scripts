@@ -392,6 +392,7 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     echo "Do not worry about the errors you will see with optipng and jpegtran"
     
     CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
+    #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
 
     #echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
 
@@ -426,18 +427,18 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     if [ "$totalk" -lt 600000 ]
     then
         echo "very low memory, --max-old-space-size=496"
-        NODE_OPTIONS="--max-old-space-size=496" npx webpack
+        NODE_OPTIONS="--max-old-space-size=496" npx webpack -y
     elif [ "$totalk" -lt 1200000 ]
     then
         echo "low memory, --max-old-space-size=750"
-        NODE_OPTIONS="--max-old-space-size=750" npx webpack
+        NODE_OPTIONS="--max-old-space-size=750" npx webpack -y
     elif [ "$totalk" -lt 2200000 ]
     then
         echo "normal memory, --max-old-space-size=1024"
-        NODE_OPTIONS="--max-old-space-size=1024" npx webpack
+        NODE_OPTIONS="--max-old-space-size=1024" npx webpack -y
     else
         echo "big memory, --max-old-space-size=2048"
-        NODE_OPTIONS="--max-old-space-size=2048" npx webpack
+        NODE_OPTIONS="--max-old-space-size=2048" npx webpack -y
     fi
     
     if [ -f /home/pi/webthings/gateway2/build/app.js ] \
