@@ -889,8 +889,10 @@ then
                 apt install -y raspberrypi-kernel-headers 
                 apt install -y raspberrypi-bootloader
                 echo
-                echo "Rebooting in 10 seconds... ($(date))"
+                echo "Kernel updated. Rebooting in 10 seconds... ($(date))"
                 echo "Hostname: $(cat /etc/hostname)"
+                echo
+                echo "Please log back in and run the install command again."
                 echo
                 sleep 10
                 reboot now
