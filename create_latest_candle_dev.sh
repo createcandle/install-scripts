@@ -796,29 +796,31 @@ then
         #touch /boot/ssh.txt
     
     
-    
-        if [ -d seeed-voicecard ]; then
-            rm -rf seeed-voicecard
-        fi
-        git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
-
-        if [ -d seeed-voicecard ]; then
-            cd seeed-voicecard
-
-            if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
-                touch /home/pi/candle/installed_respeaker_version.txt
+        if [ -f /boot/candle_first_run_complete.txt ]; then
+            if [ -d seeed-voicecard ]; then
+                rm -rf seeed-voicecard
             fi
+            git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
+
+            if [ -d seeed-voicecard ]; then
+                cd seeed-voicecard
+
+                if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
+                    touch /home/pi/candle/installed_respeaker_version.txt
+                fi
         
-            ./uninstall.sh
+                ./uninstall.sh
 
-            cd /home/pi
-            rm -rf seeed-voicecard
+                cd /home/pi
+                rm -rf seeed-voicecard
 
-        else
-            echo "Error, failed to download respeaker source"
+            else
+                echo "Error, failed to download respeaker source"
+            fi
+            #echo "" > /etc/modules
         fi
-    
-        echo "" > /etc/modules
+        
+        
     fi
     
     # A little overkill:

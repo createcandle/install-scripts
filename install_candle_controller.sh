@@ -427,18 +427,18 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     if [ "$totalk" -lt 600000 ]
     then
         echo "very low memory, --max-old-space-size=496"
-        NODE_OPTIONS="--max-old-space-size=496" npx webpack -y
+        NODE_OPTIONS="--max-old-space-size=496" npx webpack --yes
     elif [ "$totalk" -lt 1200000 ]
     then
         echo "low memory, --max-old-space-size=750"
-        NODE_OPTIONS="--max-old-space-size=750" npx webpack -y
+        NODE_OPTIONS="--max-old-space-size=750" npx webpack --yes
     elif [ "$totalk" -lt 2200000 ]
     then
         echo "normal memory, --max-old-space-size=1024"
-        NODE_OPTIONS="--max-old-space-size=1024" npx webpack -y
+        NODE_OPTIONS="--max-old-space-size=1024" npx webpack --yes
     else
         echo "big memory, --max-old-space-size=2048"
-        NODE_OPTIONS="--max-old-space-size=2048" npx webpack -y
+        NODE_OPTIONS="--max-old-space-size=2048" npx webpack --yes
     fi
     
     if [ -f /home/pi/webthings/gateway2/build/app.js ] \
@@ -516,17 +516,21 @@ if [ ! -f /home/pi/webthings/gateway/build/app.js ] \
 || [ ! -d /home/pi/webthings/gateway/node_modules ] \
 || [ ! -d /home/pi/webthings/gateway/build/static/bundle ]; 
 then
-    echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP"   | sudo tee -a /dev/kmsg
-    echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! RESTORING BACKUP" | sudo tee -a /boot/candle_log.txt
+    echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED!"   | sudo tee -a /dev/kmsg
+    echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED!" | sudo tee -a /boot/candle_log.txt
     
     # restore the backup in case something has gone very wrong
     if [ -f /home/pi/controller_backup.tar ];
     then
+        echo "Candle: RESTORING BACKUP" | sudo tee -a /dev/kmsg
+        echo "$(date) RESTORING BACKUP" | sudo tee -a /boot/candle_log.txt
         cd /home/pi
         sudo rm -rf /home/pi/webthings
         tar -xf ./controller_backup.tar
+    else
+        echo "Candle: NO BACKUP TO RESTORE!" | sudo tee -a /dev/kmsg
+        echo "$(date) NO BACKUP TO RESTORE!" | sudo tee -a /boot/candle_log.txt
     fi
-    
     
 else
     echo
