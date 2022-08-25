@@ -764,6 +764,7 @@ sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
     echo
+    echo "doing upgrade first"
     
     # Check if kernel or bootloader can be updated
     if apt list --upgradable | grep raspberrypi-bootloader; then
@@ -780,16 +781,18 @@ then
     apt-get update -y
     apt --fix-broken install -y
 
-    if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
+    if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
     
         #apt install -y raspberrypi-kernel
         #apt install -y raspberrypi-bootloader
+        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!"
         echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
         echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
         
         # Allow a kernal update if the disk image is being made right now
-        if [ -f /boot/candle_first_run_complete.txt ]; then
+        if [ ! -f /boot/candle_first_run_complete.txt ]; then
         
+            echo "no /boot/candle_first_run_complete.txt file yet, probably creating disk image"
             # A little overkill:
 
             apt-get update -y
@@ -825,9 +828,6 @@ then
             echo "Candle: Apt upgrade complete." >> /dev/kmsg
             echo "Apt upgrade done" >> /boot/candle_log.txt
             echo
-    
-    
-
     
             echo
             echo "rebooting"
@@ -1675,6 +1675,12 @@ fi
 #    echo "No new config version detected"
 #fi
 
+# This is handled by prepare_disk_image
+#if [ ! -f /boot/candle_first_run_complete.txt ]; then
+#    if [ -f /home/pi/candle/candle_first_run.sh ]; then
+#        cp /home/pi/candle/candle_first_run.sh /boot/candle_first_run.sh
+#    fi
+#fi
 #chmod +x /home/pi/candle_first_run.sh
 
 if [ ! -f /home/pi/candle/early.sh ]; then
