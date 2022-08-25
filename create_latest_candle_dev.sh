@@ -1746,12 +1746,15 @@ fi
 
 # CHMOD THE NEW FILES
 chmod +x /home/pi/candle/early.sh
-chmod +x /home/pi/candle/late.sh
 chmod +x /etc/rc.local
+chmod +x /home/pi/candle/late.sh
+
 chmod +x /home/pi/candle/debug.sh
 chmod +x /home/pi/candle/files_check.sh
+chmod +x /home/pi/candle/install_samba.sh
 chmod +x /home/pi/candle/prepare_for_disk_image.sh
 chmod +x /home/pi/candle/unsnap.sh
+
 
 # CHOWN THE NEW FILES
 chown pi:pi /home/pi/*

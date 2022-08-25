@@ -705,6 +705,50 @@ then
     
 fi
 
+
+
+
+if [ -d /home/pi/.webthings/data/zigbee2mqtt ];
+then
+    
+    cd /home/pi/.webthings/data/zigbee2mqtt
+    
+    echo
+    echo "pre-installing Zigbee2MQTT"
+    echo
+    curl -s "https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest" \
+    | grep "tarball_url" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O z2m.tgz
+    echo "unpacking z2m.tgz"
+    tar -xf z2m.tgz
+    rm z2m.tgz
+
+    for directory in Koenkk-zigbee2mqtt*; do
+      [[ -d $directory ]] || continue
+      echo "Directory: $directory"
+      rm -rf ./zigbee2mqtt
+      mv -- "$directory" ./zigbee2mqtt
+    done
+    
+    if [ -d ./zigbee2mqtt ]; then
+        chown -R pi:pi ./zigbee2mqtt
+        cd ./zigbee2mqtt
+        npm ci --production
+    else
+        echo "Error, pre-install of z2m failed: no dir"
+    fi
+    #https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest
+    
+    cd /home/pi/
+fi
+
+
+
+
+
 #cd /home/pi/webthings/gateway
 #timeout 10 npm run run-only
 echo "controller installation should be complete"
