@@ -1387,11 +1387,13 @@ then
             echo "ReSpeaker was already installed"
         
             if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
+                echo "ReSpeaker has an updated version!"
+                echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
+                echo "ReSpeaker has an updated version! Attempting to install" >> /boot/candle_log.txt
                 ./uninstall.sh
                 echo -e 'N\n' | ./install.sh
+                cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
             fi
-        
-            cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
         
         else
             echo "Doing initial ReSpeaker install"
