@@ -760,32 +760,133 @@ sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
 
 
+
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
-    echo
-    echo "RUNNING APT UPGRADE"
-    echo "Candle: running apt upgrade command" >> /dev/kmsg
-    echo "Candle: running apt upgrade command" >> /boot/candle_log.txt
     echo
     
     apt-mark unhold raspberrypi-kernel
     apt-mark unhold raspberrypi-kernel-headers 
     apt-mark unhold raspberrypi-bootloader
     
-    #apt upgrade -y
+    # Check if kernel or bootloader can be updated
+    if apt list --upgradable | grep raspberrypi-bootloader; then
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE"
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
+    fi
+    if apt list --upgradable | grep raspberrypi-kernel; then
+        echo "WARNING, KERNEL IS UPGRADEABLE"
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
+    fi
+
     apt-get update -y
     apt --fix-broken install -y
-    DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+
+    if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
+    
+        #apt install -y raspberrypi-kernel
+        #apt install -y raspberrypi-bootloader
+        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
+        echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
+
+        # make sure the system is read-write and accessible again after the reboot.
+        #touch /boot/candle_rw_once.txt
+        #touch /boot/ssh.txt
+    
+    
+    
+        if [ -d seeed-voicecard ]; then
+            rm -rf seeed-voicecard
+        fi
+        git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
+
+        if [ -d seeed-voicecard ]; then
+            cd seeed-voicecard
+
+            if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
+                touch /home/pi/candle/installed_respeaker_version.txt
+            fi
+        
+            ./uninstall.sh
+
+            cd /home/pi
+            rm -rf seeed-voicecard
+
+        else
+            echo "Error, failed to download respeaker source"
+        fi
+    
+        echo "" > /etc/modules
+    fi
+    
+    # A little overkill:
+
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
     wait
+    apt --fix-broken install -y
+    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
     echo ""
 
-    # Fix potential issue with dhcpdp on Bullseye
-    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf
-    
-    echo "calling autoremove"
+
+    #rm -rf /opt/vc/lib
+
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+    wait
+    apt --fix-broken install -y
+    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+    echo ""
+
+
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+    wait
+    apt --fix-broken install -y
+    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+    echo ""
+
     apt --fix-broken install -y
     apt autoremove -y
+    apt clean -y
+    echo
+    echo "Candle: Apt upgrade complete."
+    echo "Candle: Apt upgrade complete." >> /dev/kmsg
+    echo "Apt upgrade done" >> /boot/candle_log.txt
+    echo
+    
+    
+    #echo "calling apt upgrade"
+    #echo "Candle: doing apt upgrade" >> /dev/kmsg
+    #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
+    #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+    #wait
+    #echo
+    #echo "Upgrade complete"
 fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -829,162 +930,10 @@ then
     fi
     
     
-    # Check if kernel or bootloader can be updated
-    if apt list --upgradable | grep raspberrypi-bootloader; then
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE"
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
-    fi
-    if apt list --upgradable | grep raspberrypi-kernel; then
-        echo "WARNING, KERNEL IS UPGRADEABLE"
-        echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
-    fi
     
-    # Set kernel to not automatically upgrade, but only during disk image creation
-    # Afterwards the power settings addon should handle this.
-    if [ ! -f /boot/candle_first_run_complete.txt ]; then
-        
-        echo "/boot/candle_first_run_complete.txt does not exist yet"
-        
-        if [ ! -f /boot/candle_cutting_edge.txt ]; then
-            #echo "Settting kernel to not automatically upgrade." >> /dev/kmsg
-            #echo "Settting kernel to not automatically upgrade." >> /boot/candle_log.txt
-
-            #apt-mark hold raspberrypi-kernel
-            #apt-mark hold raspberrypi-kernel-headers 
-            #apt-mark hold raspberrypi-bootloader
-        else
-            echo
-            if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
-                echo
-                echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /dev/kmsg
-                echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /boot/candle_log.txt
-                echo
-                # Save the install file for after the reboot
-                #wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
-                #chmod +x /home/pi/create_latest_candle.sh
-                apt install -y raspberrypi-kernel
-                apt install -y raspberrypi-kernel-headers 
-                apt install -y raspberrypi-bootloader
-                #echo
-                #echo "Kernel updated. Rebooting in 10 seconds... ($(date))"
-                #echo "Hostname: $(cat /etc/hostname)"
-                #echo
-                #echo "Please log back in and run the install command again."
-                #echo
-                #sleep 10
-                #reboot now
-            fi
-        fi
-    else
-        if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
-            if [ ! -f /boot/candle_original_version.txt ]; then
-                #apt install -y raspberrypi-kernel
-                #apt install -y raspberrypi-bootloader
-                echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
-                echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
-
-                # make sure the system is read-write and accessible again after the reboot.
-                touch /boot/candle_rw_once.txt
-                touch /boot/ssh.txt
-                
-                apt-mark unhold chromium-browser
-                
-                if [ -d seeed-voicecard ]; then
-                    rm -rf seeed-voicecard
-                fi
-                git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
-    
-                if [ -d seeed-voicecard ]; then
-                    cd seeed-voicecard
-    
-                    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
-                        touch /home/pi/candle/installed_respeaker_version.txt
-                    fi
-                    
-                    ./uninstall.sh
-    
-                    cd /home/pi
-                    rm -rf seeed-voicecard
-        
-                else
-                    echo "Error, failed to download respeaker source"
-                fi
-                
-                echo "" > /etc/modules
-                
-                
-                # A little overkill:
-                
-                apt-get update -y
-                DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-                wait
-                apt --fix-broken install -y
-                sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-                echo ""
-                
-                
-                #rm -rf /opt/vc/lib
-                
-                apt-get update -y
-                DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-                wait
-                apt --fix-broken install -y
-                sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-                echo ""
-    
-    
-                apt-get update -y
-                DEBIAN_FRONTEND=noninteractive apt upgrade -y &
-                wait
-                apt --fix-broken install -y
-                sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-                echo ""
-                
-                
-                apt autoremove -y
-                apt clean -y
-                #echo "Candle: Full upgrade cleanup complete. Rebooting."
-                #echo "Candle: Full upgrade complete. Rebooting."
-                #echo "Candle: Full upgrade complete. Rebooting." >> /dev/kmsg
-                #echo "Full upgrade complete. Rebooting." >> /boot/candle_log.txt
-                
-                
-                #echo "changing fstab"
-                
-                #echo "proc            /proc           proc    defaults          0       0" > /etc/fstab
-                #echo "/dev/mmcblk0p1  /boot           vfat    defaults          0       2" >> /etc/fstab
-                #echo "/dev/mmcblk0p2  /               ext4    defaults,noatime  0       1" >> /etc/fstab
-                #echo "/dev/mmcblk0p3  /home/pi/.webthings  ext4    defaults,rw  1       2" >> /etc/fstab
-
-                #echo "/home/pi/.webthings/etc/wpa_supplicant  /etc/wpa_supplicant  none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/var/lib/bluetooth   /var/lib/bluetooth   none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/etc/ssh             /etc/ssh             none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/etc/hostname        /etc/hostname        none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/tmp                 /tmp                 none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/arduino/.arduino15  /home/pi/.arduino15  none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/arduino/Arduino     /home/pi/Arduino     none defaults,bind" >> /etc/fstab
-                
-                # reboot
-                #sleep 1
-                #reboot
-            fi
-        fi
-    fi
     
     echo
-    if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
-    then
-        echo
-        #echo "calling apt upgrade"
-        #echo "Candle: doing apt upgrade" >> /dev/kmsg
-        #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
-        #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
-        #wait
-        #echo
-        #echo "Upgrade complete"
-    fi
+    
 
 #    set +e
 
