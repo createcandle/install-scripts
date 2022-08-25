@@ -1644,9 +1644,9 @@ if [ -d /home/pi/configuration-files ]; then
         mkdir -p /home/pi/candle/configuration-files-backup
     fi
     
-    cp -r /home/pi/configuration-files/ /home/pi/candle/configuration-files-backup/
+    cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
     
-    rsync -vr --inplace /home/pi/candle/configuration-files-backup/ /
+    rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
     
     rm -rf /home/pi/configuration-files
     
@@ -1674,7 +1674,10 @@ fi
 
 #chmod +x /home/pi/candle_first_run.sh
 
-
+if [ ! -f /home/pi/candle/early.sh ]; then
+    echo "ERROR, early.sh is missing?"
+    exit 1
+fi
 
 # CHMOD THE NEW FILES
 chmod +x /home/pi/candle/early.sh
@@ -2001,13 +2004,21 @@ cd /home/pi
 if [ ! -f /etc/rc.local.bak ]; then
     cp /etc/rc.local /etc/rc.local.bak
 fi
-if [ ! -f /home/pi/candle/early.sh.bak ]; then
-    cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
+if [ -f /home/pi/candle/early.sh ]; then
+    if [ ! -f /home/pi/candle/early.sh.bak ]; then
+        cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
+    fi
+else
+    echo
+    echo "ERROR, early.sh does not exist!"
+fi    
+if [ -f etc/xdg/openbox/autostart ]; then
+    if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
+        cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
+    fi
+else
+    echo "ERROR, autostart does not exist"
 fi
-if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
-    cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
-fi
-
 
 
 
