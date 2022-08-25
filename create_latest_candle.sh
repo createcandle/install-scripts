@@ -102,53 +102,9 @@ fi
 
 echo
 
-# Detect if a kernel or bootloader update has just occured. If so, the system must be rebooted first.
-if [ "$SKIP_IPTABLES" = no ] || [[ -z "${SKIP_IPTABLES}" ]];
-then
-    if [ -f /usr/sbin/iptables ];then
-        if [ -z "$(iptables -L -v -n)" ]; then
-            echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
-            echo "Candle: ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
-            echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
-            echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /boot/candle_log.txt
-    
-            # Show error image
-            if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-            then
-                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                    /bin/ply-image /boot/error.png
-                    #sleep 7200
-                fi
-            fi
-    
-            exit 1
-        else
-            echo "No recent kernel update detected"
-        
-            echo
-            echo "ADDING IPTABLES EARLY"
-            echo
-            if iptables --list | grep 4443; then
-                echo "IPTABLES ALREADY ADDED"
-                echo "Candle: firewall already set up" >> /dev/kmsg
-                echo "Candle: firewall already set up" >> /boot/candle_log.txt
-            else
-                echo "Candle: setting up firewall (iptables)" >> /dev/kmsg
-                echo "Candle: setting up firewall (iptables)" >> /boot/candle_log.txt
-                iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
-                iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
-                iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-                iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
-            fi
-        
-        fi
-    fi
-fi
 
 
-# Check if /boot is mounted
+# Check if /boot is available
 if [ ! -f /boot/cmdline.txt ]; then
     echo "Candle: ERROR, missing cmdline.txt??" >> /dev/kmsg
     echo "Candle: ERROR, missing cmdline.txt??" >> /boot/candle_log.txt
@@ -784,6 +740,154 @@ fi
 
 
 
+# Make sure Bullseye sources are used
+if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
+    sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
+fi
+
+if cat /etc/apt/sources.list | grep -q buster; then
+    echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
+    sed -i 's/buster/bullseye/' /etc/apt/sources.list
+fi
+
+# Add option to download source code from RaspberryPi server
+echo "modifying /etc/apt/sources.list - allowing apt access to source code"
+sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
+
+
+
+
+
+if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
+then
+    echo
+    echo "doing upgrade first"
+    
+    # Check if kernel or bootloader can be updated
+    if apt list --upgradable | grep raspberrypi-bootloader; then
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE"
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
+    fi
+    if apt list --upgradable | grep raspberrypi-kernel; then
+        echo "WARNING, KERNEL IS UPGRADEABLE"
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
+    fi
+
+    apt-get update -y
+    apt --fix-broken install -y
+
+    if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
+    
+        #apt install -y raspberrypi-kernel
+        #apt install -y raspberrypi-bootloader
+        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!"
+        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
+        echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
+        
+        # Allow a kernal update if the disk image is being made right now
+        if [ ! -f /boot/candle_first_run_complete.txt ]; then
+        
+            echo "no /boot/candle_first_run_complete.txt file yet, probably creating disk image"
+            # A little overkill:
+
+            apt-get update -y
+            DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+            wait
+            apt --fix-broken install -y
+            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+            echo ""
+
+
+            #rm -rf /opt/vc/lib
+
+            apt-get update -y
+            DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+            wait
+            apt --fix-broken install -y
+            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+            echo ""
+
+
+            apt-get update -y
+            DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+            wait
+            apt --fix-broken install -y
+            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+            echo ""
+
+            apt --fix-broken install -y
+            apt autoremove -y
+            apt clean -y
+            echo
+            echo "Candle: Apt upgrade complete."
+            echo "Candle: Apt upgrade complete." >> /dev/kmsg
+            echo "Apt upgrade done" >> /boot/candle_log.txt
+            echo
+    
+            echo
+            echo "rebooting"
+            echo
+            
+            # make sure the system is read-write and accessible again after the reboot.
+            touch /boot/candle_rw_once.txt
+            #touch /boot/ssh.txt
+            
+            reboot
+    
+            #echo "calling apt upgrade"
+            #echo "Candle: doing apt upgrade" >> /dev/kmsg
+            #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
+            #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+            #wait
+            #echo
+            #echo "Upgrade complete"
+        fi
+      
+    else
+        echo "not allowing kernel updates for now"
+        apt-mark unhold raspberrypi-kernel
+        apt-mark unhold raspberrypi-kernel-headers 
+        apt-mark unhold raspberrypi-bootloader
+        
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+        
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+    fi
+    
+    
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -799,25 +903,6 @@ then
     echo "Candle: installing packages and libraries" >> /dev/kmsg
     echo "Candle: installing packages and libraries" >> /boot/candle_log.txt
     echo
-
-
-    # Make sure Bullseye sources are used
-    if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
-        echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
-        echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
-        sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
-    fi
-
-    if cat /etc/apt/sources.list | grep -q buster; then
-        echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
-        echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
-        sed -i 's/buster/bullseye/' /etc/apt/sources.list
-    fi
-    
-    
-    # Add option to download source code from RaspberryPi server
-    echo "modifying /etc/apt/sources.list - allowing apt access to source code"
-    sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
 
     # Update apt sources
@@ -850,160 +935,10 @@ then
     fi
     
     
-    # Check if kernel or bootloader can be updated
-    if apt list --upgradable | grep raspberrypi-bootloader; then
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE"
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
-    fi
-    if apt list --upgradable | grep raspberrypi-kernel; then
-        echo "WARNING, KERNEL IS UPGRADEABLE"
-        echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
-    fi
     
-    # Set kernel to not automatically upgrade, but only during disk image creation
-    # Afterwards the power settings addon should handle this.
-    if [ ! -f /boot/candle_first_run_complete.txt ]; then
-        
-        echo "/boot/candle_first_run_complete.txt does not exist yet"
-        
-        if [ ! -f /boot/candle_cutting_edge.txt ]; then
-            echo "Settting kernel to not automatically upgrade." >> /dev/kmsg
-            echo "Settting kernel to not automatically upgrade." >> /boot/candle_log.txt
-
-            apt-mark hold raspberrypi-kernel
-            apt-mark hold raspberrypi-kernel-headers 
-            apt-mark hold raspberrypi-bootloader
-        else
-            echo
-            if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
-                echo
-                echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /dev/kmsg
-                echo "candle_cutting_edge.txt detected. Updating kernel and bootloader, and then rebooting." >> /boot/candle_log.txt
-                echo
-                # Save the install file for after the reboot
-                #wget https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh -O /home/pi/create_latest_candle.sh
-                #chmod +x /home/pi/create_latest_candle.sh
-                apt install -y raspberrypi-kernel
-                apt install -y raspberrypi-kernel-headers 
-                apt install -y raspberrypi-bootloader
-                echo
-                echo "Rebooting in 10 seconds... ($(date))"
-                echo "Hostname: $(cat /etc/hostname)"
-                echo
-                sleep 10
-                reboot now
-            fi
-        fi
-    else
-        if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
-            if [ ! -f /boot/candle_original_version.txt ]; then
-                #apt install -y raspberrypi-kernel
-                #apt install -y raspberrypi-bootloader
-                echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
-                echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
-
-                # make sure the system is read-write and accessible again after the reboot.
-                touch /boot/candle_rw_once.txt
-                touch /boot/ssh.txt
-                
-                apt-mark unhold chromium-browser
-                
-                if [ -d seeed-voicecard ]; then
-                    rm -rf seeed-voicecard
-                fi
-                git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
-    
-                if [ -d seeed-voicecard ]; then
-                    cd seeed-voicecard
-    
-                    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
-                        touch /home/pi/candle/installed_respeaker_version.txt
-                    fi
-                    
-                    ./uninstall.sh
-    
-                    cd /home/pi
-                    rm -rf seeed-voicecard
-        
-                else
-                    echo "Error, failed to download respeaker source"
-                fi
-                
-                echo "" > /etc/modules
-                
-                
-                # A little overkill:
-                
-                apt-get update -y
-                DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-                wait
-                apt --fix-broken install -y
-                sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-                echo ""
-                
-                
-                #rm -rf /opt/vc/lib
-                
-                apt-get update -y
-                DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-                wait
-                apt --fix-broken install -y
-                sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-                echo ""
-    
-    
-                apt-get update -y
-                DEBIAN_FRONTEND=noninteractive apt upgrade -y &
-                wait
-                apt --fix-broken install -y
-                sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-                echo ""
-                
-                
-                apt autoremove -y
-                apt clean -y
-                #echo "Candle: Full upgrade cleanup complete. Rebooting."
-                #echo "Candle: Full upgrade complete. Rebooting."
-                #echo "Candle: Full upgrade complete. Rebooting." >> /dev/kmsg
-                #echo "Full upgrade complete. Rebooting." >> /boot/candle_log.txt
-                
-                
-                #echo "changing fstab"
-                
-                #echo "proc            /proc           proc    defaults          0       0" > /etc/fstab
-                #echo "/dev/mmcblk0p1  /boot           vfat    defaults          0       2" >> /etc/fstab
-                #echo "/dev/mmcblk0p2  /               ext4    defaults,noatime  0       1" >> /etc/fstab
-                #echo "/dev/mmcblk0p3  /home/pi/.webthings  ext4    defaults,rw  1       2" >> /etc/fstab
-
-                #echo "/home/pi/.webthings/etc/wpa_supplicant  /etc/wpa_supplicant  none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/var/lib/bluetooth   /var/lib/bluetooth   none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/etc/ssh             /etc/ssh             none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/etc/hostname        /etc/hostname        none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/tmp                 /tmp                 none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/arduino/.arduino15  /home/pi/.arduino15  none defaults,bind" >> /etc/fstab
-                #echo "/home/pi/.webthings/arduino/Arduino     /home/pi/Arduino     none defaults,bind" >> /etc/fstab
-                
-                # reboot
-                #sleep 1
-                #reboot
-            fi
-        fi
-    fi
     
     echo
-    if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
-    then
-        echo
-        #echo "calling apt upgrade"
-        #echo "Candle: doing apt upgrade" >> /dev/kmsg
-        #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
-        #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
-        #wait
-        #echo
-        #echo "Upgrade complete"
-    fi
+    
 
 #    set +e
 
@@ -1288,7 +1223,7 @@ then
 fi
 
 
-
+# Superfluous?
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
     echo
@@ -1455,11 +1390,13 @@ then
             echo "ReSpeaker was already installed"
         
             if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
+                echo "ReSpeaker has an updated version!"
+                echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
+                echo "ReSpeaker has an updated version! Attempting to install" >> /boot/candle_log.txt
                 ./uninstall.sh
                 echo -e 'N\n' | ./install.sh
+                cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
             fi
-        
-            cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
         
         else
             echo "Doing initial ReSpeaker install"
@@ -1733,23 +1670,35 @@ fi
 #then
 #    echo "Different config version, intiating Rsync"
 #    echo "Candle: Different config version, intiating Rsync" >> /dev/kmsg
-#    rsync -vr /home/pi/configuration-files/* /
+#    rsync -vr /home/pi/configuration-files/ /
 #else
 #    echo "No new config version detected"
 #fi
 
+# This is handled by prepare_disk_image
+#if [ ! -f /boot/candle_first_run_complete.txt ]; then
+#    if [ -f /home/pi/candle/candle_first_run.sh ]; then
+#        cp /home/pi/candle/candle_first_run.sh /boot/candle_first_run.sh
+#    fi
+#fi
 #chmod +x /home/pi/candle_first_run.sh
 
-
+if [ ! -f /home/pi/candle/early.sh ]; then
+    echo "ERROR, early.sh is missing?"
+    exit 1
+fi
 
 # CHMOD THE NEW FILES
 chmod +x /home/pi/candle/early.sh
-chmod +x /home/pi/candle/late.sh
 chmod +x /etc/rc.local
+chmod +x /home/pi/candle/late.sh
+
 chmod +x /home/pi/candle/debug.sh
 chmod +x /home/pi/candle/files_check.sh
+chmod +x /home/pi/candle/install_samba.sh
 chmod +x /home/pi/candle/prepare_for_disk_image.sh
 chmod +x /home/pi/candle/unsnap.sh
+
 
 # CHOWN THE NEW FILES
 chown pi:pi /home/pi/*
@@ -1830,6 +1779,23 @@ systemctl disable getty@tty1.service
 
 if [ -f /home/pi/candle/ready.sh ]; then
     systemctl disable gateway-iptables.service
+fi
+
+
+
+# Automatically restart the controller on serious crashes
+if [ -f /etc/sysctl.conf ]; then
+    if cat /etc/sysctl.conf | grep -q kernel.panic; then
+        sed -i 's/.*kernel.panic.*/kernel.panic = 6/' /etc/sysctl.conf
+    else
+        echo "kernel.panic = 5" >> /etc/sysctl.conf
+    fi
+fi
+
+if [ -f /etc/systemd/system.conf ]; then
+    sed -i 's/.*RuntimeWatchdogSec.*/RuntimeWatchdogSec=15s/' /etc/systemd/system.conf
+    sed -i 's/.*RebootWatchdogSec.*/RebootWatchdogSec=5min/'  /etc/systemd/system.conf
+    #sed -i 's/.*DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=90s/' /etc/systemd/system.conf
 fi
 
 
@@ -1945,39 +1911,6 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFi
 
 
 
-# ADD IP-TABLES
-if [ "$SKIP_IPTABLES" = no ] || [[ -z "${SKIP_IPTABLES}" ]];
-then
-    echo
-    echo "ADDING IPTABLES"
-    echo
-    #echo "before:"
-    #iptables -t nat --list
-    #echo
-    #echo "Redirecting :80 to :8080 and :443 to :4443"
-    #echo
-    if iptables --list | grep 4443; then
-        echo "IPTABLES ALREADY ADDED"
-        echo "Candle: firewall already set up" >> /dev/kmsg
-        echo "Candle: firewall already set up" >> /boot/candle_log.txt
-    else
-        echo "Candle: setting up firewall (iptables)" >> /dev/kmsg
-        echo "Candle: setting up firewall (iptables)" >> /boot/candle_log.txt
-        iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
-        iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
-        iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-        iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
-        iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
-        iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
-    fi
-    #iptables -L -v -n
-    #echo "after"
-    #iptables -t nat --list
-
-    #echo "\n\n" | apt install iptables-persistent -y
-    #apt install iptables-persistent -y
-fi
-
 echo
 
 
@@ -2080,13 +2013,21 @@ cd /home/pi
 if [ ! -f /etc/rc.local.bak ]; then
     cp /etc/rc.local /etc/rc.local.bak
 fi
-if [ ! -f /home/pi/candle/early.sh.bak ]; then
-    cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
+if [ -f /home/pi/candle/early.sh ]; then
+    if [ ! -f /home/pi/candle/early.sh.bak ]; then
+        cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
+    fi
+else
+    echo
+    echo "ERROR, early.sh does not exist!"
+fi    
+if [ -f etc/xdg/openbox/autostart ]; then
+    if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
+        cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
+    fi
+else
+    echo "ERROR, autostart does not exist"
 fi
-if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
-    cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
-fi
-
 
 
 
@@ -2106,9 +2047,11 @@ echo "Candle: almost done, cleaning up" >> /dev/kmsg
 echo "Candle: almost done, cleaning up" >> /boot/candle_log.txt
 
 
-
-#npm cache clean --force # already done in install_candle_controller script
-#nvm cache clear
+# Clean NPM cache
+export NVM_DIR="/home/pi/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+npm cache clean --force # already done in install_candle_controller script
 
 echo "Clearing Apt leftovers"
 apt clean -y
@@ -2117,6 +2060,7 @@ apt-get clean -y
 apt autoremove -y
 rm -rf /var/lib/apt/lists/*
 
+find /tmp -type f -atime +10 -delete
 
 # SAVE STATE OF INSTALLED PACKAGES
 
@@ -2261,6 +2205,17 @@ then
 else
     echo
     echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST"
+    
+    ls /home/pi/configuration-files/boot/fstab3.bak
+    ls /home/pi/configuration-files/boot/fstab4.bak
+    ls /home/pi/.webthings/etc/wpa_supplicant
+    ls /home/pi/.webthings/var/lib/bluetooth
+    ls /home/pi/.webthings/etc/ssh
+    ls /home/pi/.webthings/etc/hostname
+    ls /home/pi/.webthings/tmp
+    ls /home/pi/.webthings/arduino/.arduino15
+    ls /home/pi/.webthings/arduino/Arduino
+    
     echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
     echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
     echo
