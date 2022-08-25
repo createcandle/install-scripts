@@ -2196,6 +2196,17 @@ then
 else
     echo
     echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST"
+    
+    ls /home/pi/configuration-files/boot/fstab3.bak
+    ls /home/pi/configuration-files/boot/fstab4.bak
+    ls /home/pi/.webthings/etc/wpa_supplicant
+    ls /home/pi/.webthings/var/lib/bluetooth
+    ls /home/pi/.webthings/etc/ssh
+    ls /home/pi/.webthings/etc/hostname
+    ls /home/pi/.webthings/tmp
+    ls /home/pi/.webthings/arduino/.arduino15
+    ls /home/pi/.webthings/arduino/Arduino
+    
     echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
     echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
     echo
