@@ -1644,9 +1644,9 @@ if [ -d /home/pi/configuration-files ]; then
         mkdir -p /home/pi/candle/configuration-files-backup
     fi
     
-    cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
+    cp -r /home/pi/configuration-files/ /home/pi/candle/configuration-files-backup/
     
-    rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
+    rsync -vr --inplace /home/pi/candle/configuration-files-backup/ /
     
     rm -rf /home/pi/configuration-files
     
@@ -1667,7 +1667,7 @@ fi
 #then
 #    echo "Different config version, intiating Rsync"
 #    echo "Candle: Different config version, intiating Rsync" >> /dev/kmsg
-#    rsync -vr /home/pi/configuration-files/* /
+#    rsync -vr /home/pi/configuration-files/ /
 #else
 #    echo "No new config version detected"
 #fi

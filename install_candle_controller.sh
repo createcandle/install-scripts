@@ -446,11 +446,13 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     && [ -d /home/pi/webthings/gateway2/node_modules ] \
     && [ -d /home/pi/webthings/gateway2/build/static/bundle ];
     then
+      echo "creating .post_upgrade_complete file"
       touch .post_upgrade_complete
       echo "$(date +%s)" > update_date.txt
       #echo "Controller installation seems ok"
-      
+      echo "Controller installation seems ok, at $(pwd)"
       echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
+      
     else
       echo  
       echo "ERROR, controller installation is missing parts"
@@ -459,8 +461,9 @@ if [ -d /home/pi/webthings/gateway2 ]; then
       echo
     fi
 
-
+    echo
     echo "New controller was created at $(pwd)"
+    echo
     # Move the freshly created gateway into position
     cd /home/pi
     if [ -d /home/pi/webthings/gateway2 ]; then
@@ -468,13 +471,18 @@ if [ -d /home/pi/webthings/gateway2 ]; then
         echo "Starting move/copy of /home/pi/webthings/gateway2 to /home/pi/webthings/gateway"
         #rm-rf /home/pi/webthings/gateway
         if [ ! -d /home/pi/webthings/gateway ]; then
+            echo "Candle: Gateway didn't exist, moving gateway2 into position"
             echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
             echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /boot/candle_log.txt
             mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
         else
+            echo "Candle: Gateway dir existed, doing rsync from gateway2"
             echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
             echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /boot/candle_log.txt
-            rsync -r -q --delete /home/pi/webthings/gateway2/* /home/pi/webthings/gateway
+            
+            # rsync recursive, quiet, checksum, copy symlinks as symlinks, preserve Executability, delete extraneous files from destination, show progress
+            rsync -r -q -c -l -E --delete --progress /home/pi/webthings/gateway2/ /home/pi/webthings/gateway/ 
+            
             chown -R pi:pi /home/pi/webthings/gateway
             rm -rf /home/pi/webthings/gateway2
         fi
