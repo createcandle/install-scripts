@@ -427,18 +427,18 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     if [ "$totalk" -lt 600000 ]
     then
         echo "very low memory, --max-old-space-size=496"
-        NODE_OPTIONS="--max-old-space-size=496" npx webpack
+        NODE_OPTIONS="--max-old-space-size=496" npm_config_yes=true npx webpack
     elif [ "$totalk" -lt 1200000 ]
     then
         echo "low memory, --max-old-space-size=750"
-        NODE_OPTIONS="--max-old-space-size=750" npx webpack
+        NODE_OPTIONS="--max-old-space-size=750" npm_config_yes=true npx webpack
     elif [ "$totalk" -lt 2200000 ]
     then
         echo "normal memory, --max-old-space-size=1024"
-        NODE_OPTIONS="--max-old-space-size=1024" npx webpack  #--yes
+        NODE_OPTIONS="--max-old-space-size=1024" npm_config_yes=true npx webpack  #--yes
     else
         echo "big memory, --max-old-space-size=2048"
-        NODE_OPTIONS="--max-old-space-size=2048" npx webpack
+        NODE_OPTIONS="--max-old-space-size=2048" npm_config_yes=true npx webpack
     fi
     
     if [ -f /home/pi/webthings/gateway2/build/app.js ] \
