@@ -551,31 +551,32 @@ if [ ! -f /home/pi/.webthings/config/db.sqlite3 ] || [ ! -d /home/pi/.webthings/
 then
     echo "installing power settings addon"
     cd /home/pi/.webthings/addons
-    rm -rf package
-    rm -rf power-settings
-    #wget https://github.com/createcandle/power-settings/releases/download/3.3.11/power-settings-3.3.11.tgz
     
-    curl -s https://api.github.com/repos/createcandle/power-settings/releases/latest \
-    | grep "tarball_url" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | sed 's/,*$//' \
-    | wget -qi - -O addon.tgz
     
-    #for f in power-settings*.tgz; do
-    #    tar -xf "$f"
-    #done
-    tar -xf addon.tgz
-    rm addon.tgz
-    
-    for directory in createcandle-power-settings*; do
-      [[ -d $directory ]] || continue
-      echo "Directory: $directory"
-      mv -- "$directory" ./power-settings
+    for addon in power-settings; 
+    do
+        echo "$addon"
+        curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
+        | grep "browser_download_url" \
+        | grep -v ".sha256sum" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O addon.tgz
+        tar -xf addon.tgz
+        rm addon.tgz
+        
+        #for directory in createcandle-"$addon"*; do
+        #  [[ -d $directory ]] || continue
+        #  echo "Directory: $directory"
+        #  rm -rf ./"$addon"
+        #  mv -- "$directory" ./$addon
+        #done
+        rm -rf "$addon"
+        mv package "$addon"
+        chown -R pi:pi "$addon"
+        mkdir -p /home/pi/.webthings/data/"$addon"
     done
-    
-    chown -R pi:pi power-settings
-    rm ./*.tgz
     
 else
     echo "no need to (re-)install power-settings addon"
@@ -594,64 +595,109 @@ then
 
     # Install Zigbee2MQTT
     
+    echo "zigbee2mqtt-adapter"
     curl -s https://api.github.com/repos/kabbi/zigbee2mqtt-adapter/releases/latest \
-    | grep "tarball_url" \
+    | grep "browser_download_url" \
+    | grep -v ".sha256sum" \
     | cut -d : -f 2,3 \
     | tr -d \" \
     | sed 's/,*$//' \
     | wget -qi - -O addon.tgz
     tar -xf addon.tgz
     rm addon.tgz
-    for directory in kabbi-zigbee2mqtt-adapter*; do
-      [[ -d $directory ]] || continue
-      echo "Directory: $directory"
-      mv -- "$directory" ./zigbee2mqtt-adapter
-    done
-    chown -R pi:pi zigbee2mqtt-adapter
+    #for directory in kabbi-zigbee2mqtt-adapter*; do
+    #  [[ -d $directory ]] || continue
+    #  echo "Directory: $directory"
+    #  mv -- "$directory" ./zigbee2mqtt-adapter
+    #done
+    #chown -R pi:pi zigbee2mqtt-adapter
+    #mkdir -p /home/pi/.webthings/data/zigbee2mqtt-adapter
     #rm ./*.tgz
-
+    rm -rf zigbee2mqtt-adapter
+    mv package zigbee2mqtt-adapter
+    chown -R pi:pi zigbee2mqtt-adapter
+    mkdir -p /home/pi/.webthings/data/zigbee2mqtt-adapter
+    
+    
     
     # Install Flatsiedatsie addons
     
-    for addon in photo-frame followers-addon internet-radio;
+    for addon in photo-frame internet-radio;
     do
+        echo "$addon"
         curl -s "https://api.github.com/repos/flatsiedatsie/$addon/releases/latest" \
-        | grep "tarball_url" \
+        | grep "browser_download_url" \
+        | grep -v ".sha256sum" \
         | cut -d : -f 2,3 \
         | tr -d \" \
         | sed 's/,*$//' \
         | wget -qi - -O addon.tgz
         tar -xf addon.tgz
         rm addon.tgz
-        for directory in flatsiedatsie-"$addon"*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          rm -rf ./"$addon"
-          mv -- "$directory" ./$addon
-        done
-        chown -R pi:pi $addon
+        
+        rm -rf "$addon"
+        mv package "$addon"
+        chown -R pi:pi "$addon"
+        mkdir -p /home/pi/.webthings/data/"$addon"
+        #for directory in flatsiedatsie-"$addon"*; do
+        #  [[ -d $directory ]] || continue
+        #  echo "Directory: $directory"
+        #  rm -rf ./"$addon"
+        #  mv -- "$directory" ./$addon
+        #done
+        #chown -R pi:pi $addon
+        #mkdir -p /home/pi/.webthings/data/"$addon"
     done
+
+
+
+    # Install followers
+    
+    echo "followers-addon"
+    curl -s "https://api.github.com/repos/flatsiedatsie/followers-addon/releases/latest" \
+    | grep "browser_download_url" \
+    | grep -v ".sha256sum" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O addon.tgz
+    tar -xf addon.tgz
+    rm addon.tgz
+    
+    rm -rf followers
+    mv package followers
+    chown -R pi:pi followers
+    mkdir -p /home/pi/.webthings/data/followers
+
+
+
 
 
     # Install Candle addons
     
     for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface candleappstore; 
     do
+        echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
-        | grep "tarball_url" \
+        | grep "browser_download_url" \
+        | grep -v ".sha256sum" \
         | cut -d : -f 2,3 \
         | tr -d \" \
         | sed 's/,*$//' \
         | wget -qi - -O addon.tgz
         tar -xf addon.tgz
         rm addon.tgz
-        for directory in createcandle-"$addon"*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          rm -rf ./"$addon"
-          mv -- "$directory" ./$addon
-        done
-        chown -R pi:pi $addon
+        
+        #for directory in createcandle-"$addon"*; do
+        #  [[ -d $directory ]] || continue
+        #  echo "Directory: $directory"
+        #  rm -rf ./"$addon"
+        #  mv -- "$directory" ./$addon
+        #done
+        rm -rf "$addon"
+        mv package "$addon"
+        chown -R pi:pi "$addon"
+        mkdir -p /home/pi/.webthings/data/"$addon"
     done
     
     rm ./*.tgz
