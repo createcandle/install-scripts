@@ -765,10 +765,6 @@ if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]];
 then
     echo
     
-    apt-mark unhold raspberrypi-kernel
-    apt-mark unhold raspberrypi-kernel-headers 
-    apt-mark unhold raspberrypi-bootloader
-    
     # Check if kernel or bootloader can be updated
     if apt list --upgradable | grep raspberrypi-bootloader; then
         echo "WARNING, BOOTLOADER IS UPGRADEABLE"
@@ -790,83 +786,90 @@ then
         #apt install -y raspberrypi-bootloader
         echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
         echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
-
-        # make sure the system is read-write and accessible again after the reboot.
-        #touch /boot/candle_rw_once.txt
-        #touch /boot/ssh.txt
-    
-    
+        
+        # Allow a kernal update if the disk image is being made right now
         if [ -f /boot/candle_first_run_complete.txt ]; then
-            if [ -d seeed-voicecard ]; then
-                rm -rf seeed-voicecard
-            fi
-            git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
-
-            if [ -d seeed-voicecard ]; then
-                cd seeed-voicecard
-
-                if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
-                    touch /home/pi/candle/installed_respeaker_version.txt
-                fi
         
-                ./uninstall.sh
+            # A little overkill:
 
-                cd /home/pi
-                rm -rf seeed-voicecard
+            apt-get update -y
+            DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+            wait
+            apt --fix-broken install -y
+            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+            echo ""
 
-            else
-                echo "Error, failed to download respeaker source"
-            fi
-            #echo "" > /etc/modules
+
+            #rm -rf /opt/vc/lib
+
+            apt-get update -y
+            DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+            wait
+            apt --fix-broken install -y
+            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+            echo ""
+
+
+            apt-get update -y
+            DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+            wait
+            apt --fix-broken install -y
+            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+            echo ""
+
+            apt --fix-broken install -y
+            apt autoremove -y
+            apt clean -y
+            echo
+            echo "Candle: Apt upgrade complete."
+            echo "Candle: Apt upgrade complete." >> /dev/kmsg
+            echo "Apt upgrade done" >> /boot/candle_log.txt
+            echo
+    
+    
+
+    
+            echo
+            echo "rebooting"
+            echo
+            
+            # make sure the system is read-write and accessible again after the reboot.
+            touch /boot/candle_rw_once.txt
+            #touch /boot/ssh.txt
+            
+            reboot
+    
+            #echo "calling apt upgrade"
+            #echo "Candle: doing apt upgrade" >> /dev/kmsg
+            #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
+            #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+            #wait
+            #echo
+            #echo "Upgrade complete"
         fi
+      
+    else
+        echo "not allowing kernel updates for now"
+        apt-mark unhold raspberrypi-kernel
+        apt-mark unhold raspberrypi-kernel-headers 
+        apt-mark unhold raspberrypi-bootloader
         
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
         
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
     fi
     
-    # A little overkill:
-
-    apt-get update -y
-    DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-    wait
-    apt --fix-broken install -y
-    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-    echo ""
-
-
-    #rm -rf /opt/vc/lib
-
-    apt-get update -y
-    DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-    wait
-    apt --fix-broken install -y
-    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-    echo ""
-
-
-    apt-get update -y
-    DEBIAN_FRONTEND=noninteractive apt upgrade -y &
-    wait
-    apt --fix-broken install -y
-    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-    echo ""
-
-    apt --fix-broken install -y
-    apt autoremove -y
-    apt clean -y
-    echo
-    echo "Candle: Apt upgrade complete."
-    echo "Candle: Apt upgrade complete." >> /dev/kmsg
-    echo "Apt upgrade done" >> /boot/candle_log.txt
-    echo
     
-    
-    #echo "calling apt upgrade"
-    #echo "Candle: doing apt upgrade" >> /dev/kmsg
-    #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
-    #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
-    #wait
-    #echo
-    #echo "Upgrade complete"
 fi
 
 
@@ -1220,7 +1223,7 @@ then
 fi
 
 
-
+# Superfluous?
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
     echo
