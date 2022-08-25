@@ -102,53 +102,9 @@ fi
 
 echo
 
-# Detect if a kernel or bootloader update has just occured. If so, the system must be rebooted first.
-if [ "$SKIP_IPTABLES" = no ] || [[ -z "${SKIP_IPTABLES}" ]];
-then
-    if [ -f /usr/sbin/iptables ];then
-        if [ -z "$(iptables -L -v -n)" ]; then
-            echo "ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first."
-            echo "Candle: ERROR, IP tables gave no output, suggesting that a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
-            echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /dev/kmsg
-            echo "$(date) - it seems a bootloader or kernel update has taken place. Please reboot first." >> /boot/candle_log.txt
-    
-            # Show error image
-            if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-            then
-                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                    /bin/ply-image /boot/error.png
-                    #sleep 7200
-                fi
-            fi
-    
-            exit 1
-        else
-            echo "No recent kernel update detected"
-        
-            echo
-            echo "ADDING IPTABLES EARLY"
-            echo
-            if iptables --list | grep 4443; then
-                echo "IPTABLES ALREADY ADDED"
-                echo "Candle: firewall already set up" >> /dev/kmsg
-                echo "Candle: firewall already set up" >> /boot/candle_log.txt
-            else
-                echo "Candle: setting up firewall (iptables)" >> /dev/kmsg
-                echo "Candle: setting up firewall (iptables)" >> /boot/candle_log.txt
-                iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
-                iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
-                iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-                iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
-            fi
-        
-        fi
-    fi
-fi
 
 
-# Check if /boot is mounted
+# Check if /boot is available
 if [ ! -f /boot/cmdline.txt ]; then
     echo "Candle: ERROR, missing cmdline.txt??" >> /dev/kmsg
     echo "Candle: ERROR, missing cmdline.txt??" >> /boot/candle_log.txt
@@ -784,10 +740,52 @@ fi
 
 
 
+# Make sure Bullseye sources are used
+if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
+    sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
+fi
+
+if cat /etc/apt/sources.list | grep -q buster; then
+    echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
+    sed -i 's/buster/bullseye/' /etc/apt/sources.list
+fi
+
+# Add option to download source code from RaspberryPi server
+echo "modifying /etc/apt/sources.list - allowing apt access to source code"
+sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
 
 
 
+if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
+then
+    echo
+    echo "RUNNING APT UPGRADE"
+    echo "Candle: running apt upgrade command" >> /dev/kmsg
+    echo "Candle: running apt upgrade command" >> /boot/candle_log.txt
+    echo
+    
+    apt-mark unhold raspberrypi-kernel
+    apt-mark unhold raspberrypi-kernel-headers 
+    apt-mark unhold raspberrypi-bootloader
+    
+    #apt upgrade -y
+    apt-get update -y
+    apt --fix-broken install -y
+    DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+    wait
+    echo ""
+
+    # Fix potential issue with dhcpdp on Bullseye
+    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf
+    
+    echo "calling autoremove"
+    apt --fix-broken install -y
+    apt autoremove -y
+fi
 
 
 
@@ -799,25 +797,6 @@ then
     echo "Candle: installing packages and libraries" >> /dev/kmsg
     echo "Candle: installing packages and libraries" >> /boot/candle_log.txt
     echo
-
-
-    # Make sure Bullseye sources are used
-    if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
-        echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
-        echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
-        sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
-    fi
-
-    if cat /etc/apt/sources.list | grep -q buster; then
-        echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
-        echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
-        sed -i 's/buster/bullseye/' /etc/apt/sources.list
-    fi
-    
-    
-    # Add option to download source code from RaspberryPi server
-    echo "modifying /etc/apt/sources.list - allowing apt access to source code"
-    sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
 
     # Update apt sources
@@ -869,12 +848,12 @@ then
         echo "/boot/candle_first_run_complete.txt does not exist yet"
         
         if [ ! -f /boot/candle_cutting_edge.txt ]; then
-            echo "Settting kernel to not automatically upgrade." >> /dev/kmsg
-            echo "Settting kernel to not automatically upgrade." >> /boot/candle_log.txt
+            #echo "Settting kernel to not automatically upgrade." >> /dev/kmsg
+            #echo "Settting kernel to not automatically upgrade." >> /boot/candle_log.txt
 
-            apt-mark hold raspberrypi-kernel
-            apt-mark hold raspberrypi-kernel-headers 
-            apt-mark hold raspberrypi-bootloader
+            #apt-mark hold raspberrypi-kernel
+            #apt-mark hold raspberrypi-kernel-headers 
+            #apt-mark hold raspberrypi-bootloader
         else
             echo
             if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)"  ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
@@ -888,14 +867,14 @@ then
                 apt install -y raspberrypi-kernel
                 apt install -y raspberrypi-kernel-headers 
                 apt install -y raspberrypi-bootloader
-                echo
-                echo "Kernel updated. Rebooting in 10 seconds... ($(date))"
-                echo "Hostname: $(cat /etc/hostname)"
-                echo
-                echo "Please log back in and run the install command again."
-                echo
-                sleep 10
-                reboot now
+                #echo
+                #echo "Kernel updated. Rebooting in 10 seconds... ($(date))"
+                #echo "Hostname: $(cat /etc/hostname)"
+                #echo
+                #echo "Please log back in and run the install command again."
+                #echo
+                #sleep 10
+                #reboot now
             fi
         fi
     else
@@ -1838,6 +1817,23 @@ if [ -f /home/pi/candle/ready.sh ]; then
 fi
 
 
+
+# Automatically restart the controller on serious crashes
+if [ -f /etc/sysctl.conf ]; then
+    if cat /etc/sysctl.conf | grep -q kernel.panic; then
+        sed -i 's/.*kernel.panic.*/kernel.panic = 6/' /etc/sysctl.conf
+    else
+        echo "kernel.panic = 5" >> /etc/sysctl.conf
+    fi
+fi
+
+if [ -f /etc/systemd/system.conf ]; then
+    sed -i 's/.*RuntimeWatchdogSec.*/RuntimeWatchdogSec=15s/' /etc/systemd/system.conf
+    sed -i 's/.*RebootWatchdogSec.*/RebootWatchdogSec=5min/'  /etc/systemd/system.conf
+    #sed -i 's/.*DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=90s/' /etc/systemd/system.conf
+fi
+
+
 # KIOSK
 
 if [ -f /boot/config.txt ]; then
@@ -1949,39 +1945,6 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFi
 
 
 
-
-# ADD IP-TABLES
-if [ "$SKIP_IPTABLES" = no ] || [[ -z "${SKIP_IPTABLES}" ]];
-then
-    echo
-    echo "ADDING IPTABLES"
-    echo
-    #echo "before:"
-    #iptables -t nat --list
-    #echo
-    #echo "Redirecting :80 to :8080 and :443 to :4443"
-    #echo
-    if iptables --list | grep 4443; then
-        echo "IPTABLES ALREADY ADDED"
-        echo "Candle: firewall already set up" >> /dev/kmsg
-        echo "Candle: firewall already set up" >> /boot/candle_log.txt
-    else
-        echo "Candle: setting up firewall (iptables)" >> /dev/kmsg
-        echo "Candle: setting up firewall (iptables)" >> /boot/candle_log.txt
-        iptables -t mangle -A PREROUTING -p tcp --dport 80 -j MARK --set-mark 1
-        iptables -t mangle -A PREROUTING -p tcp --dport 443 -j MARK --set-mark 1
-        iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
-        iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 4443
-        iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8080 -m mark --mark 1 -j ACCEPT
-        iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 4443 -m mark --mark 1 -j ACCEPT
-    fi
-    #iptables -L -v -n
-    #echo "after"
-    #iptables -t nat --list
-
-    #echo "\n\n" | apt install iptables-persistent -y
-    #apt install iptables-persistent -y
-fi
 
 echo
 
@@ -2111,9 +2074,11 @@ echo "Candle: almost done, cleaning up" >> /dev/kmsg
 echo "Candle: almost done, cleaning up" >> /boot/candle_log.txt
 
 
-
-#npm cache clean --force # already done in install_candle_controller script
-#nvm cache clear
+# Clean NPM cache
+export NVM_DIR="/home/pi/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+npm cache clean --force # already done in install_candle_controller script
 
 echo "Clearing Apt leftovers"
 apt clean -y
@@ -2122,6 +2087,7 @@ apt-get clean -y
 apt autoremove -y
 rm -rf /var/lib/apt/lists/*
 
+find /tmp -type f -atime +10 -delete
 
 # SAVE STATE OF INSTALLED PACKAGES
 
