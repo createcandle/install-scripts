@@ -11,9 +11,6 @@ set +e # continue on errors
 
 # If you want to use this script to directly create disk images, then you can use:
 # export CREATE_DISK_IMAGE=yes
-# This is not recommended however. It's better to restart the controller and allow it to install Zigbee2MQTT fully, 
-# and only then run the prepare_for_disk_image script.
-
 
 # Set the script to download the very latest available version. Risky. Enabling this creates the /boot/candle_cutting_edge.txt file
 # export CUTTING_EDGE=yes
@@ -25,7 +22,7 @@ set +e # continue on errors
 # export SKIP_PYTHON=yes
 # export SKIP_RESPEAKER=yes
 # export SKIP_BLUEALSA=yes
-# export SKIP_CONTROLLER_INSTALL=yes
+# export SKIP_CONTROLLER=yes
 # export SKIP_DEBUG=yes
 # export SKIP_REBOOT=yes
 
@@ -594,7 +591,7 @@ fi
 
 # PRE-DOWNLOAD CANDLE CONTROLLER INSTALLER
 
-if [[ -z "${SKIP_CONTROLLER_INSTALL}" ]] || [ "$SKIP_CONTROLLER_INSTALL" = no ]; 
+if [[ -z "${SKIP_CONTROLLER}" ]] || [ "$SKIP_CONTROLLER" = no ]; 
 then
     
     echo
@@ -2160,9 +2157,12 @@ fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
 
-if [ -f /home/pi/configuration-files/boot/fstab3.bak ] \
-&& [ -f /home/pi/configuration-files/boot/fstab4.bak ] \
-&& [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
+if [ -f /boot/fstab3.bak ] \
+&& [ -f /boot/fstab4.bak ]; then
+    echo "/boot/fstab3.bak and /boot/fstab4.bak exist"
+fi
+
+if [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
 && [ -d /home/pi/.webthings/var/lib/bluetooth ] \
 && [ -d /home/pi/.webthings/etc/ssh ] \
 && [ -f /home/pi/.webthings/etc/hostname ] \
@@ -2206,8 +2206,6 @@ else
     echo
     echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST"
     
-    ls /home/pi/configuration-files/boot/fstab3.bak
-    ls /home/pi/configuration-files/boot/fstab4.bak
     ls /home/pi/.webthings/etc/wpa_supplicant
     ls /home/pi/.webthings/var/lib/bluetooth
     ls /home/pi/.webthings/etc/ssh
@@ -2291,7 +2289,7 @@ fi
     
     
 
-if [[ -z "${SKIP_CONTROLLER_INSTALL}" ]] || [ "$SKIP_CONTROLLER_INSTALL" = no ]; 
+if [[ -z "${SKIP_CONTROLLER}" ]] || [ "$SKIP_CONTROLLER" = no ]; 
 then
     
     if [ -f install_candle_controller.sh ]; then
