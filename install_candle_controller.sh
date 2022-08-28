@@ -120,7 +120,7 @@ then
     fi
 
     
-    
+    echo
     echo "starting nvm install"
     nvm install 12
     nvm use 12
@@ -721,10 +721,10 @@ fi
 
 
 
-if [ -d /home/pi/.webthings/data/zigbee2mqtt ];
+if [ -d /home/pi/.webthings/data/zigbee2mqtt-adapter ];
 then
     
-    cd /home/pi/.webthings/data/zigbee2mqtt
+    cd /home/pi/.webthings/data/zigbee2mqtt-adapter
     
     echo
     echo "pre-installing Zigbee2MQTT"
@@ -756,6 +756,11 @@ then
     #https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest
     
     cd /home/pi/
+    
+else
+    echo "Candle: WARNING, /home/pi/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt"
+    echo "Candle: WARNING, /home/pi/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a /dev/kmsg
+    echo "$(date) /home/pi/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a /boot/candle_log.txt
 fi
 
 
