@@ -1092,15 +1092,12 @@ then
 
     apt -y install dnsmasq  "$reinstall" #--print-uris
     systemctl disable dnsmasq.service
-    systemctl stop dnsmasq.service
+    
 
     echo 
     apt -y install hostapd "$reinstall" #--print-uris 
-    systemctl disable hostapd.service
-    systemctl stop hostapd.service
     systemctl unmask hostapd.service
     systemctl disable hostapd.service
-    systemctl stop hostapd.service
 
     # Try to fix anything that may have gone wrong
     apt update
