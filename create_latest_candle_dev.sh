@@ -2439,6 +2439,7 @@ chown -R pi:pi /home/pi/candle/*
 
 
 
+
 #
 #  DONE
 #
@@ -2449,6 +2450,29 @@ if [ -f /boot/cmdline-candle.txt ]; then
     rm /boot/cmdline.txt
     cp /boot/cmdline-candle.txt /boot/cmdline.txt
 fi
+
+
+# Fix hostname issue from RC2
+if [ -f /home/pi/.webthings/etc/hostname ] && [ -f /home/pi/.webthings/etc/hosts ]; then
+    hostname="$(cat /home/pi/.webthings/etc/hostname)"
+    if ! cat /etc/hosts | grep -q "$hostname"; then
+        echo "hostname was not in /etc/hosts. Attempting to fix."
+        echo "before:"
+        cat /home/pi/.webthings/etc/hosts
+        echo
+        sed -i -E -e "s|127\.0\.1\.1[ \t]+.*|127\.0\.1\.1 \t$hostname|" /home/pi/.webthings/etc/hosts
+        echo "after:"
+        cat /home/pi/.webthings/etc/hosts
+        echo
+    fi
+else
+    echo
+    echo "Error, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist"
+    echo "Candle: ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not e>
+    echo "ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >>>
+    exit 1
+fi
+
 
 
 # cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
@@ -2499,6 +2523,9 @@ fi
 # DONE!
 echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
 echo "$(date) - system update complete" >> /boot/candle_log.txt
+
+
+
 
 
 
