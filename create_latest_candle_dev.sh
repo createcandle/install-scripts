@@ -1657,8 +1657,6 @@ if [ -d /home/pi/configuration-files ]; then
     
     rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
     
-    rm -rf /home/pi/configuration-files
-    
     
 else
    
@@ -2518,6 +2516,10 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
     rm /boot/candle_cutting_edge.txt
 fi
 
+if [ -d /home/pi/configuration-files ]; then
+    echo "removing configuration-files dir"
+    rm -rf /home/pi/configuration-files
+fi
 
 # DONE!
 echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
