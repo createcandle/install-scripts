@@ -762,9 +762,6 @@ echo "modifying /etc/apt/sources.list - allowing apt access to source code"
 sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
 
-
-
-
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
     echo
@@ -807,15 +804,12 @@ then
             echo ""
 
 
-            #rm -rf /opt/vc/lib
-
             apt-get update -y
             DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
             wait
             apt --fix-broken install -y
             sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
             echo ""
-
 
             apt-get update -y
             DEBIAN_FRONTEND=noninteractive apt upgrade -y &
@@ -873,6 +867,11 @@ then
         echo ""
     fi
     
+
+    if [ -d /opt/vc/lib ]; then
+        echo "removing /opt/vc/lib"
+        rm -rf /opt/vc/lib
+    fi
     
 fi
 
@@ -2183,6 +2182,8 @@ if [ -f /boot/fstab3.bak ] \
     echo "/boot/fstab3.bak and /boot/fstab4.bak exist"
 else
     echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist"
+    echo "WARNING, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /dev/kmsg
+    echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /boot/candle_log.txt
 fi
 
 if [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
@@ -2216,18 +2217,23 @@ then
         echo "Candle: copying 3 partition version of fstab" >> /boot/candle_log.txt
         
         if ! diff -q /home/pi/configuration-files/boot/fstab3.bak /etc/fstab &>/dev/null; then
-            echo "fstab file is different, copying it"
+            echo "3 partition fstab file is different, copying it"
+            echo "Candle: 3 partition fstab file is different, copying it" >> /dev/kmsg
             cp --verbose /home/pi/configuration-files/boot/fstab3.bak /etc/fstab
         else
             echo "new fstab file is same as the old one, not copying it."
+            echo "Candle: new fstab file is same as the old one, not copying it." >> /dev/kmsg
+            echo "new 3 partition fstab file is same as the old one, not copying it." >> /boot/candle_log.txt
         fi
-        
     fi
 
     
 else
     echo
     echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST!"
+    # The only reason this is a warning and not an error (which would stop the process in de UI), is that the process is nearly done anyway.
+    echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
+    echo "Candle: ERROR, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
     echo
     
     ls /home/pi/.webthings/etc/wpa_supplicant
@@ -2238,9 +2244,6 @@ else
     ls /home/pi/.webthings/arduino/.arduino15
     ls /home/pi/.webthings/arduino/Arduino
     
-    # The only reason this is not an error (which would stop the process), is that the process is nearly done anyway.
-    echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
-    echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
     echo
     
 fi
