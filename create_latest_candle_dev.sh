@@ -1695,6 +1695,7 @@ fi
 # CHMOD THE NEW FILES
 chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
+chmod +x /etc/xdg/openbox/autostart
 chmod +x /home/pi/candle/late.sh
 
 chmod +x /home/pi/candle/debug.sh
@@ -1702,6 +1703,7 @@ chmod +x /home/pi/candle/files_check.sh
 chmod +x /home/pi/candle/install_samba.sh
 chmod +x /home/pi/candle/prepare_for_disk_image.sh
 chmod +x /home/pi/candle/unsnap.sh
+
 
 
 # CHOWN THE NEW FILES
@@ -2027,7 +2029,8 @@ else
     echo
     echo "ERROR, early.sh does not exist!"
 fi    
-if [ -f etc/xdg/openbox/autostart ]; then
+
+if [ -f /etc/xdg/openbox/autostart ]; then
     if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
         cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
     fi
