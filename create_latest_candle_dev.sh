@@ -791,7 +791,7 @@ then
         echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
         
         # Allow a kernal update if the disk image is being made right now
-        if [ ! -f /boot/candle_first_run_complete.txt ]; then
+        #if [ ! -f /boot/candle_first_run_complete.txt ]; then
         
             echo "no /boot/candle_first_run_complete.txt file yet, probably creating disk image"
             # A little overkill:
@@ -844,7 +844,7 @@ then
             #wait
             #echo
             #echo "Upgrade complete"
-        fi
+        #fi
       
     else
         echo "not allowing kernel updates for now"
