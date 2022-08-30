@@ -654,25 +654,27 @@ fi
 
 # If the file exists, make it executable and move it into place
 if [ -f ./ro-root.sh ]; then
-    echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
-    echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
-    chmod +x ./ro-root.sh
+    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
+        echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
+        chmod +x ./ro-root.sh
     
-    # Avoid risky move if possible
-    if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
-        echo "ro-root.sh file is different, moving it into place"
-        echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
-        echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
-        if [ -f /bin/ro-root.sh ]; then
-            rm /bin/ro-root.sh
-        fi
-        mv -f ./ro-root.sh /bin/ro-root.sh
-        chmod +x /bin/ro-root.sh
+        # Avoid risky move if possible
+        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
+            echo "ro-root.sh file is different, moving it into place"
+            echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
+            echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
+            if [ -f /bin/ro-root.sh ]; then
+                rm /bin/ro-root.sh
+            fi
+            mv -f ./ro-root.sh /bin/ro-root.sh
+            chmod +x /bin/ro-root.sh
         
-    else
-        echo "new ro-root.sh file is same as the old one, not moving it"
-        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
-        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
+        else
+            echo "new ro-root.sh file is same as the old one, not moving it"
+            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
+            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
+        fi
     fi
 else
     echo "ERROR: failed to download ro-root.sh"
@@ -1969,69 +1971,69 @@ echo
 
 if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
-    if [ -f /bin/ro-root.sh ]; then
-        #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
-        if [ $(cat /boot/config.txt | grep -c ramfsaddr) -eq 0 ];
-        then
-            echo
-            echo "ADDING READ-ONLY MODE"
-            echo
-            echo "Candle: adding read-only mode" >> /dev/kmsg
-            echo "Candle: adding read-only mode" >> /boot/candle_log.txt
-        
-            mkinitramfs -o /boot/initrd
-    
-        	echo "- Adding read only mode to config.txt"
-            echo >> /boot/config.txt
-            echo '# Read only mode' >> /boot/config.txt
-            echo 'initramfs initrd followkernel' >> /boot/config.txt
-            echo 'ramfsfile=initrd' >> /boot/config.txt
-            echo 'ramfsaddr=-1' >> /boot/config.txt
-    
-        else
-            echo "- Read only file system mode was already in config.txt"
-            echo "Candle: read-only mode already existed" >> /dev/kmsg
-            echo "Candle: read-only mode already existed" >> /boot/candle_log.txt
-        fi
-
-
-        if [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
-        then
-        
-            #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
-            if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
+    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+        if [ -f /bin/ro-root.sh ]; then
+            #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
+            if [ $(cat /boot/config.txt | grep -c ramfsaddr) -eq 0 ];
             then
-            	echo "- Modifying cmdline.txt for read-only file system"
-                echo "- - before: $(cat /boot/cmdline.txt)"
-                sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
-                echo "- - after : $(cat /boot/cmdline.txt)"
-                echo "Candle: read-only mode is now enabled" >> /dev/kmsg
-                echo "Candle: read-only mode is now enabled" >> /boot/candle_log.txt
+                echo
+                echo "ADDING READ-ONLY MODE"
+                echo
+                echo "Candle: adding read-only mode" >> /dev/kmsg
+                echo "Candle: adding read-only mode" >> /boot/candle_log.txt
+        
+                mkinitramfs -o /boot/initrd
+    
+            	echo "- Adding read only mode to config.txt"
+                echo >> /boot/config.txt
+                echo '# Read only mode' >> /boot/config.txt
+                echo 'initramfs initrd followkernel' >> /boot/config.txt
+                echo 'ramfsfile=initrd' >> /boot/config.txt
+                echo 'ramfsaddr=-1' >> /boot/config.txt
+    
             else
-                echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
-                echo "Candle: read-only mode was already enabled" >> /dev/kmsg
-                echo "Candle: read-only mode was already enabled" >> /boot/candle_log.txt
+                echo "- Read only file system mode was already in config.txt"
+                echo "Candle: read-only mode already existed" >> /dev/kmsg
+                echo "Candle: read-only mode already existed" >> /boot/candle_log.txt
             fi
-        
-        fi
-        
-        
-        # Add RW and RO alias shortcuts to .profile
-        if [ -f /home/pi/.profile ]; then
-            if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
+
+
+            if [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
             then
-                echo "adding ro and rw aliases to /home/pi/.profile"
-                echo "" >> /home/pi/.profile
-                echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
-                echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
-            fi
-        fi
+            
+                #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
+                if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
+                then
+                	echo "- Modifying cmdline.txt for read-only file system"
+                    echo "- - before: $(cat /boot/cmdline.txt)"
+                    sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
+                    echo "- - after : $(cat /boot/cmdline.txt)"
+                    echo "Candle: read-only mode is now enabled" >> /dev/kmsg
+                    echo "Candle: read-only mode is now enabled" >> /boot/candle_log.txt
+                else
+                    echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
+                    echo "Candle: read-only mode was already enabled" >> /dev/kmsg
+                    echo "Candle: read-only mode was already enabled" >> /boot/candle_log.txt
+                fi
         
-    else
-        echo "ERROR, /bin/ro-root.sh is missing, not even attempting to further install read-only mode"
+            fi
+        
+        
+            # Add RW and RO alias shortcuts to .profile
+            if [ -f /home/pi/.profile ]; then
+                if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
+                then
+                    echo "adding ro and rw aliases to /home/pi/.profile"
+                    echo "" >> /home/pi/.profile
+                    echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
+                    echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
+                fi
+            fi
+        
+        else
+            echo "ERROR, /bin/ro-root.sh is missing, not even attempting to further install read-only mode"
+        fi
     fi
-    
-    
 fi
 
 
@@ -2203,7 +2205,7 @@ if cat /boot/cmdline.txt | grep -q PARTUUID; then
 fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
-if [ lsblk | grep -q 'mmcblk0p3' ] || [ lsblk | grep -q 'mmcblk0p4' ]; then
+if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
 
     if [ -f /boot/fstab3.bak ] \
     && [ -f /boot/fstab4.bak ]; then
@@ -2477,9 +2479,11 @@ chown -R pi:pi /home/pi/candle/*
 
 
 if [ -f /boot/cmdline-candle.txt ]; then
-    echo "copying default Candle cmdline.txt into place"
-    rm /boot/cmdline.txt
-    cp /boot/cmdline-candle.txt /boot/cmdline.txt
+    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+        echo "copying default Candle cmdline.txt into place"
+        rm /boot/cmdline.txt
+        cp /boot/cmdline-candle.txt /boot/cmdline.txt
+    fi
 fi
 
 
