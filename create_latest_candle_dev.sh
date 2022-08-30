@@ -342,6 +342,98 @@ fi
 
 
 
+
+if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
+then
+    echo
+    echo "doing upgrade first"
+    
+    # Check if kernel or bootloader can be updated
+    if apt list --upgradable | grep raspberrypi-bootloader; then
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE"
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
+    fi
+    if apt list --upgradable | grep raspberrypi-kernel; then
+        echo "WARNING, KERNEL IS UPGRADEABLE"
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
+    fi
+
+    apt-get update -y
+    apt --fix-broken install -y
+
+    if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
+    
+        #apt install -y raspberrypi-kernel
+        #apt install -y raspberrypi-bootloader
+        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!"
+        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
+        echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
+        
+        echo "no /boot/candle_first_run_complete.txt file yet, probably creating disk image"
+        # A little overkill:
+
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+
+
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+
+        apt --fix-broken install -y
+        apt autoremove -y
+        apt clean -y
+        echo
+        echo "Candle: Apt upgrade complete."
+        echo "Candle: Apt upgrade complete." >> /dev/kmsg
+        echo "Apt upgrade done" >> /boot/candle_log.txt
+        echo
+
+        echo
+        echo "rebooting"
+        echo
+        
+        # make sure the system is read-write and accessible again after the reboot.
+        touch /boot/candle_rw_once.txt
+        #touch /boot/ssh.txt
+        
+        reboot
+
+        #echo "calling apt upgrade"
+        #echo "Candle: doing apt upgrade" >> /dev/kmsg
+        #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
+        #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+        #wait
+        #echo
+        #echo "Upgrade complete"
+      
+    fi
+    
+fi
+
+
+
+
+
+
+
+
 # PLYMOUTH LITE
 if [ ! -f /bin/ply-image ]; 
 then
@@ -408,6 +500,18 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
     wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
 fi
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -769,82 +873,21 @@ then
     
     # Check if kernel or bootloader can be updated
     if apt list --upgradable | grep raspberrypi-bootloader; then
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE"
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
+        echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE"
+        echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE" >> /boot/candle_log.txt
     fi
     if apt list --upgradable | grep raspberrypi-kernel; then
-        echo "WARNING, KERNEL IS UPGRADEABLE"
-        echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
+        echo "WARNING, KERNEL IS STILL UPGRADEABLE"
+        echo "WARNING, KERNEL IS STILL UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, KERNEL IS STILL UPGRADEABLE" >> /boot/candle_log.txt
     fi
 
     apt-get update -y
     apt --fix-broken install -y
 
     if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
-    
-        #apt install -y raspberrypi-kernel
-        #apt install -y raspberrypi-bootloader
-        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!"
-        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
-        echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
-        
-        # Allow a kernal update if the disk image is being made right now
-        #if [ ! -f /boot/candle_first_run_complete.txt ]; then
-        
-            echo "no /boot/candle_first_run_complete.txt file yet, probably creating disk image"
-            # A little overkill:
-
-            apt-get update -y
-            DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-            wait
-            apt --fix-broken install -y
-            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-            echo ""
-
-
-            apt-get update -y
-            DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-            wait
-            apt --fix-broken install -y
-            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-            echo ""
-
-            apt-get update -y
-            DEBIAN_FRONTEND=noninteractive apt upgrade -y &
-            wait
-            apt --fix-broken install -y
-            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-            echo ""
-
-            apt --fix-broken install -y
-            apt autoremove -y
-            apt clean -y
-            echo
-            echo "Candle: Apt upgrade complete."
-            echo "Candle: Apt upgrade complete." >> /dev/kmsg
-            echo "Apt upgrade done" >> /boot/candle_log.txt
-            echo
-    
-            echo
-            echo "rebooting"
-            echo
-            
-            # make sure the system is read-write and accessible again after the reboot.
-            touch /boot/candle_rw_once.txt
-            #touch /boot/ssh.txt
-            
-            reboot
-    
-            #echo "calling apt upgrade"
-            #echo "Candle: doing apt upgrade" >> /dev/kmsg
-            #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
-            #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
-            #wait
-            #echo
-            #echo "Upgrade complete"
-        #fi
+        echo "STRANGE ERROR, the kernel update should already be done at this point"
       
     else
         echo "not allowing kernel updates for now"
@@ -874,22 +917,6 @@ then
     fi
     
 fi
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2176,76 +2203,80 @@ if cat /boot/cmdline.txt | grep -q PARTUUID; then
 fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
+if [ lsblk | grep -q 'mmcblk0p3' ] || [ lsblk | grep -q 'mmcblk0p4' ]; then
 
-if [ -f /boot/fstab3.bak ] \
-&& [ -f /boot/fstab4.bak ]; then
-    echo "/boot/fstab3.bak and /boot/fstab4.bak exist"
-else
-    echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist"
-    echo "WARNING, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /dev/kmsg
-    echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /boot/candle_log.txt
-fi
-
-if [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
-&& [ -d /home/pi/.webthings/var/lib/bluetooth ] \
-&& [ -d /home/pi/.webthings/etc/ssh ] \
-&& [ -f /home/pi/.webthings/etc/hostname ] \
-&& [ -d /home/pi/.webthings/tmp ] \
-&& [ -d /home/pi/.webthings/arduino/.arduino15 ] \
-&& [ -d /home/pi/.webthings/arduino/Arduino ];
-then
-    echo
-    echo "COPYING FSTAB FILE"
-    echo
-
-    if lsblk | grep -q 'mmcblk0p4'; 
-    then
-        echo "copying 4 partition version of fstab"
-        echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
-        echo "Candle: copying 4 partition version of fstab" >> /boot/candle_log.txt
-        
-        if ! diff -q /home/pi/configuration-files/boot/fstab4.bak /etc/fstab &>/dev/null; then
-            echo "fstab file is different, copying it"
-            cp --verbose /home/pi/configuration-files/boot/fstab4.bak /etc/fstab
-        else
-            echo "new fstab file is same as the old one, not copying it."
-        fi
-        
+    if [ -f /boot/fstab3.bak ] \
+    && [ -f /boot/fstab4.bak ]; then
+        echo "/boot/fstab3.bak and /boot/fstab4.bak exist"
     else
-        echo "copying 3 partition version of fstab"
-        echo "Candle: copying 3 partition version of fstab" >> /dev/kmsg
-        echo "Candle: copying 3 partition version of fstab" >> /boot/candle_log.txt
-        
-        if ! diff -q /home/pi/configuration-files/boot/fstab3.bak /etc/fstab &>/dev/null; then
-            echo "3 partition fstab file is different, copying it"
-            echo "Candle: 3 partition fstab file is different, copying it" >> /dev/kmsg
-            cp --verbose /home/pi/configuration-files/boot/fstab3.bak /etc/fstab
-        else
-            echo "new fstab file is same as the old one, not copying it."
-            echo "Candle: new fstab file is same as the old one, not copying it." >> /dev/kmsg
-            echo "new 3 partition fstab file is same as the old one, not copying it." >> /boot/candle_log.txt
-        fi
+        echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist"
+        echo "WARNING, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /dev/kmsg
+        echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /boot/candle_log.txt
     fi
 
+    if [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
+    && [ -d /home/pi/.webthings/var/lib/bluetooth ] \
+    && [ -d /home/pi/.webthings/etc/ssh ] \
+    && [ -f /home/pi/.webthings/etc/hostname ] \
+    && [ -d /home/pi/.webthings/tmp ] \
+    && [ -d /home/pi/.webthings/arduino/.arduino15 ] \
+    && [ -d /home/pi/.webthings/arduino/Arduino ];
+    then
+        echo
+        echo "COPYING FSTAB FILE"
+        echo
+
+        if lsblk | grep -q 'mmcblk0p4'; 
+        then
+            echo "copying 4 partition version of fstab"
+            echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
+            echo "Candle: copying 4 partition version of fstab" >> /boot/candle_log.txt
+        
+            if ! diff -q /home/pi/configuration-files/boot/fstab4.bak /etc/fstab &>/dev/null; then
+                echo "fstab file is different, copying it"
+                cp --verbose /home/pi/configuration-files/boot/fstab4.bak /etc/fstab
+            else
+                echo "new fstab file is same as the old one, not copying it."
+            fi
+        
+        else
+            echo "copying 3 partition version of fstab"
+            echo "Candle: copying 3 partition version of fstab" >> /dev/kmsg
+            echo "Candle: copying 3 partition version of fstab" >> /boot/candle_log.txt
+        
+            if ! diff -q /home/pi/configuration-files/boot/fstab3.bak /etc/fstab &>/dev/null; then
+                echo "3 partition fstab file is different, copying it"
+                echo "Candle: 3 partition fstab file is different, copying it" >> /dev/kmsg
+                cp --verbose /home/pi/configuration-files/boot/fstab3.bak /etc/fstab
+            else
+                echo "new fstab file is same as the old one, not copying it."
+                echo "Candle: new fstab file is same as the old one, not copying it." >> /dev/kmsg
+                echo "new 3 partition fstab file is same as the old one, not copying it." >> /boot/candle_log.txt
+            fi
+        fi
+
     
+    else
+        echo
+        echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST!"
+        # The only reason this is a warning and not an error (which would stop the process in de UI), is that the process is nearly done anyway.
+        echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
+        echo "Candle: ERROR, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
+        echo
+    
+        ls /home/pi/.webthings/etc/wpa_supplicant
+        ls /home/pi/.webthings/var/lib/bluetooth
+        ls /home/pi/.webthings/etc/ssh
+        ls /home/pi/.webthings/etc/hostname
+        ls /home/pi/.webthings/tmp
+        ls /home/pi/.webthings/arduino/.arduino15
+        ls /home/pi/.webthings/arduino/Arduino
+    
+        echo
+    
+    fi
 else
-    echo
-    echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST!"
-    # The only reason this is a warning and not an error (which would stop the process in de UI), is that the process is nearly done anyway.
-    echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
-    echo "Candle: ERROR, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
-    echo
-    
-    ls /home/pi/.webthings/etc/wpa_supplicant
-    ls /home/pi/.webthings/var/lib/bluetooth
-    ls /home/pi/.webthings/etc/ssh
-    ls /home/pi/.webthings/etc/hostname
-    ls /home/pi/.webthings/tmp
-    ls /home/pi/.webthings/arduino/.arduino15
-    ls /home/pi/.webthings/arduino/Arduino
-    
-    echo
-    
+    echo "ERROR, no 3rd or 4th partition"
 fi
 
 
