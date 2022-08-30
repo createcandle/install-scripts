@@ -304,6 +304,7 @@ sleep 3
 cd /home/pi
 
 
+
 # Make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
     rm /boot/candle_hardware_clock.txt
@@ -343,10 +344,45 @@ fi
 
 
 
+echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nsystemctl restart avahi-daemon' > /usr/bin/candle_hostname_fix.sh 
+
+
+
+# BULLSEYE SOURCES
+
+# Make sure Bullseye sources are used
+if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
+    sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
+fi
+
+if cat /etc/apt/sources.list | grep -q buster; then
+    echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
+    sed -i 's/buster/bullseye/' /etc/apt/sources.list
+fi
+
+# Add option to download source code from RaspberryPi server
+echo "modifying /etc/apt/sources.list - allowing apt access to source code"
+sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
+
+
+
+# Unhold browser
+apt-mark unhold chromium-browser
+
+
+
+
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
     echo
     echo "doing upgrade first"
+    
+    apt update -y
+    apt-get update -y
+    apt --fix-broken install -y
     
     # Check if kernel or bootloader can be updated
     if apt list --upgradable | grep raspberrypi-bootloader; then
@@ -360,8 +396,7 @@ then
         echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
     fi
 
-    apt-get update -y
-    apt --fix-broken install -y
+
 
     if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
     
@@ -377,21 +412,36 @@ then
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
         wait
+        apt-get --fix-missing
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
 
 
+        if [ -d /opt/vc/lib ]; then
+            echo "removing left over /opt/vc/lib"
+            rm -rf /opt/vc/lib
+        fi
+        
+        if [ -d /var/lib/dhcpcd5 ]; then
+            echo "removing left over dhcpcd5"
+            rm -rf /var/lib/dhcpcd5  
+        fi
+        
+        
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
         wait
+        apt-get --fix-missing
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
 
         apt-get update -y
+        apt-get update --fix-missing -y
         DEBIAN_FRONTEND=noninteractive apt upgrade -y &
         wait
+        apt-get update --fix-missing -y
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
@@ -405,9 +455,11 @@ then
         echo "Apt upgrade done" >> /boot/candle_log.txt
         echo
 
+
         apt-mark unhold chromium-browser
     
         if chromium-browser --version | grep -q 'Chromium 88'; then
+            echo "Version 88 of ungoogled chromium detected. Removing..."
             echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
             echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
             apt-get purge chromium-browser -y --allow-change-held-packages
@@ -417,31 +469,30 @@ then
             apt install chromium-browser -y --allow-change-held-packages
         fi
 
-        echo
-        echo "rebooting"
-        echo
+        if [ -f /boot/candle_original_version.txt ] || [ ! -f /boot/candle_first_run_complete.txt ]; then
+            echo
+            echo "rebooting"
+            echo "$(date) - rebooting" >> /boot/candle_log.txt
+            echo
         
-        # make sure the system is read-write and accessible again after the reboot.
-        touch /boot/candle_rw_once.txt
-        #touch /boot/ssh.txt
+            # make sure the system is read-write and accessible again after the reboot.
+            touch /boot/candle_rw_once.txt
+            #touch /boot/ssh.txt
         
-        reboot
-        sleep 60
-        #echo "calling apt upgrade"
-        #echo "Candle: doing apt upgrade" >> /dev/kmsg
-        #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
-        #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
-        #wait
-        #echo
-        #echo "Upgrade complete"
+            reboot
+            sleep 60
+            #echo "calling apt upgrade"
+            #echo "Candle: doing apt upgrade" >> /dev/kmsg
+            #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
+            #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+            #wait
+            #echo
+            #echo "Upgrade complete"
+        fi
       
     fi
     
 fi
-
-
-
-
 
 
 
@@ -861,24 +912,7 @@ fi
 
 
 
-
-# Make sure Bullseye sources are used
-if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
-    sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
-fi
-
-if cat /etc/apt/sources.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
-    sed -i 's/buster/bullseye/' /etc/apt/sources.list
-fi
-
-# Add option to download source code from RaspberryPi server
-echo "modifying /etc/apt/sources.list - allowing apt access to source code"
-sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
-
+# APT UPGRADE
 
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
@@ -904,6 +938,41 @@ then
         echo "STRANGE ERROR, the kernel update should already be done at this point"
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> /dev/kmsg
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> /boot/candle_log.txt
+        
+        apt-mark unhold chromium-browser
+        
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+        
+        
+    
+        if chromium-browser --version | grep -q 'Chromium 88'; then
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+            apt-get purge chromium-browser -y --allow-change-held-packages
+            apt purge chromium-browser -y --allow-change-held-packages
+            apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
+            apt autoremove -y --allow-change-held-packages
+            apt install chromium-browser -y --allow-change-held-packages
+        fi
+
+
+        if [ -f /boot/candle_original_version.txt ] || [ ! -f /boot/candle_first_run_complete.txt ]; then
+            echo
+            echo "rebooting"
+            echo "$(date) - rebooting" >> /boot/candle_log.txt
+            echo
+        
+            # make sure the system is read-write and accessible again after the reboot.
+            touch /boot/candle_rw_once.txt
+        
+            reboot
+            sleep 60
+        fi
       
     else
         echo "doing system update, but not allowing kernel updates for now"
@@ -1413,46 +1482,52 @@ fi
 # RESPEAKER HAT
 if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]];
 then
-    echo
-    echo "INSTALLING RESPEAKER HAT DRIVERS"
-    echo
     
-    apt-get update
-    cd /home/pi
-    git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
+    if [ -f /boot/candle_original_version.txt ]; then
     
-    if [ -d seeed-voicecard ]; then
-        cd seeed-voicecard
+        echo
+        echo "INSTALLING RESPEAKER HAT DRIVERS"
+        echo
     
-        if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
-            mkdir -p /home/pi/candle
-            #touch /home/pi/candle/installed_respeaker_version.txt
-            cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
-        fi
+        apt-get update
+        cd /home/pi
+        git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
     
-        if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ];
-        then
-            echo "ReSpeaker was already installed"
-        
-            if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
-                echo "ReSpeaker has an updated version!"
-                echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
-                echo "ReSpeaker has an updated version! Attempting to install" >> /boot/candle_log.txt
-                ./uninstall.sh
-                echo -e 'N\n' | ./install.sh
+        if [ -d seeed-voicecard ]; then
+            cd seeed-voicecard
+    
+            if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
+                mkdir -p /home/pi/candle
+                #touch /home/pi/candle/installed_respeaker_version.txt
                 cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
             fi
+    
+            if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ];
+            then
+                echo "ReSpeaker was already installed"
+        
+                if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
+                    echo "ReSpeaker has an updated version!"
+                    echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
+                    echo "ReSpeaker has an updated version! Attempting to install" >> /boot/candle_log.txt
+                    ./uninstall.sh
+                    echo -e 'N\n' | ./install.sh
+                    cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+                else
+                    echo "not a new respeaker version" >> /dev/kmsg
+                fi
+        
+            else
+                echo "Doing initial ReSpeaker install"
+                echo -e 'N\n' | ./install.sh
+            fi
+        
+            cd /home/pi
+            rm -rf seeed-voicecard
         
         else
-            echo "Doing initial ReSpeaker install"
-            echo -e 'N\n' | ./install.sh
+            echo "Error, failed to download respeaker source"
         fi
-        
-        cd /home/pi
-        rm -rf seeed-voicecard
-        
-    else
-        echo "Error, failed to download respeaker source"
     fi
     
     
