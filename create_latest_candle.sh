@@ -25,6 +25,18 @@ set +e # continue on errors
 # export SKIP_CONTROLLER=yes
 # export SKIP_DEBUG=yes
 # export SKIP_REBOOT=yes
+ 
+#SKIP_PARTITIONS=yes
+#SKIP_APT_INSTALL=yes
+#SKIP_APT_UPGRADE=yes
+#SKIP_PYTHON=yes
+#SKIP_RESPEAKER=yes
+#SKIP_BLUEALSA=yes
+#SKIP_CONTROLLER=yes
+#SKIP_DEBUG=yes
+#SKIP_REBOOT=yes
+ 
+# SKIP_PARTITIONS=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_PYTHON=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER=yes SKIP_DEBUG=yes SKIP_REBOOT=yes
 
 # The script can add the re-install option to every Apt install command. This feature may be removed in the future.
 # export APT_REINSTALL=yes
@@ -1907,7 +1919,12 @@ if [ -d /home/pi/configuration-files ]; then
         mkdir -p /home/pi/candle/configuration-files-backup
     fi
     
+    echo
+    echo "copying configuration-files to configuration-files-backup"
     cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
+    
+    echo
+    echo "Doing rsync from configuration-files-backup"
     rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
     echo "Configuration files should be copied" >> /dev/kmsg
     echo "Configuration files should be copied" >> /boot/candle_log.txt
