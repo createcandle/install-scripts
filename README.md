@@ -13,19 +13,23 @@ https://www.candlesmarthome.com/download
 
 
 ## Creating the Candle Raspberry Pi disk image
-1. Install Raspberry Pi Imager software on a computer with an SD card reader, and get a micro SD card of at least 16Gb.
+For this you will need:
+- A Raspberry pi with at least 2Gb of memory
+- An internet router with a free network cable
+- A micro SD card of at least 16Gb
+- An internet connected computer that can read/write the SD card
+
+1. Install Raspberry Pi Imager software on a computer with an SD card reader.
 
 https://www.raspberrypi.com/software/
 
-2. Open Raspberry Pi Imager, insert the SD card. Select Raspberry Pi OS Bullseye Lite (32 Bit) as the OS to install. Also select your SD card.
+2. Open Raspberry Pi Imager, insert the SD card. Select Raspberry Pi OS Bullseye Lite (32 Bit) as the OS to install. Also select your SD card as the drive to flash it to.
 
 3. Use the gear icon to set everything up that you can: enable ssh, set username "pi" and password "smarthome", set the hostname to "candle", pre-fill your wifi credentials, etc.
 
 4. Click "write". Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt” using a text editor. From it, delete “init=/usr/lib/raspi-config/init_resize.sh”, and save. Saving might seem to fail, but it probably saved anyway. Open the cmdline.txt file again to confirm.
 
-NOTE: If you want to get the "cutting edge" version of Candle, you will also have to create a file called `candle_cutting_edge.txt`
-
-5. Make sure there is no other "candle.local" device on the network already, since after a reboot the Raspberry Pi's hostname will change to `candle.local`. You must also plug a network cable into the Raspberry Pi.
+5. Make sure there is no other "candle.local" device on the network already, since after a reboot the Raspberry Pi's hostname will change to `candle.local` (if it isn't called that already). You must also plug a network cable into the Raspberry Pi to avoid download issues.
 
 6. Now insert the SD card into the Raspberry Pi, power it up, wait a minute.
 
@@ -39,9 +43,9 @@ ssh pi@candle.local
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo bash
 ```
 
-NOTE: If you enabled developer mode, and the script detects that a bootloader or kernel update is available, then it will install these first and reboot the system. You can then log back in and run the install command again.
+NOTE: If the script detects that a bootloader or kernel update is available (which is very likely), then it will install these first and reboot the system. You can then log back in and run the install command again.
 
-9. The script will easily take an hour to run on a Raspberry Pi 3b. When it is complete it will shut down the Raspberry Pi (assuming there are no errors).
+9. The script will easily take more than an hour to run on a Raspberry Pi 3b. When it is complete it will shut down the Raspberry Pi (assuming there are no errors).
 
 13. When you see the message that it is shutting down, wait 15 seconds until the shutdown is complete. Then take out the SD card and insert it back into your laptop again to turn it into a disk image file. On windows you can use the free version of Win32 Disk Imager for this. Make sure to check the box to only read the partitions. Name the file to be extracted something like `Candle_2.0.0.img` (depending on the intended version).
 
