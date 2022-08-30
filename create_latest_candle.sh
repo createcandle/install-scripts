@@ -304,6 +304,7 @@ sleep 3
 cd /home/pi
 
 
+
 # Make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
     rm /boot/candle_hardware_clock.txt
@@ -339,6 +340,34 @@ if [ -z "$(which git)" ]; then
     echo
     apt -y install git "$reinstall" 
 fi
+
+
+
+
+
+# BULLSEYE SOURCES
+
+# Make sure Bullseye sources are used
+if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
+    sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
+fi
+
+if cat /etc/apt/sources.list | grep -q buster; then
+    echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
+    sed -i 's/buster/bullseye/' /etc/apt/sources.list
+fi
+
+# Add option to download source code from RaspberryPi server
+echo "modifying /etc/apt/sources.list - allowing apt access to source code"
+sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
+
+
+
+# Unhold browser
+apt-mark unhold chromium-browser
 
 
 
@@ -419,6 +448,7 @@ then
 
         echo
         echo "rebooting"
+        echo "$(date) - rebooting" >> /boot/candle_log.txt
         echo
         
         # make sure the system is read-write and accessible again after the reboot.
@@ -861,24 +891,7 @@ fi
 
 
 
-
-# Make sure Bullseye sources are used
-if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
-    sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
-fi
-
-if cat /etc/apt/sources.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
-    sed -i 's/buster/bullseye/' /etc/apt/sources.list
-fi
-
-# Add option to download source code from RaspberryPi server
-echo "modifying /etc/apt/sources.list - allowing apt access to source code"
-sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
-
+# APT UPGRADE
 
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
@@ -904,6 +917,36 @@ then
         echo "STRANGE ERROR, the kernel update should already be done at this point"
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> /dev/kmsg
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> /boot/candle_log.txt
+        
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+        
+        apt-mark unhold chromium-browser
+    
+        if chromium-browser --version | grep -q 'Chromium 88'; then
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+            apt-get purge chromium-browser -y --allow-change-held-packages
+            apt purge chromium-browser -y --allow-change-held-packages
+            apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
+            apt autoremove -y --allow-change-held-packages
+            apt install chromium-browser -y --allow-change-held-packages
+        fi
+
+        echo
+        echo "rebooting"
+        echo "$(date) - rebooting" >> /boot/candle_log.txt
+        echo
+        
+        # make sure the system is read-write and accessible again after the reboot.
+        touch /boot/candle_rw_once.txt
+        
+        reboot
+        sleep 60
       
     else
         echo "doing system update, but not allowing kernel updates for now"
