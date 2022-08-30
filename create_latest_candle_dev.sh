@@ -405,6 +405,18 @@ then
         echo "Apt upgrade done" >> /boot/candle_log.txt
         echo
 
+        apt-mark unhold chromium-browser
+    
+        if chromium-browser --version | grep -q 'Chromium 88'; then
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+            apt-get purge chromium-browser -y --allow-change-held-packages
+            apt purge chromium-browser -y --allow-change-held-packages
+            apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
+            apt autoremove -y --allow-change-held-packages
+            apt install chromium-browser -y --allow-change-held-packages
+        fi
+
         echo
         echo "rebooting"
         echo
@@ -414,7 +426,7 @@ then
         #touch /boot/ssh.txt
         
         reboot
-
+        sleep 60
         #echo "calling apt upgrade"
         #echo "Candle: doing apt upgrade" >> /dev/kmsg
         #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
@@ -890,9 +902,13 @@ then
 
     if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
         echo "STRANGE ERROR, the kernel update should already be done at this point"
+        echo "STRANGE ERROR, the kernel update should already be done at this point" >> /dev/kmsg
+        echo "STRANGE ERROR, the kernel update should already be done at this point" >> /boot/candle_log.txt
       
     else
-        echo "not allowing kernel updates for now"
+        echo "doing system update, but not allowing kernel updates for now"
+        echo "doing system update, but not allowing kernel updates for now" >> /dev/kmsg
+        echo "doing system update, but not allowing kernel updates for now" >> /boot/candle_log.txt
         apt-mark unhold raspberrypi-kernel
         apt-mark unhold raspberrypi-kernel-headers 
         apt-mark unhold raspberrypi-bootloader
@@ -910,12 +926,6 @@ then
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
-    fi
-    
-
-    if [ -d /opt/vc/lib ]; then
-        echo "removing /opt/vc/lib"
-        rm -rf /opt/vc/lib
     fi
     
 fi
@@ -2125,7 +2135,16 @@ apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk
 
 
 
+if [ -f /home/pi/prepare_for_disk_image.sh ]; then
+    echo "removing old prepare for disk image script"
+    rm /home/pi/prepare_for_disk_image.sh
+fi
 
+
+if [ -d /opt/vc/lib ]; then
+    echo "removing left over /opt/vc/lib"
+    rm -rf /opt/vc/lib
+fi
 
 
 echo "removing swap"
@@ -2190,6 +2209,7 @@ if [ ! -f /home/pi/.webthings/etc/hosts ]; then
     echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
     echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
 fi
+
 if [ ! -L /etc/hosts ]; then
     echo "removing /etc/hosts and creating a symlink to /home/pi/.webthings/etc/hosts instead"
     rm /etc/hosts
