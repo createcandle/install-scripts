@@ -352,6 +352,25 @@ fi
 
 
 
+# PLYMOUTH LITE
+if [ ! -f /bin/ply-image ]; 
+then
+    echo
+    echo "creating Plymouth lite (to show splash images)" >> /dev/kmsg
+    echo "creating Plymouth lite (to show splash images)" >> /boot/candle_log.txt
+    echo
+    git clone --depth 1 https://github.com/createcandle/Plymouth-lite.git
+    cd Plymouth-lite
+    ./configure
+    make
+    cp ply-image /usr/bin
+
+    cd /home/pi
+    rm -rf Plymouth-lite
+fi
+
+
+
 
 echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nsystemctl restart avahi-daemon' > /usr/bin/candle_hostname_fix.sh 
 
@@ -739,22 +758,6 @@ fi
 
 
 
-# PLYMOUTH LITE
-if [ ! -f /bin/ply-image ]; 
-then
-    echo
-    echo "creating Plymouth lite (to show splash images)" >> /dev/kmsg
-    echo "creating Plymouth lite (to show splash images)" >> /boot/candle_log.txt
-    echo
-    git clone --depth 1 https://github.com/T4d3o/Plymouth-lite.git
-    cd Plymouth-lite
-    ./configure
-    make
-    cp ply-image /usr/bin
-
-    cd /home/pi
-    rm -rf Plymouth-lite
-fi
 
 
 
