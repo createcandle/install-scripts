@@ -380,6 +380,10 @@ then
     echo
     echo "doing upgrade first"
     
+    apt update -y
+    apt-get update -y
+    apt --fix-broken install -y
+    
     # Check if kernel or bootloader can be updated
     if apt list --upgradable | grep raspberrypi-bootloader; then
         echo "WARNING, BOOTLOADER IS UPGRADEABLE"
@@ -392,8 +396,7 @@ then
         echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
     fi
 
-    apt-get update -y
-    apt --fix-broken install -y
+
 
     if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
     
@@ -409,21 +412,36 @@ then
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
         wait
+        apt-get --fix-missing
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
 
 
+        if [ -d /opt/vc/lib ]; then
+            echo "removing left over /opt/vc/lib"
+            rm -rf /opt/vc/lib
+        fi
+        
+        if [ -d /var/lib/dhcpcd5 ]; then
+            echo "removing left over dhcpcd5"
+            rm -rf /var/lib/dhcpcd5  
+        fi
+        
+        
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
         wait
+        apt-get --fix-missing
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
 
         apt-get update -y
+        apt-get update --fix-missing -y
         DEBIAN_FRONTEND=noninteractive apt upgrade -y &
         wait
+        apt-get update --fix-missing -y
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
@@ -436,6 +454,7 @@ then
         echo "Candle: Apt upgrade complete." >> /dev/kmsg
         echo "Apt upgrade done" >> /boot/candle_log.txt
         echo
+
 
         apt-mark unhold chromium-browser
     
