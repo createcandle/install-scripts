@@ -1908,8 +1908,15 @@ if [ -d /home/pi/configuration-files ]; then
         mkdir -p /home/pi/candle/configuration-files-backup
     fi
     
-    cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
+    # not tested yet:
+    #if [ -f /etc/systemd/system/rc-local.service.d/ttyoutput.conf ]; then
+    #    rm /etc/systemd/system/rc-local.service.d/ttyoutput.conf
+    #fi
     
+    if [ -d /home/pi/candle/configuration-files-backup ]; then
+        rm -rf /home/pi/candle/configuration-files-backup
+    fi
+    cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
     rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
     
     
@@ -2010,6 +2017,9 @@ systemctl enable candle_splashscreen_updating.service
 systemctl enable candle_splashscreen_updating180.service
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 # TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon). Then again, can't hurt to have redundancy.
+
+# disable old splash screen
+systemctl disable splashscreen.service
 
 # enable BlueAlsa services
 systemctl enable bluealsa.service 
