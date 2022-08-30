@@ -342,6 +342,110 @@ fi
 
 
 
+
+if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
+then
+    echo
+    echo "doing upgrade first"
+    
+    # Check if kernel or bootloader can be updated
+    if apt list --upgradable | grep raspberrypi-bootloader; then
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE"
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
+    fi
+    if apt list --upgradable | grep raspberrypi-kernel; then
+        echo "WARNING, KERNEL IS UPGRADEABLE"
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
+    fi
+
+    apt-get update -y
+    apt --fix-broken install -y
+
+    if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
+    
+        #apt install -y raspberrypi-kernel
+        #apt install -y raspberrypi-bootloader
+        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!"
+        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
+        echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
+        
+        echo "no /boot/candle_first_run_complete.txt file yet, probably creating disk image"
+        # A little overkill:
+
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+
+
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+
+        apt-get update -y
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        wait
+        apt --fix-broken install -y
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        echo ""
+
+        apt --fix-broken install -y
+        apt autoremove -y
+        apt clean -y
+        echo
+        echo "Candle: Apt upgrade complete."
+        echo "Candle: Apt upgrade complete." >> /dev/kmsg
+        echo "Apt upgrade done" >> /boot/candle_log.txt
+        echo
+
+        apt-mark unhold chromium-browser
+    
+        if chromium-browser --version | grep -q 'Chromium 88'; then
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+            apt-get purge chromium-browser -y --allow-change-held-packages
+            apt purge chromium-browser -y --allow-change-held-packages
+            apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
+            apt autoremove -y --allow-change-held-packages
+            apt install chromium-browser -y --allow-change-held-packages
+        fi
+
+        echo
+        echo "rebooting"
+        echo
+        
+        # make sure the system is read-write and accessible again after the reboot.
+        touch /boot/candle_rw_once.txt
+        #touch /boot/ssh.txt
+        
+        reboot
+        sleep 60
+        #echo "calling apt upgrade"
+        #echo "Candle: doing apt upgrade" >> /dev/kmsg
+        #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
+        #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
+        #wait
+        #echo
+        #echo "Upgrade complete"
+      
+    fi
+    
+fi
+
+
+
+
+
+
+
+
 # PLYMOUTH LITE
 if [ ! -f /bin/ply-image ]; 
 then
@@ -408,6 +512,18 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
     wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
 fi
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -550,25 +666,27 @@ fi
 
 # If the file exists, make it executable and move it into place
 if [ -f ./ro-root.sh ]; then
-    echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
-    echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
-    chmod +x ./ro-root.sh
+    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
+        echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
+        chmod +x ./ro-root.sh
     
-    # Avoid risky move if possible
-    if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
-        echo "ro-root.sh file is different, moving it into place"
-        echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
-        echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
-        if [ -f /bin/ro-root.sh ]; then
-            rm /bin/ro-root.sh
-        fi
-        mv -f ./ro-root.sh /bin/ro-root.sh
-        chmod +x /bin/ro-root.sh
+        # Avoid risky move if possible
+        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
+            echo "ro-root.sh file is different, moving it into place"
+            echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
+            echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
+            if [ -f /bin/ro-root.sh ]; then
+                rm /bin/ro-root.sh
+            fi
+            mv -f ./ro-root.sh /bin/ro-root.sh
+            chmod +x /bin/ro-root.sh
         
-    else
-        echo "new ro-root.sh file is same as the old one, not moving it"
-        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
-        echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
+        else
+            echo "new ro-root.sh file is same as the old one, not moving it"
+            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
+            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
+        fi
     fi
 else
     echo "ERROR: failed to download ro-root.sh"
@@ -769,85 +887,28 @@ then
     
     # Check if kernel or bootloader can be updated
     if apt list --upgradable | grep raspberrypi-bootloader; then
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE"
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
+        echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE"
+        echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE" >> /boot/candle_log.txt
     fi
     if apt list --upgradable | grep raspberrypi-kernel; then
-        echo "WARNING, KERNEL IS UPGRADEABLE"
-        echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
+        echo "WARNING, KERNEL IS STILL UPGRADEABLE"
+        echo "WARNING, KERNEL IS STILL UPGRADEABLE" >> /dev/kmsg
+        echo "WARNING, KERNEL IS STILL UPGRADEABLE" >> /boot/candle_log.txt
     fi
 
     apt-get update -y
     apt --fix-broken install -y
 
     if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
-    
-        #apt install -y raspberrypi-kernel
-        #apt install -y raspberrypi-bootloader
-        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!"
-        echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
-        echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
-        
-        # Allow a kernal update if the disk image is being made right now
-        #if [ ! -f /boot/candle_first_run_complete.txt ]; then
-        
-            echo "no /boot/candle_first_run_complete.txt file yet, probably creating disk image"
-            # A little overkill:
-
-            apt-get update -y
-            DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-            wait
-            apt --fix-broken install -y
-            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-            echo ""
-
-
-            apt-get update -y
-            DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-            wait
-            apt --fix-broken install -y
-            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-            echo ""
-
-            apt-get update -y
-            DEBIAN_FRONTEND=noninteractive apt upgrade -y &
-            wait
-            apt --fix-broken install -y
-            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-            echo ""
-
-            apt --fix-broken install -y
-            apt autoremove -y
-            apt clean -y
-            echo
-            echo "Candle: Apt upgrade complete."
-            echo "Candle: Apt upgrade complete." >> /dev/kmsg
-            echo "Apt upgrade done" >> /boot/candle_log.txt
-            echo
-    
-            echo
-            echo "rebooting"
-            echo
-            
-            # make sure the system is read-write and accessible again after the reboot.
-            touch /boot/candle_rw_once.txt
-            #touch /boot/ssh.txt
-            
-            reboot
-    
-            #echo "calling apt upgrade"
-            #echo "Candle: doing apt upgrade" >> /dev/kmsg
-            #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
-            #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
-            #wait
-            #echo
-            #echo "Upgrade complete"
-        #fi
+        echo "STRANGE ERROR, the kernel update should already be done at this point"
+        echo "STRANGE ERROR, the kernel update should already be done at this point" >> /dev/kmsg
+        echo "STRANGE ERROR, the kernel update should already be done at this point" >> /boot/candle_log.txt
       
     else
-        echo "not allowing kernel updates for now"
+        echo "doing system update, but not allowing kernel updates for now"
+        echo "doing system update, but not allowing kernel updates for now" >> /dev/kmsg
+        echo "doing system update, but not allowing kernel updates for now" >> /boot/candle_log.txt
         apt-mark unhold raspberrypi-kernel
         apt-mark unhold raspberrypi-kernel-headers 
         apt-mark unhold raspberrypi-bootloader
@@ -867,29 +928,7 @@ then
         echo ""
     fi
     
-
-    if [ -d /opt/vc/lib ]; then
-        echo "removing /opt/vc/lib"
-        rm -rf /opt/vc/lib
-    fi
-    
 fi
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1942,69 +1981,69 @@ echo
 
 if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
-    if [ -f /bin/ro-root.sh ]; then
-        #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
-        if [ $(cat /boot/config.txt | grep -c ramfsaddr) -eq 0 ];
-        then
-            echo
-            echo "ADDING READ-ONLY MODE"
-            echo
-            echo "Candle: adding read-only mode" >> /dev/kmsg
-            echo "Candle: adding read-only mode" >> /boot/candle_log.txt
-        
-            mkinitramfs -o /boot/initrd
-    
-        	echo "- Adding read only mode to config.txt"
-            echo >> /boot/config.txt
-            echo '# Read only mode' >> /boot/config.txt
-            echo 'initramfs initrd followkernel' >> /boot/config.txt
-            echo 'ramfsfile=initrd' >> /boot/config.txt
-            echo 'ramfsaddr=-1' >> /boot/config.txt
-    
-        else
-            echo "- Read only file system mode was already in config.txt"
-            echo "Candle: read-only mode already existed" >> /dev/kmsg
-            echo "Candle: read-only mode already existed" >> /boot/candle_log.txt
-        fi
-
-
-        if [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
-        then
-        
-            #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
-            if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
+    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+        if [ -f /bin/ro-root.sh ]; then
+            #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
+            if [ $(cat /boot/config.txt | grep -c ramfsaddr) -eq 0 ];
             then
-            	echo "- Modifying cmdline.txt for read-only file system"
-                echo "- - before: $(cat /boot/cmdline.txt)"
-                sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
-                echo "- - after : $(cat /boot/cmdline.txt)"
-                echo "Candle: read-only mode is now enabled" >> /dev/kmsg
-                echo "Candle: read-only mode is now enabled" >> /boot/candle_log.txt
+                echo
+                echo "ADDING READ-ONLY MODE"
+                echo
+                echo "Candle: adding read-only mode" >> /dev/kmsg
+                echo "Candle: adding read-only mode" >> /boot/candle_log.txt
+        
+                mkinitramfs -o /boot/initrd
+    
+            	echo "- Adding read only mode to config.txt"
+                echo >> /boot/config.txt
+                echo '# Read only mode' >> /boot/config.txt
+                echo 'initramfs initrd followkernel' >> /boot/config.txt
+                echo 'ramfsfile=initrd' >> /boot/config.txt
+                echo 'ramfsaddr=-1' >> /boot/config.txt
+    
             else
-                echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
-                echo "Candle: read-only mode was already enabled" >> /dev/kmsg
-                echo "Candle: read-only mode was already enabled" >> /boot/candle_log.txt
+                echo "- Read only file system mode was already in config.txt"
+                echo "Candle: read-only mode already existed" >> /dev/kmsg
+                echo "Candle: read-only mode already existed" >> /boot/candle_log.txt
             fi
-        
-        fi
-        
-        
-        # Add RW and RO alias shortcuts to .profile
-        if [ -f /home/pi/.profile ]; then
-            if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
+
+
+            if [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
             then
-                echo "adding ro and rw aliases to /home/pi/.profile"
-                echo "" >> /home/pi/.profile
-                echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
-                echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
-            fi
-        fi
+            
+                #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
+                if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
+                then
+                	echo "- Modifying cmdline.txt for read-only file system"
+                    echo "- - before: $(cat /boot/cmdline.txt)"
+                    sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
+                    echo "- - after : $(cat /boot/cmdline.txt)"
+                    echo "Candle: read-only mode is now enabled" >> /dev/kmsg
+                    echo "Candle: read-only mode is now enabled" >> /boot/candle_log.txt
+                else
+                    echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
+                    echo "Candle: read-only mode was already enabled" >> /dev/kmsg
+                    echo "Candle: read-only mode was already enabled" >> /boot/candle_log.txt
+                fi
         
-    else
-        echo "ERROR, /bin/ro-root.sh is missing, not even attempting to further install read-only mode"
+            fi
+        
+        
+            # Add RW and RO alias shortcuts to .profile
+            if [ -f /home/pi/.profile ]; then
+                if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
+                then
+                    echo "adding ro and rw aliases to /home/pi/.profile"
+                    echo "" >> /home/pi/.profile
+                    echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
+                    echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
+                fi
+            fi
+        
+        else
+            echo "ERROR, /bin/ro-root.sh is missing, not even attempting to further install read-only mode"
+        fi
     fi
-    
-    
 fi
 
 
@@ -2096,7 +2135,16 @@ apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk
 
 
 
+if [ -f /home/pi/prepare_for_disk_image.sh ]; then
+    echo "removing old prepare for disk image script"
+    rm /home/pi/prepare_for_disk_image.sh
+fi
 
+
+if [ -d /opt/vc/lib ]; then
+    echo "removing left over /opt/vc/lib"
+    rm -rf /opt/vc/lib
+fi
 
 
 echo "removing swap"
@@ -2161,6 +2209,7 @@ if [ ! -f /home/pi/.webthings/etc/hosts ]; then
     echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
     echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
 fi
+
 if [ ! -L /etc/hosts ]; then
     echo "removing /etc/hosts and creating a symlink to /home/pi/.webthings/etc/hosts instead"
     rm /etc/hosts
@@ -2176,76 +2225,80 @@ if cat /boot/cmdline.txt | grep -q PARTUUID; then
 fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
+if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
 
-if [ -f /boot/fstab3.bak ] \
-&& [ -f /boot/fstab4.bak ]; then
-    echo "/boot/fstab3.bak and /boot/fstab4.bak exist"
-else
-    echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist"
-    echo "WARNING, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /dev/kmsg
-    echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /boot/candle_log.txt
-fi
-
-if [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
-&& [ -d /home/pi/.webthings/var/lib/bluetooth ] \
-&& [ -d /home/pi/.webthings/etc/ssh ] \
-&& [ -f /home/pi/.webthings/etc/hostname ] \
-&& [ -d /home/pi/.webthings/tmp ] \
-&& [ -d /home/pi/.webthings/arduino/.arduino15 ] \
-&& [ -d /home/pi/.webthings/arduino/Arduino ];
-then
-    echo
-    echo "COPYING FSTAB FILE"
-    echo
-
-    if lsblk | grep -q 'mmcblk0p4'; 
-    then
-        echo "copying 4 partition version of fstab"
-        echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
-        echo "Candle: copying 4 partition version of fstab" >> /boot/candle_log.txt
-        
-        if ! diff -q /home/pi/configuration-files/boot/fstab4.bak /etc/fstab &>/dev/null; then
-            echo "fstab file is different, copying it"
-            cp --verbose /home/pi/configuration-files/boot/fstab4.bak /etc/fstab
-        else
-            echo "new fstab file is same as the old one, not copying it."
-        fi
-        
+    if [ -f /boot/fstab3.bak ] \
+    && [ -f /boot/fstab4.bak ]; then
+        echo "/boot/fstab3.bak and /boot/fstab4.bak exist"
     else
-        echo "copying 3 partition version of fstab"
-        echo "Candle: copying 3 partition version of fstab" >> /dev/kmsg
-        echo "Candle: copying 3 partition version of fstab" >> /boot/candle_log.txt
-        
-        if ! diff -q /home/pi/configuration-files/boot/fstab3.bak /etc/fstab &>/dev/null; then
-            echo "3 partition fstab file is different, copying it"
-            echo "Candle: 3 partition fstab file is different, copying it" >> /dev/kmsg
-            cp --verbose /home/pi/configuration-files/boot/fstab3.bak /etc/fstab
-        else
-            echo "new fstab file is same as the old one, not copying it."
-            echo "Candle: new fstab file is same as the old one, not copying it." >> /dev/kmsg
-            echo "new 3 partition fstab file is same as the old one, not copying it." >> /boot/candle_log.txt
-        fi
+        echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist"
+        echo "WARNING, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /dev/kmsg
+        echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /boot/candle_log.txt
     fi
 
+    if [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
+    && [ -d /home/pi/.webthings/var/lib/bluetooth ] \
+    && [ -d /home/pi/.webthings/etc/ssh ] \
+    && [ -f /home/pi/.webthings/etc/hostname ] \
+    && [ -d /home/pi/.webthings/tmp ] \
+    && [ -d /home/pi/.webthings/arduino/.arduino15 ] \
+    && [ -d /home/pi/.webthings/arduino/Arduino ];
+    then
+        echo
+        echo "COPYING FSTAB FILE"
+        echo
+
+        if lsblk | grep -q 'mmcblk0p4'; 
+        then
+            echo "copying 4 partition version of fstab"
+            echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
+            echo "Candle: copying 4 partition version of fstab" >> /boot/candle_log.txt
+        
+            if ! diff -q /home/pi/configuration-files/boot/fstab4.bak /etc/fstab &>/dev/null; then
+                echo "fstab file is different, copying it"
+                cp --verbose /home/pi/configuration-files/boot/fstab4.bak /etc/fstab
+            else
+                echo "new fstab file is same as the old one, not copying it."
+            fi
+        
+        else
+            echo "copying 3 partition version of fstab"
+            echo "Candle: copying 3 partition version of fstab" >> /dev/kmsg
+            echo "Candle: copying 3 partition version of fstab" >> /boot/candle_log.txt
+        
+            if ! diff -q /home/pi/configuration-files/boot/fstab3.bak /etc/fstab &>/dev/null; then
+                echo "3 partition fstab file is different, copying it"
+                echo "Candle: 3 partition fstab file is different, copying it" >> /dev/kmsg
+                cp --verbose /home/pi/configuration-files/boot/fstab3.bak /etc/fstab
+            else
+                echo "new fstab file is same as the old one, not copying it."
+                echo "Candle: new fstab file is same as the old one, not copying it." >> /dev/kmsg
+                echo "new 3 partition fstab file is same as the old one, not copying it." >> /boot/candle_log.txt
+            fi
+        fi
+
     
+    else
+        echo
+        echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST!"
+        # The only reason this is a warning and not an error (which would stop the process in de UI), is that the process is nearly done anyway.
+        echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
+        echo "Candle: ERROR, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
+        echo
+    
+        ls /home/pi/.webthings/etc/wpa_supplicant
+        ls /home/pi/.webthings/var/lib/bluetooth
+        ls /home/pi/.webthings/etc/ssh
+        ls /home/pi/.webthings/etc/hostname
+        ls /home/pi/.webthings/tmp
+        ls /home/pi/.webthings/arduino/.arduino15
+        ls /home/pi/.webthings/arduino/Arduino
+    
+        echo
+    
+    fi
 else
-    echo
-    echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST!"
-    # The only reason this is a warning and not an error (which would stop the process in de UI), is that the process is nearly done anyway.
-    echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
-    echo "Candle: ERROR, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
-    echo
-    
-    ls /home/pi/.webthings/etc/wpa_supplicant
-    ls /home/pi/.webthings/var/lib/bluetooth
-    ls /home/pi/.webthings/etc/ssh
-    ls /home/pi/.webthings/etc/hostname
-    ls /home/pi/.webthings/tmp
-    ls /home/pi/.webthings/arduino/.arduino15
-    ls /home/pi/.webthings/arduino/Arduino
-    
-    echo
-    
+    echo "ERROR, no 3rd or 4th partition"
 fi
 
 
@@ -2446,9 +2499,11 @@ chown -R pi:pi /home/pi/candle/*
 
 
 if [ -f /boot/cmdline-candle.txt ]; then
-    echo "copying default Candle cmdline.txt into place"
-    rm /boot/cmdline.txt
-    cp /boot/cmdline-candle.txt /boot/cmdline.txt
+    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+        echo "copying default Candle cmdline.txt into place"
+        rm /boot/cmdline.txt
+        cp /boot/cmdline-candle.txt /boot/cmdline.txt
+    fi
 fi
 
 
