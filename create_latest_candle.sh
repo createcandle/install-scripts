@@ -39,6 +39,15 @@ set +e # continue on errors
 # export CHROOTED=yes
 
 
+
+
+# Note to self
+# Upgrade conflicts with:
+# - installing ReSpeaker drivers
+# - installing the new read only mode
+
+
+
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]; then
   echo "Please run candle update script as root (use sudo)"
@@ -367,10 +376,236 @@ fi
 echo "modifying /etc/apt/sources.list - allowing apt access to source code"
 sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
-
-
 # Unhold browser
 apt-mark unhold chromium-browser
+
+
+apt-get update -y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+echo
+echo "Downloading read only script"
+echo
+
+if [ -f /boot/candle_cutting_edge.txt ]; then
+    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
+    echo "Candle: Downloading cutting edge read-only script" >> /boot/candle_log.txt
+    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
+    
+else
+    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
+    echo "Candle: Downloading stable read-only script" >> /boot/candle_log.txt
+    curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
+    | grep "tarball_url" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | sed 's/,*$//' \
+    | wget -qi - -O ro-overlay.tar
+
+    if [ -f ro-overlay.tar ]; then
+        
+        if [ -d ./ro-overlay ]; then
+            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
+            rm -rf ./ro-overlay
+        fi
+        echo "unpacking ro-overlay.tar"
+        tar -xf ro-overlay.tar
+        rm ./ro-overlay.tar
+    
+        for directory in createcandle-ro-overlay*; do
+          [[ -d $directory ]] || continue
+          echo "Directory: $directory"
+          mv -- "$directory" ./ro-overlay
+        done
+
+        if [ -d ./ro-overlay ]; then
+            echo "ro-overlay folder exists, OK"
+            cp ./ro-overlay/bin/ro-root.sh ./ro-root.sh
+            rm -rf ./ro-overlay
+        else
+            echo "ERROR, ro-overlay folder missing"
+            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
+            echo "Candle: WARNING, ro-overlay folder missing" >> /boot/candle_log.txt
+        fi
+    else
+        echo "Ro-root tar file missing, download failed"
+        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
+        echo "Candle: ERROR, stable read-only tar download failed" >> /boot/candle_log.txt
+        
+        # Show error image
+        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+        then
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                /bin/ply-image /boot/error.png
+                #sleep 7200
+            fi
+        fi
+
+        exit 1
+        
+    fi
+fi
+
+
+# If the file exists, make it executable and move it into place
+if [ -f ./ro-root.sh ]; then
+    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
+        echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
+        chmod +x ./ro-root.sh
+    
+        # Avoid risky move if possible
+        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
+            echo "ro-root.sh file is different, moving it into place"
+            echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
+            echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
+            if [ -f /bin/ro-root.sh ]; then
+                rm /bin/ro-root.sh
+            fi
+            mv -f ./ro-root.sh /bin/ro-root.sh
+            chmod +x /bin/ro-root.sh
+        
+        else
+            echo "new ro-root.sh file is same as the old one, not moving it"
+            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
+            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
+        fi
+    fi
+else
+    echo "ERROR: failed to download ro-root.sh"
+    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
+    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
+    echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
+    
+    # Show error image
+    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+    then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            /bin/ply-image /boot/error.png
+            #sleep 7200
+        fi
+    fi
+
+    exit 1
+fi
+
+
+# ENABLE READ_ONLY MODE
+
+if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
+
+    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+        if [ -f /bin/ro-root.sh ]; then
+            #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
+            if [ $(cat /boot/config.txt | grep -c ramfsaddr) -eq 0 ];
+            then
+                echo
+                echo "ADDING READ-ONLY MODE"
+                echo
+                echo "Candle: adding read-only mode" >> /dev/kmsg
+                echo "Candle: adding read-only mode" >> /boot/candle_log.txt
+        
+                mkinitramfs -o /boot/initrd
+    
+            	echo "- Adding read only mode to config.txt"
+                echo >> /boot/config.txt
+                echo '# Read only mode' >> /boot/config.txt
+                echo 'initramfs initrd followkernel' >> /boot/config.txt
+                echo 'ramfsfile=initrd' >> /boot/config.txt
+                echo 'ramfsaddr=-1' >> /boot/config.txt
+    
+            else
+                echo "- Read only file system mode was already in config.txt"
+                echo "Candle: read-only mode already existed" >> /dev/kmsg
+                echo "Candle: read-only mode already existed" >> /boot/candle_log.txt
+            fi
+
+
+            if [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
+            then
+            
+                #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
+                if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
+                then
+                	echo "- Modifying cmdline.txt for read-only file system"
+                    echo "- - before: $(cat /boot/cmdline.txt)"
+                    sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
+                    echo "- - after : $(cat /boot/cmdline.txt)"
+                    echo "Candle: read-only mode is now enabled" >> /dev/kmsg
+                    echo "Candle: read-only mode is now enabled" >> /boot/candle_log.txt
+                else
+                    echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
+                    echo "Candle: read-only mode was already enabled" >> /dev/kmsg
+                    echo "Candle: read-only mode was already enabled" >> /boot/candle_log.txt
+                fi
+        
+            fi
+        
+        
+            # Add RW and RO alias shortcuts to .profile
+            if [ -f /home/pi/.profile ]; then
+                if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
+                then
+                    echo "adding ro and rw aliases to /home/pi/.profile"
+                    echo "" >> /home/pi/.profile
+                    echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
+                    echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
+                fi
+            fi
+        
+        else
+            echo "ERROR, /bin/ro-root.sh is missing, not even attempting to further install read-only mode"
+        fi
+    fi
+fi
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -434,8 +669,12 @@ then
         wait
         apt-get --fix-missing
         apt --fix-broken install -y
+        apt autoremove -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-        echo ""
+        echo
+        echo
+        echo
+        echo
 
         apt-get update -y
         apt-get update --fix-missing -y
@@ -444,11 +683,14 @@ then
         apt-get update --fix-missing -y
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-        echo ""
+        echo
+        echo
+        echo
+        echo
 
         apt --fix-broken install -y
         apt autoremove -y
-        apt clean -y
+        #apt clean -y
         echo
         echo "Candle: Apt upgrade complete."
         echo "Candle: Apt upgrade complete." >> /dev/kmsg
@@ -651,111 +893,6 @@ fi
 
 
 
-echo
-echo "Downloading read only script"
-echo
-
-if [ -f /boot/candle_cutting_edge.txt ]; then
-    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
-    echo "Candle: Downloading cutting edge read-only script" >> /boot/candle_log.txt
-    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
-    
-else
-    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
-    echo "Candle: Downloading stable read-only script" >> /boot/candle_log.txt
-    curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
-    | grep "tarball_url" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | sed 's/,*$//' \
-    | wget -qi - -O ro-overlay.tar
-
-    if [ -f ro-overlay.tar ]; then
-        
-        if [ -d ./ro-overlay ]; then
-            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
-            rm -rf ./ro-overlay
-        fi
-        echo "unpacking ro-overlay.tar"
-        tar -xf ro-overlay.tar
-        rm ./ro-overlay.tar
-    
-        for directory in createcandle-ro-overlay*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          mv -- "$directory" ./ro-overlay
-        done
-
-        if [ -d ./ro-overlay ]; then
-            echo "ro-overlay folder exists, OK"
-            cp ./ro-overlay/bin/ro-root.sh ./ro-root.sh
-            rm -rf ./ro-overlay
-        else
-            echo "ERROR, ro-overlay folder missing"
-            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
-            echo "Candle: WARNING, ro-overlay folder missing" >> /boot/candle_log.txt
-        fi
-    else
-        echo "Ro-root tar file missing, download failed"
-        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
-        echo "Candle: ERROR, stable read-only tar download failed" >> /boot/candle_log.txt
-        
-        # Show error image
-        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-        then
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                /bin/ply-image /boot/error.png
-                #sleep 7200
-            fi
-        fi
-
-        exit 1
-        
-    fi
-fi
-
-
-# If the file exists, make it executable and move it into place
-if [ -f ./ro-root.sh ]; then
-    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
-        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
-        echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
-        chmod +x ./ro-root.sh
-    
-        # Avoid risky move if possible
-        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
-            echo "ro-root.sh file is different, moving it into place"
-            echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
-            echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
-            if [ -f /bin/ro-root.sh ]; then
-                rm /bin/ro-root.sh
-            fi
-            mv -f ./ro-root.sh /bin/ro-root.sh
-            chmod +x /bin/ro-root.sh
-        
-        else
-            echo "new ro-root.sh file is same as the old one, not moving it"
-            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
-            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
-        fi
-    fi
-else
-    echo "ERROR: failed to download ro-root.sh"
-    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
-    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
-    echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
-    
-    # Show error image
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-    then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            /bin/ply-image /boot/error.png
-            #sleep 7200
-        fi
-    fi
-
-    exit 1
-fi
 
 
 
@@ -2051,75 +2188,6 @@ echo
 
 
 
-
-# ENABLE READ_ONLY MODE
-
-if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
-
-    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
-        if [ -f /bin/ro-root.sh ]; then
-            #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
-            if [ $(cat /boot/config.txt | grep -c ramfsaddr) -eq 0 ];
-            then
-                echo
-                echo "ADDING READ-ONLY MODE"
-                echo
-                echo "Candle: adding read-only mode" >> /dev/kmsg
-                echo "Candle: adding read-only mode" >> /boot/candle_log.txt
-        
-                mkinitramfs -o /boot/initrd
-    
-            	echo "- Adding read only mode to config.txt"
-                echo >> /boot/config.txt
-                echo '# Read only mode' >> /boot/config.txt
-                echo 'initramfs initrd followkernel' >> /boot/config.txt
-                echo 'ramfsfile=initrd' >> /boot/config.txt
-                echo 'ramfsaddr=-1' >> /boot/config.txt
-    
-            else
-                echo "- Read only file system mode was already in config.txt"
-                echo "Candle: read-only mode already existed" >> /dev/kmsg
-                echo "Candle: read-only mode already existed" >> /boot/candle_log.txt
-            fi
-
-
-            if [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
-            then
-            
-                #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
-                if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
-                then
-                	echo "- Modifying cmdline.txt for read-only file system"
-                    echo "- - before: $(cat /boot/cmdline.txt)"
-                    sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
-                    echo "- - after : $(cat /boot/cmdline.txt)"
-                    echo "Candle: read-only mode is now enabled" >> /dev/kmsg
-                    echo "Candle: read-only mode is now enabled" >> /boot/candle_log.txt
-                else
-                    echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
-                    echo "Candle: read-only mode was already enabled" >> /dev/kmsg
-                    echo "Candle: read-only mode was already enabled" >> /boot/candle_log.txt
-                fi
-        
-            fi
-        
-        
-            # Add RW and RO alias shortcuts to .profile
-            if [ -f /home/pi/.profile ]; then
-                if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
-                then
-                    echo "adding ro and rw aliases to /home/pi/.profile"
-                    echo "" >> /home/pi/.profile
-                    echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
-                    echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
-                fi
-            fi
-        
-        else
-            echo "ERROR, /bin/ro-root.sh is missing, not even attempting to further install read-only mode"
-        fi
-    fi
-fi
 
 
 
