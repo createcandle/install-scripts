@@ -1,6 +1,12 @@
 # Candle install scripts
 
 
+THIS IS FOR DEVELOPERS ONLY. IF YoU WANT TO USE CANDLE, SIMPLY DOWNLOAD THE LATEST DISK IMAGE:
+
+https://www.candlesmarthome.com/download
+
+
+
 ## Creating the Candle Raspberry Pi disk image
 1. Install Raspberry Pi Imager software on a computer with an SD card reader, and get a micro SD card of at least 16Gb.
 
