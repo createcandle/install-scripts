@@ -870,6 +870,10 @@ else
       mv -- "$directory" ./configuration-files
     done
     
+    rm ./configuration-files/LICENSE
+    rm ./configuration-files/README.md
+    rm -rf ./configuration-files/.git
+    
 fi
 
 
@@ -957,8 +961,8 @@ then
             rm /home/pi/latest_stable_controller.tar.txt
         fi
         
-        wget https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O /home/pi/latest_stable_controller.tar
-        wget https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O /home/pi/latest_stable_controller.tar.txt
+        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O /home/pi/latest_stable_controller.tar
+        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O /home/pi/latest_stable_controller.tar.txt
         
         if [ -f /home/pi/latest_stable_controller.tar ] && [ -f /home/pi/latest_stable_controller.tar.txt ]; then
             
@@ -1893,11 +1897,6 @@ if [ -d /home/pi/configuration-files ]; then
     rm /home/pi/configuration-files/README.md
     rm -rf /home/pi/configuration-files/.git
     
-    if [ ! -d /home/pi/candle/configuration-files-backup ]; then
-        echo "Creating intial backup of the configuration files" >> /dev/kmsg
-        echo "Creating intial backup of the configuration files" >> /boot/candle_log.txt
-    fi
-    
     if [ -d /home/pi/candle/configuration-files-backup ]; then
         rm -rf /home/pi/candle/configuration-files-backup/*
         echo "Updating backup of the configuration files" >> /dev/kmsg
@@ -1908,17 +1907,9 @@ if [ -d /home/pi/configuration-files ]; then
         mkdir -p /home/pi/candle/configuration-files-backup
     fi
     
-    # not tested yet:
-    #if [ -f /etc/systemd/system/rc-local.service.d/ttyoutput.conf ]; then
-    #    rm /etc/systemd/system/rc-local.service.d/ttyoutput.conf
-    #fi
-    
-    if [ -d /home/pi/candle/configuration-files-backup ]; then
-        rm -rf /home/pi/candle/configuration-files-backup
-    fi
     cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
     rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
-    
+    echo "Configuration files should be copied" >> /boot/candle_log.txt
     
 else
    
