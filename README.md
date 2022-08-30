@@ -1,10 +1,15 @@
 # Candle install scripts
 
 
-THIS IS FOR DEVELOPERS ONLY. IF YoU WANT TO USE CANDLE, SIMPLY DOWNLOAD THE LATEST DISK IMAGE:
+THIS IS FOR DEVELOPERS ONLY. IF YOU WANT TO USE CANDLE, SIMPLY DOWNLOAD THE LATEST DISK IMAGE:
 
 https://www.candlesmarthome.com/download
 
+
+.
+
+
+.
 
 
 ## Creating the Candle Raspberry Pi disk image
