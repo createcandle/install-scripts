@@ -1909,6 +1909,7 @@ if [ -d /home/pi/configuration-files ]; then
     
     cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
     rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
+    echo "Configuration files should be copied" >> /dev/kmsg
     echo "Configuration files should be copied" >> /boot/candle_log.txt
     
 else
