@@ -370,11 +370,10 @@ then
 fi
 
 
-
-
+echo
+echo "updating /usr/bin/candle_hostname_fix.sh"
 echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nsystemctl restart avahi-daemon' > /usr/bin/candle_hostname_fix.sh 
-
-
+echo
 
 # BULLSEYE SOURCES
 
@@ -396,11 +395,13 @@ echo "modifying /etc/apt/sources.list - allowing apt access to source code"
 sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
 # Unhold browser
+echo
 apt-mark unhold chromium-browser
 
-
+echo
+echo "doing apt-get update"
 apt-get update -y
-
+echo
 
 
 
@@ -1281,7 +1282,7 @@ then
     echo "Candle: installing support packages" >> /dev/kmsg
     echo "Candle: installing support packages" >> /boot/candle_log.txt
     echo
-    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables liblivemedia-dev; do
+    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables liblivemedia-dev libcamera-apps; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
