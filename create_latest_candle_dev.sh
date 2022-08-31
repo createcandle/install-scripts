@@ -1357,12 +1357,14 @@ then
 
     apt -y install dnsmasq  "$reinstall" #--print-uris
     systemctl disable dnsmasq.service
+    systemctl stop dnsmasq.service
     
 
     echo 
     apt -y install hostapd "$reinstall" #--print-uris 
     systemctl unmask hostapd.service
     systemctl disable hostapd.service
+    systemctl stop hostapd.service
 
     # Try to fix anything that may have gone wrong
     apt update
@@ -1640,7 +1642,7 @@ fi
 if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]];
 then
     
-    if [ -f /boot/candle_original_version.txt ]; then
+    #if [ ! -f /boot/candle_original_version.txt ]; then
     
         echo
         echo "INSTALLING RESPEAKER HAT DRIVERS"
@@ -1685,12 +1687,18 @@ then
         else
             echo "Error, failed to download respeaker source"
         fi
-    fi
+        
+    #else
+    #    echo "/boot/candle_original_version.txt already existed, skipping respeaker driver install"
+    #fi
     
     
 else
+    echo
+    echo "Candle: skipping ReSpeaker drivers install"
     echo "Candle: skipping ReSpeaker drivers install" >> /dev/kmsg
     echo "Candle: skipping ReSpeaker drivers install" >> /boot/candle_log.txt
+    echo
 fi
 
 
