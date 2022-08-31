@@ -1835,40 +1835,7 @@ find /home/pi/.webthings/tmp \
 
 cd /home/pi
 
-# SYMLINKS
 
-# move hosts file to user partition
-#if [ ! -f /boot/candle_first_run_complete.txt ]; then
-#    cp --verbose /etc/hosts /home/pi/.webthings/etc/hosts
-#    sed -i -E "s|127.0.1.1\s+candle|127.0.1.1        $(cat /home/pi/.webthings/etc/hostname)|g" /home/pi/.webthings/etc/hosts
-#fi
-
-
-# move timezone file to user partition
-if [ ! -f /home/pi/.webthings/etc/timezone ]; then
-    echo "copying /etc/timezone to /home/pi/.webthings/etc/timezone"
-    cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
-fi
-
-#creating symlink for timezone
-if [ ! -L /etc/timezone ]; then
-    echo "removing /etc/timezone file and creating a symlink to /home/pi/.webthings/etc/timezone instead"
-    rm /etc/timezone
-    ln -s /home/pi/.webthings/etc/timezone /etc/timezone
-fi
-
-# create fake-hwclock file
-if [ ! -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
-    echo "copying /etc/fake-hwclock.data to /home/pi/.webthings/etc/fake-hwclock.data"
-    cp --verbose /etc/fake-hwclock.data /home/pi/.webthings/etc/fake-hwclock.data
-fi
-
-# create symlink for fake-hwclock
-if [ ! -L /etc/fake-hwclock.data ]; then
-    echo "removing /etc/fake-hwclock.data file and creating a symlink to /home/pi/.webthings/etc/fake-hwclock.data instead"
-    rm /etc/fake-hwclock.data
-    ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
-fi
 
 # PREPARE FOR BINDS IN FSTAB
 echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
@@ -1986,7 +1953,12 @@ chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
 chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
 
-# ADD LINKS
+
+
+
+# ADD SYMLINKS
+
+# Create symlink for .asoundrc
 if [ ! -L /home/pi/.asoundrc ]; then
     if [ -f /home/pi/.webthings/etc/asoundrc ]; then
         echo "Creating symlink from /home/pi/.asoundrc to /home/pi/.webthings/etc/asoundrc"
@@ -1994,6 +1966,64 @@ if [ ! -L /home/pi/.asoundrc ]; then
         ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
     fi
 fi
+
+
+# Create locations on the user partition for time
+if [ ! -L /etc/localtime ]; then
+    echo "creating symlink for /etc/localtime"
+    mkdir -p /home/pi/.webthings/etc
+    if [ ! -f /home/pi/.webthings/etc/localtime ]; then
+        echo "copying localtime file into position"
+        cp /etc/localtime /home/pi/.webthings/etc/localtime
+    fi
+    rm /etc/localtime
+    ln -s /home/pi/.webthings/etc/localtime /etc/localtime
+fi
+
+
+#creating symlink for timezone
+if [ ! -L /etc/timezone ]; then
+    echo "removing /etc/timezone file and creating a symlink to /home/pi/.webthings/etc/timezone instead"
+    # move timezone file to user partition
+    if [ ! -f /home/pi/.webthings/etc/timezone ]; then
+        echo "copying /etc/timezone to /home/pi/.webthings/etc/timezone"
+        cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
+    fi
+    rm /etc/timezone
+    ln -s /home/pi/.webthings/etc/timezone /etc/timezone
+fi
+
+
+# create symlink for fake-hwclock
+if [ ! -L /etc/fake-hwclock.data ]; then
+    echo "removing /etc/fake-hwclock.data file and creating a symlink to /home/pi/.webthings/etc/fake-hwclock.data instead"
+    # create fake-hwclock file
+    if [ ! -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
+        echo "copying /etc/fake-hwclock.data to /home/pi/.webthings/etc/fake-hwclock.data"
+        cp --verbose /etc/fake-hwclock.data /home/pi/.webthings/etc/fake-hwclock.data
+    fi
+    rm /etc/fake-hwclock.data
+    ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
+fi
+
+
+# Create location on the user partition for language
+if [ ! -L /etc/default/locale ]; then
+    echo "creating symlink for /etc/default/locale"
+    mkdir -p /home/pi/.webthings/etc/default
+    if [ ! -f /home/pi/.webthings/etc/default/locale ]; then
+        echo "copying locale file into position"
+        cp /etc/default/locale /home/pi/.webthings/etc/default/locale
+    fi
+    rm /etc/default/locale
+    ln -s /home/pi/.webthings/etc/default/locale /etc/default/locale
+fi
+
+
+
+
+
+
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/zcandle.conf
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/mosquitto.conf
 
