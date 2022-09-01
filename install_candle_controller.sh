@@ -685,10 +685,36 @@ then
 
 
 
+    for addon in candleappstore; 
+    do
+        
+        echo "$addon"
+        curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
+        | grep "browser_download_url" \
+        | grep "linux-arm-v3.9" \
+        | grep -v ".sha256sum" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O addon.tgz
+        tar -xf addon.tgz
+        rm addon.tgz
+        
+        #for directory in createcandle-"$addon"*; do
+        #  [[ -d $directory ]] || continue
+        #  echo "Directory: $directory"
+        #  rm -rf ./"$addon"
+        #  mv -- "$directory" ./$addon
+        #done
+        rm -rf "$addon"
+        mv package "$addon"
+        chown -R pi:pi "$addon"
+        mkdir -p /home/pi/.webthings/data/"$addon"
+    done
 
     # Install Candle addons
     
-    for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface candleappstore; 
+    for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface; 
     do
         echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
@@ -751,7 +777,10 @@ then
         if [ -d ./zigbee2mqtt ]; then
             chown -R pi:pi ./zigbee2mqtt
             cd ./zigbee2mqtt
-            npm ci --production
+            npm install -g typescript; 
+            npm i --save-dev @types/node;
+            npm ci
+            #npm ci --production
         else
             echo "Error, pre-install of z2m failed: no dir"
         fi
