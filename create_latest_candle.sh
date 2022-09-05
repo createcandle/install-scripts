@@ -973,6 +973,9 @@ then
             rm /home/pi/latest_stable_controller.tar.txt
         fi
         
+        echo "Candle: Starting download of stable controller tar"
+        echo "Candle: Starting download of stable controller tar. Takes a while." >> /dev/kmsg
+        echo "Candle: Starting download of stable controller tar" >> /boot/candle_log.txt
         wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O /home/pi/latest_stable_controller.tar
         wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O /home/pi/latest_stable_controller.tar.txt
         
@@ -1012,7 +1015,7 @@ then
                     fi
                 fi
     
-                exit 1
+                #exit 1
             fi
             
         else
@@ -1036,7 +1039,7 @@ then
                 fi
             fi
     
-            exit 1
+            # exit 1
         fi
         
     fi
@@ -1342,7 +1345,7 @@ then
 
 
     # Camera support
-    for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
+    for i in python3-picamera2 python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
