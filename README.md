@@ -83,7 +83,31 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 
 .
 
-### Live update script
+.
+
+### Installing the controller software only (advanced)
+It's technically also possible to install only the Candle Controller software on an existing system (and skip the entire disk image around it). This is done buy running the `install_candle_controller.sh` script on its own. For example:
+
+```
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh | bash
+```
+To then start the controller, start `run-app.sh` in the `webthings/gateway` folder. Then you should be able to open the controller on port 8080, e.g. by visiting `http://[your_local_name_here]:8080`
+
+Note:
+- This does not install all the systemd services, so it won't auto-start at boot. You'll have to add that manually. An example file can be found here:
+https://github.com/createcandle/configuration-files/blob/main/etc/systemd/system/webthings-gateway.service
+- This does not install iptables redirects, so by default the controller will be available on port `8080` only. An example of how to add these rules can be found here:
+https://github.com/createcandle/configuration-files/blob/a11fcef2a77c59a2d38a5b8d59b8488e7c29710a/home/pi/candle/early.sh#L14
+
+.
+
+.
+
+.
+
+.
+
+### Live update script (deprecated)
 With the latest versions of Candle it's now possible to fully update the controller even when read-only protection is enabled, with out needing a reboot first. This is experimental, so use at your own risk. It automatically detects if your controller is compatible. We prefer to just disable read-only first through a reboot.
 ```
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo bash
