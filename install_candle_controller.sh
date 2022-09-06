@@ -9,6 +9,91 @@ else
     CANDLE_BASE="$(pwd)"
 fi
 
+if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
+then
+    echo "no environment indication to go cutting edge"
+    
+    if [ ! -f "$CANDLE_BASE/latest_stable_controller.tar.txt" ] && [ ! -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
+    
+        echo "Candle: Starting download of stable controller tar"
+        echo "Candle: Starting download of stable controller tar. Takes a while." >> /dev/kmsg
+        echo "Candle: Starting download of stable controller tar" >> /boot/candle_log.txt
+        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O "$CANDLE_BASE/latest_stable_controller.tar"
+        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O "$CANDLE_BASE/latest_stable_controller.tar.txt"
+    
+        if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ] && [ -f "$CANDLE_BASE/latest_stable_controller.tar.tx"t ]; then
+        
+            echo "controller tar & md5 downloaded OK"
+            echo "Candle: controller tar & md5 downloaded OK" >> /dev/kmsg
+            echo "Candle: controller tar & md5 downloaded OK" >> /boot/candle_log.txt
+        
+            if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat $CANDLE_BASE/latest_stable_controller.tar.txt)" ]; then
+                echo "MD5 checksum of latest_stable_controller.tar matched"
+            
+                chown pi:pi "$CANDLE_BASE/latest_stable_controller.tar"
+            
+                if [ -f "$CANDLE_BASE/controller_backup_fresh.tar" ]; then
+                    rm "$CANDLE_BASE/controller_backup_fresh.tar"
+                fi
+            
+            else
+                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?"
+                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /dev/kmsg
+                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /boot/candle_log.txt
+            
+                if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
+                    rm "$CANDLE_BASE/latest_stable_controller.tar"
+                fi
+                if [ -f "$CANDLE_BASE/latest_stable_controller.tar.txt" ]; then
+                    rm "$CANDLE_BASE/latest_stable_controller.tar.txt"
+                fi
+            
+                # Show error image
+                if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+                then
+                    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                        /bin/ply-image /boot/error.png
+                        #sleep 7200
+                    fi
+                fi
+
+                #exit 1
+            fi
+        
+        else
+            echo "Candle: download of stable controller tar or md5 failed. Aborting."
+            echo "Candle: Error, download of stable controller tar or md5 failed. Aborting." >> /dev/kmsg
+            echo "$(date) - download of stable controller tar or md5 failed. Aborting." >> /boot/candle_log.txt
+        
+            if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
+                rm "$CANDLE_BASE/latest_stable_controller.tar"
+            fi
+            if [ -f "$CANDLE_BASE/latest_stable_controller.tar.txt" ]; then
+                rm "$CANDLE_BASE/latest_stable_controller.tar.txt"
+            fi
+        
+            # Show error image
+            if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+            then
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+                    /bin/ply-image /boot/error.png
+                    #sleep 7200
+                fi
+            fi
+
+            # exit 1
+        fi
+    else
+        echo "latest_stable_controller.tar already downloaded"
+    fi
+    
+    
+else
+    echo "going cutting edge"
+    touch /boot/candle_cutting_edge.txt
+fi
+
+
 # This script is part of the Candle disk image creation script
 
 # This script should be run as user pi (not root)
@@ -400,9 +485,6 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     
     CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
-
-
-
 
 
     echo
