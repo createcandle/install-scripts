@@ -16,16 +16,16 @@ then
     if [ ! -f "$CANDLE_BASE/latest_stable_controller.tar.txt" ] && [ ! -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
     
         echo "Candle: Starting download of stable controller tar"
-        echo "Candle: Starting download of stable controller tar. Takes a while." >> /dev/kmsg
-        echo "Candle: Starting download of stable controller tar" >> /boot/candle_log.txt
+        echo "Candle: Starting download of stable controller tar. Takes a while." | sudo tee -a /dev/kmsg
+        echo "Candle: Starting download of stable controller tar" | sudo tee -a /boot/candle_log.txt
         wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O "$CANDLE_BASE/latest_stable_controller.tar"
         wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O "$CANDLE_BASE/latest_stable_controller.tar.txt"
     
         if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ] && [ -f "$CANDLE_BASE/latest_stable_controller.tar.tx"t ]; then
         
             echo "controller tar & md5 downloaded OK"
-            echo "Candle: controller tar & md5 downloaded OK" >> /dev/kmsg
-            echo "Candle: controller tar & md5 downloaded OK" >> /boot/candle_log.txt
+            echo "Candle: controller tar & md5 downloaded OK" | sudo tee -a /dev/kmsg
+            echo "Candle: controller tar & md5 downloaded OK"| sudo tee -a /boot/candle_log.txt
         
             if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat $CANDLE_BASE/latest_stable_controller.tar.txt)" ]; then
                 echo "MD5 checksum of latest_stable_controller.tar matched"
@@ -38,8 +38,8 @@ then
             
             else
                 echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?"
-                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /dev/kmsg
-                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /boot/candle_log.txt
+                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" | sudo tee -a /dev/kmsg
+                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?"| sudo tee -a /boot/candle_log.txt
             
                 if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
                     rm "$CANDLE_BASE/latest_stable_controller.tar"
@@ -62,8 +62,8 @@ then
         
         else
             echo "Candle: download of stable controller tar or md5 failed. Aborting."
-            echo "Candle: Error, download of stable controller tar or md5 failed. Aborting." >> /dev/kmsg
-            echo "$(date) - download of stable controller tar or md5 failed. Aborting." >> /boot/candle_log.txt
+            echo "Candle: Error, download of stable controller tar or md5 failed. Aborting." | sudo tee -a /dev/kmsg
+            echo "$(date) - download of stable controller tar or md5 failed. Aborting." | sudo tee -a /boot/candle_log.txt
         
             if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
                 rm "$CANDLE_BASE/latest_stable_controller.tar"
