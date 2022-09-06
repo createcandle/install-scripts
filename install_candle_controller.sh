@@ -1,12 +1,20 @@
 #!/bin/bash
 set +e
 
-#part of the Candle disk image creation script
+CANDLE_BASE='.'
+
+if [ -d /home/pi ]; then
+    CANDLE_BASE="/home/pi"
+else
+    CANDLE_BASE="$(pwd)"
+fi
+
+# This script is part of the Candle disk image creation script
 
 # This script should be run as user pi (not root)
 if ! [ "$EUID" -ne 0 ];
 then
-  echo "Please run as user pi (do not use sudo)"
+  echo "Please do not run as root (do not use sudo)"
   exit 1
 fi
 
@@ -18,9 +26,9 @@ if [ ! -s /etc/resolv.conf ]; then
 fi
 
 # Add /home/pi/.local/bin to path
-if [ -z "$(printenv PATH | grep /home/pi/.local/bin)" ]; then 
-    export PATH="/home/pi/.local/bin:$PATH"
-    echo "added /home/pi/.local/bin to PATH"
+if [ -z "$(printenv PATH | grep $CANDLE_BASE/.local/bin)" ]; then 
+    export PATH="$CANDLE_BASE/.local/bin:$PATH"
+    echo "added $CANDLE_BASE/.local/bin to PATH"
 fi
 
 
@@ -28,6 +36,7 @@ echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
 echo "USER         : $(whoami)"
 echo "PATH         : $PATH"
+echo "CANDLE_BASE  : $CANDLE_BASE"
 scriptname=$(basename "$0")
 echo "NAME         : $scriptname"
 
@@ -40,13 +49,13 @@ fi
 echo
 echo
 
-cd /home/pi || exit
+cd "$CANDLE_BASE" || exit
 
 echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 echo "candle: installing python gateway addon" | sudo tee -a /boot/candle_log.txt
 python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
 
-if [ ! command -v npm &> /dev/null ] || [ "$(cat /home/pi/.webthings/.node_version)" != 12 ];
+if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 12 ];
 then
     echo
     echo "NPM could not be found. Installing it now."
@@ -83,7 +92,7 @@ then
     #. ~/.bashrc
     
     
-    export NVM_DIR="/home/pi/.nvm"
+    export NVM_DIR="$CANDLE_BASE/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
     
@@ -106,17 +115,17 @@ then
     fi
     
 
-    if cat /home/pi/.profile | grep NVM
+    if cat "$CANDLE_BASE/.profile" | grep NVM
     then
         echo "NVM lines already appended to .profile"
         echo "NVM lines already appended to .profile" | sudo tee -a /dev/kmsg
         echo "NVM lines already appended to .profile" | sudo tee -a /boot/candle_log.txt
     else
         echo "Appending NVM lines to .profile"
-        echo >> /home/pi/.profile
-        echo 'export NVM_DIR="/home/pi/.nvm"' >> /home/pi/.profile
-        echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> /home/pi/.profile
-        echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> /home/pi/.profile
+        echo >> "$CANDLE_BASE/.profile"
+        echo 'export NVM_DIR="$CANDLE_BASE/.nvm"' >> "$CANDLE_BASE/.profile"
+        echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> "$CANDLE_BASE/.profile"
+        echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> "$CANDLE_BASE/.profile"
     fi
 
     
@@ -131,8 +140,8 @@ else
 fi
 
 
-if [ -d /home/pi/.nvm ]; then
-    export NVM_DIR="/home/pi/.nvm"
+if [ -d "$CANDLE_BASE/.nvm" ]; then
+    export NVM_DIR="$CANDLE_BASE/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 fi
@@ -159,9 +168,9 @@ npm cache verify
 npm config set metrics-registry="https://"
 #npm config set registry="https://"
 #npm config set user-agent=""
-if [ -f /home/pi/.npm/anonymous-cli-metrics.json ]
+if [ -f "$CANDLE_BASE/.npm/anonymous-cli-metrics.json" ]
 then
-  rm /home/pi/.npm/anonymous-cli-metrics.json
+  rm "$CANDLE_BASE/.npm/anonymous-cli-metrics.json"
 fi
 
 
@@ -169,9 +178,9 @@ _node_version=$(node --version | grep -E -o '[0-9]+' | head -n1)
 echo "Node version: ${_node_version}" | sudo tee -a /dev/kmsg
 echo "Node version: ${_node_version}" | sudo tee -a /boot/candle_log.txt
 
-echo "${_node_version}" > "/home/pi/.webthings/.node_version"
+echo "${_node_version}" > "$CANDLE_BASE/.webthings/.node_version"
 echo "Node version in .node_version file:"
-cat /home/pi/.webthings/.node_version
+cat "$CANDLE_BASE/.webthings/.node_version"
 
 
 sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
@@ -190,26 +199,24 @@ echo
 # Create a backup first
 
 availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
-if [ -f /home/pi/latest_stable_controller.tar ]; then
+if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
     if [ "$availMem" -gt "200000" ]; 
     then
-        if [ -f /home/pi/webthings/gateway/build/app.js ] \
-        && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
-        && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-        && [ -d /home/pi/webthings/gateway/node_modules ] \
-        && [ -d /home/pi/webthings/gateway/build/static/bundle ];
+        if [ -f "$CANDLE_BASE/webthings/gateway/build/app.js" ] \
+        && [ -f "$CANDLE_BASE/webthings/gateway/build/static/index.html" ] \
+        && [ -f "$CANDLE_BASE/webthings/gateway/.post_upgrade_complete" ] \
+        && [ -d "$CANDLE_BASE/webthings/gateway/node_modules" ] \
+        && [ -d "$CANDLE_BASE/webthings/gateway/build/static/bundle" ];
         then
             echo "Detected old webthings directory! Creating fresh backup"
             echo "Candle: Detected old webthings directory. Creating fresh backup" | sudo tee -a /dev/kmsg
             echo "Candle: Detected old webthings directory. Creating fresh backup" | sudo tee -a /boot/candle_log.txt
-            #mv /home/pi/webthings /home/pi/webthings-old
             tar -czf ./controller_backup_fresh.tar ./webthings
         fi
     fi
 fi
 
 
-#rm -rf /home/pi/webthings
 
 if [ -d ./candle-controller ]; then
     echo "spotted candle-controller directory. Must be left over from interupted install"
@@ -225,16 +232,16 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
     
     echo "Candle: Starting controller source code download" | sudo tee -a /dev/kmsg
     echo "Candle: Starting controller source code download" | sudo tee -a /boot/candle_log.txt
-    mkdir -p /home/pi/webthings
-    chown pi:pi /home/pi/webthings
-    cd /home/pi/webthings
+    mkdir -p "$CANDLE_BASE/webthings"
+    chown pi:pi "$CANDLE_BASE/webthings"
+    cd "$CANDLE_BASE/webthings"
     
     git clone --depth 1 https://github.com/createcandle/candle-controller.git
     if [ -d ./candle-controller ]; then
         echo "Cutting edge controller download succeeded" | sudo tee -a /dev/kmsg
         echo "Cutting edge controller download succeeded" | sudo tee -a /boot/candle_log.txt
-        rm -rf /home/pi/webthings/gateway2
-        mv -f ./candle-controller /home/pi/webthings/gateway2
+        rm -rf "$CANDLE_BASE/webthings/gateway2"
+        mv -f ./candle-controller "$CANDLE_BASE/webthings/gateway2"
     else
         echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a /dev/kmsg
         echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a /boot/candle_log.txt
@@ -253,14 +260,14 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
 # Stable controller. Now simply downloads the entire folder and puts it into place.
 else
 
-    if [ -f /home/pi/latest_stable_controller.tar ]; then
+    if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
         
         echo "Will extract latest_stable_controller.tar"
         
-        cd /home/pi
+        cd "$CANDLE_BASE"
         
-        if [ -d /home/pi/webthings/gateway2 ]; then
-            rm -rf /home/pi/webthings/gateway2
+        if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
+            rm -rf "$CANDLE_BASE/webthings/gateway2"
         fi
 
         availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
@@ -269,34 +276,34 @@ else
             echo "Candle: Doing safe unpack of latest_stable_controller.tar"
             echo "Candle: Doing safe unpack of latest_stable_controller.tar" | sudo tee -a /dev/kmsg
             echo "Doing safe unpack of latest_stable_controller.tar" | sudo tee -a /boot/candle_log.txt
-            mkdir -p /home/pi/downloaded_controller
-            rm -rf /home/pi/downloaded_controller/*
+            mkdir -p "$CANDLE_BASE/downloaded_controller"
+            rm -rf "$CANDLE_BASE/downloaded_controller/*"
             echo "extracting"
-            tar -xf latest_stable_controller.tar -C /home/pi/downloaded_controller
+            tar -xf latest_stable_controller.tar -C "$CANDLE_BASE/downloaded_controller"
             
-            ls /home/pi/downloaded_controller
+            ls "$CANDLE_BASE/downloaded_controller"
             
-            if [ -f /home/pi/downloaded_controller/webthings/gateway/.post_upgrade_complete ]; then
+            if [ -f "$CANDLE_BASE/downloaded_controller/webthings/gateway/.post_upgrade_complete" ]; then
                 echo "extraction worked fine"
-                if [ -d /home/pi/webthings/gateway ]; then
-                    rm -rf /home/pi/webthings/gateway
+                if [ -d "$CANDLE_BASE/webthings/gateway" ]; then
+                    rm -rf "$CANDLE_BASE/webthings/gateway"
                 fi
                 echo "moving extracted gateway dir into place"
-                mv /home/pi/downloaded_controller/webthings/gateway /home/pi/webthings/gateway
+                mv "$CANDLE_BASE/downloaded_controller/webthings/gateway $CANDLE_BASE/webthings/gateway"
             else
                 echo "extraction did not go as planned"    
             fi
             
             echo "removing extracted files"
-            rm -rf /home/pi/downloaded_controller
+            rm -rf "$CANDLE_BASE/downloaded_controller"
             
         else
             # more risky move because of low disk space
             echo "Candle: Low disk space, doing direct unpack of latest_stable_controller.tar" | sudo tee -a /dev/kmsg
             echo "Low disk space, doing direct unpack of latest_stable_controller.tar" | sudo tee -a /boot/candle_log.txt
             
-            if [ -d /home/pi/webthings ]; then
-                sudo rm -rf /home/pi/webthings
+            if [ -d "$CANDLE_BASE/webthings" ]; then
+                sudo rm -rf "$CANDLE_BASE/webthings"
             fi
             tar -xf latest_stable_controller.tar
         fi
@@ -306,9 +313,9 @@ else
         echo "Stable, but latest_stable_controller.tar missing. Attempting build." | sudo tee -a /dev/kmsg
         echo "Stable, but latest_stable_controller.tar missing. Attempting build." | sudo tee -a /boot/candle_log.txt
         
-        mkdir -p /home/pi/webthings
-        chown pi:pi /home/pi/webthings
-        cd /home/pi/webthings
+        mkdir -p "$CANDLE_BASE/webthings"
+        chown pi:pi "$CANDLE_BASE/webthings"
+        cd "$CANDLE_BASE/webthings"
         
         curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
         | grep "tarball_url" \
@@ -334,8 +341,8 @@ else
             #mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
             echo
             echo "PWD: $(pwd)"
-            echo "ls /home/pi/webthings/gateway2:"
-            ls /home/pi/webthings/gateway2
+            echo "ls $CANDLE_BASE/webthings/gateway2:"
+            ls "$CANDLE_BASE/webthings/gateway2"
         else
             echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /dev/kmsg
             echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /boot/candle_log.txt
@@ -355,7 +362,7 @@ else
 fi
 
 
-if [ -f /boot/candle_cutting_edge.txt ] && [ ! -d /home/pi/webthings/gateway2 ]; then
+if [ -f /boot/candle_cutting_edge.txt ] && [ ! -d "$CANDLE_BASE/webthings/gateway2" ]; then
     echo
     echo "ERROR, missing gateway2 directory"
     echo "Candle: ERROR, missing gateway2 directory" | sudo tee -a /dev/kmsg
@@ -374,10 +381,10 @@ if [ -f /boot/candle_cutting_edge.txt ] && [ ! -d /home/pi/webthings/gateway2 ];
 fi
 
 
-if [ -d /home/pi/webthings/gateway2 ]; then
-    echo "/home/pi/webthings/gateway2 exists"
+if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
+    echo "$CANDLE_BASE/webthings/gateway2 exists"
     
-    cd /home/pi/webthings/gateway2
+    cd "$CANDLE_BASE/webthings/gateway2"
 
     rm -rf node_modules/
 
@@ -394,7 +401,6 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
 
-    #echo "Does node_modules exist now?: $(ls /home/pi/webthings/gateway)" | sudo tee -a /dev/kmsg
 
 
 
@@ -441,10 +447,10 @@ if [ -d /home/pi/webthings/gateway2 ]; then
         NODE_OPTIONS="--max-old-space-size=2048" npm_config_yes=true npx webpack
     fi
     
-    if [ -f /home/pi/webthings/gateway2/build/app.js ] \
-    && [ -f /home/pi/webthings/gateway2/build/static/index.html ] \
-    && [ -d /home/pi/webthings/gateway2/node_modules ] \
-    && [ -d /home/pi/webthings/gateway2/build/static/bundle ];
+    if [ -f "$CANDLE_BASE/webthings/gateway2/build/app.js" ] \
+    && [ -f "$CANDLE_BASEwebthings/gateway2/build/static/index.html" ] \
+    && [ -d "$CANDLE_BASE/webthings/gateway2/node_modules" ] \
+    && [ -d "$CANDLE_BASE/webthings/gateway2/build/static/bundle" ];
     then
       echo "creating .post_upgrade_complete file"
       touch .post_upgrade_complete
@@ -465,26 +471,26 @@ if [ -d /home/pi/webthings/gateway2 ]; then
     echo "New controller was created at $(pwd)"
     echo
     # Move the freshly created gateway into position
-    cd /home/pi
-    if [ -d /home/pi/webthings/gateway2 ]; then
+    cd "$CANDLE_BASE"
+    if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     
-        echo "Starting move/copy of /home/pi/webthings/gateway2 to /home/pi/webthings/gateway"
-        #rm-rf /home/pi/webthings/gateway
-        if [ ! -d /home/pi/webthings/gateway ]; then
+        echo "Starting move/copy of $CANDLE_BASE/webthings/gateway2 to $CANDLE_BASE/webthings/gateway"
+
+        if [ ! -d "$CANDLE_BASE/webthings/gateway" ]; then
             echo "Candle: Gateway didn't exist, moving gateway2 into position"
             echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
             echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /boot/candle_log.txt
-            mv /home/pi/webthings/gateway2 /home/pi/webthings/gateway
+            mv "$CANDLE_BASE/webthings/gateway2 $CANDLE_BASE/webthings/gateway"
         else
             echo "Candle: Gateway dir existed, doing rsync from gateway2"
             echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
             echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /boot/candle_log.txt
             
             # rsync recursive, quiet, checksum, copy symlinks as symlinks, preserve Executability, delete extraneous files from destination, show progress
-            rsync -r -q -c -l -E --delete --progress /home/pi/webthings/gateway2/ /home/pi/webthings/gateway/ 
+            rsync -r -q -c -l -E --delete --progress "$CANDLE_BASE/webthings/gateway2/ $CANDLE_BASE/webthings/gateway/"
             
-            chown -R pi:pi /home/pi/webthings/gateway
-            rm -rf /home/pi/webthings/gateway2
+            chown -R pi:pi "$CANDLE_BASE/webthings/gateway"
+            rm -rf "$CANDLE_BASE/webthings/gateway2"
         fi
     else
         # This should never happen
@@ -501,15 +507,15 @@ echo
 echo
 echo "Candle: Linking gateway addon" | sudo tee -a /dev/kmsg
 echo "Candle: Linking gateway addon" | sudo tee -a /boot/candle_log.txt
-if [ -d /home/pi/webthings/gateway/node_modules/gateway-addon ];
+if [ -d "$CANDLE_BASE/webthings/gateway/node_modules/gateway-addon" ];
 then
-    cd "/home/pi/webthings/gateway/node_modules/gateway-addon"
+    cd "$CANDLE_BASE/webthings/gateway/node_modules/gateway-addon"
     npm link
-    cd /home/pi
+    cd "$CANDLE_BASE"
 else
-    echo "ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing"
-    echo "Candle: ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
-    echo "Candle: ERROR, /home/pi/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /boot/candle_log.txt
+    echo "ERROR, $CANDLE_BASE/webthings/gateway/node_modules/gateway-addon was missing"
+    echo "Candle: ERROR, $CANDLE_BASE/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
+    echo "Candle: ERROR, $CANDLE_BASE/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /boot/candle_log.txt
 fi
 
 
@@ -518,22 +524,22 @@ fi
 # TODO: maybe do another sanity check and restore a backup if need be?
 
 
-if [ ! -f /home/pi/webthings/gateway/build/app.js ] \
-|| [ ! -f /home/pi/webthings/gateway/build/static/index.html ] \
-|| [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-|| [ ! -d /home/pi/webthings/gateway/node_modules ] \
-|| [ ! -d /home/pi/webthings/gateway/build/static/bundle ]; 
+if [ ! -f "$CANDLE_BASE/webthings/gateway/build/app.js" ] \
+|| [ ! -f "$CANDLE_BASE/webthings/gateway/build/static/index.html" ] \
+|| [ ! -f "$CANDLE_BASE/webthings/gateway/.post_upgrade_complete" ] \
+|| [ ! -d "$CANDLE_BASE/webthings/gateway/node_modules" ] \
+|| [ ! -d "$CANDLE_BASE/webthings/gateway/build/static/bundle" ]; 
 then
     echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED!"   | sudo tee -a /dev/kmsg
     echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED!" | sudo tee -a /boot/candle_log.txt
     
     # restore the backup in case something has gone very wrong
-    if [ -f /home/pi/controller_backup.tar ];
+    if [ -f "$CANDLE_BASE/controller_backup.tar" ];
     then
         echo "Candle: RESTORING BACKUP" | sudo tee -a /dev/kmsg
         echo "$(date) RESTORING BACKUP" | sudo tee -a /boot/candle_log.txt
-        cd /home/pi
-        sudo rm -rf /home/pi/webthings
+        cd "$CANDLE_BASE"
+        sudo rm -rf "$CANDLE_BASE/webthings"
         tar -xf ./controller_backup.tar
     else
         echo "Candle: NO BACKUP TO RESTORE!" | sudo tee -a /dev/kmsg
@@ -549,21 +555,21 @@ else
 fi
 
 
-cd /home/pi
+cd "$CANDLE_BASE"
 
 
 echo
 echo "INSTALLING CANDLE ADDONS"
 echo
 
-mkdir -p /home/pi/.webthings/addons
-chown -R pi:pi /home/pi/.webthings/addons
+mkdir -p "$CANDLE_BASE/.webthings/addons"
+chown -R pi:pi "$CANDLE_BASE/.webthings/addons"
 
 
-if [ ! -f /home/pi/.webthings/config/db.sqlite3 ] || [ ! -d /home/pi/.webthings/addons/power-settings ];
+if [ ! -f "$CANDLE_BASE/.webthings/config/db.sqlite3" ] || [ ! -d "$CANDLE_BASE/.webthings/addons/power-settings" ];
 then
     echo "installing power settings addon"
-    cd /home/pi/.webthings/addons
+    cd "$CANDLE_BASE/.webthings/addons"
     
     
     for addon in power-settings; 
@@ -588,7 +594,7 @@ then
         rm -rf "$addon"
         mv package "$addon"
         chown -R pi:pi "$addon"
-        mkdir -p /home/pi/.webthings/data/"$addon"
+        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
     done
     
 else
@@ -598,12 +604,12 @@ fi
 
 # Once the Candle app store exists, this part is never run again.
 # TODO: what if part of this failed?
-if [ ! -d /home/pi/.webthings/addons/candleappstore ]; 
+if [ ! -d "$CANDLE_BASE/.webthings/addons/candleappstore" ]; 
 then
     echo "Candle: Installing addons" | sudo tee -a /dev/kmsg
     echo "Candle: Installing addons" | sudo tee -a /boot/candle_log.txt
         
-    cd /home/pi/.webthings/addons
+    cd "$CANDLE_BASE/.webthings/addons"
 
 
     # Install Zigbee2MQTT
@@ -629,7 +635,7 @@ then
     rm -rf zigbee2mqtt-adapter
     mv package zigbee2mqtt-adapter
     chown -R pi:pi zigbee2mqtt-adapter
-    mkdir -p /home/pi/.webthings/data/zigbee2mqtt-adapter
+    mkdir -p "$CANDLE_BASE/.webthings/data/zigbee2mqtt-adapter"
     
     
     
@@ -651,7 +657,7 @@ then
         rm -rf "$addon"
         mv package "$addon"
         chown -R pi:pi "$addon"
-        mkdir -p /home/pi/.webthings/data/"$addon"
+        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
         #for directory in flatsiedatsie-"$addon"*; do
         #  [[ -d $directory ]] || continue
         #  echo "Directory: $directory"
@@ -680,7 +686,7 @@ then
     rm -rf followers
     mv package followers
     chown -R pi:pi followers
-    mkdir -p /home/pi/.webthings/data/followers
+    mkdir -p "$CANDLE_BASE/.webthings/data/followers"
 
 
 
@@ -709,7 +715,7 @@ then
         rm -rf "$addon"
         mv package "$addon"
         chown -R pi:pi "$addon"
-        mkdir -p /home/pi/.webthings/data/"$addon"
+        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
     done
 
     # Install Candle addons
@@ -736,7 +742,7 @@ then
         rm -rf "$addon"
         mv package "$addon"
         chown -R pi:pi "$addon"
-        mkdir -p /home/pi/.webthings/data/"$addon"
+        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
     done
     
     rm ./*.tgz
@@ -747,12 +753,12 @@ fi
 
 
 
-if [ -d /home/pi/.webthings/data/zigbee2mqtt-adapter ];
+if [ -d "$CANDLE_BASE/.webthings/data/zigbee2mqtt-adapter" ];
 then
     
-    if [ ! -d /home/pi/.webthings/data/zigbee2mqtt-adapter/zigbee2mqtt ];
+    if [ ! -d "$CANDLE_BASE/.webthings/data/zigbee2mqtt-adapter/zigbee2mqtt" ];
     then
-        cd /home/pi/.webthings/data/zigbee2mqtt-adapter
+        cd "$CANDLE_BASE/.webthings/data/zigbee2mqtt-adapter"
     
         echo
         echo "pre-installing Zigbee2MQTT"
@@ -786,13 +792,13 @@ then
         fi
         #https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest
     
-        cd /home/pi/
+        cd "$CANDLE_BASE"
     fi
     
 else
-    echo "Candle: WARNING, /home/pi/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt"
-    echo "Candle: WARNING, /home/pi/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a /dev/kmsg
-    echo "$(date) /home/pi/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a /boot/candle_log.txt
+    echo "Candle: WARNING, $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt"
+    echo "Candle: WARNING, $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a /dev/kmsg
+    echo "$(date) $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a /boot/candle_log.txt
 fi
 
 
@@ -802,26 +808,26 @@ fi
 #cd /home/pi/webthings/gateway
 #timeout 10 npm run run-only
 echo "controller installation should be complete"
-echo "ls /home/pi/.webthings:"
-#ls /home/pi/.webthings
+echo "ls $CANDLE_BASE/.webthings:"
+ls "$CANDLE_BASE/.webthings"
 
-cd /home/pi
+cd "$CANDLE_BASE"
 
 
 
-mkdir -p /home/pi/.webthings/config
-chown -R pi:pi /home/pi/.webthings/config
-if [ ! -f /home/pi/.webthings/config/db.sqlite3 ];
+mkdir -p "$CANDLE_BASE/.webthings/config"
+chown -R pi:pi "$CANDLE_BASE/.webthings/config"
+if [ ! -f "$CANDLE_BASE/.webthings/config/db.sqlite3" ];
 then
     echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a /dev/kmsg
     echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a /boot/candle_log.txt
-    if [ -f /home/pi/.webthings/addons/power-settings/db.sqlite3 ]; then
-        cp /home/pi/.webthings/addons/power-settings/db.sqlite3 /home/pi/.webthings/config/db.sqlite3
-        chown pi:pi /home/pi/.webthings/config/db.sqlite3
+    if [ -f "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3" ]; then
+        cp "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 $CANDLE_BASE/.webthings/config/db.sqlite3"
+        chown pi:pi "$CANDLE_BASE/.webthings/config/db.sqlite3"
     else
-        echo "ERROR, /home/pi/.webthings/addons/power-settings/db.sqlite3 was missing"
-        echo "Candle: ERROR, /home/pi/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /dev/kmsg
-        echo "Candle: ERROR, /home/pi/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /boot/candle_log.txt
+        echo "ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing"
+        echo "Candle: ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /dev/kmsg
+        echo "Candle: ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /boot/candle_log.txt
     fi
 else
     echo "warning, not copying default database since a database file already exists"
@@ -834,7 +840,7 @@ fi
 npm config set metrics-registry="https://"
 #npm config set registry="https://"
 npm config set user-agent=""
-rm /home/pi/.npm/anonymous-cli-metrics.json
+rm "$CANDLE_BASE/.npm/anonymous-cli-metrics.json"
 
 npm cache clean --force
 nvm cache clear
