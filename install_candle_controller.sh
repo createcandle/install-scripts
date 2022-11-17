@@ -216,6 +216,7 @@ then
     
     echo
     echo "starting nvm install"
+    nvm install 16
     nvm install 12
     nvm use 12
     nvm alias default 12
@@ -635,6 +636,33 @@ else
     echo "Candle: a valid controller exists" | sudo tee -a /boot/candle_log.txt
     echo
 fi
+
+
+cd "$CANDLE_BASE"
+
+
+#
+#  NODE SYMLINKS
+#
+# Create shortcuts to multiple isntalled node versions
+
+cd "$CANDLE_BASE/webthings/gateway"
+
+# Node 12
+V12=$(ls $CANDLE_BASE/.nvm/versions/node | grep v12) # TODO: this now assumes that the candle base dir is also a user root dir with nvm installed. Is that wise?
+echo "V12: $V12"
+V12_PATH="$CANDLE_BASE/.nvm/versions/node/$V12/bin/node"
+echo "Node V12 path: $V12_PATH"
+rm node12
+ln -s "$V12_PATH" node12
+
+# NODE 16
+V16=$(ls $CANDLE_BASE/.nvm/versions/node | grep v16)
+echo "V16: $V16"
+V16_PATH="$CANDLE_BASE/.nvm/versions/node/$V16/bin/node"
+echo "Node V16 path: $V16_PATH"
+rm node16
+ln -s "$V16_PATH" node16
 
 
 cd "$CANDLE_BASE"
