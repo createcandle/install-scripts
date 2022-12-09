@@ -9,6 +9,10 @@ else
     CANDLE_BASE="$(pwd)"
 fi
 
+if [ -f /boot/candle_cutting_edge.txt ]; then
+    CUTTING_EDGE=yes
+fi
+
 if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
 then
     echo "no environment indication to go cutting edge"
