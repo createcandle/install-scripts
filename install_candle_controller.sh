@@ -643,43 +643,35 @@ fi
 cd "$CANDLE_BASE"
 
 
-if [ -d "$CANDLE_BASE/webthings/gateway" ]; then
+#
+#  NODE SYMLINKS
+#
+# Create shortcuts to multiple installed node versions. 
 
-    #
-    #  NODE SYMLINKS
-    #
-    # Create shortcuts to multiple isntalled node versions
+# These are kept in user home directory so that the gateway can be replaced independently of node.
+#cd "$CANDLE_BASE/webthings/gateway"
 
-    cd "$CANDLE_BASE/webthings/gateway"
-
-    # Node 12
-    V12=$(ls $CANDLE_BASE/.nvm/versions/node | grep v12) # TODO: this now assumes that the candle base dir is also a user root dir with nvm installed. Is that wise?
-    echo "V12: $V12"
-    V12_PATH="$CANDLE_BASE/.nvm/versions/node/$V12/bin/node"
-    echo "Node V12 path: $V12_PATH"
-    if [ -L node16 ]; then
-        echo "removing old node12 symlink first"
-        rm node12
-    fi
-    ln -s "$V12_PATH" node12
-
-    # NODE 16
-    V16=$(ls $CANDLE_BASE/.nvm/versions/node | grep v16)
-    echo "V16: $V16"
-    V16_PATH="$CANDLE_BASE/.nvm/versions/node/$V16/bin/node"
-    echo "Node V16 path: $V16_PATH"
-    if [ -L node16 ]; then
-        echo "removing old node16 symlink first"
-        rm node16
-    fi
-    ln -s "$V16_PATH" node16
-
-else
-    echo
-    echo "ERROR, GATEWAY DIR DID NOT EXIST! COULD NOT CREATE NODE SYMLINKS"
-    echo
+# Node 12
+V12=$(ls $CANDLE_BASE/.nvm/versions/node | grep v12) # TODO: this now assumes that the candle base dir is also a user root dir with nvm installed. Is that wise?
+echo "V12: $V12"
+V12_PATH="$CANDLE_BASE/.nvm/versions/node/$V12/bin/node"
+echo "Node V12 path: $V12_PATH"
+if [ -L node16 ]; then
+    echo "removing old node12 symlink first"
+    rm node12
 fi
+ln -s "$V12_PATH" node12
 
+# NODE 16
+V16=$(ls $CANDLE_BASE/.nvm/versions/node | grep v16)
+echo "V16: $V16"
+V16_PATH="$CANDLE_BASE/.nvm/versions/node/$V16/bin/node"
+echo "Node V16 path: $V16_PATH"
+if [ -L node16 ]; then
+    echo "removing old node16 symlink first"
+    rm node16
+fi
+ln -s "$V16_PATH" node16
 
 
 
