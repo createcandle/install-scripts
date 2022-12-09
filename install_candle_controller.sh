@@ -557,7 +557,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
       echo "Candle: ERROR, controller installation is mising parts" | sudo tee -a /dev/kmsg
       echo "$(date) - ERROR, controller installation is mising parts" | sudo tee -a /boot/candle_log.txt
       ls "$CANDLE_BASE/webthings/gateway2/build/app.js"
-      ls "$CANDLE_BASEwebthings/gateway2/build/static/index.html"
+      ls "$CANDLE_BASE/webthings/gateway2/build/static/index.html"
       ls "$CANDLE_BASE/webthings/gateway2/node_modules"
       ls "$CANDLE_BASE/webthings/gateway2/build/static/bundle" 
       echo
