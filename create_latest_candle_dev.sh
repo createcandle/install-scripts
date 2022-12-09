@@ -2625,7 +2625,7 @@ then
             fi
             
         elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-        || [ ! -f /home/pi/node12 ] ; then; then
+        || [ ! -f /home/pi/node12 ] ; then
     
             echo 
             echo "ERROR, detected failure to (fully) install candle-controller"
