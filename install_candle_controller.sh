@@ -218,8 +218,8 @@ then
     echo "starting nvm install"
     nvm install 16
     nvm install 12
-    nvm use 12
-    nvm alias default 12
+    nvm use 16
+    nvm alias default 16
 else
     echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
     echo "NPM seems to already be installed." | sudo tee -a /boot/candle_log.txt
