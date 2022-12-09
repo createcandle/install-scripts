@@ -542,7 +542,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     fi
     
     if [ -f "$CANDLE_BASE/webthings/gateway2/build/app.js" ] \
-    && [ -f "$CANDLE_BASEwebthings/gateway2/build/static/index.html" ] \
+    && [ -f "$CANDLE_BASE/webthings/gateway2/build/static/index.html" ] \
     && [ -d "$CANDLE_BASE/webthings/gateway2/node_modules" ] \
     && [ -d "$CANDLE_BASE/webthings/gateway2/build/static/bundle" ];
     then
