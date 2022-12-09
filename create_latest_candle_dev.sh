@@ -2597,7 +2597,7 @@ then
         if [ -d /ro ]; then
             if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ]; then
                 echo 
-                echo "ERROR, failed to (fully) install candle-controller (/ro)"
+                echo "ERROR, detected failure to (fully) install candle-controller (/ro)"
                 echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
                 echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /home/pi/.webthings/candle.log
                 echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /boot/candle_log.txt
@@ -2615,7 +2615,7 @@ then
         elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ]; then
     
             echo 
-            echo "ERROR, failed to (fully) install candle-controller"
+            echo "ERROR, detected failure to (fully) install candle-controller"
             echo "Candle: ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
             echo "Candle: ERROR, failed to (fully) install candle-controller" >> /home/pi/.webthings/candle.log
             echo "Candle: ERROR, failed to (fully) install candle-controller" >> /boot/candle_log.txt
