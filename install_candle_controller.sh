@@ -164,7 +164,9 @@ then
     #    echo "spotted NVM installation left-over: .nvm dir"
     #fi
     #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
-    wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
+    #wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
+    wget https://raw.githubusercontent.com/creationix/nvm/master/install.sh -O install_nvm.sh
+    #curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
     if [ ! -f install_nvm.sh ]; then
         echo "ERROR, install_nvm.sh failed to download"
         echo "ERROR, install_nvm.sh failed to download" | sudo tee -a /dev/kmsg
@@ -508,11 +510,11 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     cp -rL static build/static
     find build -name '*.ts' -delete
     echo
-    echo "Compiling typescript. this will take a while..."
-    echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
-    echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /boot/candle_log.txt
-    npx tsc -p .
-    echo "(it probably found some errors, don't worry about those)"
+    #echo "Compiling typescript. this will take a while..."
+    #echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
+    #echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /boot/candle_log.txt
+    #npx tsc -p .
+    #echo "(it probably found some errors, don't worry about those)"
     echo
     #echo "Running webpack. this will take a while too..."
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
