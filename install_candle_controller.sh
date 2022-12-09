@@ -563,14 +563,14 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
             echo "Candle: Gateway didn't exist, moving gateway2 into position"
             echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
             echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /boot/candle_log.txt
-            mv "$CANDLE_BASE/webthings/gateway2 $CANDLE_BASE/webthings/gateway"
+            mv "$CANDLE_BASE/webthings/gateway2" "$CANDLE_BASE/webthings/gateway"
         else
             echo "Candle: Gateway dir existed, doing rsync from gateway2"
             echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
             echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /boot/candle_log.txt
             
             # rsync recursive, quiet, checksum, copy symlinks as symlinks, preserve Executability, delete extraneous files from destination, show progress
-            rsync -r -q -c -l -E --delete --progress "$CANDLE_BASE/webthings/gateway2/ $CANDLE_BASE/webthings/gateway/"
+            rsync -r -q -c -l -E --delete --progress "$CANDLE_BASE/webthings/gateway2/" "$CANDLE_BASE/webthings/gateway/"
             
             chown -R pi:pi "$CANDLE_BASE/webthings/gateway"
             rm -rf "$CANDLE_BASE/webthings/gateway2"
@@ -627,6 +627,8 @@ then
     else
         echo "Candle: NO BACKUP TO RESTORE!" | sudo tee -a /dev/kmsg
         echo "$(date) NO BACKUP TO RESTORE!" | sudo tee -a /boot/candle_log.txt
+        
+        exit 1
     fi
     
 else
@@ -641,34 +643,45 @@ fi
 cd "$CANDLE_BASE"
 
 
-#
-#  NODE SYMLINKS
-#
-# Create shortcuts to multiple isntalled node versions
+if [ -d "$CANDLE_BASE/webthings/gateway" ]; then
 
-cd "$CANDLE_BASE/webthings/gateway"
+    #
+    #  NODE SYMLINKS
+    #
+    # Create shortcuts to multiple isntalled node versions
 
-# Node 12
-V12=$(ls $CANDLE_BASE/.nvm/versions/node | grep v12) # TODO: this now assumes that the candle base dir is also a user root dir with nvm installed. Is that wise?
-echo "V12: $V12"
-V12_PATH="$CANDLE_BASE/.nvm/versions/node/$V12/bin/node"
-echo "Node V12 path: $V12_PATH"
-if [ -L node16 ]; then
-    echo "removing old node12 symlink first"
-    rm node12
+    cd "$CANDLE_BASE/webthings/gateway"
+
+    # Node 12
+    V12=$(ls $CANDLE_BASE/.nvm/versions/node | grep v12) # TODO: this now assumes that the candle base dir is also a user root dir with nvm installed. Is that wise?
+    echo "V12: $V12"
+    V12_PATH="$CANDLE_BASE/.nvm/versions/node/$V12/bin/node"
+    echo "Node V12 path: $V12_PATH"
+    if [ -L node16 ]; then
+        echo "removing old node12 symlink first"
+        rm node12
+    fi
+    ln -s "$V12_PATH" node12
+
+    # NODE 16
+    V16=$(ls $CANDLE_BASE/.nvm/versions/node | grep v16)
+    echo "V16: $V16"
+    V16_PATH="$CANDLE_BASE/.nvm/versions/node/$V16/bin/node"
+    echo "Node V16 path: $V16_PATH"
+    if [ -L node16 ]; then
+        echo "removing old node16 symlink first"
+        rm node16
+    fi
+    ln -s "$V16_PATH" node16
+
+else
+    echo
+    echo "ERROR, GATEWAY DIR DID NOT EXIST! COULD NOT CREATE NODE SYMLINKS"
+    echo
 fi
-ln -s "$V12_PATH" node12
 
-# NODE 16
-V16=$(ls $CANDLE_BASE/.nvm/versions/node | grep v16)
-echo "V16: $V16"
-V16_PATH="$CANDLE_BASE/.nvm/versions/node/$V16/bin/node"
-echo "Node V16 path: $V16_PATH"
-if [ -L node16 ]; then
-    echo "removing old node16 symlink first"
-    rm node16
-fi
-ln -s "$V16_PATH" node16
+
+
 
 
 cd "$CANDLE_BASE"
