@@ -1,6 +1,11 @@
 #!/bin/bash
 set +e
 
+if [ "$EUID" -e 0 ]; then
+  echo "The controller install script should not be run as root"
+  exit
+fi
+
 CANDLE_BASE='.'
 
 if [ -d /home/pi ]; then
