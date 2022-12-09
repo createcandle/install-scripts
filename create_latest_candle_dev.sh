@@ -68,6 +68,13 @@ fi
 
 scriptname=$(basename "$0")
 
+# Not used in this script yet, currently /home/pi is still hardcoded
+if [ -d /home/pi ]; then
+    CANDLE_BASE="/home/pi"
+else
+    CANDLE_BASE="$(pwd)"
+fi
+
 echo "" >> /boot/candle_log.txt
 echo "Candle: starting update - $(date) - $scriptname" >> /dev/kmsg
 echo "starting update - $(date) - $scriptname" >> /boot/candle_log.txt
@@ -2599,7 +2606,8 @@ then
         # Check if the installation of the controller succeeded
     
         if [ -d /ro ]; then
-            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ]; then
+            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] \
+            || [ ! -f /ro/home/pi/node12 ] ; then
                 echo 
                 echo "ERROR, detected failure to (fully) install candle-controller (/ro)"
                 echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
@@ -2616,7 +2624,8 @@ then
                 exit 1
             fi
             
-        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ]; then
+        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
+        || [ ! -f /home/pi/node12 ] ; then; then
     
             echo 
             echo "ERROR, detected failure to (fully) install candle-controller"
