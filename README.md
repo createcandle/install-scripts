@@ -86,7 +86,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 .
 
 ### Installing the controller software only (advanced)
-It's technically also possible to install only the Candle Controller software on an existing system (and skip the entire disk image around it). This is done buy running the `install_candle_controller.sh` script on its own. For example:
+It's technically also possible to install only the Candle Controller software on an existing system (and skip the entire disk image around it). This is done by running the `install_candle_controller.sh` script on its own. For example:
 
 ```
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh | bash
