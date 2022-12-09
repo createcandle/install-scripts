@@ -27,7 +27,7 @@ https://www.raspberrypi.com/software/
 
 3. Use the gear icon to set everything up that you can: enable ssh, set username "pi" and password "smarthome", set the hostname to "candle", pre-fill your wifi credentials, etc.
 
-4. Click "write". Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt” using a text editor. From it, delete “init=/usr/lib/raspi-config/init_resize.sh”, and save. Saving might seem to fail, but it probably saved anyway. Open the cmdline.txt file again to confirm.
+4. Click "write". Once flashing is complete, unplug the SD card from your computer and re-insert it into your computer. A new disk called "boot" should appear. Edit the file called “cmdline.txt” using a text editor. From it, delete the part that starts with “init=”, and save. Saving might seem to fail, but it probably saved anyway. Open the cmdline.txt file again to confirm.
 
 5. Make sure there is no other "candle.local" device on the network already, since after a reboot the Raspberry Pi's hostname will change to `candle.local` (if it isn't called that already). You must also plug a network cable into the Raspberry Pi to avoid download issues.
 
