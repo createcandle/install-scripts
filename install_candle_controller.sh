@@ -1,18 +1,59 @@
 #!/bin/bash
 set +e
 
-if [ "$EUID" -e 0 ]; then
-  echo "The controller install script should not be run as root"
-  exit
+# This script is part of the Candle disk image creation script, although it can be run stand-alone to only install the controller itself.
+
+# This script should be run as user pi (not root)
+if ! [ "$EUID" -ne 0 ];
+then
+  echo "Please do not run as root (do not use sudo)"
+  exit 1
 fi
 
-CANDLE_BASE='.'
+if [ ! -s /etc/resolv.conf ]; then
+    # no nameserver
+    echo "no nameserver, aborting"
+    echo "Candle: No nameserver, aborting" | sudo tee -a /dev/kmsg
+    exit 1
+fi
 
+# It sohuld in theory be possible to install this in any directory, not just /home/pi (untested)
+CANDLE_BASE='.'
 if [ -d /home/pi ]; then
     CANDLE_BASE="/home/pi"
 else
     CANDLE_BASE="$(pwd)"
 fi
+
+
+# Add /home/pi/.local/bin to path
+if [ -z "$(printenv PATH | grep $CANDLE_BASE/.local/bin)" ]; then 
+    export PATH="$CANDLE_BASE/.local/bin:$PATH"
+    echo "added $CANDLE_BASE/.local/bin to PATH"
+fi
+
+
+echo "DATE         : $(date)"
+echo "IP ADDRESS   : $(hostname -I)"
+echo "USER         : $(whoami)"
+echo "PATH         : $PATH"
+echo "CANDLE_BASE  : $CANDLE_BASE"
+scriptname=$(basename "$0")
+echo "NAME         : $scriptname"
+
+if [ -f /boot/candle_cutting_edge.txt ]; then
+echo "Cutting edge : yes"
+else
+echo "Cutting edge : no"
+fi
+
+echo
+echo
+
+cd "$CANDLE_BASE" || exit
+
+
+
 
 if [ -f /boot/candle_cutting_edge.txt ]; then
     CUTTING_EDGE=yes
@@ -96,54 +137,11 @@ then
         echo "latest_stable_controller.tar already downloaded"
     fi
     
-    
-else
-    echo "going cutting edge"
-    touch /boot/candle_cutting_edge.txt
 fi
 
 
-# This script is part of the Candle disk image creation script
-
-# This script should be run as user pi (not root)
-if ! [ "$EUID" -ne 0 ];
-then
-  echo "Please do not run as root (do not use sudo)"
-  exit 1
-fi
-
-if [ ! -s /etc/resolv.conf ]; then
-    # no nameserver
-    echo "no nameserver, aborting"
-    echo "Candle: No nameserver, aborting" | sudo tee -a /dev/kmsg
-    exit 1
-fi
-
-# Add /home/pi/.local/bin to path
-if [ -z "$(printenv PATH | grep $CANDLE_BASE/.local/bin)" ]; then 
-    export PATH="$CANDLE_BASE/.local/bin:$PATH"
-    echo "added $CANDLE_BASE/.local/bin to PATH"
-fi
 
 
-echo "DATE         : $(date)"
-echo "IP ADDRESS   : $(hostname -I)"
-echo "USER         : $(whoami)"
-echo "PATH         : $PATH"
-echo "CANDLE_BASE  : $CANDLE_BASE"
-scriptname=$(basename "$0")
-echo "NAME         : $scriptname"
-
-if [ -f /boot/candle_cutting_edge.txt ]; then
-echo "Cutting edge : yes"
-else
-echo "Cutting edge : no"
-fi
-
-echo
-echo
-
-cd "$CANDLE_BASE" || exit
 
 echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 echo "candle: installing python gateway addon" | sudo tee -a /boot/candle_log.txt
