@@ -554,6 +554,10 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
       echo "ERROR, controller installation is missing parts"
       echo "Candle: ERROR, controller installation is mising parts" | sudo tee -a /dev/kmsg
       echo "$(date) - ERROR, controller installation is mising parts" | sudo tee -a /boot/candle_log.txt
+      ls "$CANDLE_BASE/webthings/gateway2/build/app.js"
+      ls "$CANDLE_BASEwebthings/gateway2/build/static/index.html"
+      ls "$CANDLE_BASE/webthings/gateway2/node_modules"
+      ls "$CANDLE_BASE/webthings/gateway2/build/static/bundle" 
       echo
     fi
 
@@ -620,8 +624,8 @@ if [ ! -f "$CANDLE_BASE/webthings/gateway/build/app.js" ] \
 || [ ! -d "$CANDLE_BASE/webthings/gateway/node_modules" ] \
 || [ ! -d "$CANDLE_BASE/webthings/gateway/build/static/bundle" ]; 
 then
-    echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED!"   | sudo tee -a /dev/kmsg
-    echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED!" | sudo tee -a /boot/candle_log.txt
+    echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! Backup not created."   | sudo tee -a /dev/kmsg
+    echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! Backup not created." | sudo tee -a /boot/candle_log.txt
     
     # restore the backup in case something has gone very wrong
     if [ -f "$CANDLE_BASE/controller_backup.tar" ];
