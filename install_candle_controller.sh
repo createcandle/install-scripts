@@ -512,11 +512,11 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     cp -rL static build/static
     find build -name '*.ts' -delete
     echo
-    #echo "Compiling typescript. this will take a while..."
-    #echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
-    #echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /boot/candle_log.txt
-    #npx tsc -p .
-    #echo "(it probably found some errors, don't worry about those)"
+    echo "Compiling typescript. this will take a while..."
+    echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
+    echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /boot/candle_log.txt
+    npx tsc -p .
+    echo "(it probably found some errors, don't worry about those)"
     echo
     #echo "Running webpack. this will take a while too..."
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
