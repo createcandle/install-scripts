@@ -1135,9 +1135,13 @@ then
         fi
       
     else
-        echo "doing system update, but not allowing kernel updates for now"
-        echo "doing system update, but not allowing kernel updates for now" >> /dev/kmsg
-        echo "doing system update, but not allowing kernel updates for now" >> /boot/candle_log.txt
+    
+        # TODO: it said "not allowing kernel updates", but then sets kernel to "unhold".. so...
+        # Should kernel updates be held? Everything seems to update ok anyway.
+    
+        echo "doing system update, allowing kernel updates for now"
+        echo "doing system update, allowing kernel updates for now" >> /dev/kmsg
+        echo "doing system update, allowing kernel updates for now" >> /boot/candle_log.txt
         apt-mark unhold raspberrypi-kernel
         apt-mark unhold raspberrypi-kernel-headers 
         apt-mark unhold raspberrypi-bootloader
