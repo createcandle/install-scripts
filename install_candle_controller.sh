@@ -3,6 +3,8 @@ set +e
 
 # This script is part of the Candle disk image creation script, although it can be run stand-alone to only install the controller itself.
 
+echo ""
+
 # This script should be run as user pi (not root)
 if ! [ "$EUID" -ne 0 ];
 then
