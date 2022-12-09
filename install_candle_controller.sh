@@ -972,7 +972,10 @@ fi
 npm config set metrics-registry="https://"
 #npm config set registry="https://"
 npm config set user-agent=""
-rm "$CANDLE_BASE/.npm/anonymous-cli-metrics.json"
+if [ -f "$CANDLE_BASE/.npm/anonymous-cli-metrics.json" ]
+then
+  rm "$CANDLE_BASE/.npm/anonymous-cli-metrics.json"
+fi
 
 npm cache clean --force
 nvm cache clear
