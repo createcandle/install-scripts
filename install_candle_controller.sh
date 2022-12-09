@@ -628,7 +628,7 @@ then
         echo "Candle: NO BACKUP TO RESTORE!" | sudo tee -a /dev/kmsg
         echo "$(date) NO BACKUP TO RESTORE!" | sudo tee -a /boot/candle_log.txt
         
-        exit 1
+        # Could abort here..
     fi
     
 else
