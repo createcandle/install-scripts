@@ -932,7 +932,7 @@ then
     echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a /dev/kmsg
     echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a /boot/candle_log.txt
     if [ -f "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3" ]; then
-        cp "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 $CANDLE_BASE/.webthings/config/db.sqlite3"
+        cp "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3" "$CANDLE_BASE/.webthings/config/db.sqlite3"
         chown pi:pi "$CANDLE_BASE/.webthings/config/db.sqlite3"
     else
         echo "ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing"
