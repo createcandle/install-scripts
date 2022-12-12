@@ -227,10 +227,11 @@ then
     
     echo
     echo "starting nvm install"
-    nvm install 16
     nvm install 12
-    nvm use 16
-    nvm alias default 16
+    #nvm install 16
+    nvm install 18
+    nvm use 18
+    nvm alias default 18
 else
     echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
     echo "NPM seems to already be installed." | sudo tee -a /boot/candle_log.txt
@@ -678,15 +679,26 @@ fi
 ln -s "$V12_PATH" node12
 
 # NODE 16
-V16=$(ls $CANDLE_BASE/.nvm/versions/node | grep v16)
-echo "V16: $V16"
-V16_PATH="$CANDLE_BASE/.nvm/versions/node/$V16/bin/node"
-echo "Node V16 path: $V16_PATH"
-if [ -L node16 ]; then
-    echo "removing old node16 symlink first"
-    rm node16
+#V16=$(ls $CANDLE_BASE/.nvm/versions/node | grep v16)
+#echo "V16: $V16"
+#V16_PATH="$CANDLE_BASE/.nvm/versions/node/$V16/bin/node"
+#echo "Node V16 path: $V16_PATH"
+#if [ -L node16 ]; then
+#    echo "removing old node16 symlink first"
+#    rm node16
+#fi
+#ln -s "$V16_PATH" node16
+
+# NODE 18
+V18=$(ls $CANDLE_BASE/.nvm/versions/node | grep v18)
+echo "V18: $V18"
+V18_PATH="$CANDLE_BASE/.nvm/versions/node/$V18/bin/node"
+echo "Node V18 path: $V18_PATH"
+if [ -L node18 ]; then
+    echo "removing old node18 symlink first"
+    rm node18
 fi
-ln -s "$V16_PATH" node16
+ln -s "$V18_PATH" node18
 
 
 
