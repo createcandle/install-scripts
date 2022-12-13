@@ -228,10 +228,15 @@ then
     echo
     echo "starting nvm install"
     
-    nvm uninstall 12
+    #nvm uninstall 12
+    for v in $(nvm_ls 12); do echo nvm uninstall $v; done
     nvm install 12
+    
     #nvm install 16
-    nvm uninstall 18
+    
+    #nvm uninstall 18
+    #nvm uninstall 18
+    for v in $(nvm_ls 18); do echo nvm uninstall $v; done
     nvm install 18
     nvm use 18
     nvm alias default 18
