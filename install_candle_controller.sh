@@ -227,8 +227,11 @@ then
     
     echo
     echo "starting nvm install"
+    
+    nvm uninstall 12
     nvm install 12
     #nvm install 16
+    nvm uninstall 18
     nvm install 18
     nvm use 18
     nvm alias default 18
