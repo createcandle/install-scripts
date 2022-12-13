@@ -676,7 +676,7 @@ cd "$CANDLE_BASE"
 #cd "$CANDLE_BASE/webthings/gateway"
 
 # Node 12
-V12=$(ls $CANDLE_BASE/.nvm/versions/node | grep v12) # TODO: this now assumes that the candle base dir is also a user root dir with nvm installed. Is that wise?
+V12=$(ls $CANDLE_BASE/.nvm/versions/node | grep v12 | head -n 1) # TODO: this now assumes that the candle base dir is also a user root dir with nvm installed. Is that wise?
 echo "V12: $V12"
 V12_PATH="$CANDLE_BASE/.nvm/versions/node/$V12/bin/node"
 echo "Node V12 path: $V12_PATH"
@@ -698,7 +698,7 @@ ln -s "$V12_PATH" node12
 #ln -s "$V16_PATH" node16
 
 # NODE 18
-V18=$(ls $CANDLE_BASE/.nvm/versions/node | grep v18)
+V18=$(ls $CANDLE_BASE/.nvm/versions/node | grep v18 | head -n 1)
 echo "V18: $V18"
 V18_PATH="$CANDLE_BASE/.nvm/versions/node/$V18/bin/node"
 echo "Node V18 path: $V18_PATH"
