@@ -675,7 +675,7 @@ V12=$(ls $CANDLE_BASE/.nvm/versions/node | grep v12) # TODO: this now assumes th
 echo "V12: $V12"
 V12_PATH="$CANDLE_BASE/.nvm/versions/node/$V12/bin/node"
 echo "Node V12 path: $V12_PATH"
-if [ -L node16 ]; then
+if [ -L node12 ]; then
     echo "removing old node12 symlink first"
     rm node12
 fi
