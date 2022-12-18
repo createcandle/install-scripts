@@ -1421,7 +1421,7 @@ then
     chromium-browser git \
     autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six \
-    arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables \
+    arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi7 nbtscan ufw iptables \
     liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 \
     libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
