@@ -1851,6 +1851,11 @@ find /home/pi/.webthings/tmp \
      -exec chmod go-rwx {} +
 
 
+# Prepare a location for Matter settings
+mkdir /home/pi/.webthings/hasdata
+ln -s /home/pi/.webthings/hasdata /data
+chown pi:pi /data
+chown pi:pi /home/pi/.webthings/hasdata
 
 
 # COPY FILES
