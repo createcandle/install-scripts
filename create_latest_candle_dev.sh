@@ -157,14 +157,17 @@ fi
 
 
 # OUTPUT SOME INFORMATION
+BIT_TYPE=$(getconf LONG_BIT)
 
 cd /home/pi
 
 echo
 echo "CREATING CANDLE"
 echo
+
 echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
+echo "BITS         : $BIT_TYPE"
 echo "PATH         : $PATH"
 echo "USER         : $(whoami)"
 
@@ -421,7 +424,6 @@ apt-mark unhold chromium-browser
 # 64 BIT
 # If this Raspbery Pi OS is 64 bit, then install support for 32 bit as well.
 
-BIT_TYPE=$(getconf LONG_BIT)
 if [ $BIT_TYPE -eq 64 ]; then
     pkg --add-architecture armhf
     apt update -y && sudo apt install -y screen:armhf
