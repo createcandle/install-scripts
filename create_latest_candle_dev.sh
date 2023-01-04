@@ -394,7 +394,8 @@ fi
 
 echo
 echo "updating /usr/bin/candle_hostname_fix.sh"
-echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --static\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --transient\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --pretty\nsystemctl restart avahi-daemon' > /usr/bin/candle_hostname_fix.sh 
+echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --static\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --transient\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --pretty\nsystemctl restart avahi-daemon' > /usr/bin/candle_hostname_fix.sh
+chmod +x /usr/bin/candle_hostname_fix.sh
 echo
 
 # BULLSEYE SOURCES
@@ -1324,7 +1325,7 @@ then
     echo "Candle: installing support packages" >> /dev/kmsg
     echo "Candle: installing support packages" >> /boot/candle_log.txt
     echo
-    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi7 nbtscan ufw iptables liblivemedia-dev libcamera-apps; do
+    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi7 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
