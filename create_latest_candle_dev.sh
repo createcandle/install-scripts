@@ -394,7 +394,7 @@ fi
 
 echo
 echo "updating /usr/bin/candle_hostname_fix.sh"
-echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nsystemctl restart avahi-daemon' > /usr/bin/candle_hostname_fix.sh 
+echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --static\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --transient\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --pretty\nsystemctl restart avahi-daemon' > /usr/bin/candle_hostname_fix.sh 
 echo
 
 # BULLSEYE SOURCES
