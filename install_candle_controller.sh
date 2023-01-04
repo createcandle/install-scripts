@@ -732,7 +732,7 @@ then
     do
         echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
-        | grep "browser_download_url" \
+        | grep "tarball_url" \
         | grep -v ".sha256sum" \
         | cut -d : -f 2,3 \
         | tr -d \" \
