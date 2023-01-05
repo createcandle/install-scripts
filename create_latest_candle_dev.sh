@@ -2007,6 +2007,15 @@ if [ ! -L /home/pi/.asoundrc ]; then
     fi
 fi
 
+# make libffi.so.6 "available" for python (voco) by linking to the newer version
+if [ -d /usr/lib/aarch64-linux-gnu ]; then
+  if [ ! -f /usr/lib/aarch64-linux-gnu/libffi.so.6 ] && [ -f /usr/lib/aarch64-linux-gnu/libffi.so.7 ]; then
+    if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.6 ]; then
+      echo "creating symlink for  libffi.so.6 -> libffi.so.7"
+      ln -s /usr/lib/aarch64-linux-gnu/libffi.so.7 /usr/lib/aarch64-linux-gnu/libffi.so.6
+    fi
+  fi
+fi
 
 # Create locations on the user partition for time
 if [ ! -L /etc/localtime ]; then
