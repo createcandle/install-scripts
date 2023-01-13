@@ -426,7 +426,7 @@ apt-mark unhold chromium-browser
 # If this Raspbery Pi OS is 64 bit, then install support for 32 bit as well.
 
 if [ $BIT_TYPE -eq 64 ]; then
-    pkg --add-architecture armhf
+    dpkg --add-architecture armhf
     apt update -y && sudo apt install -y screen:armhf
 fi
 
