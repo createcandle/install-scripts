@@ -2403,6 +2403,15 @@ apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk
 #fi
 
 
+if [ -f /home/pi/create_latest_candle_dev.sh ]; then
+    echo "removing old create_latest_candle_dev.sh script"
+    rm /home/pi/create_latest_candle_dev.sh
+fi
+
+if [ -f /home/pi/recovery.img ]; then
+    echo "removing old recovery.img file"
+    rm /home/pi/recovery.img
+fi
 
 if [ -f /home/pi/prepare_for_disk_image.sh ]; then
     echo "removing old prepare for disk image script"
