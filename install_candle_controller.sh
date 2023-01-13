@@ -970,6 +970,8 @@ then
         #https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest
     
         cd "$CANDLE_BASE"
+    else
+        echo "Warning, Z2M was already downloaded"
     fi
     
 else
