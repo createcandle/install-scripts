@@ -149,7 +149,12 @@ fi
 
 if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
 then
-    echo "no environment indication to go cutting edge"
+    
+    if [ -f /boot/candle_cutting_edge.txt ]; then
+       echo "/boot/candle_cutting_edge.txt exists"
+    else
+       echo "no environment indication to go cutting edge"
+    fi
 else
     echo "going cutting edge"
     touch /boot/candle_cutting_edge.txt
