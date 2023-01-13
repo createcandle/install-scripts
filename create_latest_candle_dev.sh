@@ -337,19 +337,23 @@ cd /home/pi
 # only install the recovery partition if the system has a recovery partition
 if lsblk | grep -q 'mmcblk0p4'; then
 
+    cd /home/pi/.webthings
+    
     echo "Downloading the recovery partition"
-    wget https://www.candlesmarthome.com/tools/recovery.img
+    wget -c https://www.candlesmarthome.com/tools/recovery.img
 
     echo "Mounting the recovery partition"
     losetup --partscan /dev/loop0 recovery.img
 
-    if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then
+    if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then # -n is for "non-zero string"
         echo "Copying recovery partition data"
         echo "Copying recovery partition data" >> /dev/kmsg
         echo "Copying recovery partition data" >> /boot/candle_log.txt
         dd if=/dev/loop0p2 of=/dev/mmcblk0p3 bs=1M
     fi
 fi
+
+cd /home/pi
 
 # Make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
