@@ -3,6 +3,8 @@ set +e
 
 # This script is part of the Candle disk image creation script, although it can be run stand-alone to only install the controller itself.
 
+BIT_TYPE=$(getconf LONG_BIT)
+
 echo ""
 
 # This script should be run as user pi (not root)
@@ -37,6 +39,7 @@ fi
 
 echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
+echo "BITS         : $BIT_TYPE"
 echo "USER         : $(whoami)"
 echo "PATH         : $PATH"
 echo "CANDLE_BASE  : $CANDLE_BASE"
@@ -721,23 +724,28 @@ echo
 mkdir -p "$CANDLE_BASE/.webthings/addons"
 chown -R pi:pi "$CANDLE_BASE/.webthings/addons"
 
+ARCHSTRING=linux-arm
+if [ $BIT_TYPE -eq 64 ]; then
+    ARCHSTRING=linux-arm64
+fi
 
 if [ ! -f "$CANDLE_BASE/.webthings/config/db.sqlite3" ] || [ ! -d "$CANDLE_BASE/.webthings/addons/power-settings" ];
 then
     echo "installing power settings addon"
-    cd "$CANDLE_BASE/.webthings/addons"
     
+    cd "$CANDLE_BASE/.webthings/addons"
     
     for addon in power-settings; 
     do
         echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
-        | grep "tarball_url" \
-        | grep -v ".sha256sum" \
-        | cut -d : -f 2,3 \
-        | tr -d \" \
-        | sed 's/,*$//' \
-        | wget -qi - -O addon.tgz
+            | grep "browser_download_url" \
+            | grep -v ".sha256sum" \
+            | grep "$ARCHSTRING-v3.9" \
+            | cut -d : -f 2,3 \
+            | tr -d \" \
+            | sed 's/,*$//' \
+            | wget -qi - -O addon.tgz
         tar -xf addon.tgz
         rm addon.tgz
         
@@ -771,13 +779,25 @@ then
     # Install Zigbee2MQTT
     
     echo "zigbee2mqtt-adapter"
-    curl -s https://api.github.com/repos/kabbi/zigbee2mqtt-adapter/releases/latest \
-    | grep "browser_download_url" \
-    | grep -v ".sha256sum" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | sed 's/,*$//' \
-    | wget -qi - -O addon.tgz
+    if [ $BIT_TYPE -eq 64 ]; then
+        curl -s https://api.github.com/repos/kabbi/zigbee2mqtt-adapter/releases/latest \
+        | grep "browser_download_url" \
+        | grep "linux-arm64" \
+        | grep -v ".sha256sum" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O addon.tgz
+    else
+        curl -s https://api.github.com/repos/kabbi/zigbee2mqtt-adapter/releases/latest \
+        | grep "browser_download_url" \
+        | grep -v "linux-arm64" \
+        | grep -v ".sha256sum" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O addon.tgz
+    fi
     tar -xf addon.tgz
     rm addon.tgz
     #for directory in kabbi-zigbee2mqtt-adapter*; do
@@ -801,12 +821,13 @@ then
     do
         echo "$addon"
         curl -s "https://api.github.com/repos/flatsiedatsie/$addon/releases/latest" \
-        | grep "browser_download_url" \
-        | grep -v ".sha256sum" \
-        | cut -d : -f 2,3 \
-        | tr -d \" \
-        | sed 's/,*$//' \
-        | wget -qi - -O addon.tgz
+            | grep "browser_download_url" \
+            | grep "$ARCHSTRING-v3.9" \
+            | grep -v ".sha256sum" \
+            | cut -d : -f 2,3 \
+            | tr -d \" \
+            | sed 's/,*$//' \
+            | wget -qi - -O addon.tgz
         tar -xf addon.tgz
         rm addon.tgz
         
@@ -827,15 +848,17 @@ then
 
 
     # Install followers
+    # separate because tar file name and addon name are not the same (followers / followers-addon)
     
     echo "followers-addon"
     curl -s "https://api.github.com/repos/flatsiedatsie/followers-addon/releases/latest" \
-    | grep "browser_download_url" \
-    | grep -v ".sha256sum" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | sed 's/,*$//' \
-    | wget -qi - -O addon.tgz
+        | grep "browser_download_url" \
+        | grep "$ARCHSTRING-v3.9" \
+        | grep -v ".sha256sum" \
+        | cut -d : -f 2,3 \
+        | tr -d \" \
+        | sed 's/,*$//' \
+        | wget -qi - -O addon.tgz
     tar -xf addon.tgz
     rm addon.tgz
     
@@ -845,20 +868,18 @@ then
     mkdir -p "$CANDLE_BASE/.webthings/data/followers"
 
 
-
-
     for addon in candleappstore; 
     do
         
         echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
-        | grep "browser_download_url" \
-        | grep "linux-arm-v3.9" \
-        | grep -v ".sha256sum" \
-        | cut -d : -f 2,3 \
-        | tr -d \" \
-        | sed 's/,*$//' \
-        | wget -qi - -O addon.tgz
+            | grep "browser_download_url" \
+            | grep "$ARCHSTRING-v3.9" \
+            | grep -v ".sha256sum" \
+            | cut -d : -f 2,3 \
+            | tr -d \" \
+            | sed 's/,*$//' \
+            | wget -qi - -O addon.tgz
         tar -xf addon.tgz
         rm addon.tgz
         
@@ -880,12 +901,13 @@ then
     do
         echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
-        | grep "browser_download_url" \
-        | grep -v ".sha256sum" \
-        | cut -d : -f 2,3 \
-        | tr -d \" \
-        | sed 's/,*$//' \
-        | wget -qi - -O addon.tgz
+            | grep "browser_download_url" \
+            | grep "$ARCHSTRING-v3.9" \
+            | grep -v ".sha256sum" \
+            | cut -d : -f 2,3 \
+            | tr -d \" \
+            | sed 's/,*$//' \
+            | wget -qi - -O addon.tgz
         tar -xf addon.tgz
         rm addon.tgz
         
@@ -903,7 +925,6 @@ then
     
     rm ./*.tgz
 
-    
 fi
 
 
