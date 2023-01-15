@@ -2711,30 +2711,6 @@ then
     
     cd /home/pi
 
-
-    # Create initial tar backup of controller
-    if [ ! -f /home/pi/controller_backup.tar ];
-    then
-        if [ -f /home/pi/webthings/gateway/build/app.js ] \
-        && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
-        && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-        && [ -d /home/pi/webthings/gateway/node_modules ] \
-        && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
-        then
-            echo "Creating initial backup of webthings folder"
-            echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
-            echo "Candle: creating initial backup of webthings folder" >> /boot/candle_log.txt
-            tar -czf ./controller_backup.tar ./webthings
-        
-        else
-            echo
-            echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
-            echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
-            echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /boot/candle_log.txt
-            echo
-        fi
-    fi
-
     if [ -f /home/pi/controller_backup.tar ]; then
         chown pi:pi /home/pi/controller_backup.tar
     fi
