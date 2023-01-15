@@ -308,7 +308,6 @@ else
 fi
 
 
-
 echo
 
 # Clean up any files that may be left over to make sure there is enough space
@@ -334,6 +333,9 @@ if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
     echo "Warning, removed /home/pi/latest_stable_controller.tar.txt"
 fi
 
+# pre-made mountpoints for mounting user or recovery partition
+mkdir -p /mnt/userpart
+mkdir -p /mnt/recoverypart
 
 
 sleep 3
@@ -345,16 +347,25 @@ if lsblk | grep -q 'mmcblk0p4'; then
     cd /home/pi/.webthings
     
     echo "Downloading the recovery partition"
-    wget -c https://www.candlesmarthome.com/tools/recovery.img
+    wget -c https://www.candlesmarthome.com/tools/recovery.img.tar.gz
 
-    echo "Mounting the recovery partition"
-    losetup --partscan /dev/loop0 recovery.img
+    echo "untarring the recovery partition"
+    tar xf recovery.img.tar.gz
+    
+    if [ -f recovery.img ]; then
+        echo "Mounting the recovery partition"
+        losetup --partscan /dev/loop0 recovery.img
 
-    if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then # -n is for "non-zero string"
-        echo "Copying recovery partition data"
-        echo "Copying recovery partition data" >> /dev/kmsg
-        echo "Copying recovery partition data" >> /boot/candle_log.txt
-        dd if=/dev/loop0p2 of=/dev/mmcblk0p3 bs=1M
+        if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then # -n is for "non-zero string"
+            echo "Copying recovery partition data"
+            echo "Copying recovery partition data" >> /dev/kmsg
+            echo "Copying recovery partition data" >> /boot/candle_log.txt
+            dd if=/dev/loop0p2 of=/dev/mmcblk0p3 bs=1M
+        fi
+    else
+        echo "ERROR, failed to download or extract the recovery disk image"
+        echo "ERROR, failed to download or extract the recovery disk image" >> /dev/kmsg
+        echo "ERROR, failed to download or extract the recovery disk image" >> /boot/candle_log.txt
     fi
 fi
 
