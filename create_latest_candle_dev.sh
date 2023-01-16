@@ -336,6 +336,7 @@ fi
 # pre-made mountpoints for mounting user or recovery partition
 mkdir -p /mnt/userpart
 mkdir -p /mnt/recoverypart
+mkdir -p /mnt/ramdrive
 
 
 sleep 3
