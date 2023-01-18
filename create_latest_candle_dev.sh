@@ -2362,8 +2362,21 @@ fi
 
 
 
-
-
+# Download some more splash screens
+if [ ! -f "/boot/splash_updating-0.png" ]; then
+    echo "Downloading progress bar images"
+    wget https://www.candlesmarthome.com/tools/splash_updating-0.png -O /boot/splash_updating-0.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-1.png -O /boot/splash_updating-1.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-2.png -O /boot/splash_updating-2.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-3.png -O /boot/splash_updating-3.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-4.png -O /boot/splash_updating-4.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-0.png -O /boot/splash_updating180-0.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-1.png -O /boot/splash_updating180-1.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-2.png -O /boot/splash_updating180-2.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-3.png -O /boot/splash_updating180-3.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-4.png -O /boot/splash_updating180-4.png
+    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+fi
 
 
 
