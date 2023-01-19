@@ -353,12 +353,15 @@ if lsblk | grep -q 'mmcblk0p4'; then
     fi
     
     echo "Downloading the recovery partition"
+    echo "Downloading the recovery partition" >> /dev/kmsg
+    echo "Downloading the recovery partition" >> /boot/candle_log.txt
+    
     wget -c https://www.candlesmarthome.com/tools/recovery.fs.tar.gz -O recovery.fs.tar.gz
 
     echo "untarring the recovery partition"
     tar xf recovery.fs.tar.gz
     
-    if [ -f recovery.fs ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then # -n is for "non-zero string"
+    if [ -f recovery.fs ]; then # -n is for "non-zero string"
         #echo "Mounting the recovery partition"
         #losetup --partscan /dev/loop0 recovery.img
         
@@ -366,10 +369,8 @@ if lsblk | grep -q 'mmcblk0p4'; then
         echo "Copying recovery partition data" >> /dev/kmsg
         echo "Copying recovery partition data" >> /boot/candle_log.txt
         dd if=recovery.fs of=/dev/mmcblk0p3 bs=1M
-    
-
+        
         #if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then 
-            
         #fi
     else
         echo "ERROR, failed to download or extract the recovery disk image"
