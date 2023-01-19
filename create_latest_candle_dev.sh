@@ -347,27 +347,38 @@ if lsblk | grep -q 'mmcblk0p4'; then
 
     cd /home/pi/.webthings
     
+    if [ -f recovery.fs ]; then
+        echo "Warning, recovery.fs already existed. Removing it first."
+        rm recovery.fs
+    fi
+    
     echo "Downloading the recovery partition"
-    wget -c https://www.candlesmarthome.com/tools/recovery.img.tar.gz
+    wget -c https://www.candlesmarthome.com/tools/recovery.fs.tar.gz -O recovery.fs.tar.gz
 
     echo "untarring the recovery partition"
-    tar xf recovery.img.tar.gz
+    tar xf recovery.fs.tar.gz
     
-    if [ -f recovery.img ]; then
-        echo "Mounting the recovery partition"
-        losetup --partscan /dev/loop0 recovery.img
+    if [ -f recovery.fs ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then # -n is for "non-zero string"
+        #echo "Mounting the recovery partition"
+        #losetup --partscan /dev/loop0 recovery.img
+        
+        echo "Copying recovery partition data"
+        echo "Copying recovery partition data" >> /dev/kmsg
+        echo "Copying recovery partition data" >> /boot/candle_log.txt
+        dd if=recovery.fs of=/dev/mmcblk0p3 bs=1M
+    
 
-        if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then # -n is for "non-zero string"
-            echo "Copying recovery partition data"
-            echo "Copying recovery partition data" >> /dev/kmsg
-            echo "Copying recovery partition data" >> /boot/candle_log.txt
-            dd if=/dev/loop0p2 of=/dev/mmcblk0p3 bs=1M
-        fi
+        #if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then 
+            
+        #fi
     else
         echo "ERROR, failed to download or extract the recovery disk image"
         echo "ERROR, failed to download or extract the recovery disk image" >> /dev/kmsg
         echo "ERROR, failed to download or extract the recovery disk image" >> /boot/candle_log.txt
     fi
+    
+    recovery.fs.tar.gz
+    rm recovery.fs
 fi
 
 cd /home/pi
