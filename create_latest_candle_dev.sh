@@ -476,7 +476,7 @@ apt-mark unhold chromium-browser
 if [ $BIT_TYPE -eq 64 ]; then
     echo "Adding support for 32 bit architecture"
     dpkg --add-architecture armhf
-    apt update -y && sudo apt install -y screen:armhf
+    apt update -y && apt install -y screen:armhf
 fi
 
 echo
@@ -2169,13 +2169,16 @@ systemctl disable webthings-gateway.check-for-update.timer
 systemctl disable webthings-gateway.update-rollback.service
 
 # disable apt services
-sudo systemctl disable apt-daily.service
-sudo systemctl disable apt-daily.timer
-sudo systemctl disable apt-daily-upgrade.timer
-sudo systemctl disable apt-daily-upgrade.service
+systemctl disable apt-daily.service
+systemctl disable apt-daily.timer
+systemctl disable apt-daily-upgrade.timer
+systemctl disable apt-daily-upgrade.service
 
 # disable man-db timer
 systemctl disable man-db.timer
+
+# disable modemManager
+systemctl disable ModemManager.service
 
 # enable half-hourly save of time
 systemctl enable fake-hwclock-save.service
