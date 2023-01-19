@@ -2012,7 +2012,7 @@ chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
 chmod +x /etc/xdg/openbox/autostart
 chmod +x /home/pi/candle/late.sh
-
+chmod +x /home/pi/candle/every_minute.sh
 chmod +x /home/pi/candle/debug.sh
 chmod +x /home/pi/candle/files_check.sh
 chmod +x /home/pi/candle/install_samba.sh
@@ -2133,7 +2133,7 @@ systemctl enable candle_first_run.service
 #systemctl enable candle_start_swap.service
 systemctl enable candle_early.service
 systemctl enable candle_late.service 
-systemctl enable candle_late.service
+systemctl enable candle_every_minute.timer
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
 systemctl enable candle_reboot.service
