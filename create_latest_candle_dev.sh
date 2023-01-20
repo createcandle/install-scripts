@@ -356,7 +356,7 @@ if lsblk | grep -q 'mmcblk0p4'; then
     echo "Downloading the recovery partition" >> /dev/kmsg
     echo "Downloading the recovery partition" >> /boot/candle_log.txt
     
-    wget -c https://www.candlesmarthome.com/tools/recovery.fs.tar.gz -O recovery.fs.tar.gz
+    wget -c https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz
 
     echo "untarring the recovery partition"
     tar xf recovery.fs.tar.gz
