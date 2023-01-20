@@ -2180,6 +2180,10 @@ systemctl disable man-db.timer
 # disable modemManager
 systemctl disable ModemManager.service
 
+#disable wpa_supplicant service because dhpcpcd is managing it. Otherwise it runs twice.
+systemctl disable wpa_supplicant.service
+
+
 # enable half-hourly save of time
 systemctl enable fake-hwclock-save.service
 
