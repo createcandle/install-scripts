@@ -2777,9 +2777,10 @@ fi
 
 # Make sure permissions of newly pre-installed addons are ok
 
-chown -R pi:pi /home/pi/.webthings/addons
-
-chmod -R 755 /home/pi/.webthingsaddons
+cd /home/pi/.webthings
+chown -R pi:pi addons
+chmod -R 755 addons
+cd /home/pi/
 
 #
 #  ADDITIONAL CLEANUP
