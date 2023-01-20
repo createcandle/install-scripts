@@ -334,10 +334,10 @@ if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
 fi
 
 # pre-made mountpoints for mounting user or recovery partition
-mkdir -p /mnt/userpart
-mkdir -p /mnt/recoverypart
-mkdir -p /mnt/ramdrive
-
+#mkdir -p /mnt/userpart
+#mkdir -p /mnt/recoverypart
+#mkdir -p /mnt/ramdrive
+# not compatible with /ro
 
 sleep 3
 cd /home/pi
