@@ -68,6 +68,13 @@ fi
 
 scriptname=$(basename "$0")
 
+# Not used in this script yet, currently /home/pi is still hardcoded
+if [ -d /home/pi ]; then
+    CANDLE_BASE="/home/pi"
+else
+    CANDLE_BASE="$(pwd)"
+fi
+
 echo "" >> /boot/candle_log.txt
 echo "Candle: starting update - $(date) - $scriptname" >> /dev/kmsg
 echo "starting update - $(date) - $scriptname" >> /boot/candle_log.txt
@@ -142,7 +149,12 @@ fi
 
 if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
 then
-    echo "no environment indication to go cutting edge"
+    
+    if [ -f /boot/candle_cutting_edge.txt ]; then
+       echo "/boot/candle_cutting_edge.txt exists"
+    else
+       echo "no environment indication to go cutting edge"
+    fi
 else
     echo "going cutting edge"
     touch /boot/candle_cutting_edge.txt
@@ -150,14 +162,17 @@ fi
 
 
 # OUTPUT SOME INFORMATION
+BIT_TYPE=$(getconf LONG_BIT)
 
 cd /home/pi
 
 echo
 echo "CREATING CANDLE"
 echo
+
 echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
+echo "BITS         : $BIT_TYPE"
 echo "PATH         : $PATH"
 echo "USER         : $(whoami)"
 
@@ -260,7 +275,7 @@ then
 
             printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
             resize2fs /dev/mmcblk0p2
-            #printf "y" | mkfs.ext4 /dev/mmcblk0p3
+            printf "y" | mkfs.ext4 /dev/mmcblk0p3
             printf "y" | mkfs.ext4 /dev/mmcblk0p4
             mkdir -p /home/pi/.webthings
             chown pi:pi /home/pi/.webthings
@@ -293,7 +308,6 @@ else
 fi
 
 
-
 echo
 
 # Clean up any files that may be left over to make sure there is enough space
@@ -319,12 +333,56 @@ if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
     echo "Warning, removed /home/pi/latest_stable_controller.tar.txt"
 fi
 
-
+# pre-made mountpoints for mounting user or recovery partition
+#mkdir -p /mnt/userpart
+#mkdir -p /mnt/recoverypart
+#mkdir -p /mnt/ramdrive
+# not compatible with /ro
 
 sleep 3
 cd /home/pi
 
+# only install the recovery partition if the system has a recovery partition
+if lsblk | grep -q 'mmcblk0p4'; then
 
+    cd /home/pi/.webthings
+    
+    if [ -f recovery.fs ]; then
+        echo "Warning, recovery.fs already existed. Removing it first."
+        rm recovery.fs
+    fi
+    
+    echo "Downloading the recovery partition"
+    echo "Downloading the recovery partition" >> /dev/kmsg
+    echo "Downloading the recovery partition" >> /boot/candle_log.txt
+    
+    wget -c https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz
+
+    echo "untarring the recovery partition"
+    tar xf recovery.fs.tar.gz
+    
+    if [ -f recovery.fs ]; then # -n is for "non-zero string"
+        #echo "Mounting the recovery partition"
+        #losetup --partscan /dev/loop0 recovery.img
+        
+        echo "Copying recovery partition data"
+        echo "Copying recovery partition data" >> /dev/kmsg
+        echo "Copying recovery partition data" >> /boot/candle_log.txt
+        dd if=recovery.fs of=/dev/mmcblk0p3 bs=1M
+        
+        #if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then 
+        #fi
+    else
+        echo "ERROR, failed to download or extract the recovery disk image"
+        echo "ERROR, failed to download or extract the recovery disk image" >> /dev/kmsg
+        echo "ERROR, failed to download or extract the recovery disk image" >> /boot/candle_log.txt
+    fi
+    
+    recovery.fs.tar.gz
+    rm recovery.fs
+fi
+
+cd /home/pi
 
 # Make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
@@ -384,7 +442,8 @@ fi
 
 echo
 echo "updating /usr/bin/candle_hostname_fix.sh"
-echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nsystemctl restart avahi-daemon' > /usr/bin/candle_hostname_fix.sh 
+echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --static\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --transient\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --pretty' > /usr/bin/candle_hostname_fix.sh
+chmod +x /usr/bin/candle_hostname_fix.sh
 echo
 
 # BULLSEYE SOURCES
@@ -409,6 +468,16 @@ sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 # Unhold browser
 echo
 apt-mark unhold chromium-browser
+
+
+# 64 BIT
+# If this Raspbery Pi OS is 64 bit, then install support for 32 bit as well.
+
+if [ $BIT_TYPE -eq 64 ]; then
+    echo "Adding support for 32 bit architecture"
+    dpkg --add-architecture armhf
+    apt update -y && apt install -y screen:armhf
+fi
 
 echo
 echo "doing apt-get update"
@@ -1135,9 +1204,13 @@ then
         fi
       
     else
-        echo "doing system update, but not allowing kernel updates for now"
-        echo "doing system update, but not allowing kernel updates for now" >> /dev/kmsg
-        echo "doing system update, but not allowing kernel updates for now" >> /boot/candle_log.txt
+    
+        # TODO: it said "not allowing kernel updates", but then sets kernel to "unhold".. so...
+        # Should kernel updates be held? Everything seems to update ok anyway.
+    
+        echo "doing system update, allowing kernel updates for now"
+        echo "doing system update, allowing kernel updates for now" >> /dev/kmsg
+        echo "doing system update, allowing kernel updates for now" >> /boot/candle_log.txt
         apt-mark unhold raspberrypi-kernel
         apt-mark unhold raspberrypi-kernel-headers 
         apt-mark unhold raspberrypi-bootloader
@@ -1301,7 +1374,7 @@ then
     echo "Candle: installing support packages" >> /dev/kmsg
     echo "Candle: installing support packages" >> /boot/candle_log.txt
     echo
-    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables liblivemedia-dev libcamera-apps; do
+    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi7 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
@@ -1410,7 +1483,7 @@ then
     chromium-browser git \
     autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python-six \
-    arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi6 nbtscan ufw iptables \
+    arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi7 nbtscan ufw iptables \
     liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 \
     libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
@@ -1840,6 +1913,11 @@ find /home/pi/.webthings/tmp \
      -exec chmod go-rwx {} +
 
 
+# Prepare a location for Matter settings
+mkdir /home/pi/.webthings/hasdata
+ln -s /home/pi/.webthings/hasdata /data
+chown pi:pi /data
+chown pi:pi /home/pi/.webthings/hasdata
 
 
 # COPY FILES
@@ -1946,7 +2024,7 @@ chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
 chmod +x /etc/xdg/openbox/autostart
 chmod +x /home/pi/candle/late.sh
-
+chmod +x /home/pi/candle/every_minute.sh
 chmod +x /home/pi/candle/debug.sh
 chmod +x /home/pi/candle/files_check.sh
 chmod +x /home/pi/candle/install_samba.sh
@@ -1978,6 +2056,15 @@ if [ ! -L /home/pi/.asoundrc ]; then
     fi
 fi
 
+# make libffi.so.6 "available" for python (voco) by linking to the newer version
+if [ -d /usr/lib/aarch64-linux-gnu ]; then
+  if [ ! -f /usr/lib/aarch64-linux-gnu/libffi.so.6 ] && [ -f /usr/lib/aarch64-linux-gnu/libffi.so.7 ]; then
+    if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.6 ]; then
+      echo "creating symlink for  libffi.so.6 -> libffi.so.7"
+      ln -s /usr/lib/aarch64-linux-gnu/libffi.so.7 /usr/lib/aarch64-linux-gnu/libffi.so.6
+    fi
+  fi
+fi
 
 # Create locations on the user partition for time
 if [ ! -L /etc/localtime ]; then
@@ -2058,7 +2145,7 @@ systemctl enable candle_first_run.service
 #systemctl enable candle_start_swap.service
 systemctl enable candle_early.service
 systemctl enable candle_late.service 
-systemctl enable candle_late.service
+systemctl enable candle_every_minute.timer
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
 systemctl enable candle_reboot.service
@@ -2082,13 +2169,20 @@ systemctl disable webthings-gateway.check-for-update.timer
 systemctl disable webthings-gateway.update-rollback.service
 
 # disable apt services
-sudo systemctl disable apt-daily.service
-sudo systemctl disable apt-daily.timer
-sudo systemctl disable apt-daily-upgrade.timer
-sudo systemctl disable apt-daily-upgrade.service
+systemctl disable apt-daily.service
+systemctl disable apt-daily.timer
+systemctl disable apt-daily-upgrade.timer
+systemctl disable apt-daily-upgrade.service
 
 # disable man-db timer
 systemctl disable man-db.timer
+
+# disable modemManager
+systemctl disable ModemManager.service
+
+#disable wpa_supplicant service because dhpcpcd is managing it. Otherwise it runs twice.
+systemctl disable wpa_supplicant.service
+
 
 # enable half-hourly save of time
 systemctl enable fake-hwclock-save.service
@@ -2287,8 +2381,23 @@ fi
 
 
 
-
-
+# Download some more splash screens
+if [ ! -f "/boot/splash_updating-0.png" ]; then
+    echo "Downloading progress bar images"
+    wget https://www.candlesmarthome.com/tools/splash_updating-0.png -O /boot/splash_updating-0.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-1.png -O /boot/splash_updating-1.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-2.png -O /boot/splash_updating-2.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-3.png -O /boot/splash_updating-3.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-4.png -O /boot/splash_updating-4.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-5.png -O /boot/splash_updating-5.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-0.png -O /boot/splash_updating180-0.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-1.png -O /boot/splash_updating180-1.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-2.png -O /boot/splash_updating180-2.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-3.png -O /boot/splash_updating180-3.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-4.png -O /boot/splash_updating180-4.png
+    wget https://www.candlesmarthome.com/tools/splash_updating180-5.png -O /boot/splash_updating180-5.png
+    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+fi
 
 
 
@@ -2341,6 +2450,15 @@ apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk
 #fi
 
 
+if [ -f /home/pi/create_latest_candle_dev.sh ]; then
+    echo "removing old create_latest_candle_dev.sh script"
+    rm /home/pi/create_latest_candle_dev.sh
+fi
+
+if [ -f /home/pi/recovery.img ]; then
+    echo "removing old recovery.img file"
+    rm /home/pi/recovery.img
+fi
 
 if [ -f /home/pi/prepare_for_disk_image.sh ]; then
     echo "removing old prepare for disk image script"
@@ -2595,9 +2713,10 @@ then
         # Check if the installation of the controller succeeded
     
         if [ -d /ro ]; then
-            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ]; then
+            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] \
+            || [ ! -f /ro/home/pi/node12 ] ; then
                 echo 
-                echo "ERROR, failed to (fully) install candle-controller (/ro)"
+                echo "ERROR, detected failure to (fully) install candle-controller (/ro)"
                 echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
                 echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /home/pi/.webthings/candle.log
                 echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /boot/candle_log.txt
@@ -2612,10 +2731,11 @@ then
                 exit 1
             fi
             
-        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ]; then
+        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
+        || [ ! -f /home/pi/node12 ] ; then
     
             echo 
-            echo "ERROR, failed to (fully) install candle-controller"
+            echo "ERROR, detected failure to (fully) install candle-controller"
             echo "Candle: ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
             echo "Candle: ERROR, failed to (fully) install candle-controller" >> /home/pi/.webthings/candle.log
             echo "Candle: ERROR, failed to (fully) install candle-controller" >> /boot/candle_log.txt
@@ -2637,30 +2757,6 @@ then
     
     cd /home/pi
 
-
-    # Create initial tar backup of controller
-    if [ ! -f /home/pi/controller_backup.tar ];
-    then
-        if [ -f /home/pi/webthings/gateway/build/app.js ] \
-        && [ -f /home/pi/webthings/gateway/build/static/index.html ] \
-        && [ -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-        && [ -d /home/pi/webthings/gateway/node_modules ] \
-        && [ -d /home/pi/webthings/gateway/build/static/bundle ]; 
-        then
-            echo "Creating initial backup of webthings folder"
-            echo "Candle: creating initial backup of webthings folder" >> /dev/kmsg
-            echo "Candle: creating initial backup of webthings folder" >> /boot/candle_log.txt
-            tar -czf ./controller_backup.tar ./webthings
-        
-        else
-            echo
-            echo "ERROR, NOT MAKING BACKUP, MISSING WEBTHINGS DIRECTORY OR PARTS MISSING"
-            echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /dev/kmsg
-            echo "Candle: WARNING, the Candle controller installation seems to be incomplete. Will not create (new) backup" >> /boot/candle_log.txt
-            echo
-        fi
-    fi
-
     if [ -f /home/pi/controller_backup.tar ]; then
         chown pi:pi /home/pi/controller_backup.tar
     fi
@@ -2679,6 +2775,12 @@ else
 fi
 
 
+# Make sure permissions of newly pre-installed addons are ok
+
+cd /home/pi/.webthings
+chown -R pi:pi addons
+chmod -R 755 addons
+cd /home/pi/
 
 #
 #  ADDITIONAL CLEANUP
