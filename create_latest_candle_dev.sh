@@ -273,8 +273,8 @@ then
             echo "Candle: creating partitions" >> /boot/candle_log.txt
             echo
 
-            printf "resizepart 2 7000\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
-            resize2fs /dev/mmcblk0p2
+            printf "resizepart 2 7000MB\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
+            resize2fs /dev/mmcblk0p2 6000M
             printf "y" | mkfs.ext4 /dev/mmcblk0p3
             printf "y" | mkfs.ext4 /dev/mmcblk0p4
             mkdir -p /home/pi/.webthings
