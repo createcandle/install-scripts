@@ -507,7 +507,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     
     echo "Do not worry about the errors you will see with optipng and jpegtran"
     
-    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
+    #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
+    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
 
 
