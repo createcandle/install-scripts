@@ -262,7 +262,7 @@ if [ -f ./install_nvm.sh ]; then
 fi
 
 # install older version of NPM to avoid issue: reify:date-fns: http fetch GET 200 https://registry.npmjs.org/date-fns/-/date-fns-2.29.3.tgz 105523ms (cache miss)
-npm install -g npm@6.14.17 # Node 14 version
+# npm install -g npm@6.14.17 # Node 14 version # it seems waiting very long also solves it...
 
 
 echo
