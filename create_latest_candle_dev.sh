@@ -9,7 +9,7 @@ set +e # continue on errors
 
 # By default it acts as an upgrade script (not doing a factory reset at the end, rebooting the system when done)
 
-# If you want to use this script to directly create disk images, then you can use:
+# If you want to use this script to directly create disk imagesrecovery, then you can use:
 # export CREATE_DISK_IMAGE=yes
 
 # Set the script to download the very latest available version. Risky. Enabling this creates the /boot/candle_cutting_edge.txt file
@@ -353,47 +353,6 @@ fi
 sleep 3
 cd /home/pi
 
-# only install the recovery partition if the system has a recovery partition
-if lsblk | grep -q 'mmcblk0p4'; then
-
-    cd /home/pi/.webthings
-    
-    if [ -f recovery.fs ]; then
-        echo "Warning, recovery.fs already existed. Removing it first."
-        rm recovery.fs
-    fi
-    
-    echo "Downloading the recovery partition"
-    echo "Downloading the recovery partition" >> /dev/kmsg
-    echo "Downloading the recovery partition" >> /boot/candle_log.txt
-    
-    wget -c https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz
-
-    echo "untarring the recovery partition"
-    tar xf recovery.fs.tar.gz
-    
-    if [ -f recovery.fs ]; then # -n is for "non-zero string"
-        #echo "Mounting the recovery partition"
-        #losetup --partscan /dev/loop0 recovery.img
-        
-        echo "Copying recovery partition data"
-        echo "Copying recovery partition data" >> /dev/kmsg
-        echo "Copying recovery partition data" >> /boot/candle_log.txt
-        dd if=recovery.fs of=/dev/mmcblk0p3 bs=1M
-        
-        #if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then 
-        #fi
-    else
-        echo "ERROR, failed to download or extract the recovery disk image"
-        echo "ERROR, failed to download or extract the recovery disk image" >> /dev/kmsg
-        echo "ERROR, failed to download or extract the recovery disk image" >> /boot/candle_log.txt
-    fi
-    
-    recovery.fs.tar.gz
-    rm recovery.fs
-fi
-
-cd /home/pi
 
 # Save the bits of the initial kernel the boot partition to a file
 if [ "$BIT_TYPE" == 64 ]; then
@@ -1855,10 +1814,49 @@ rm -rf bluez-alsa
 
 
 
+echo ""
+echo "INSTALLING RECOVERY PARTITION"
+echo ""
 
+# only install the recovery partition if the system has a recovery partition
+if lsblk | grep -q 'mmcblk0p4'; then
 
+    cd /home/pi/.webthings
+    
+    if [ -f recovery.fs ]; then
+        echo "Warning, recovery.fs already existed. Removing it first."
+        rm recovery.fs
+    fi
+    
+    echo "Downloading the recovery partition"
+    echo "Downloading the recovery partition" >> /dev/kmsg
+    echo "Downloading the recovery partition" >> /boot/candle_log.txt
+    
+    wget -c https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz
 
-
+    echo "untarring the recovery partition"
+    tar xf recovery.fs.tar.gz
+    
+    if [ -f recovery.fs ]; then # -n is for "non-zero string"
+        #echo "Mounting the recovery partition"
+        #losetup --partscan /dev/loop0 recovery.img
+        
+        echo "Copying recovery partition data"
+        echo "Copying recovery partition data" >> /dev/kmsg
+        echo "Copying recovery partition data" >> /boot/candle_log.txt
+        dd if=recovery.fs of=/dev/mmcblk0p3 bs=1M
+        
+        #if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then 
+        #fi
+    else
+        echo "ERROR, failed to download or extract the recovery disk image"
+        echo "ERROR, failed to download or extract the recovery disk image" >> /dev/kmsg
+        echo "ERROR, failed to download or extract the recovery disk image" >> /boot/candle_log.txt
+    fi
+    
+    recovery.fs.tar.gz
+    rm recovery.fs
+fi
 
 
 
