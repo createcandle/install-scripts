@@ -279,7 +279,7 @@ then
                 resize2fs /dev/mmcblk0p2
                 
             else
-                printf "resizepart 2 4500MB\nmkpart\np\next4\n4501MB\n7500MB\nmkpart\np\next4\n7502MB\n9500MB\nquit" | parted
+                printf "resizepart 2 5000MB\nmkpart\np\next4\n5001MB\n7500MB\nmkpart\np\next4\n7502MB\n9500MB\nquit" | parted
                 resize2fs /dev/mmcblk0p2
             fi
             
