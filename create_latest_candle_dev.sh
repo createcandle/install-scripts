@@ -287,6 +287,10 @@ then
             mkdir -p /home/pi/.webthings
             chown pi:pi /home/pi/.webthings
             touch /boot/candle_has_4th_partition.txt
+            
+            e2label /dev/mmcblk0p2 system
+            e2label /dev/mmcblk0p3 recovery
+            e2label /dev/mmcblk0p4 user
         else
             echo
             echo "Partition 2 was missing. Inside chroot?"
