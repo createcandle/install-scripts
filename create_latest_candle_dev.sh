@@ -395,6 +395,9 @@ fi
 
 cd /home/pi
 
+# Save the bits of the initial kernel the boot partition to a file
+echo "$BIT_TYPE" > /boot/candle_bits.txt
+
 # Make sure there is a current time
 if [ -f /boot/candle_hardware_clock.txt ]; then
     rm /boot/candle_hardware_clock.txt
