@@ -506,7 +506,7 @@ echo
 if [ -f /boot/candle_cutting_edge.txt ]; then
     echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
     echo "Candle: Downloading cutting edge read-only script" >> /boot/candle_log.txt
-    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh
+    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh --retry-connrefused 
     
 else
     echo "Candle: Downloading stable read-only script" >> /dev/kmsg
@@ -516,7 +516,7 @@ else
     | cut -d : -f 2,3 \
     | tr -d \" \
     | sed 's/,*$//' \
-    | wget -qi - -O ro-overlay.tar
+    | wget -qi - -O ro-overlay.tar --retry-connrefused 
 
     if [ -f ro-overlay.tar ]; then
         
@@ -824,14 +824,14 @@ fi
 
 # Download splash images
 if [ -f /boot/cmdline.txt ]; then
-    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png --retry-connrefused 
     echo
     echo "Candle: downloading splash images and videos" >> /dev/kmsg
     echo "Candle: downloading splash images and videos" >> /boot/candle_log.txt
     echo
     
-    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png
+    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png --retry-connrefused 
     
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
@@ -862,12 +862,15 @@ if [ -f /boot/cmdline.txt ]; then
     fi
     
     # Download the rest of the images
-    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png
-    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png
-    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png
-    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png
-    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4
-    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4
+    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4 --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4 --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_preparing.png -O /boot/splash_preparing.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_preparing.png -O /boot/splash_preparing180.png --retry-connrefused 
+    
 fi
 
 
@@ -919,7 +922,7 @@ else
     | cut -d : -f 2,3 \
     | tr -d \" \
     | sed 's/,*$//' \
-    | wget -qi - -O configuration-files.tar
+    | wget -qi - -O configuration-files.tar --retry-connrefused 
 
     tar -xf configuration-files.tar
     rm configuration-files.tar
@@ -986,7 +989,7 @@ then
         echo "Candle: Starting download of cutting edge controller install script" >> /dev/kmsg
         echo "Candle: Starting download of cutting edge controller install script" >> /boot/candle_log.txt
         echo
-        wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh
+        wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh --retry-connrefused 
         
     else
         echo "Candle: Starting download of stable controller install script"
@@ -998,7 +1001,7 @@ then
         | cut -d : -f 2,3 \
         | tr -d \" \
         | sed 's/,*$//' \
-        | wget -qi - -O install-scripts.tar
+        | wget -qi - -O install-scripts.tar  --retry-connrefused 
 
         tar -xf install-scripts.tar
         rm install-scripts.tar
@@ -1024,8 +1027,8 @@ then
         echo "Candle: Starting download of stable controller tar"
         echo "Candle: Starting download of stable controller tar. Takes a while." >> /dev/kmsg
         echo "Candle: Starting download of stable controller tar" >> /boot/candle_log.txt
-        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O /home/pi/latest_stable_controller.tar
-        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O /home/pi/latest_stable_controller.tar.txt
+        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O /home/pi/latest_stable_controller.tar --retry-connrefused 
+        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O /home/pi/latest_stable_controller.tar.txt --retry-connrefused 
         
         if [ -f /home/pi/latest_stable_controller.tar ] && [ -f /home/pi/latest_stable_controller.tar.txt ]; then
             
@@ -1833,7 +1836,7 @@ if lsblk | grep -q 'mmcblk0p4'; then
     echo "Downloading the recovery partition" >> /dev/kmsg
     echo "Downloading the recovery partition" >> /boot/candle_log.txt
     
-    wget -c https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz
+    wget -c https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz --retry-connrefused 
 
     echo "untarring the recovery partition"
     tar xf recovery.fs.tar.gz
@@ -2319,7 +2322,7 @@ fi
 
 # Disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
 #rm /etc/xdg/openbox/rc.xml
-#wget https://www.candlesmarthome.com/tools/rc.xml /etc/xdg/openbox/rc.xml
+#wget https://www.candlesmarthome.com/tools/rc.xml /etc/xdg/openbox/rc.xml --retry-connrefused 
 
 # Modify the xinitrc file to automatically log in the pi user
 echo "- Creating xinitrc file"
@@ -2402,19 +2405,19 @@ fi
 # Download some more splash screens
 if [ ! -f "/boot/splash_updating-0.png" ]; then
     echo "Downloading progress bar images"
-    wget https://www.candlesmarthome.com/tools/splash_updating-0.png -O /boot/splash_updating-0.png
-    wget https://www.candlesmarthome.com/tools/splash_updating-1.png -O /boot/splash_updating-1.png
-    wget https://www.candlesmarthome.com/tools/splash_updating-2.png -O /boot/splash_updating-2.png
-    wget https://www.candlesmarthome.com/tools/splash_updating-3.png -O /boot/splash_updating-3.png
-    wget https://www.candlesmarthome.com/tools/splash_updating-4.png -O /boot/splash_updating-4.png
-    wget https://www.candlesmarthome.com/tools/splash_updating-5.png -O /boot/splash_updating-5.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180-0.png -O /boot/splash_updating180-0.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180-1.png -O /boot/splash_updating180-1.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180-2.png -O /boot/splash_updating180-2.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180-3.png -O /boot/splash_updating180-3.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180-4.png -O /boot/splash_updating180-4.png
-    wget https://www.candlesmarthome.com/tools/splash_updating180-5.png -O /boot/splash_updating180-5.png
-    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
+    wget https://www.candlesmarthome.com/tools/splash_updating-0.png -O /boot/splash_updating-0.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-1.png -O /boot/splash_updating-1.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-2.png -O /boot/splash_updating-2.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-3.png -O /boot/splash_updating-3.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-4.png -O /boot/splash_updating-4.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-5.png -O /boot/splash_updating-5.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-0.png -O /boot/splash_updating180-0.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-1.png -O /boot/splash_updating180-1.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-2.png -O /boot/splash_updating180-2.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-3.png -O /boot/splash_updating180-3.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-4.png -O /boot/splash_updating180-4.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-5.png -O /boot/splash_updating180-5.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png --retry-connrefused 
 fi
 
 
