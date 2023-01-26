@@ -226,7 +226,7 @@ then
     else
         echo "Appending NVM lines to .profile"
         echo >> "$CANDLE_BASE/.profile"
-        echo 'export NVM_DIR="$CANDLE_BASE/.nvm"' >> "$CANDLE_BASE/.profile"
+        echo 'export NVM_DIR="$HOME/.nvm"' >> "$CANDLE_BASE/.profile"
         echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> "$CANDLE_BASE/.profile"
         echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> "$CANDLE_BASE/.profile"
     fi
@@ -245,8 +245,6 @@ then
     #nvm uninstall 18
     for v in $(nvm_ls 18); do nvm uninstall $v; done
     nvm install 18
-    nvm use 18
-    nvm alias default 18
 else
     echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
     echo "NPM seems to already be installed." | sudo tee -a /boot/candle_log.txt
@@ -264,6 +262,9 @@ if [ -f ./install_nvm.sh ]; then
     echo "removing install_nvm.sh"
     rm ./install_nvm.sh
 fi
+
+nvm use 18
+nvm alias default 18
 
 # install older version of NPM to avoid issue: reify:date-fns: http fetch GET 200 https://registry.npmjs.org/date-fns/-/date-fns-2.29.3.tgz 105523ms (cache miss)
 # npm install -g npm@6.14.17 # Node 14 version # it seems waiting very long also solves it...
@@ -295,6 +296,7 @@ echo "Node version: ${_node_version}" | sudo tee -a /dev/kmsg
 echo "Node version: ${_node_version}" | sudo tee -a /boot/candle_log.txt
 
 echo "${_node_version}" > "$CANDLE_BASE/.webthings/.node_version"
+
 echo "Node version in .node_version file:"
 cat "$CANDLE_BASE/.webthings/.node_version"
 
