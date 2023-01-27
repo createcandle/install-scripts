@@ -2872,7 +2872,7 @@ if [ ! -f /home/pi/candle/creation_date.txt ]; then
 fi
 
 # remember when the update script was last run
-echo "$(date +%s)" > /home/pi/candle/update_date.txt
+#echo "$(date +%s)" > /home/pi/candle/update_date.txt
 
 # Disable old bootup actions service
 systemctl disable candle_bootup_actions.service
