@@ -869,7 +869,7 @@ if [ -f /boot/cmdline.txt ]; then
     wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4 --retry-connrefused 
     wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4 --retry-connrefused 
     wget https://www.candlesmarthome.com/tools/splash_preparing.png -O /boot/splash_preparing.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_preparing.png -O /boot/splash_preparing180.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_preparing180.png -O /boot/splash_preparing180.png --retry-connrefused 
     
 fi
 
