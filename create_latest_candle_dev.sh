@@ -2861,6 +2861,11 @@ fi
 
 
 
+if [ -d /home/pi/webthings/gateway ] && [ -d /home/pi/webthings/gateway2 ]; then
+    rm -rf /home/pi/webthings/gateway2
+fi
+
+
 # cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
 
 if [ -f /boot/candle_first_run_complete.txt ] && [ ! -f /boot/candle_original_version.txt ]; then
@@ -2877,7 +2882,6 @@ fi
 
 # Disable old bootup actions service
 systemctl disable candle_bootup_actions.service
-
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
 if [ -f /boot/bootup_actions.sh ]; then
