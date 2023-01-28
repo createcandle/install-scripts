@@ -2043,6 +2043,7 @@ fi
 # CHMOD THE NEW FILES
 chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
+chmod +x /home/pi/candle/reboot_to_recovery.sh
 chmod +x /etc/xdg/openbox/autostart
 chmod +x /home/pi/candle/late.sh
 chmod +x /home/pi/candle/every_minute.sh
