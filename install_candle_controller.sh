@@ -568,6 +568,9 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     && [ -d "$CANDLE_BASE/webthings/gateway2/node_modules" ] \
     && [ -d "$CANDLE_BASE/webthings/gateway2/build/static/bundle" ];
     then
+    
+      npm prune --omit=dev
+    
       echo "creating .post_upgrade_complete file"
       touch .post_upgrade_complete
       echo "$(date +%s)" > update_date.txt
