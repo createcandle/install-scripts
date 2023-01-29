@@ -1836,30 +1836,42 @@ if lsblk | grep -q 'mmcblk0p4'; then
     echo "Downloading the recovery partition" >> /dev/kmsg
     echo "Downloading the recovery partition" >> /boot/candle_log.txt
     
-    wget -c https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz --retry-connrefused 
+    wget https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz --retry-connrefused 
 
-    echo "untarring the recovery partition"
-    tar xf recovery.fs.tar.gz
-    
-    if [ -f recovery.fs ]; then # -n is for "non-zero string"
-        #echo "Mounting the recovery partition"
-        #losetup --partscan /dev/loop0 recovery.img
-        
-        echo "Copying recovery partition data"
-        echo "Copying recovery partition data" >> /dev/kmsg
-        echo "Copying recovery partition data" >> /boot/candle_log.txt
-        dd if=recovery.fs of=/dev/mmcblk0p3 bs=1M
-        
-        #if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then 
-        #fi
+    if [ -f recovery.fs.tar.gz ]; then
+        echo "untarring the recovery partition"
+        tar xf recovery.fs.tar.gz
+
+        if [ -f recovery.fs ]; then # -n is for "non-zero string"
+            #echo "Mounting the recovery partition"
+            #losetup --partscan /dev/loop0 recovery.img
+
+            echo "Copying recovery partition data"
+            echo "Copying recovery partition data" >> /dev/kmsg
+            echo "Copying recovery partition data" >> /boot/candle_log.txt
+            dd if=recovery.fs of=/dev/mmcblk0p3 bs=1M
+
+            #if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then 
+            #fi
+        else
+            echo "ERROR, failed to download or extract the recovery disk image"
+            echo "ERROR, failed to download or extract the recovery disk image" >> /dev/kmsg
+            echo "ERROR, failed to download or extract the recovery disk image" >> /boot/candle_log.txt
+        fi
+
+        rm recovery.fs.tar.gz
+        rm recovery.fs
     else
-        echo "ERROR, failed to download or extract the recovery disk image"
-        echo "ERROR, failed to download or extract the recovery disk image" >> /dev/kmsg
-        echo "ERROR, failed to download or extract the recovery disk image" >> /boot/candle_log.txt
-    fi
+        echo "ERROR, recovery partition file not downloaded"
     
-    recovery.fs.tar.gz
-    rm recovery.fs
+        # Show error image
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
+            /bin/ply-image /boot/error.png
+            #sleep 7200
+        fi
+        
+        exit 1
+    fi
 fi
 
 
@@ -1929,9 +1941,9 @@ if [ ! -d /home/pi/.webthings/tmp ]; then
 fi
 chmod 1777 /home/pi/.webthings/tmp
 find /home/pi/.webthings/tmp \
-     -mindepth 1 \
-     -name '.*-unix' -exec chmod 1777 {} + -prune -o \
-     -exec chmod go-rwx {} +
+    -mindepth 1 \
+    -name '.*-unix' -exec chmod 1777 {} + -prune -o \
+    -exec chmod go-rwx {} +
 
 
 # Prepare a location for Matter settings
@@ -2754,7 +2766,7 @@ then
             fi
             
         elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-        || [ ! -f /home/pi/node12 ] ; then
+        || [ ! -e /home/pi/node12 ] ; then
     
             echo 
             echo "ERROR, detected failure to (fully) install candle-controller"
