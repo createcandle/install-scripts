@@ -1884,6 +1884,8 @@ echo
 echo "INSTALLING OTHER FILES AND SERVICES"
 echo
 
+systemctl stop triggerhappy.socket
+systemctl stop triggerhappy.service
 
 # switch back to root of home folder
 cd /home/pi
