@@ -488,8 +488,14 @@ echo
 
 
 
-
-
+# Upgrade Python to 3.11
+wget -qO - https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh -O upgrade_python.sh
+if [ ! -f upgrade_python.sh ]; then
+  echo "ERROR, COULD NOT UPGRADE PYTHON, UPGRADE SCRIPT NOT DOWNLOADED?"
+  exit 1
+fi
+chmod +x upgrade_python.sh
+bash python.sh 3.11.0
 
 
 
