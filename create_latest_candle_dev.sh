@@ -463,7 +463,7 @@ fi
 
 echo
 echo "doing apt-get update"
-apt-get update -y
+apt-get update
 echo
 
 
