@@ -507,12 +507,18 @@ else
         else
             tar -xvf python11.tar.xz
 
-            cd Python-*
+            for directory in Python3-*; do
+                [[ -d $directory ]] || continue
+                echo "Directory: $directory"
+                mv -f "$directory" ./python311
+            done
+
+            cd python311
             ./configure --enable-optimizations
             make altinstall
-
+            cd ..
+            rm -rf python311
             
-
             # Upgrade symlink for python3
             if [ -e /usr/bin/python3.11 ]; then
                 cd /usr/bin/
@@ -524,7 +530,6 @@ else
                 exit 1
             fi
 
-            
         fi
         
     else
