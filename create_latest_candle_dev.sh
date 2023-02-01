@@ -1674,14 +1674,14 @@ then
                     cd -
 
                     # Also create simlink for pip
-                    if [ -e /usr/bin/pip3 ] && [ -x /usr/bin/pip3.11 ] && [ -x /usr/bin/pip3.9 ]; then
-                        mv /usr/bin/pip3 /usr/bin/pip3.9
-                        mv /usr/bin/pip3.11 /usr/bin/pip3
-                        pip install --upgrade pip
-                    else
-                        echo "Error, /usr/bin/pip3.11 seems to be missing"
-                        exit 1
-                    fi
+                    #if [ -e /usr/bin/pip3 ] && [ -x /usr/bin/pip3.11 ] && [ -x /usr/bin/pip3.9 ]; then
+                    #    mv /usr/bin/pip3 /usr/bin/pip3.9
+                    #    mv /usr/bin/pip3.11 /usr/bin/pip3
+                    #    pip install --upgrade pip
+                    #else
+                    #    echo "Error, /usr/bin/pip3.11 seems to be missing"
+                    #    exit 1
+                    #fi
 
                 else
                     echo "Error, /usr/bin/python3.11 binary is missing"
