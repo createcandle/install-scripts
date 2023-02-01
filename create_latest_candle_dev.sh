@@ -489,13 +489,56 @@ echo
 
 
 # Upgrade Python to 3.11
-wget -qO - https://raw.githubusercontent.com/tvdsluijs/sh-python-installer/main/python.sh -O upgrade_python.sh
-if [ ! -f upgrade_python.sh ]; then
-  echo "ERROR, COULD NOT UPGRADE PYTHON, UPGRADE SCRIPT NOT DOWNLOADED?"
-  exit 1
+
+if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
+then
+    echo ""
+    echo "Skipping Python upgrade"
+else
+    echo "Upgrading Python to 3.11"
+    
+    wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
+
+    if [ ! -f python11.tar.xz ]; then
+        echo "Error, Python 11 failed to download. Aborting."
+        exit 1
+    fi
+    tar -zxvf python11.tar.gx
+
+    cd Python-*
+    ./configure --enable-optimizations
+    make altinstall
+
+    cd /usr/bin/
+
+    # Upgrade symlink for python3
+    if [ -e /usr/bin/python3.11 ]; then
+        echo "creating symlink python3 -> python 3.11"
+        ln -vfns python3.11 python3
+    else
+        echo "Error, /usr/bin/python3.11 binary is missing"
+        exit 1
+    fi
+
+    cd -
+
+    # Install  latest version of Pip
+    apt update
+    apt install python3-pip
+
+    # Re-install modules
+    echo
+    echo "re-installing modules for Python 11"
+    for i in certifi chardet colorzero distro gpiozero idna numpy picamera2 pidng piexif Pillow python-apt python-prctl \
+        requests RPi.GPIO setuptools simplejpeg six spidev ssh-import-id toml urllib3 v4l2-python3 wheel; do
+
+        echo "$i"
+        yes | pip3 install "$i" --upgrade
+        echo
+    done
+  
 fi
-chmod +x upgrade_python.sh
-bash python.sh 3.11.0
+
 
 
 
