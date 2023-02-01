@@ -1671,7 +1671,7 @@ then
                     cd -
 
                     # Also create simlink for pip
-                    if  && [ -e /usr/bin/pip3 ] && [ -x /usr/bin/pip3.11 ] && [ -x /usr/bin/pip3.9 ]; then
+                    if [ -e /usr/bin/pip3 ] && [ -x /usr/bin/pip3.11 ] && [ -x /usr/bin/pip3.9 ]; then
                         mv /usr/bin/pip3 /usr/bin/pip3.9
                         mv /usr/bin/pip3.11 /usr/bin/pip3
                         pip install --upgrade pip
