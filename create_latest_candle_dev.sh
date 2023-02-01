@@ -2882,6 +2882,8 @@ fi
 cd /home/pi/.webthings
 chown -R pi:pi addons
 chmod -R 755 addons
+chown -R pi:pi data
+chmod -R 755 data
 cd /home/pi/
 
 #
