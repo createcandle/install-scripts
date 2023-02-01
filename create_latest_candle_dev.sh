@@ -523,7 +523,8 @@ else
 
             cd python311
             ./configure --enable-optimizations --prefix=/usr
-            make altinstall
+            #make altinstall
+            make install
             cd ..
             rm -rf python311
             
