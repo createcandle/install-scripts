@@ -541,6 +541,7 @@ else
                 if [ -e /usr/bin/pip3.11 ] && [ -e /usr/bin/pip3 ]; then
                     mv /usr/bin/pip3 /usr/bin/pip3.9
                     mv /usr/bin/pip3.11 /usr/bin/pip3
+                    pip install --upgrade pip
                 else
                     echo "Error, /usr/bin/pip3.11 seems to be missing"
                     exit 1
