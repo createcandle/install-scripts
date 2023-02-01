@@ -1660,7 +1660,7 @@ then
                 done
 
                 cd python311
-                ./configure --enable-optimizations --prefix=/usr
+                ./configure --enable-optimizations #--prefix=/usr
                 #make altinstall
                 make install
                 cd ..
