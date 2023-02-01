@@ -1,6 +1,9 @@
 #!/bin/bash
 set +e # continue on errors
 
+#CUTTING_EDGE=yes 
+#CREATE_DISK_IMAGE=yes
+
 
 # CANDLE INSTALL AND UPDATE SCRIPT
 
