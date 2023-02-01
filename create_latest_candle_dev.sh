@@ -505,7 +505,7 @@ else
             echo "Error, Python 11 failed to download. Aborting."
             exit 1
         else
-            tar -zxvf python11.tar.gx
+            tar -xvf python11.tar.xz
 
             cd Python-*
             ./configure --enable-optimizations
