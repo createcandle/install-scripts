@@ -499,12 +499,17 @@ else
     if [ ! -e /usr/bin/python3.11 ]; then
         echo "Upgrading Python to 3.11"
         
+        apt update
+        
         # Packages needed to build Python
         for pkg in build-essential zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
         libgdbm-dev liblzma-dev tk8.5-dev lzma lzma-dev libgdbm-dev libffi-dev
         do
             apt -y install $pkg --no-install-recommends
         done
+        
+        # just to be sure...
+        apt-get install libffi-dev
         
         wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
         
@@ -525,8 +530,8 @@ else
 
             cd python311
             ./configure --enable-optimizations --prefix=/usr
-            make altinstall
-            #make install
+            #make altinstall
+            make install
             cd ..
             rm -rf python311
             
@@ -538,7 +543,7 @@ else
                 cd -
                 
                 # Also create simlink for pip
-                if [ -e /usr/bin/pip3.11 ] && [ -e /usr/bin/pip3 ]; then
+                if  && [ -e /usr/bin/pip3 ] && [ -x /usr/bin/pip3.11 ] && [ -x /usr/bin/pip3.9 ]; then
                     mv /usr/bin/pip3 /usr/bin/pip3.9
                     mv /usr/bin/pip3.11 /usr/bin/pip3
                     pip install --upgrade pip
@@ -563,6 +568,9 @@ else
     
     #echo "installing Pip for Python 11"
     #apt install python3-pip
+    
+    echo "updating pip"
+    sudo -u pi python3 -m pip install --upgrade pip
 
     # Re-install modules that come with Raspberry Pi OS by default
     echo
@@ -571,7 +579,8 @@ else
         requests RPi.GPIO setuptools simplejpeg six spidev ssh-import-id toml urllib3 v4l2-python3 wheel; do
 
         echo "$i"
-        yes | pip3 install "$i" --upgrade
+        #sudo -u pi pip3 install "$i" --upgrade
+        sudo -u pi python3 -m pip install "$i" --upgrade
         echo
     done
     
