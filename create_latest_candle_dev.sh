@@ -1446,7 +1446,7 @@ then
 
     # additional programs for Candle kiosk mode:
     echo
-    echo "installing kiosk packages (x, openbox)"
+    echo "installing kiosk packages"
     echo
     for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
         echo "$i"
