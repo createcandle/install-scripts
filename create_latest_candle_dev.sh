@@ -2181,7 +2181,7 @@ if [ ! -L /etc/localtime ]; then
 fi
 
 
-#creating symlink for timezone
+# Creating symlink for timezone
 if [ ! -L /etc/timezone ]; then
     echo "removing /etc/timezone file and creating a symlink to /home/pi/.webthings/etc/timezone instead"
     # move timezone file to user partition
@@ -2194,7 +2194,7 @@ if [ ! -L /etc/timezone ]; then
 fi
 
 
-# create symlink for fake-hwclock
+# Create symlink for fake-hwclock
 if [ ! -L /etc/fake-hwclock.data ]; then
     echo "removing /etc/fake-hwclock.data file and creating a symlink to /home/pi/.webthings/etc/fake-hwclock.data instead"
     # create fake-hwclock file
@@ -2884,6 +2884,12 @@ chown -R pi:pi addons
 chmod -R 755 addons
 chown -R pi:pi data
 chmod -R 755 data
+chown -R pi:pi uploads
+chmod -R 755 uploads
+chown -R pi:pi chromium
+chmod -R 755 chromium
+chown -R pi:pi arduino
+chmod -R 755 arduino
 cd /home/pi/
 
 #
