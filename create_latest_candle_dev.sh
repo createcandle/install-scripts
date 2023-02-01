@@ -522,7 +522,7 @@ else
             done
 
             cd python311
-            ./configure --enable-optimizations
+            ./configure --enable-optimizations --prefix=/usr
             make altinstall
             cd ..
             rm -rf python311
