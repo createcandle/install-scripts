@@ -506,10 +506,12 @@ else
             exit 1
         else
             tar -xvf python11.tar.xz
+            echo "ls:"
+            ls
 
-            for directory in Python3-*; do
+            for directory in Python-*; do
                 [[ -d $directory ]] || continue
-                echo "Directory: $directory"
+                echo "Moving directory: $directory"
                 mv -f "$directory" ./python311
             done
 
