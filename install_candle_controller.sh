@@ -153,7 +153,7 @@ echo "candle: installing python gateway addon" | sudo tee -a /boot/candle_log.tx
 python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon
 
 # install newer version of Python websocket client
-python3 -m pip install --force-reinstall -v "websocket-client==1.4.2"
+#python3 -m pip install --force-reinstall -v "websocket-client==1.4.2"
 
 
 if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 12 ];
