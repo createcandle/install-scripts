@@ -536,6 +536,16 @@ else
                 echo "creating symlink python3 -> python 3.11"
                 ln -vfns python3.11 python3
                 cd -
+                
+                # Also create simlink for pip
+                if [ -e /usr/bin/pip3.11 ] && [ -e /usr/bin/pip3 ]; then
+                    mv /usr/bin/pip3 /usr/bin/pip3.9
+                    mv /usr/bin/pip3.11 /usr/bin/pip3
+                else
+                    echo "Error, /usr/bin/pip3.11 seems to be missing"
+                    exit 1
+                fi
+                
             else
                 echo "Error, /usr/bin/python3.11 binary is missing"
                 exit 1
