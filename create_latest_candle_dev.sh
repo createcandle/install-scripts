@@ -499,9 +499,10 @@ else
     if [ ! -e /usr/bin/python3.11 ]; then
         echo "Upgrading Python to 3.11"
         
+        # Packages needed to build Python
         for pkg in build-essential zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev libgdbm-dev liblzma-dev tk8.5-dev lzma lzma-dev libgdbm-dev
         do
-            apt -y install $pkg
+            apt -y install $pkg --no-install-recommends
         done
         
         wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
@@ -547,7 +548,9 @@ else
 
     # Install  latest version of Pip
     apt update
-    apt install python3-pip
+    
+    #echo "installing Pip for Python 11"
+    #apt install python3-pip
 
     # Re-install modules that come with Raspberry Pi OS by default
     echo
