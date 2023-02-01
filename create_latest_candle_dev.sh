@@ -500,7 +500,8 @@ else
         echo "Upgrading Python to 3.11"
         
         # Packages needed to build Python
-        for pkg in build-essential zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev libgdbm-dev liblzma-dev tk8.5-dev lzma lzma-dev libgdbm-dev
+        for pkg in build-essential zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
+        libgdbm-dev liblzma-dev tk8.5-dev lzma lzma-dev libgdbm-dev libffi-dev
         do
             apt -y install $pkg --no-install-recommends
         done
