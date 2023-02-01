@@ -488,7 +488,78 @@ echo
 
 
 
+# Upgrade Python to 3.11
 
+if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
+then
+    echo ""
+    echo "Skipping Python upgrade"
+else
+
+    if [ ! -e /usr/bin/python3.11 ]; then
+        echo "Upgrading Python to 3.11"
+        
+        for pkg in build-essential zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev libgdbm-dev liblzma-dev tk8.5-dev lzma lzma-dev libgdbm-dev
+        do
+            apt -y install $pkg
+        done
+        
+        wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
+        
+        if [ ! -f python11.tar.xz ]; then
+            echo "Error, Python 11 failed to download. Aborting."
+            exit 1
+        else
+            tar -xvf python11.tar.xz
+            rm python11.tar.xz
+            echo "ls:"
+            ls
+
+            for directory in Python-*; do
+                [[ -d $directory ]] || continue
+                echo "Moving directory: $directory"
+                mv -f "$directory" ./python311
+            done
+
+            cd python311
+            ./configure --enable-optimizations --prefix=/usr
+            make altinstall
+            cd ..
+            rm -rf python311
+            
+            # Upgrade symlink for python3
+            if [ -e /usr/bin/python3.11 ]; then
+                cd /usr/bin/
+                echo "creating symlink python3 -> python 3.11"
+                ln -vfns python3.11 python3
+                cd -
+            else
+                echo "Error, /usr/bin/python3.11 binary is missing"
+                exit 1
+            fi
+
+        fi
+        
+    else
+        echo "Python 11 seems to already be installed"
+    fi
+
+    # Install  latest version of Pip
+    apt update
+    apt install python3-pip
+
+    # Re-install modules that come with Raspberry Pi OS by default
+    echo
+    echo "re-installing modules for Python 11"
+    for i in certifi chardet colorzero distro gpiozero idna numpy picamera2 pidng piexif Pillow python-apt python-prctl \
+        requests RPi.GPIO setuptools simplejpeg six spidev ssh-import-id toml urllib3 v4l2-python3 wheel; do
+
+        echo "$i"
+        yes | pip3 install "$i" --upgrade
+        echo
+    done
+    
+fi
 
 
 
@@ -2115,7 +2186,7 @@ if [ ! -L /etc/localtime ]; then
 fi
 
 
-#creating symlink for timezone
+# Creating symlink for timezone
 if [ ! -L /etc/timezone ]; then
     echo "removing /etc/timezone file and creating a symlink to /home/pi/.webthings/etc/timezone instead"
     # move timezone file to user partition
@@ -2128,7 +2199,7 @@ if [ ! -L /etc/timezone ]; then
 fi
 
 
-# create symlink for fake-hwclock
+# Create symlink for fake-hwclock
 if [ ! -L /etc/fake-hwclock.data ]; then
     echo "removing /etc/fake-hwclock.data file and creating a symlink to /home/pi/.webthings/etc/fake-hwclock.data instead"
     # create fake-hwclock file
@@ -2816,6 +2887,14 @@ fi
 cd /home/pi/.webthings
 chown -R pi:pi addons
 chmod -R 755 addons
+chown -R pi:pi data
+chmod -R 755 data
+chown -R pi:pi uploads
+chmod -R 755 uploads
+chown -R pi:pi chromium
+chmod -R 755 chromium
+chown -R pi:pi arduino
+chmod -R 755 arduino
 cd /home/pi/
 
 #
