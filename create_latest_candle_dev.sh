@@ -495,32 +495,41 @@ then
     echo ""
     echo "Skipping Python upgrade"
 else
-    echo "Upgrading Python to 3.11"
+
+    if [ ! -e /usr/bin/python3.11 ]; then
+        echo "Upgrading Python to 3.11"
     
-    wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
+        wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
 
-    if [ ! -f python11.tar.xz ]; then
-        echo "Error, Python 11 failed to download. Aborting."
-        exit 1
-    fi
-    tar -zxvf python11.tar.gx
+        if [ ! -f python11.tar.xz ]; then
+            echo "Error, Python 11 failed to download. Aborting."
+            exit 1
+        else
+            tar -zxvf python11.tar.gx
 
-    cd Python-*
-    ./configure --enable-optimizations
-    make altinstall
+            cd Python-*
+            ./configure --enable-optimizations
+            make altinstall
 
-    cd /usr/bin/
+            
 
-    # Upgrade symlink for python3
-    if [ -e /usr/bin/python3.11 ]; then
-        echo "creating symlink python3 -> python 3.11"
-        ln -vfns python3.11 python3
+            # Upgrade symlink for python3
+            if [ -e /usr/bin/python3.11 ]; then
+                cd /usr/bin/
+                echo "creating symlink python3 -> python 3.11"
+                ln -vfns python3.11 python3
+                cd -
+            else
+                echo "Error, /usr/bin/python3.11 binary is missing"
+                exit 1
+            fi
+
+            
+        fi
+        
     else
-        echo "Error, /usr/bin/python3.11 binary is missing"
-        exit 1
+        echo "Python 11 seems to already be installed"
     fi
-
-    cd -
 
     # Install  latest version of Pip
     apt update
@@ -536,7 +545,7 @@ else
         yes | pip3 install "$i" --upgrade
         echo
     done
-  
+    
 fi
 
 
