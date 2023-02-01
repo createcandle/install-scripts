@@ -506,6 +506,7 @@ else
             exit 1
         else
             tar -xvf python11.tar.xz
+            rm python11.tar.xz
             echo "ls:"
             ls
 
