@@ -1700,8 +1700,9 @@ then
         #echo "installing Pip for Python 11"
         #apt install python3-pip
 
-        echo "updating pip"
-        sudo -u pi python3 -m pip install --upgrade pip
+        echo "Setting pip version to 20.3.4"
+        sudo -u pi python3 -m pip install --upgrade pip pip==20.3.4
+        #sudo -u pi python3 -m pip install --upgrade pip
 
         # Re-install modules that come with Raspberry Pi OS by default
         echo
