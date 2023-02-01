@@ -498,9 +498,9 @@ else
 
     if [ ! -e /usr/bin/python3.11 ]; then
         echo "Upgrading Python to 3.11"
-    
+        
         wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
-
+        
         if [ ! -f python11.tar.xz ]; then
             echo "Error, Python 11 failed to download. Aborting."
             exit 1
@@ -535,7 +535,7 @@ else
     apt update
     apt install python3-pip
 
-    # Re-install modules
+    # Re-install modules that come with Raspberry Pi OS by default
     echo
     echo "re-installing modules for Python 11"
     for i in certifi chardet colorzero distro gpiozero idna numpy picamera2 pidng piexif Pillow python-apt python-prctl \
