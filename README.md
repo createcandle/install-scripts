@@ -65,11 +65,11 @@ Note: There are some other options which are described in the create_latest_cand
 
 For example, this command creates a disk image (though you likely have to run it twice). It creates the cutting-edge version of Candle.
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes bash
+curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes bash
 ```
 Or the tiny partition version, which is used to create downloadable system updates only:
 ```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes TINY_PARTITIONS=yes CREATE_DISK_IMAGE=yes bash
+curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes TINY_PARTITIONS=yes CREATE_DISK_IMAGE=yes bash
 ```
 (It's the command we really use to create the Candle disk images. Once done, do `touch /boot/candle_rw_once.txt` and then reboot the controller. Log in, wait for Zigbee2MQTT to be fully installed, and only then run the `prepare_for_disk_image.sh` script)
 
