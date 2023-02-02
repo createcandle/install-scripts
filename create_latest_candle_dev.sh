@@ -1661,17 +1661,17 @@ then
 
                 cd python311
                 ./configure --enable-optimizations #--prefix=/usr
-                #make altinstall
-                make install
+                make altinstall
+                #make install
                 cd ..
                 rm -rf python311
 
                 # Upgrade symlink for python3
-                if [ -e /usr/bin/python3.11 ]; then
-                    cd /usr/bin/
-                    echo "creating symlink python3 -> python 3.11"
-                    ln -vfns python3.11 python3
-                    cd -
+                #if [ -e /usr/bin/python3.11 ]; then
+                #    cd /usr/bin/
+                #    echo "creating symlink python3 -> python 3.11"
+                #    ln -vfns python3.11 python3
+                #    cd -
 
                     # Also create simlink for pip
                     #if [ -e /usr/bin/pip3 ] && [ -x /usr/bin/pip3.11 ] && [ -x /usr/bin/pip3.9 ]; then
@@ -1683,10 +1683,10 @@ then
                     #    exit 1
                     #fi
 
-                else
-                    echo "Error, /usr/bin/python3.11 binary is missing"
-                    exit 1
-                fi
+                #else
+                #    echo "Error, /usr/bin/python3.11 binary is missing"
+                #    exit 1
+                #fi
 
             fi
  
