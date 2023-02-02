@@ -152,6 +152,11 @@ echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 echo "candle: installing python gateway addon" | sudo tee -a /boot/candle_log.txt
 python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon
 
+# Install the gateway addon for Python 3.11 too, if Python 3.11 exists
+python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon
+
+
+
 # install newer version of Python websocket client
 #python3 -m pip install --force-reinstall -v "websocket-client==1.4.2"
 
