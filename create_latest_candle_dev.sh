@@ -2935,7 +2935,7 @@ fi
 chown pi:pi /home/pi/*
 chown -R pi:pi /home/pi/candle/*
 
-
+rm -rf python311
 
 
 #
