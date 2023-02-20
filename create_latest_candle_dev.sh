@@ -1615,7 +1615,7 @@ fi
 if [ "$SKIP_PYTHON" = no ] || [[ -z "${SKIP_PYTHON}" ]];
 then
 
-
+    PATH=$PATH:/home/pi/.local/bin
 
 
     # Upgrade Python to 3.11
