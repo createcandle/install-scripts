@@ -1712,7 +1712,7 @@ then
 
             echo "$i"
             #sudo -u pi pip3 install "$i" --upgrade
-            sudo -u pi python3 -m pip install "$i" --upgrade
+            sudo -u pi python3.11 -m pip install "$i" --upgrade
             echo
         done
 
