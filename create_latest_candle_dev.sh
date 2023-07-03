@@ -1330,7 +1330,7 @@ then
     echo "Candle: installing support packages" >> /dev/kmsg
     echo "Candle: installing support packages" >> /boot/candle_log.txt
     echo
-    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi7 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils; do
+    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi7 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils jq; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> /boot/candle_log.txt
@@ -1421,6 +1421,7 @@ then
         nbtscan \
         unclutter \
         xinput \
+        jq \
         autoconf;
     do
         if [ -z "$(which $i)" ]; then
