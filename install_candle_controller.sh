@@ -153,7 +153,7 @@ echo "candle: installing python gateway addon" | sudo tee -a /boot/candle_log.tx
 python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages
 
 # Install the gateway addon for Python 3.11 too, if Python 3.11 exists
-python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages
+python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon
 
 
 
@@ -179,23 +179,10 @@ then
     #fi
     #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
     #wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
-    wget https://raw.githubusercontent.com/creationix/nvm/master/install.sh -O install_nvm.sh
+    #wget https://raw.githubusercontent.com/creationix/nvm/master/install.sh -O install_nvm.sh
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
     #curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-    if [ ! -f install_nvm.sh ]; then
-        echo "ERROR, install_nvm.sh failed to download"
-        echo "ERROR, install_nvm.sh failed to download" | sudo tee -a /dev/kmsg
-        echo "ERROR, install_nvm.sh failed to download" | sudo tee -a /boot/candle_log.txt
-        
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            sudo /bin/ply-image /boot/error.png
-            sleep 7200
-        fi
-        
-        exit 1
-    fi
     
-    chmod +x install_nvm.sh
-    ./install_nvm.sh
 
     #. ~/.bashrc
     
