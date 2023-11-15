@@ -1438,12 +1438,13 @@ then
 
 
     # TODO: removed libffi7 / libffi8 check
+    # For bookworm libavcodec58 was changed to libavcodec59
     for i in \
     chromium-browser git \
     autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
     arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
-    liblivemedia-dev libavcodec58 libavutil56 libswresample3 libffi8 libavformat58 \
+    liblivemedia-dev libavcodec59 libavutil56 libswresample3 libffi8 libavformat58 \
     libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
     do
