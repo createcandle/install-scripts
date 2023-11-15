@@ -1331,13 +1331,15 @@ then
     echo "Candle: installing support packages" >> /dev/kmsg
     echo "Candle: installing support packages" >> /boot/candle_log.txt
     echo
-    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi7 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils jq; do
-        echo "$i"
-        echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> /boot/candle_log.txt
-        apt -y install "$i" --print-uris "$reinstall" 
-        echo
-    done
+
+    # Debian Bookworm doesn't have libffi7 anymore
+    for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils jq; do
+            echo "$i"
+            echo "Candle: installing $i" >> /dev/kmsg
+            echo "Candle: installing $i" >> /boot/candle_log.txt
+            apt -y install "$i" --print-uris "$reinstall" 
+            echo
+        done
 
     # Quick sanity check
     if [ ! -f /usr/sbin/mosquitto ]; then
@@ -1435,14 +1437,13 @@ then
     done
 
 
-    # 
-        
+    # TODO: removed libffi7 / libffi8 check
     for i in \
     chromium-browser git \
     autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
-    arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi7 nbtscan ufw iptables \
-    liblivemedia-dev libavcodec58 libavutil56 libswresample3 libavformat58 \
+    arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
+    liblivemedia-dev libavcodec58 libavutil56 libswresample3 libffi8 libavformat58 \
     libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
     do
