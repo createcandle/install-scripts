@@ -1215,18 +1215,6 @@ then
     apt --fix-broken install -y
     echo
 
-    # Allow python packages to be installed globally (since the disk will be read-only anyway)
-    if [ -f /etc/pip.conf ]; then
-        if cat /etc/pip.conf | grep -q break-system-packages; then
-            echo "pip break-system-packages already set"
-        else 
-            echo "break-system-packages = true" >> /etc/pip.conf
-        fi
-    else
-        echo "[global]" > /etc/pip.conf
-        echo "break-system-packages = true" >> /etc/pip.conf
-    fi
-
     
     # Just to be safe, try showing the splash images again
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
@@ -1720,6 +1708,18 @@ then
         sudo -u pi python3 -m pip install --upgrade pip pip==20.3.4
         #sudo -u pi python3 -m pip install --upgrade pip
 
+        # Allow python packages to be installed globally (since the disk will be read-only anyway)
+        if [ -f /etc/pip.conf ]; then
+            if cat /etc/pip.conf | grep -q break-system-packages; then
+                echo "pip break-system-packages already set"
+            else 
+                echo "break-system-packages = true" >> /etc/pip.conf
+            fi
+        else
+            echo "[global]" > /etc/pip.conf
+            echo "break-system-packages = true" >> /etc/pip.conf
+        fi
+
         # Re-install modules that come with Raspberry Pi OS by default
         echo
         echo "re-installing modules for Python 11"
@@ -1760,7 +1760,9 @@ then
     sudo -u pi python3 -m pip install --upgrade pip
 
     sudo -u pi pip3 uninstall -y adapt-parser || true
-    sudo -u pi pip3 install dbus-python pybluez pillow pycryptodomex numpy
+    sudo -u pi pip3 install dbus-python pillow pycryptodomex numpy
+
+     sudo -u pi pip3 install git+https://github.com/pybluez/pybluez.git#egg=pybluez
 
     if [ -d "/home/pi/.local/bin" ] ; then
         echo "adding /home/pi/.local/bin to path"
