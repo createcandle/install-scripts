@@ -150,10 +150,10 @@ fi
 
 echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 echo "candle: installing python gateway addon" | sudo tee -a /boot/candle_log.txt
-python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon
+python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages
 
 # Install the gateway addon for Python 3.11 too, if Python 3.11 exists
-python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon
+python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages
 
 
 
