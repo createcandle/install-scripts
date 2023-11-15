@@ -1214,7 +1214,19 @@ then
     apt-get update -y
     apt --fix-broken install -y
     echo
-    
+
+    # Allow python packages to be installed globally (since the disk will be read-only anyway)
+    if [ -f /etc/pip.conf ]; then
+        if cat /etc/pip.conf | grep -q break-system-packages; then
+            echo "pip break-system-packages already set"
+        else 
+            echo "break-system-packages = true" >> /etc/pip.conf
+        fi
+    else
+        echo "[global]" > /etc/pip.conf
+        echo "break-system-packages = true" >> /etc/pip.conf
+    fi
+
     
     # Just to be safe, try showing the splash images again
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
