@@ -279,7 +279,7 @@ then
             echo
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 printf "resizepart 2 7000MB\nyes\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
-                resizepart /dev/mmcblk0 2 12600000
+                #resizepart /dev/mmcblk0 2 12600000
                 resize2fs /dev/mmcblk0p2
                 
             else
