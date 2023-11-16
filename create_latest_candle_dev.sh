@@ -278,12 +278,12 @@ then
             echo "Candle: creating partitions" >> /boot/candle_log.txt
             echo
             if [[ -z "${TINY_PARTITIONS}" ]]; then
-                printf "resizepart 2 7000MB\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
+                printf "resizepart 2 7000MB\nyes\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
                 resizepart /dev/mmcblk0 2 12600000
                 resize2fs /dev/mmcblk0p2
                 
             else
-                printf "resizepart 2 5000MB\nmkpart\np\next4\n5001MB\n7500MB\nmkpart\np\next4\n7502MB\n9500MB\nquit" | parted
+                printf "resizepart 2 5000MB\nyes\nmkpart\np\next4\n5001MB\n7500MB\nmkpart\np\next4\n7502MB\n9500MB\nquit" | parted
                 resize2fs /dev/mmcblk0p2
             fi
             
