@@ -1375,7 +1375,7 @@ then
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
     if [ "$BOOKWORM" = yes ]; then
-        
+        echo "on bookworm"
     fi
 
 
