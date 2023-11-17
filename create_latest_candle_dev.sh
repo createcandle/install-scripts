@@ -715,9 +715,10 @@ then
         wait
         apt-get --fix-missing
         apt --fix-broken install -y
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-        echo ""
-
+        if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+            echo ""
+        fi
 
         if [ -d /opt/vc/lib ]; then
             echo "removing left over /opt/vc/lib"
