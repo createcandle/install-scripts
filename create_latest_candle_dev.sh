@@ -1784,7 +1784,7 @@ then
     sudo -u pi pip3 install pycryptodomex --break-system-packages
 
     sudo -u pi pip3 --break-system-packages install git+https://github.com/pybluez/pybluez.git#egg=pybluez  
-
+    
     
 
     echo "Updating existing python packages"
