@@ -15,7 +15,7 @@ set +e # continue on errors
 # If you want to use this script to directly create disk imagesrecovery, then you can use:
 # export CREATE_DISK_IMAGE=yes
 
-# Set the script to download the very latest available version. Risky. Enabling this creates the /boot/candle_cutting_edge.txt file
+# Set the script to download the very latest available version. Risky. Enabling this creates the $BOOT_DIR/candle_cutting_edge.txt file
 # export CUTTING_EDGE=yes
 
 # Other parts of the script that can be skipped:
@@ -80,24 +80,33 @@ else
     CANDLE_BASE="$(pwd)"
 fi
 
-echo "" >> /boot/candle_log.txt
+BOOT_DIR="/boot"
+if lsblk | grep /boot/firmware; then
+    echo "firmware partition is mounted at /boot/firmware"
+    BOOT_DIR="/boot/firmware"
+fi
+
+
+
+
+echo "" >> $BOOT_DIR/candle_log.txt
 echo "Candle: starting update - $(date) - $scriptname" >> /dev/kmsg
-echo "starting update - $(date) - $scriptname" >> /boot/candle_log.txt
+echo "starting update - $(date) - $scriptname" >> $BOOT_DIR/candle_log.txt
 
 if [ -f /proc/mounts ]; 
 then
     # Detect is read-only mode is active
     if [ -n "$(grep "[[:space:]]ro[[:space:],]" /proc/mounts | grep ' /ro ')" ]; then
         echo 
-        echo "Detected read-only mode. Create /boot/candle_rw_once.txt, reboot, and then try again."
+        echo "Detected read-only mode. Create $BOOT_DIR/candle_rw_once.txt, reboot, and then try again."
         echo "Candle: detected read-only mode. Aborting." >> /dev/kmsg
-        echo "Candle: detected read-only mode. Aborting." >> /boot/candle_log.txt
+        echo "Candle: detected read-only mode. Aborting." >> $BOOT_DIR/candle_log.txt
       
         # Show error image
         if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
         then
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                /bin/ply-image /boot/error.png
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+                /bin/ply-image $BOOT_DIR/error.png
                 #sleep 7200
             fi
         fi
@@ -109,18 +118,18 @@ fi
 
 # Detect if old overlay system is active
 
-if [ -f /boot/cmdline.txt ]; then
-    if grep -q "boot=overlay" /boot/cmdline.txt; then
+if [ -f $BOOT_DIR/cmdline.txt ]; then
+    if grep -q "boot=overlay" $BOOT_DIR/cmdline.txt; then
         echo 
         echo "Detected the OLD raspi-config read-only overlay. Disable it under raspi-config -> performance (and then reboot)"
         echo "Candle: detected OLD read-only mode. Aborting." >> /dev/kmsg
-        echo "Candle: detected OLD read-only mode. Aborting." >> /boot/candle_log.txt
+        echo "Candle: detected OLD read-only mode. Aborting." >> $BOOT_DIR/candle_log.txt
 
         # Show error image
         if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
         then
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                /bin/ply-image /boot/error.png
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+                /bin/ply-image $BOOT_DIR/error.png
                 #sleep 7200
             fi
         fi
@@ -135,14 +144,14 @@ echo
 
 
 # Check if /boot is available
-if [ ! -f /boot/cmdline.txt ]; then
+if [ ! -f $BOOT_DIR/cmdline.txt ]; then
     echo "Candle: ERROR, missing cmdline.txt??" >> /dev/kmsg
-    echo "Candle: ERROR, missing cmdline.txt??" >> /boot/candle_log.txt
+    echo "Candle: ERROR, missing cmdline.txt??" >> $BOOT_DIR/candle_log.txt
     
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            /bin/ply-image /boot/error.png
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+            /bin/ply-image $BOOT_DIR/error.png
             #sleep 7200
         fi
     fi
@@ -155,14 +164,14 @@ fi
 if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
 then
     
-    if [ -f /boot/candle_cutting_edge.txt ]; then
-       echo "/boot/candle_cutting_edge.txt exists"
+    if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
+       echo "$BOOT_DIR/candle_cutting_edge.txt exists"
     else
        echo "no environment indication to go cutting edge"
     fi
 else
     echo "going cutting edge"
-    touch /boot/candle_cutting_edge.txt
+    touch $BOOT_DIR/candle_cutting_edge.txt
 fi
 
 
@@ -183,20 +192,20 @@ echo "USER         : $(whoami)"
 
 echo "SCRIPT NAME  : $scriptname"
 
-if [ -f /boot/candle_cutting_edge.txt ]; then
+if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     echo "CUTTING EDGE : yes"
     echo "CUTTING EDGE : yes" >> /dev/kmsg
-    echo "CUTTING EDGE : yes" >> /boot/candle_log.txt
+    echo "CUTTING EDGE : yes" >> $BOOT_DIR/candle_log.txt
 else
     echo "CUTTING EDGE : no"
     echo "CUTTING EDGE : no" >> /dev/kmsg
-    echo "CUTTING EDGE : no" >> /boot/candle_log.txt
+    echo "CUTTING EDGE : no" >> $BOOT_DIR/candle_log.txt
 fi
 
 
 if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
 echo "CHROOT       : Not in chroot"
-echo "CHROOT       : Not in chroot" >> /boot/candle_log.txt
+echo "CHROOT       : Not in chroot" >> $BOOT_DIR/candle_log.txt
 else
 echo "CHROOT       : Inside chroot"
 fi
@@ -209,7 +218,7 @@ else
     reinstall="--reinstall"
     echo "APT REINSTALL: yes"
     echo "APT REINSTALL: yes" >> /dev/kmsg
-    echo "APT REINSTALL: yes" >> /boot/candle_log.txt
+    echo "APT REINSTALL: yes" >> $BOOT_DIR/candle_log.txt
     echo
     echo "reinstall flag: $reinstall"
 fi
@@ -224,8 +233,8 @@ cat /etc/os-release
 echo
 echo
 
-echo "/boot/cmdline.txt before:"
-cat /boot/cmdline.txt
+echo "$BOOT_DIR/cmdline.txt before:"
+cat $BOOT_DIR/cmdline.txt
 echo
 
 # Wait for IP address for at most 30 seconds
@@ -240,7 +249,7 @@ do
     sleep 1    
   else
     echo "Candle: IP address detected: $(hostname -I)" >> /dev/kmsg
-    echo "Candle: IP address detected: $(hostname -I)" >> /boot/candle_log.txt
+    echo "Candle: IP address detected: $(hostname -I)" >> $BOOT_DIR/candle_log.txt
     break
   fi
 done
@@ -253,7 +262,7 @@ if [ ! -s /etc/resolv.conf ]; then
     # no nameserver
     echo "no nameserver, aborting"
     echo "Candle: no nameserver, aborting" >> /dev/kmsg
-    echo "Candle: no nameserver, aborting" >> /boot/candle_log.txt
+    echo "Candle: no nameserver, aborting" >> $BOOT_DIR/candle_log.txt
     exit 1
 fi
 
@@ -275,7 +284,7 @@ then
             echo
             echo "CREATING PARTITIONS"
             echo "Candle: creating partitions" >> /dev/kmsg
-            echo "Candle: creating partitions" >> /boot/candle_log.txt
+            echo "Candle: creating partitions" >> $BOOT_DIR/candle_log.txt
             echo
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 printf "resizepart 2 7000MB\nyes\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
@@ -291,7 +300,7 @@ then
             printf "y" | mkfs.ext4 /dev/mmcblk0p4
             mkdir -p /home/pi/.webthings
             chown pi:pi /home/pi/.webthings
-            touch /boot/candle_has_4th_partition.txt
+            touch $BOOT_DIR/candle_has_4th_partition.txt
             
             e2label /dev/mmcblk0p2 system
             e2label /dev/mmcblk0p3 recovery
@@ -320,7 +329,7 @@ else
     echo "Partitions seem to already exist (addons dir existed)"
     echo "Candle: partitions seem to already exist" >> /dev/kmsg
     echo "$(date) - starting create_latest_candle" >> /home/pi/.webthings/candle.log
-    echo "$(date) - starting create_latest_candle" >> /boot/candle_log.txt
+    echo "$(date) - starting create_latest_candle" >> $BOOT_DIR/candle_log.txt
 fi
 
 
@@ -361,32 +370,32 @@ cd /home/pi
 
 # Save the bits of the initial kernel the boot partition to a file
 if [ "$BIT_TYPE" == 64 ]; then
-    echo "creating /boot/candle_64bits.txt"
-    echo "creating /boot/candle_64bits.txt" >> /dev/kmsg
-    touch /boot/candle_64bits.txt
+    echo "creating $BOOT_DIR/candle_64bits.txt"
+    echo "creating $BOOT_DIR/candle_64bits.txt" >> /dev/kmsg
+    touch $BOOT_DIR/candle_64bits.txt
 fi
 
 
 # Make sure there is a current time
-if [ -f /boot/candle_hardware_clock.txt ]; then
-    rm /boot/candle_hardware_clock.txt
+if [ -f $BOOT_DIR/candle_hardware_clock.txt ]; then
+    rm $BOOT_DIR/candle_hardware_clock.txt
     systemctl restart systemd-timesyncd.service
     timedatectl set-ntp true
     timedatectl
     sleep 2
     /usr/sbin/fake-hwclock save
     echo "Candle: requested latest time. Date is now: $(date)" >> /dev/kmsg
-    echo "Candle: requested latest time. Date is now: $(date)" >> /boot/candle_log.txt
+    echo "Candle: requested latest time. Date is now: $(date)" >> $BOOT_DIR/candle_log.txt
 fi
 
 
 
 # Download error image first
-if [ -f /boot/cmdline.txt ]; then
-    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png
-    if [ ! -f /boot/error.png ]; then
+if [ -f $BOOT_DIR/cmdline.txt ]; then
+    wget https://www.candlesmarthome.com/tools/error.png -O $BOOT_DIR/error.png
+    if [ ! -f $BOOT_DIR/error.png ]; then
         echo "Candle: ERROR, download of error.png failed. How ironic." >> /dev/kmsg
-        echo "Candle: ERROR, download of error.png failed. How ironic." >> /boot/candle_log.txt
+        echo "Candle: ERROR, download of error.png failed. How ironic." >> $BOOT_DIR/candle_log.txt
         exit 1
     fi      
 fi
@@ -398,7 +407,7 @@ if [ -z "$(which git)" ]; then
     echo
     echo "installing git"
     echo "Candle: installing git" >> /dev/kmsg
-    echo "Candle: installing git" >> /boot/candle_log.txt
+    echo "Candle: installing git" >> $BOOT_DIR/candle_log.txt
     echo
     apt -y install git "$reinstall" 
 fi
@@ -410,7 +419,7 @@ if [ ! -f /bin/ply-image ];
 then
     echo
     echo "creating Plymouth lite (to show splash images)" >> /dev/kmsg
-    echo "creating Plymouth lite (to show splash images)" >> /boot/candle_log.txt
+    echo "creating Plymouth lite (to show splash images)" >> $BOOT_DIR/candle_log.txt
     echo
     git clone --depth 1 https://github.com/createcandle/Plymouth-lite.git
     cd Plymouth-lite
@@ -434,13 +443,13 @@ echo
 # Make sure Bullseye sources are used
 if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
     echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /boot/candle_log.txt
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> $BOOT_DIR/candle_log.txt
     sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
 fi
 
 if cat /etc/apt/sources.list | grep -q buster; then
     echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list from buster to bullseye" >> /boot/candle_log.txt 
+    echo "changing /etc/apt/sources.list from buster to bullseye" >> $BOOT_DIR/candle_log.txt 
     sed -i 's/buster/bullseye/' /etc/apt/sources.list
 fi
 
@@ -478,14 +487,14 @@ echo
 echo "Downloading read only script"
 echo
 
-if [ -f /boot/candle_cutting_edge.txt ]; then
+if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
-    echo "Candle: Downloading cutting edge read-only script" >> /boot/candle_log.txt
+    echo "Candle: Downloading cutting edge read-only script" >> $BOOT_DIR/candle_log.txt
     wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh --retry-connrefused 
     
 else
     echo "Candle: Downloading stable read-only script" >> /dev/kmsg
-    echo "Candle: Downloading stable read-only script" >> /boot/candle_log.txt
+    echo "Candle: Downloading stable read-only script" >> $BOOT_DIR/candle_log.txt
     curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
     | grep "tarball_url" \
     | cut -d : -f 2,3 \
@@ -516,18 +525,18 @@ else
         else
             echo "ERROR, ro-overlay folder missing"
             echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
-            echo "Candle: WARNING, ro-overlay folder missing" >> /boot/candle_log.txt
+            echo "Candle: WARNING, ro-overlay folder missing" >> $BOOT_DIR/candle_log.txt
         fi
     else
         echo "Ro-root tar file missing, download failed"
         echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
-        echo "Candle: ERROR, stable read-only tar download failed" >> /boot/candle_log.txt
+        echo "Candle: ERROR, stable read-only tar download failed" >> $BOOT_DIR/candle_log.txt
         
         # Show error image
         if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
         then
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                /bin/ply-image /boot/error.png
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+                /bin/ply-image $BOOT_DIR/error.png
                 #sleep 7200
             fi
         fi
@@ -542,14 +551,14 @@ fi
 if [ -f ./ro-root.sh ]; then
     if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
         echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
-        echo "Candle: ro-root.sh file downloaded OK" >> /boot/candle_log.txt
+        echo "Candle: ro-root.sh file downloaded OK" >> $BOOT_DIR/candle_log.txt
         chmod +x ./ro-root.sh
     
         # Avoid risky move if possible
         if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
             echo "ro-root.sh file is different, moving it into place"
             echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
-            echo "Candle: ro-root.sh file is different, moving it into place" >> /boot/candle_log.txt
+            echo "Candle: ro-root.sh file is different, moving it into place" >> $BOOT_DIR/candle_log.txt
             if [ -f /bin/ro-root.sh ]; then
                 rm /bin/ro-root.sh
             fi
@@ -559,20 +568,20 @@ if [ -f ./ro-root.sh ]; then
         else
             echo "new ro-root.sh file is same as the old one, not moving it"
             echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
-            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /boot/candle_log.txt
+            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> $BOOT_DIR/candle_log.txt
         fi
     fi
 else
     echo "ERROR: failed to download ro-root.sh"
     echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
     echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
-    echo "$(date) - download of read-only overlay script failed" >> /boot/candle_log.txt
+    echo "$(date) - download of read-only overlay script failed" >> $BOOT_DIR/candle_log.txt
     
     # Show error image
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            /bin/ply-image /boot/error.png
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+            /bin/ply-image $BOOT_DIR/error.png
             #sleep 7200
         fi
     fi
@@ -587,47 +596,47 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
     if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
         if [ -f /bin/ro-root.sh ]; then
-            #isInFile4=$(cat /boot/config.txt | grep -c "ramfsaddr")
-            if [ $(cat /boot/config.txt | grep -c ramfsaddr) -eq 0 ];
+            #isInFile4=$(cat $BOOT_DIR/config.txt | grep -c "ramfsaddr")
+            if [ $(cat $BOOT_DIR/config.txt | grep -c ramfsaddr) -eq 0 ];
             then
                 echo
                 echo "ADDING READ-ONLY MODE"
                 echo
                 echo "Candle: adding read-only mode" >> /dev/kmsg
-                echo "Candle: adding read-only mode" >> /boot/candle_log.txt
+                echo "Candle: adding read-only mode" >> $BOOT_DIR/candle_log.txt
         
-                mkinitramfs -o /boot/initrd
+                mkinitramfs -o $BOOT_DIR/initrd
     
             	echo "- Adding read only mode to config.txt"
-                echo >> /boot/config.txt
-                echo '# Read only mode' >> /boot/config.txt
-                echo 'initramfs initrd followkernel' >> /boot/config.txt
-                echo 'ramfsfile=initrd' >> /boot/config.txt
-                echo 'ramfsaddr=-1' >> /boot/config.txt
+                echo >> $BOOT_DIR/config.txt
+                echo '# Read only mode' >> $BOOT_DIR/config.txt
+                echo 'initramfs initrd followkernel' >> $BOOT_DIR/config.txt
+                echo 'ramfsfile=initrd' >> $BOOT_DIR/config.txt
+                echo 'ramfsaddr=-1' >> $BOOT_DIR/config.txt
     
             else
                 echo "- Read only file system mode was already in config.txt"
                 echo "Candle: read-only mode already existed" >> /dev/kmsg
-                echo "Candle: read-only mode already existed" >> /boot/candle_log.txt
+                echo "Candle: read-only mode already existed" >> $BOOT_DIR/candle_log.txt
             fi
 
 
-            if [ -f /boot/initrd ] && [ ! $(cat /boot/config.txt | grep -c "ramfsaddr") -eq 0 ];
+            if [ -f $BOOT_DIR/initrd ] && [ ! $(cat $BOOT_DIR/config.txt | grep -c "ramfsaddr") -eq 0 ];
             then
             
-                #isInFile5=$(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh")
-                if [ $(cat /boot/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
+                #isInFile5=$(cat $BOOT_DIR/cmdline.txt | grep -c "init=/bin/ro-root.sh")
+                if [ $(cat $BOOT_DIR/cmdline.txt | grep -c "init=/bin/ro-root.sh") -eq 0 ]
                 then
                 	echo "- Modifying cmdline.txt for read-only file system"
-                    echo "- - before: $(cat /boot/cmdline.txt)"
-                    sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' /boot/cmdline.txt
-                    echo "- - after : $(cat /boot/cmdline.txt)"
+                    echo "- - before: $(cat $BOOT_DIR/cmdline.txt)"
+                    sed -i ' 1 s|.*|& init=/bin/ro-root.sh|' $BOOT_DIR/cmdline.txt
+                    echo "- - after : $(cat $BOOT_DIR/cmdline.txt)"
                     echo "Candle: read-only mode is now enabled" >> /dev/kmsg
-                    echo "Candle: read-only mode is now enabled" >> /boot/candle_log.txt
+                    echo "Candle: read-only mode is now enabled" >> $BOOT_DIR/candle_log.txt
                 else
                     echo "- The cmdline.txt file was already modified with the read-only filesystem init command"
                     echo "Candle: read-only mode was already enabled" >> /dev/kmsg
-                    echo "Candle: read-only mode was already enabled" >> /boot/candle_log.txt
+                    echo "Candle: read-only mode was already enabled" >> $BOOT_DIR/candle_log.txt
                 fi
         
             fi
@@ -678,12 +687,12 @@ then
     if apt list --upgradable | grep raspberrypi-bootloader; then
         echo "WARNING, BOOTLOADER IS UPGRADEABLE"
         echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> /boot/candle_log.txt
+        echo "WARNING, BOOTLOADER IS UPGRADEABLE" >> $BOOT_DIR/candle_log.txt
     fi
     if apt list --upgradable | grep raspberrypi-kernel; then
         echo "WARNING, KERNEL IS UPGRADEABLE"
         echo "WARNING, KERNEL IS UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, KERNEL IS UPGRADEABLE" >> /boot/candle_log.txt
+        echo "WARNING, KERNEL IS UPGRADEABLE" >> $BOOT_DIR/candle_log.txt
     fi
 
 
@@ -694,9 +703,9 @@ then
         #apt install -y raspberrypi-bootloader
         echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!"
         echo "Candle: WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO. Takes a while!" >> /dev/kmsg
-        echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> /boot/candle_log.txt
+        echo "WARNING, DOING FULL UPGRADE. THIS WILL UPDATE THE KERNEL TOO." >> $BOOT_DIR/candle_log.txt
         
-        echo "no /boot/candle_first_run_complete.txt file yet, probably creating disk image"
+        echo "no $BOOT_DIR/candle_first_run_complete.txt file yet, probably creating disk image"
         # A little overkill:
 
         apt-get update -y
@@ -749,7 +758,7 @@ then
         echo
         echo "Candle: Apt upgrade complete."
         echo "Candle: Apt upgrade complete." >> /dev/kmsg
-        echo "Apt upgrade done" >> /boot/candle_log.txt
+        echo "Apt upgrade done" >> $BOOT_DIR/candle_log.txt
         echo
 
 
@@ -758,7 +767,7 @@ then
         if chromium-browser --version | grep -q 'Chromium 88'; then
             echo "Version 88 of ungoogled chromium detected. Removing..."
             echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
-            echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
             apt-get purge chromium-browser -y --allow-change-held-packages
             apt purge chromium-browser -y --allow-change-held-packages
             apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
@@ -766,21 +775,21 @@ then
             apt install chromium-browser -y --allow-change-held-packages
         fi
 
-        if [ -f /boot/candle_original_version.txt ] || [ ! -f /boot/candle_first_run_complete.txt ]; then
+        if [ -f $BOOT_DIR/candle_original_version.txt ] || [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
             echo
             echo "rebooting"
-            echo "$(date) - rebooting" >> /boot/candle_log.txt
+            echo "$(date) - rebooting" >> $BOOT_DIR/candle_log.txt
             echo
         
             # make sure the system is read-write and accessible again after the reboot.
-            touch /boot/candle_rw_once.txt
-            #touch /boot/ssh.txt
+            touch $BOOT_DIR/candle_rw_once.txt
+            #touch $BOOT_DIR/ssh.txt
         
             reboot
             sleep 60
             #echo "calling apt upgrade"
             #echo "Candle: doing apt upgrade" >> /dev/kmsg
-            #echo "Candle: doing apt upgrade" >> /boot/candle_log.txt
+            #echo "Candle: doing apt upgrade" >> $BOOT_DIR/candle_log.txt
             #DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &
             #wait
             #echo
@@ -798,53 +807,53 @@ fi
 
 
 # Download splash images
-if [ -f /boot/cmdline.txt ]; then
-    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png --retry-connrefused 
+if [ -f $BOOT_DIR/cmdline.txt ]; then
+    wget https://www.candlesmarthome.com/tools/error.png -O $BOOT_DIR/error.png --retry-connrefused 
     echo
     echo "Candle: downloading splash images and videos" >> /dev/kmsg
-    echo "Candle: downloading splash images and videos" >> /boot/candle_log.txt
+    echo "Candle: downloading splash images and videos" >> $BOOT_DIR/candle_log.txt
     echo
     
-    wget https://www.candlesmarthome.com/tools/splash_updating.png -O /boot/splash_updating.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O /boot/splash_updating180.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating.png -O $BOOT_DIR/splash_updating.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O $BOOT_DIR/splash_updating180.png --retry-connrefused 
     
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/splash_updating.png" ]; then
             echo "Candle: showing updating splash image" >> /dev/kmsg
-            echo "Candle: showing updating splash image" >> /boot/candle_log.txt
-            if [ -f /boot/rotate180.txt ]; then
-                /bin/ply-image /boot/splash_updating180.png
+            echo "Candle: showing updating splash image" >> $BOOT_DIR/candle_log.txt
+            if [ -f $BOOT_DIR/rotate180.txt ]; then
+                /bin/ply-image $BOOT_DIR/splash_updating180.png
                 if ps aux | grep -q /usr/bin/startx; then
-                    DISPLAY=:0 feh --bg-fill /boot/splash_updating180.png
+                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating180.png
                 fi
                     
             else
-                /bin/ply-image /boot/splash_updating.png
+                /bin/ply-image $BOOT_DIR/splash_updating.png
                 if ps aux | grep -q /usr/bin/startx; then
-                    DISPLAY=:0 feh --bg-fill /boot/splash_updating.png
+                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating.png
                 fi
             fi
         fi
         
         # Also start SSH
-        if [ -f /boot/developer.txt ] || [ -f /boot/candle_cutting_edge.txt ]; then
+        if [ -f $BOOT_DIR/developer.txt ] || [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
             echo "Candle: starting ssh" >> /dev/kmsg
-            echo "Candle: starting ssh" >> /boot/candle_log.txt
+            echo "Candle: starting ssh" >> $BOOT_DIR/candle_log.txt
             systemctl start ssh.service
         fi
                 
     fi
     
     # Download the rest of the images
-    wget https://www.candlesmarthome.com/tools/splash.png -O /boot/splash.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash180.png -O /boot/splash180.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splashalt.png -O /boot/splashalt.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash180alt.png -O /boot/splash180alt.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash.mp4 -O /boot/splash.mp4 --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O /boot/splash180.mp4 --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_preparing.png -O /boot/splash_preparing.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_preparing180.png -O /boot/splash_preparing180.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash.png -O $BOOT_DIR/splash.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash180.png -O $BOOT_DIR/splash180.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splashalt.png -O $BOOT_DIR/splashalt.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash180alt.png -O $BOOT_DIR/splash180alt.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash.mp4 -O $BOOT_DIR/splash.mp4 --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O $BOOT_DIR/splash180.mp4 --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_preparing.png -O $BOOT_DIR/splash_preparing.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_preparing180.png -O $BOOT_DIR/splash_preparing180.png --retry-connrefused 
     
 fi
 
@@ -876,11 +885,11 @@ if [ -d /home/pi/configuration-files ]; then
 fi
 
 # Download ready-made settings files from the Candle github
-if [ -f /boot/candle_cutting_edge.txt ]; then
+if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     
     echo "Candle: Starting download of cutting edge configuration files"
     echo "Candle: Starting download of cutting edge configuration files" >> /dev/kmsg
-    echo "Candle: Starting download of cutting edge configuration files" >> /boot/candle_log.txt
+    echo "Candle: Starting download of cutting edge configuration files" >> $BOOT_DIR/candle_log.txt
     git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
     if [ -d /home/pi/configuration-files ]; then
         rm /home/pi/configuration-files/LICENSE
@@ -891,7 +900,7 @@ if [ -f /boot/candle_cutting_edge.txt ]; then
 else
     echo "Candle: Starting download of stable configuration files"
     echo "Candle: Starting download of stable configuration files" >> /dev/kmsg
-    echo "Candle: Starting download of stable configuration files" >> /boot/candle_log.txt
+    echo "Candle: Starting download of stable configuration files" >> $BOOT_DIR/candle_log.txt
     curl -s https://api.github.com/repos/createcandle/configuration-files/releases/latest \
     | grep "tarball_url" \
     | cut -d : -f 2,3 \
@@ -920,14 +929,14 @@ if [ ! -d /home/pi/configuration-files ]; then
     echo 
     echo "ERROR, failed to download latest configuration files"
     echo "Candle: ERROR, failed to download latest configuration files" >> /dev/kmsg
-    echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
+    echo "$(date) - failed to download latest configuration files" >> $BOOT_DIR/candle_log.txt
     echo "$(date) - failed to download latest configuration files" >> /home/pi/.webthings/candle.log
-    echo "$(date) - failed to download latest configuration files" >> /boot/candle_log.txt
+    echo "$(date) - failed to download latest configuration files" >> $BOOT_DIR/candle_log.txt
     echo
     
     # Show error image
-    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-        /bin/ply-image /boot/error.png
+    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+        /bin/ply-image $BOOT_DIR/error.png
         #sleep 7200
     fi
     
@@ -952,24 +961,24 @@ then
     echo
     echo "PRE-DOWNLOADING CANDLE CONTROLLER"
     echo "Candle: starting download of Candle controller" >> /dev/kmsg
-    echo "Candle: starting download of Candle controller" >> /boot/candle_log.txt
+    echo "Candle: starting download of Candle controller" >> $BOOT_DIR/candle_log.txt
     echo
 
     cd /home/pi
     #rm -rf /home/pi/webthings
     #rm -rf /home/pi/.webthings # too dangerous
     
-    if [ -f /boot/candle_cutting_edge.txt ]; then
+    if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
         echo "Candle: Starting download of cutting edge controller install script"
         echo "Candle: Starting download of cutting edge controller install script" >> /dev/kmsg
-        echo "Candle: Starting download of cutting edge controller install script" >> /boot/candle_log.txt
+        echo "Candle: Starting download of cutting edge controller install script" >> $BOOT_DIR/candle_log.txt
         echo
         wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_candle_controller.sh -O ./install_candle_controller.sh --retry-connrefused 
         
     else
         echo "Candle: Starting download of stable controller install script"
         echo "Candle: Starting download of stable controller install script" >> /dev/kmsg
-        echo "Candle: Starting download of stable controller install script" >> /boot/candle_log.txt
+        echo "Candle: Starting download of stable controller install script" >> $BOOT_DIR/candle_log.txt
         echo
         curl -s https://api.github.com/repos/createcandle/install-scripts/releases/latest \
         | grep "tarball_url" \
@@ -1001,7 +1010,7 @@ then
         
         echo "Candle: Starting download of stable controller tar"
         echo "Candle: Starting download of stable controller tar. Takes a while." >> /dev/kmsg
-        echo "Candle: Starting download of stable controller tar" >> /boot/candle_log.txt
+        echo "Candle: Starting download of stable controller tar" >> $BOOT_DIR/candle_log.txt
         wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O /home/pi/latest_stable_controller.tar --retry-connrefused 
         wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O /home/pi/latest_stable_controller.tar.txt --retry-connrefused 
         
@@ -1009,7 +1018,7 @@ then
             
             echo "controller tar & md5 downloaded OK"
             echo "Candle: controller tar & md5 downloaded OK" >> /dev/kmsg
-            echo "Candle: controller tar & md5 downloaded OK" >> /boot/candle_log.txt
+            echo "Candle: controller tar & md5 downloaded OK" >> $BOOT_DIR/candle_log.txt
             
             if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat /home/pi/latest_stable_controller.tar.txt)" ]; then
                 echo "MD5 checksum of latest_stable_controller.tar matched"
@@ -1023,7 +1032,7 @@ then
             else
                 echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?"
                 echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /dev/kmsg
-                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /boot/candle_log.txt
+                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> $BOOT_DIR/candle_log.txt
                 
                 if [ -f /home/pi/latest_stable_controller.tar ]; then
                     rm /home/pi/latest_stable_controller.tar
@@ -1035,8 +1044,8 @@ then
                 # Show error image
                 if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
                 then
-                    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                        /bin/ply-image /boot/error.png
+                    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+                        /bin/ply-image $BOOT_DIR/error.png
                         #sleep 7200
                     fi
                 fi
@@ -1047,7 +1056,7 @@ then
         else
             echo "Candle: download of stable controller tar or md5 failed. Aborting."
             echo "Candle: Error, download of stable controller tar or md5 failed. Aborting." >> /dev/kmsg
-            echo "$(date) - download of stable controller tar or md5 failed. Aborting." >> /boot/candle_log.txt
+            echo "$(date) - download of stable controller tar or md5 failed. Aborting." >> $BOOT_DIR/candle_log.txt
             
             if [ -f /home/pi/latest_stable_controller.tar ]; then
                 rm /home/pi/latest_stable_controller.tar
@@ -1059,8 +1068,8 @@ then
             # Show error image
             if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
             then
-                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                    /bin/ply-image /boot/error.png
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+                    /bin/ply-image $BOOT_DIR/error.png
                     #sleep 7200
                 fi
             fi
@@ -1076,15 +1085,15 @@ then
         echo
         echo "ERROR, missing install_candle_controller.sh file"
         echo "Candle: ERROR, missing install_candle_controller.sh file. Aborting." >> /dev/kmsg
-        echo "$(date) - Failed to download install_candle_controller script" >> /boot/candle_log.txt
+        echo "$(date) - Failed to download install_candle_controller script" >> $BOOT_DIR/candle_log.txt
         echo "$(date) - Failed to download install_candle_controller script" >> /home/pi/.webthings/candle.log
         echo
     
         # Show error image
         if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
         then
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                /bin/ply-image /boot/error.png
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+                /bin/ply-image $BOOT_DIR/error.png
                 #sleep 7200
             fi
         fi
@@ -1109,12 +1118,12 @@ then
     if apt list --upgradable | grep raspberrypi-bootloader; then
         echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE"
         echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE" >> /boot/candle_log.txt
+        echo "WARNING, BOOTLOADER IS STILL UPGRADEABLE" >> $BOOT_DIR/candle_log.txt
     fi
     if apt list --upgradable | grep raspberrypi-kernel; then
         echo "WARNING, KERNEL IS STILL UPGRADEABLE"
         echo "WARNING, KERNEL IS STILL UPGRADEABLE" >> /dev/kmsg
-        echo "WARNING, KERNEL IS STILL UPGRADEABLE" >> /boot/candle_log.txt
+        echo "WARNING, KERNEL IS STILL UPGRADEABLE" >> $BOOT_DIR/candle_log.txt
     fi
 
     apt-get update -y
@@ -1123,7 +1132,7 @@ then
     if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
         echo "STRANGE ERROR, the kernel update should already be done at this point"
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> /dev/kmsg
-        echo "STRANGE ERROR, the kernel update should already be done at this point" >> /boot/candle_log.txt
+        echo "STRANGE ERROR, the kernel update should already be done at this point" >> $BOOT_DIR/candle_log.txt
         
         apt-mark unhold chromium-browser
         
@@ -1138,7 +1147,7 @@ then
     
         if chromium-browser --version | grep -q 'Chromium 88'; then
             echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
-            echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+            echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
             apt-get purge chromium-browser -y --allow-change-held-packages
             apt purge chromium-browser -y --allow-change-held-packages
             apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
@@ -1147,14 +1156,14 @@ then
         fi
 
 
-        if [ -f /boot/candle_original_version.txt ] || [ ! -f /boot/candle_first_run_complete.txt ]; then
+        if [ -f $BOOT_DIR/candle_original_version.txt ] || [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
             echo
             echo "rebooting"
-            echo "$(date) - rebooting" >> /boot/candle_log.txt
+            echo "$(date) - rebooting" >> $BOOT_DIR/candle_log.txt
             echo
         
             # make sure the system is read-write and accessible again after the reboot.
-            touch /boot/candle_rw_once.txt
+            touch $BOOT_DIR/candle_rw_once.txt
         
             reboot
             sleep 60
@@ -1167,7 +1176,7 @@ then
     
         echo "doing system update, allowing kernel updates for now"
         echo "doing system update, allowing kernel updates for now" >> /dev/kmsg
-        echo "doing system update, allowing kernel updates for now" >> /boot/candle_log.txt
+        echo "doing system update, allowing kernel updates for now" >> $BOOT_DIR/candle_log.txt
         apt-mark unhold raspberrypi-kernel
         apt-mark unhold raspberrypi-kernel-headers 
         apt-mark unhold raspberrypi-bootloader
@@ -1202,14 +1211,14 @@ then
     echo
     echo "INSTALLING APPLICATIONS AND LIBRARIES"
     echo "Candle: installing packages and libraries" >> /dev/kmsg
-    echo "Candle: installing packages and libraries" >> /boot/candle_log.txt
+    echo "Candle: installing packages and libraries" >> $BOOT_DIR/candle_log.txt
     echo
 
 
     # Update apt sources
     #set -e
     echo "calling apt update" >> /dev/kmsg
-    echo "calling apt update" >> /boot/candle_log.txt 
+    echo "calling apt update" >> $BOOT_DIR/candle_log.txt 
     apt update -y
     apt-get update -y
     apt --fix-broken install -y
@@ -1219,17 +1228,17 @@ then
     # Just to be safe, try showing the splash images again
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
-            if [ -f /boot/rotate180.txt ]; then
-                /bin/ply-image /boot/splash_updating180.png
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/splash_updating.png" ]; then
+            if [ -f $BOOT_DIR/rotate180.txt ]; then
+                /bin/ply-image $BOOT_DIR/splash_updating180.png
                 if ps aux | grep -q /usr/bin/startx; then
-                    DISPLAY=:0 feh --bg-fill /boot/splash_updating180.png
+                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating180.png
                 fi
                     
             else
-                /bin/ply-image /boot/splash_updating.png
+                /bin/ply-image $BOOT_DIR/splash_updating.png
                 if ps aux | grep -q /usr/bin/startx; then
-                    DISPLAY=:0 feh --bg-fill /boot/splash_updating.png
+                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating.png
                 fi
             fi
         fi
@@ -1246,17 +1255,17 @@ then
     # Just to be safe, try showing the splash images again
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/splash_updating.png" ]; then
-            if [ -f /boot/rotate180.txt ]; then
-                /bin/ply-image /boot/splash_updating180.png
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/splash_updating.png" ]; then
+            if [ -f $BOOT_DIR/rotate180.txt ]; then
+                /bin/ply-image $BOOT_DIR/splash_updating180.png
                 if ps aux | grep -q /usr/bin/startx; then
-                    DISPLAY=:0 feh --bg-fill /boot/splash_updating180.png
+                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating180.png
                 fi
                     
             else
-                /bin/ply-image /boot/splash_updating.png
+                /bin/ply-image $BOOT_DIR/splash_updating.png
                 if ps aux | grep -q /usr/bin/startx; then
-                    DISPLAY=:0 feh --bg-fill /boot/splash_updating.png
+                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating.png
                 fi
             fi
         fi
@@ -1267,14 +1276,14 @@ then
     echo
     echo "installing chromium-browser"
     echo "Candle: installing chromium-browser" >> /dev/kmsg
-    echo "Candle: installing chromium-browser" >> /boot/candle_log.txt
+    echo "Candle: installing chromium-browser" >> $BOOT_DIR/candle_log.txt
     echo
     
     apt-mark unhold chromium-browser
     
     if chromium-browser --version | grep -q 'Chromium 88'; then
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
-        echo "Version 88 of ungoogled chromium detected. Removing..." >> /boot/candle_log.txt
+        echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
         apt-get purge chromium-browser -y --allow-change-held-packages
         apt purge chromium-browser -y --allow-change-held-packages
         apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
@@ -1296,7 +1305,7 @@ then
     echo
     echo "installing git"
     echo "Candle: installing git" >> /dev/kmsg
-    echo "Candle: installing git" >> /boot/candle_log.txt
+    echo "Candle: installing git" >> $BOOT_DIR/candle_log.txt
     echo
     apt -y install git "$reinstall" 
 
@@ -1329,14 +1338,14 @@ then
     echo
     echo "installing support packages like ffmpeg, arping, libolm, sqlite, mosquitto"
     echo "Candle: installing support packages" >> /dev/kmsg
-    echo "Candle: installing support packages" >> /boot/candle_log.txt
+    echo "Candle: installing support packages" >> $BOOT_DIR/candle_log.txt
     echo
 
     # Debian Bookworm doesn't have libffi7 anymore
     for i in arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils jq; do
             echo "$i"
             echo "Candle: installing $i" >> /dev/kmsg
-            echo "Candle: installing $i" >> /boot/candle_log.txt
+            echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
             apt -y install "$i" --print-uris "$reinstall" 
             echo
         done
@@ -1344,7 +1353,7 @@ then
     # Quick sanity check
     if [ ! -f /usr/sbin/mosquitto ]; then
         echo "Candle: WARNING, mosquitto failed to install the first time" >> /dev/kmsg
-        echo "Candle: WARNING, mosquitto failed to install the first time" >> /boot/candle_log.txt
+        echo "Candle: WARNING, mosquitto failed to install the first time" >> $BOOT_DIR/candle_log.txt
         apt -y --reinstall install mosquitto  
     fi
 
@@ -1356,7 +1365,7 @@ then
     for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> /boot/candle_log.txt
+        echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
         apt-get -y --no-install-recommends install "$i"  "$reinstall" #--print-uris
         echo
     done
@@ -1369,7 +1378,7 @@ then
     for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> /boot/candle_log.txt
+        echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
         apt -y install "$i" "$reinstall"  #--print-uris
         echo
     done
@@ -1380,7 +1389,7 @@ then
     for i in python3-picamera2 python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> /boot/candle_log.txt
+        echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
         apt -y install "$i"  "$reinstall" #--print-uris
         echo
     done
@@ -1388,7 +1397,7 @@ then
     echo
     echo "INSTALLING HOSTAPD AND DNSMASQ"
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
-    echo "Candle: installing hostapd and dnsmasq" >> /boot/candle_log.txt
+    echo "Candle: installing hostapd and dnsmasq" >> $BOOT_DIR/candle_log.txt
 
     apt -y install dnsmasq  "$reinstall" #--print-uris
     systemctl disable dnsmasq.service
@@ -1429,7 +1438,7 @@ then
     do
         if [ -z "$(which $i)" ]; then
             echo "Candle: WARNING, $i binary not found. Reinstalling."  >> /dev/kmsg
-            echo "Candle: WARNING, $i binary not found. Reinstalling."  >> /boot/candle_log.txt
+            echo "Candle: WARNING, $i binary not found. Reinstalling."  >> $BOOT_DIR/candle_log.txt
             apt -y purge "$i"
             sleep 2
             apt -y install "$i"
@@ -1469,12 +1478,12 @@ then
                 echo
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
-                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /boot/candle_log.txt
+                echo "Candle: ERROR, $i package still did not install. Aborting..." >> $BOOT_DIR/candle_log.txt
                 dpkg -s "$i"
                 
                 # Show error image
-                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-                    /bin/ply-image /boot/error.png
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/error.png" ]; then
+                    /bin/ply-image $BOOT_DIR/error.png
                     #sleep 7200
                 fi
     
@@ -1510,14 +1519,14 @@ then
                 echo
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
-                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /boot/candle_log.txt
+                echo "Candle: ERROR, $i package still did not install. Aborting..." >> $BOOT_DIR/candle_log.txt
                 dpkg -s "$i"
                 
                 # Show error image
                 if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
                 then
-                    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-                        /bin/ply-image /boot/error.png
+                    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/error.png" ]; then
+                        /bin/ply-image $BOOT_DIR/error.png
                         #sleep 7200
                     fi
                 fi
@@ -1536,7 +1545,7 @@ then
     echo
     echo "RUNNING APT UPGRADE"
     echo "Candle: running apt upgrade command" >> /dev/kmsg
-    echo "Candle: running apt upgrade command" >> /boot/candle_log.txt
+    echo "Candle: running apt upgrade command" >> $BOOT_DIR/candle_log.txt
     echo
     #apt upgrade -y
     apt-get update -y
@@ -1568,13 +1577,13 @@ else
     echo "Error detected in the packages install phase (git is missing). Try running the Candle install script again."
     echo ""
     echo "Candle: error GIT failed to install" >> /dev/kmsg
-    echo "Candle: error GIT failed to install" >> /boot/candle_log.txt
+    echo "Candle: error GIT failed to install" >> $BOOT_DIR/candle_log.txt
     
     # Show error image
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-            /bin/ply-image /boot/error.png
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/error.png" ]; then
+            /bin/ply-image $BOOT_DIR/error.png
             #sleep 7200
         fi
     fi
@@ -1594,13 +1603,13 @@ else
     echo "Error detected in the packages install phase (browser is missing). Try running the Candle install script again."
     echo ""
     echo "Candle: error browser failed to install" >> /dev/kmsg
-    echo "Candle: error browser failed to install" >> /boot/candle_log.txt
+    echo "Candle: error browser failed to install" >> $BOOT_DIR/candle_log.txt
     
     # Show error image
     if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
     then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "/boot/error.png" ]; then
-            /bin/ply-image /boot/error.png
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/error.png" ]; then
+            /bin/ply-image $BOOT_DIR/error.png
             #sleep 7200
         fi
     fi
@@ -1810,7 +1819,7 @@ fi
 if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]];
 then
     
-    #if [ ! -f /boot/candle_original_version.txt ]; then
+    #if [ ! -f $BOOT_DIR/candle_original_version.txt ]; then
     
         echo
         echo "INSTALLING RESPEAKER HAT DRIVERS"
@@ -1836,7 +1845,7 @@ then
                 if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
                     echo "ReSpeaker has an updated version!"
                     echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
-                    echo "ReSpeaker has an updated version! Attempting to install" >> /boot/candle_log.txt
+                    echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
                     ./uninstall.sh
                     echo -e 'N\n' | ./install.sh
                     cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
@@ -1857,7 +1866,7 @@ then
         fi
         
     #else
-    #    echo "/boot/candle_original_version.txt already existed, skipping respeaker driver install"
+    #    echo "$BOOT_DIR/candle_original_version.txt already existed, skipping respeaker driver install"
     #fi
     
     
@@ -1865,7 +1874,7 @@ else
     echo
     echo "Candle: skipping ReSpeaker drivers install"
     echo "Candle: skipping ReSpeaker drivers install" >> /dev/kmsg
-    echo "Candle: skipping ReSpeaker drivers install" >> /boot/candle_log.txt
+    echo "Candle: skipping ReSpeaker drivers install" >> $BOOT_DIR/candle_log.txt
     echo
 fi
 
@@ -1879,7 +1888,7 @@ then
     echo
     echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
     echo "Candle: building BlueAlsa (audio streaming)" >> /dev/kmsg
-    echo "Candle: building BlueAlsa (audio streaming)" >> /boot/candle_log.txt
+    echo "Candle: building BlueAlsa (audio streaming)" >> $BOOT_DIR/candle_log.txt
     echo
     
     adduser --system --group --no-create-home bluealsa
@@ -1910,7 +1919,7 @@ then
 
 else
     echo "Candle: Skipping BlueAlsa build" >> /dev/kmsg
-    echo "Candle: Skipping BlueAlsa build" >> /boot/candle_log.txt
+    echo "Candle: Skipping BlueAlsa build" >> $BOOT_DIR/candle_log.txt
 fi
 
 cd /home/pi
@@ -1944,7 +1953,7 @@ if lsblk | grep -q 'mmcblk0p4'; then
     
     echo "Downloading the recovery partition"
     echo "Downloading the recovery partition" >> /dev/kmsg
-    echo "Downloading the recovery partition" >> /boot/candle_log.txt
+    echo "Downloading the recovery partition" >> $BOOT_DIR/candle_log.txt
     
     wget https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz --retry-connrefused 
 
@@ -1958,7 +1967,7 @@ if lsblk | grep -q 'mmcblk0p4'; then
 
             echo "Copying recovery partition data"
             echo "Copying recovery partition data" >> /dev/kmsg
-            echo "Copying recovery partition data" >> /boot/candle_log.txt
+            echo "Copying recovery partition data" >> $BOOT_DIR/candle_log.txt
             dd if=recovery.fs of=/dev/mmcblk0p3 bs=1M
 
             #if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then 
@@ -1966,7 +1975,7 @@ if lsblk | grep -q 'mmcblk0p4'; then
         else
             echo "ERROR, failed to download or extract the recovery disk image"
             echo "ERROR, failed to download or extract the recovery disk image" >> /dev/kmsg
-            echo "ERROR, failed to download or extract the recovery disk image" >> /boot/candle_log.txt
+            echo "ERROR, failed to download or extract the recovery disk image" >> $BOOT_DIR/candle_log.txt
         fi
 
         rm recovery.fs.tar.gz
@@ -1975,8 +1984,8 @@ if lsblk | grep -q 'mmcblk0p4'; then
         echo "ERROR, recovery partition file not downloaded"
     
         # Show error image
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-            /bin/ply-image /boot/error.png
+        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+            /bin/ply-image $BOOT_DIR/error.png
             #sleep 7200
         fi
         
@@ -2104,7 +2113,7 @@ if [ -d /home/pi/configuration-files ]; then
 
     echo "Copying configuration files into place"
     echo "Candle: Copying configuration files into place" >> /dev/kmsg
-    echo "Candle: Copying configuration files into place" >> /boot/candle_log.txt
+    echo "Candle: Copying configuration files into place" >> $BOOT_DIR/candle_log.txt
     
     rm /home/pi/configuration-files/LICENSE
     rm /home/pi/configuration-files/README.md
@@ -2113,10 +2122,10 @@ if [ -d /home/pi/configuration-files ]; then
     if [ -d /home/pi/candle/configuration-files-backup ]; then
         rm -rf /home/pi/candle/configuration-files-backup/*
         echo "Updating backup of the configuration files" >> /dev/kmsg
-        echo "Updating backup of the configuration files" >> /boot/candle_log.txt
+        echo "Updating backup of the configuration files" >> $BOOT_DIR/candle_log.txt
     else
         echo "Creating intial backup of the configuration files" >> /dev/kmsg
-        echo "Creating intial backup of the configuration files" >> /boot/candle_log.txt
+        echo "Creating intial backup of the configuration files" >> $BOOT_DIR/candle_log.txt
         mkdir -p /home/pi/candle/configuration-files-backup
     fi
     
@@ -2128,21 +2137,21 @@ if [ -d /home/pi/configuration-files ]; then
     echo "Doing rsync from configuration-files-backup"
     rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
     echo "Configuration files should be copied" >> /dev/kmsg
-    echo "Configuration files should be copied" >> /boot/candle_log.txt
+    echo "Configuration files should be copied" >> $BOOT_DIR/candle_log.txt
     
 else
    
     echo "Error, configuration files directory missing"
     echo "Candle: Error, configuration files directory missing" >> /dev/kmsg
-    echo "Error, configuration files directory missing" >> /boot/candle_log.txt
+    echo "Error, configuration files directory missing" >> $BOOT_DIR/candle_log.txt
 fi
 
 
 
-#if [ ! -f /boot/candle_config_version.txt ]; then
-#    touch /boot/candle_config_version.txt
+#if [ ! -f $BOOT_DIR/candle_config_version.txt ]; then
+#    touch $BOOT_DIR/candle_config_version.txt
 #fi
-#if ! diff -q /home/pi/configuration-files/boot/candle_config_version.txt /boot/candle_config_version.txt &>/dev/null; 
+#if ! diff -q /home/pi/configuration-files/boot/candle_config_version.txt $BOOT_DIR/candle_config_version.txt &>/dev/null; 
 #then
 #    echo "Different config version, intiating Rsync"
 #    echo "Candle: Different config version, intiating Rsync" >> /dev/kmsg
@@ -2152,9 +2161,9 @@ fi
 #fi
 
 # This is handled by prepare_disk_image
-#if [ ! -f /boot/candle_first_run_complete.txt ]; then
+#if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
 #    if [ -f /home/pi/candle/candle_first_run.sh ]; then
-#        cp /home/pi/candle/candle_first_run.sh /boot/candle_first_run.sh
+#        cp /home/pi/candle/candle_first_run.sh $BOOT_DIR/candle_first_run.sh
 #    fi
 #fi
 #chmod +x /home/pi/candle_first_run.sh
@@ -2277,7 +2286,7 @@ fi
 echo
 echo "ENABLING AND DISABLING SERVICES"
 echo "Candle: enabling services" >> /dev/kmsg
-echo "Candle: enabling services" >> /boot/candle_log.txt
+echo "Candle: enabling services" >> $BOOT_DIR/candle_log.txt
 echo
 #systemctl daemon-reload
 
@@ -2362,71 +2371,71 @@ fi
 
 # KIOSK
 
-if [ -f /boot/config.txt ]; then
+if [ -f $BOOT_DIR/config.txt ]; then
 
     # Hides the Raspberry Pi logos normally shown at boot
 
-    if [ $(cat /boot/config.txt | grep -c "disable_splash") -eq 0 ];
+    if [ $(cat $BOOT_DIR/config.txt | grep -c "disable_splash") -eq 0 ];
     then
     	echo "- Adding disable_splash to config.txt"
-    	echo 'disable_splash=1' >> /boot/config.txt
+    	echo 'disable_splash=1' >> $BOOT_DIR/config.txt
     else
         echo "- Splash was already disabled in config.txt"
     fi
 
     # add HDMI always on
-    if [ $(cat /boot/config.txt | grep -c "hdmi_force_hotplug") -eq 0 ];
+    if [ $(cat $BOOT_DIR/config.txt | grep -c "hdmi_force_hotplug") -eq 0 ];
     then
     	echo "- Adding hdmi_force_hotplug=1 to config.txt"
-    	echo 'hdmi_force_hotplug=1' >> /boot/config.txt
+    	echo 'hdmi_force_hotplug=1' >> $BOOT_DIR/config.txt
     else
         echo "- hdmi_force_hotplug was already in config.txt"
-        if [ $(cat /boot/config.txt | grep -c "#hdmi_force_hotplug=1") -eq 0 ];
+        if [ $(cat $BOOT_DIR/config.txt | grep -c "#hdmi_force_hotplug=1") -eq 0 ];
         then
-            sed -i 's|#hdmi_force_hotplug=1|hdmi_force_hotplug=1|g' /boot/config.txt
+            sed -i 's|#hdmi_force_hotplug=1|hdmi_force_hotplug=1|g' $BOOT_DIR/config.txt
             
         fi
     fi
 
 
     # Hide the text normally shown when linux boots up
-    isInFile=$(cat /boot/cmdline.txt | grep -c "tty3")
+    isInFile=$(cat $BOOT_DIR/cmdline.txt | grep -c "tty3")
     if [ $isInFile -eq 0 ]
     then    
     	echo "- Modifying cmdline.txt"
         echo "Candle: adding kiosk parameters to cmdline.txt" >> /dev/kmsg
-        echo "Candle: adding kiosk parameters to cmdline.txt" >> /boot/candle_log.txt
+        echo "Candle: adding kiosk parameters to cmdline.txt" >> $BOOT_DIR/candle_log.txt
     	# change text output to third console. press alt-shift-F3 during boot to see it again.
-        sed -i ' 1 s/tty1/tty3/' /boot/cmdline.txt
+        sed -i ' 1 s/tty1/tty3/' $BOOT_DIR/cmdline.txt
         
         echo "cmdline in between after switchting tty to 3:"
-        cat /boot/cmdline.txt
+        cat $BOOT_DIR/cmdline.txt
         echo
         
     	# hide all the small things normally shown at boot
-    	sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' /boot/cmdline.txt   
+    	sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' $BOOT_DIR/cmdline.txt   
         
         echo "cmdline in between after hiding kiosk:"
-        cat /boot/cmdline.txt
+        cat $BOOT_DIR/cmdline.txt
         echo     
     else
         echo "- The cmdline.txt file was already modified"
         echo "Candle: cmdline.txt kiosk parameters were already present" >> /dev/kmsg
-        echo "Candle: cmdline.txt kiosk parameters were already present" >> /boot/candle_log.txt
+        echo "Candle: cmdline.txt kiosk parameters were already present" >> $BOOT_DIR/candle_log.txt
     fi
     
     # Use the older display driver for now, as this solves many audio headaches.
     # https://github.com/raspberrypi/linux/issues/4543
     echo "setting fkms display driver"
-    sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' /boot/config.txt
+    sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' $BOOT_DIR/config.txt
 
 
     # Set more power for USB ports
-    isInFile3=$(cat /boot/config.txt | grep -c "max_usb_current")
+    isInFile3=$(cat $BOOT_DIR/config.txt | grep -c "max_usb_current")
     if [ $isInFile3 -eq 0 ]
     then
     	echo "- Setting USB to deliver more current in config.txt"
-    	echo 'max_usb_current=1' >> /boot/config.txt
+    	echo 'max_usb_current=1' >> $BOOT_DIR/config.txt
     else
         echo "- USB was already set to deliver more current in config.txt"
     fi
@@ -2528,21 +2537,21 @@ fi
 
 
 # Download some more splash screens
-if [ ! -f "/boot/splash_updating-0.png" ]; then
+if [ ! -f "$BOOT_DIR/splash_updating-0.png" ]; then
     echo "Downloading progress bar images"
-    wget https://www.candlesmarthome.com/tools/splash_updating-0.png -O /boot/splash_updating-0.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating-1.png -O /boot/splash_updating-1.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating-2.png -O /boot/splash_updating-2.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating-3.png -O /boot/splash_updating-3.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating-4.png -O /boot/splash_updating-4.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating-5.png -O /boot/splash_updating-5.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating180-0.png -O /boot/splash_updating180-0.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating180-1.png -O /boot/splash_updating180-1.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating180-2.png -O /boot/splash_updating180-2.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating180-3.png -O /boot/splash_updating180-3.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating180-4.png -O /boot/splash_updating180-4.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating180-5.png -O /boot/splash_updating180-5.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/error.png -O /boot/error.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-0.png -O $BOOT_DIR/splash_updating-0.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-1.png -O $BOOT_DIR/splash_updating-1.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-2.png -O $BOOT_DIR/splash_updating-2.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-3.png -O $BOOT_DIR/splash_updating-3.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-4.png -O $BOOT_DIR/splash_updating-4.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating-5.png -O $BOOT_DIR/splash_updating-5.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-0.png -O $BOOT_DIR/splash_updating180-0.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-1.png -O $BOOT_DIR/splash_updating180-1.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-2.png -O $BOOT_DIR/splash_updating180-2.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-3.png -O $BOOT_DIR/splash_updating180-3.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-4.png -O $BOOT_DIR/splash_updating180-4.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/splash_updating180-5.png -O $BOOT_DIR/splash_updating180-5.png --retry-connrefused 
+    wget https://www.candlesmarthome.com/tools/error.png -O $BOOT_DIR/error.png --retry-connrefused 
 fi
 
 
@@ -2554,7 +2563,7 @@ echo
 echo "CLEANING UP"
 echo
 echo "Candle: almost done, cleaning up" >> /dev/kmsg
-echo "Candle: almost done, cleaning up" >> /boot/candle_log.txt
+echo "Candle: almost done, cleaning up" >> $BOOT_DIR/candle_log.txt
 
 
 # Clean NPM cache
@@ -2630,7 +2639,7 @@ if [ -f /home/pi/.webthings/swap ]; then
 fi
 if [ -f /var/swap ]; then
     echo "Candle: removing swap" >> /dev/kmsg
-    echo "Candle: removing swap" >> /boot/candle_log.txt
+    echo "Candle: removing swap" >> $BOOT_DIR/candle_log.txt
     swapoff /var/swap
     rm /var/swap
 fi
@@ -2652,10 +2661,10 @@ echo '{"optOut": true,"lastUpdateCheck": 0}' > /home/pi/.config/configstore/upda
 chown pi:pi /home/pi/.config/configstore/update-notifier-npm.json 
 
 # Remove files left over by Windows or MacOS
-rm -rf /boot/.Spotlight*
+rm -rf $BOOT_DIR/.Spotlight*
 
-if [ -f /boot/._cmdline.txt ]; then
-    rm /boot/._cmdline.txt
+if [ -f $BOOT_DIR/._cmdline.txt ]; then
+    rm $BOOT_DIR/._cmdline.txt
 fi
 
 
@@ -2667,11 +2676,11 @@ then
     echo "candle" > /etc/hostname
     echo "candle" > /home/pi/.webthings/etc/hostname
     echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /boot/candle_log.txt
+    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
 else
     echo "/home/pi/.webthings/etc/hostname already existed"
     echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /boot/candle_log.txt
+    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
 fi
 
 
@@ -2689,22 +2698,22 @@ fi
 
 
 # Set to boot from partition2
-if cat /boot/cmdline.txt | grep -q PARTUUID; then
+if cat $BOOT_DIR/cmdline.txt | grep -q PARTUUID; then
     echo "replacing PARTUUID= in bootcmd.txt with /dev/mmcblk0p2"
-    sed -i ' 1 s|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' /boot/cmdline.txt # should that g be there?
-    #sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' /boot/cmdline.txt   
+    sed -i ' 1 s|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' $BOOT_DIR/cmdline.txt # should that g be there?
+    #sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' $BOOT_DIR/cmdline.txt   
 fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
 if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
 
-    if [ -f /boot/fstab3.bak ] \
-    && [ -f /boot/fstab4.bak ]; then
-        echo "/boot/fstab3.bak and /boot/fstab4.bak exist"
+    if [ -f $BOOT_DIR/fstab3.bak ] \
+    && [ -f $BOOT_DIR/fstab4.bak ]; then
+        echo "$BOOT_DIR/fstab3.bak and $BOOT_DIR/fstab4.bak exist"
     else
-        echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist"
-        echo "WARNING, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /dev/kmsg
-        echo "ERROR, /boot/fstab3.bak and /boot/fstab4.bak do not exist" >> /boot/candle_log.txt
+        echo "ERROR, $BOOT_DIR/fstab3.bak and $BOOT_DIR/fstab4.bak do not exist"
+        echo "WARNING, $BOOT_DIR/fstab3.bak and $BOOT_DIR/fstab4.bak do not exist" >> /dev/kmsg
+        echo "ERROR, $BOOT_DIR/fstab3.bak and $BOOT_DIR/fstab4.bak do not exist" >> $BOOT_DIR/candle_log.txt
     fi
 
     if [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
@@ -2723,7 +2732,7 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
         then
             echo "copying 4 partition version of fstab"
             echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
-            echo "Candle: copying 4 partition version of fstab" >> /boot/candle_log.txt
+            echo "Candle: copying 4 partition version of fstab" >> $BOOT_DIR/candle_log.txt
         
             if ! diff -q /home/pi/configuration-files/boot/fstab4.bak /etc/fstab &>/dev/null; then
                 echo "fstab file is different, copying it"
@@ -2735,7 +2744,7 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
         else
             echo "copying 3 partition version of fstab"
             echo "Candle: copying 3 partition version of fstab" >> /dev/kmsg
-            echo "Candle: copying 3 partition version of fstab" >> /boot/candle_log.txt
+            echo "Candle: copying 3 partition version of fstab" >> $BOOT_DIR/candle_log.txt
         
             if ! diff -q /home/pi/configuration-files/boot/fstab3.bak /etc/fstab &>/dev/null; then
                 echo "3 partition fstab file is different, copying it"
@@ -2744,7 +2753,7 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
             else
                 echo "new fstab file is same as the old one, not copying it."
                 echo "Candle: new fstab file is same as the old one, not copying it." >> /dev/kmsg
-                echo "new 3 partition fstab file is same as the old one, not copying it." >> /boot/candle_log.txt
+                echo "new 3 partition fstab file is same as the old one, not copying it." >> $BOOT_DIR/candle_log.txt
             fi
         fi
 
@@ -2754,7 +2763,7 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
         echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST!"
         # The only reason this is a warning and not an error (which would stop the process in de UI), is that the process is nearly done anyway.
         echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
-        echo "Candle: ERROR, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /boot/candle_log.txt
+        echo "Candle: ERROR, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> $BOOT_DIR/candle_log.txt
         echo
     
         ls /home/pi/.webthings/etc/wpa_supplicant
@@ -2781,18 +2790,18 @@ rm -rf /home/pi/configuration-files
 
 
 # if this is not a cutting edge build, then use the cmdline.txt and config.txt from the configuration files
-if [ ! -f /boot/candle_cutting_edge.txt ]; then # || [ ! -f /boot/candle_first_run_complete.txt ]; then
+if [ ! -f $BOOT_DIR/candle_cutting_edge.txt ]; then # || [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
     
     # Copy the Candle cmdline over the old one. This one is disk UUID agnostic.
-    if [ -f /boot/cmdline-candle.txt ]; then
-        rm /boot/cmdline.txt
-        cp /boot/cmdline-candle.txt /boot/cmdline.txt
+    if [ -f $BOOT_DIR/cmdline-candle.txt ]; then
+        rm $BOOT_DIR/cmdline.txt
+        cp $BOOT_DIR/cmdline-candle.txt $BOOT_DIR/cmdline.txt
     fi
 
     # Copy the Candle config.txt over the old one.
-    if [ -f /boot/config.txt.bak ]; then
-        rm /boot/config.txt
-        cp /boot/config.txt.bak /boot/config.txt
+    if [ -f $BOOT_DIR/config.txt.bak ]; then
+        rm $BOOT_DIR/config.txt
+        cp $BOOT_DIR/config.txt.bak $BOOT_DIR/config.txt
     fi
 fi
 
@@ -2865,12 +2874,12 @@ then
                 echo "ERROR, detected failure to (fully) install candle-controller (/ro)"
                 echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
                 echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /home/pi/.webthings/candle.log
-                echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /boot/candle_log.txt
+                echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> $BOOT_DIR/candle_log.txt
                 echo
 
                 # Show error image
-                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                    /bin/ply-image /boot/error.png
+                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+                    /bin/ply-image $BOOT_DIR/error.png
                     #sleep 7200
                 fi
 
@@ -2884,12 +2893,12 @@ then
             echo "ERROR, detected failure to (fully) install candle-controller"
             echo "Candle: ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
             echo "Candle: ERROR, failed to (fully) install candle-controller" >> /home/pi/.webthings/candle.log
-            echo "Candle: ERROR, failed to (fully) install candle-controller" >> /boot/candle_log.txt
+            echo "Candle: ERROR, failed to (fully) install candle-controller" >> $BOOT_DIR/candle_log.txt
             echo
 
             # Show error image
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f /boot/error.png ]; then
-                /bin/ply-image /boot/error.png
+            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+                /bin/ply-image $BOOT_DIR/error.png
                 #sleep 7200
             fi
 
@@ -2961,11 +2970,11 @@ rm -rf python311
 #
 
 
-if [ -f /boot/cmdline-candle.txt ]; then
+if [ -f $BOOT_DIR/cmdline-candle.txt ]; then
     if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
         echo "copying default Candle cmdline.txt into place"
-        rm /boot/cmdline.txt
-        cp /boot/cmdline-candle.txt /boot/cmdline.txt
+        rm $BOOT_DIR/cmdline.txt
+        cp $BOOT_DIR/cmdline-candle.txt $BOOT_DIR/cmdline.txt
     fi
 fi
 
@@ -2987,7 +2996,7 @@ else
     echo
     echo "Error, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist"
     echo "Candle: ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> /dev/kmsg
-    echo "ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> /boot/candle_log.txt
+    echo "ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> $BOOT_DIR/candle_log.txt
     exit 1
 fi
 
@@ -3000,8 +3009,8 @@ fi
 
 # cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
 
-if [ -f /boot/candle_first_run_complete.txt ] && [ ! -f /boot/candle_original_version.txt ]; then
-    echo "2.0.0-beta" > /boot/candle_original_version.txt
+if [ -f $BOOT_DIR/candle_first_run_complete.txt ] && [ ! -f $BOOT_DIR/candle_original_version.txt ]; then
+    echo "2.0.0-beta" > $BOOT_DIR/candle_original_version.txt
 fi
 
 # remember when the disk image was created
@@ -3016,29 +3025,29 @@ fi
 systemctl disable candle_bootup_actions.service
 
 # delete bootup_actions, just in case this script is being run as a bootup_actions script.
-if [ -f /boot/bootup_actions.sh ]; then
-    rm /boot/bootup_actions.sh
-    echo "removed /boot/bootup_actions.sh"
+if [ -f $BOOT_DIR/bootup_actions.sh ]; then
+    rm $BOOT_DIR/bootup_actions.sh
+    echo "removed $BOOT_DIR/bootup_actions.sh"
 fi
-if [ -f /boot/bootup_actions_failed.sh ]; then
-    rm /boot/bootup_actions_failed.sh
-    echo "removed /boot/bootup_actions_failed.sh"
+if [ -f $BOOT_DIR/bootup_actions_failed.sh ]; then
+    rm $BOOT_DIR/bootup_actions_failed.sh
+    echo "removed $BOOT_DIR/bootup_actions_failed.sh"
 fi
 
-if [ -f /boot/post_bootup_actions.sh ]; then
-    rm /boot/post_bootup_actions.sh
-    echo "removed /boot/post_bootup_actions.sh"
+if [ -f $BOOT_DIR/post_bootup_actions.sh ]; then
+    rm $BOOT_DIR/post_bootup_actions.sh
+    echo "removed $BOOT_DIR/post_bootup_actions.sh"
 fi
-if [ -f /boot/post_bootup_actions_failed.sh ]; then
-    rm /boot/post_bootup_actions_failed.sh
-    echo "removed /boot/post_bootup_actions_failed.sh"
+if [ -f $BOOT_DIR/post_bootup_actions_failed.sh ]; then
+    rm $BOOT_DIR/post_bootup_actions_failed.sh
+    echo "removed $BOOT_DIR/post_bootup_actions_failed.sh"
 fi
 
 # Remove cutting edge
-if [ -f /boot/candle_cutting_edge.txt ]; then
+if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     echo "disabling cutting edge" >> /dev/kmsg
-    echo "disabling cutting edge" >> /boot/candle_log.txt
-    rm /boot/candle_cutting_edge.txt
+    echo "disabling cutting edge" >> $BOOT_DIR/candle_log.txt
+    rm $BOOT_DIR/candle_cutting_edge.txt
 fi
 
 if [ -d /home/pi/configuration-files ]; then
@@ -3048,7 +3057,7 @@ fi
 
 # DONE!
 echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
-echo "$(date) - system update complete" >> /boot/candle_log.txt
+echo "$(date) - system update complete" >> $BOOT_DIR/candle_log.txt
 
 
 
@@ -3066,13 +3075,13 @@ then
     echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
     echo
 
-    if [ -f /boot/candle_first_run_complete.txt ]; then
-        /home/pi/candle/debug.sh > /boot/debug.txt
+    if [ -f $BOOT_DIR/candle_first_run_complete.txt ]; then
+        /home/pi/candle/debug.sh > $BOOT_DIR/debug.txt
 
-        echo "" >> /boot/debug.txt
-        echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPDATE PROCESS" >> /boot/debug.txt
-        cat /boot/debug.txt
-        echo "Candle: DONE. Debug output placed in /boot/debug.txt" >> /dev/kmsg
+        echo "" >> $BOOT_DIR/debug.txt
+        echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPDATE PROCESS" >> $BOOT_DIR/debug.txt
+        cat $BOOT_DIR/debug.txt
+        echo "Candle: DONE. Debug output placed in $BOOT_DIR/debug.txt" >> /dev/kmsg
     else
         /home/pi/candle/debug.sh
     fi
@@ -3085,7 +3094,7 @@ fi
 echo
 
 
-if [ ! -f /boot/candle_first_run_complete.txt ]; then
+if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
     
     if [[ -n "${CREATE_DISK_IMAGE}" ]] || [ "$CREATE_DISK_IMAGE" = yes ]; 
     then
@@ -3099,7 +3108,7 @@ if [ ! -f /boot/candle_first_run_complete.txt ]; then
         echo "NOT RUNNING PREPARE_FOR_DISK_IMAGE SCRIPT. Stopping early."
     
         # To be safe, start SSH on the first run
-        #touch /boot/ssh.txt
+        #touch $BOOT_DIR/ssh.txt
     
         # Optional download of .deb files
         if [[ -z "${DOWNLOAD_DEB}" ]] || [ "$DOWNLOAD_DEB" = no ]; then
@@ -3132,7 +3141,7 @@ if [ ! -f /boot/candle_first_run_complete.txt ]; then
         cd /home/pi/
   
         # On the next boot allow the system partition to be writeable
-        # touch /boot/candle_rw_once.txt
+        # touch $BOOT_DIR/candle_rw_once.txt
     
         #MY_SCRIPT_VARIABLE="${CANDLE_DEV}"
         echo
@@ -3145,9 +3154,9 @@ if [ ! -f /boot/candle_first_run_complete.txt ]; then
         echo
         echo "Note that if you reboot, the read-only mode will become active."
         echo "If you want to delay this once, then use this command:"
-        echo "touch /boot/candle_rw_once.txt"
+        echo "touch $BOOT_DIR/candle_rw_once.txt"
         echo "...or if you want skip read-only mode permanently:"
-        echo "touch /boot/candle_rw_keep.txt"
+        echo "touch $BOOT_DIR/candle_rw_keep.txt"
         echo ""
     
     fi
@@ -3156,7 +3165,7 @@ fi
 
 
 # If developer mode is active during a system update, then the system will permanently have SSH enabled
-if [ ! -f /boot/developer.txt ]; then
+if [ ! -f $BOOT_DIR/developer.txt ]; then
     # Disable SSH access
     #systemctl disable ssh.service
     raspi-config nonint do_ssh 1 # 0 is enable, 1 is disable
@@ -3172,8 +3181,8 @@ else
     echo "Candle: Rebooting in 10 seconds" >> /dev/kmsg
     echo
     sleep 10
-    if [ -f /boot/candle_rw_once.txt ]; then
-        rm /boot/candle_rw_once.txt
+    if [ -f $BOOT_DIR/candle_rw_once.txt ]; then
+        rm $BOOT_DIR/candle_rw_once.txt
     fi
     reboot
 fi
