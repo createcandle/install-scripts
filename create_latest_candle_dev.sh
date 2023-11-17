@@ -80,10 +80,12 @@ else
     CANDLE_BASE="$(pwd)"
 fi
 
+BOOKWORM=0
 BOOT_DIR="/boot"
 if lsblk | grep /boot/firmware; then
     echo "firmware partition is mounted at /boot/firmware"
     BOOT_DIR="/boot/firmware"
+    BOOKWORM=1
 fi
 
 
@@ -1372,6 +1374,10 @@ then
     
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
+    if [ "$BOOKWORM" = yes ]; then
+        
+    fi
+
 
     # for BlueAlsa
     echo "installing bluealsa support packages"
@@ -1628,7 +1634,12 @@ fi
 if [ "$SKIP_PYTHON" = no ] || [[ -z "${SKIP_PYTHON}" ]];
 then
 
-    PATH=$PATH:/home/pi/.local/bin
+    #PATH=$PATH:/home/pi/.local/bin
+    if [ -d "/home/pi/.local/bin" ] ; then
+        [[ ":$PATH:" != *":$CANDLE_BASE/.local/bin:"* ]] && PATH="$CANDLE_BASE/.local/bin:${PATH}"
+    else
+        echo "WARNING, /home/pi/.local/bin does not exist"
+    fi
 
 
     # Upgrade Python to 3.11
@@ -1710,8 +1721,8 @@ then
         # Install  latest version of Pip
         apt update
 
-        #echo "installing Pip for Python 11"
-        #apt install python3-pip
+        echo "installing Pip"
+        apt install python3-pip
 
         echo "Setting pip version to 20.3.4"
         sudo -u pi python3 -m pip install --upgrade pip pip==20.3.4
@@ -1761,27 +1772,24 @@ then
     echo "installing pip3"
     echo
     apt install -y python3-pip
-
+    
     # update pip
     #sudo -u pi /usr/bin/python3 -m pip install --upgrade pip
 
     # upgrade pip first
     sudo -u pi python3 -m pip install --upgrade pip
 
+    apt install -y python3-dbus python3-rpi.gpio python3-pillow python3-wheel python3-requests python3-distro python3-certifi python3-urllib3 python3-colorzero python3-chardet python3-libevdev python3-numpy
+
     sudo -u pi pip3 uninstall -y adapt-parser || true
-    sudo -u pi pip3 install dbus-python pillow pycryptodomex numpy
+    sudo -u pi pip3 install pycryptodomex --break-system-packages
 
-     sudo -u pi pip3 install git+https://github.com/pybluez/pybluez.git#egg=pybluez
+    sudo -u pi pip3 --break-system-packages install git+https://github.com/pybluez/pybluez.git#egg=pybluez  
 
-    if [ -d "/home/pi/.local/bin" ] ; then
-        echo "adding /home/pi/.local/bin to path"
-        PATH="/home/pi/.local/bin:$PATH"
-    else
-        echo "WARNING, /home/pi/.local/bin does not exist"
-    fi
+    
 
     echo "Updating existing python packages"
-    sudo -u pi pip install --upgrade certifi chardet colorzero dbus-python distro requests RPi.GPIO ssh-import-id urllib3 wheel libevdev
+    sudo -u pi pip install --upgrade ssh-import-id --break-system-packages
 
     #echo "Installing Python gateway_addon"
     #sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
