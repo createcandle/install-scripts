@@ -2951,6 +2951,8 @@ if [ -e /home/pi/webthings/gateway/static/images/floorplan.svg ];
 then
     cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/floorplan.svg
     chown pi:pi /home/pi/.webthings/floorplan.svg
+    mkdir -p /home/pi/.webthings/uploads
+    cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/uploads/floorplan.svg
 else
     echo ""
     echo "WARNING: missing floorplan"
