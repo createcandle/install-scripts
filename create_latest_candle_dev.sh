@@ -2759,9 +2759,9 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
             echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
             echo "Candle: copying 4 partition version of fstab" >> $BOOT_DIR/candle_log.txt
         
-            if ! diff -q /home/pi/configuration-files/boot/fstab4.bak /etc/fstab &>/dev/null; then
+            if ! diff -q /home/pi/configuration-files/boot/firmware/fstab4.bak /etc/fstab &>/dev/null; then
                 echo "fstab file is different, copying it"
-                cp --verbose /home/pi/configuration-files/boot/fstab4.bak /etc/fstab
+                cp --verbose /home/pi/configuration-files/boot/firmware/fstab4.bak /etc/fstab
             else
                 echo "new fstab file is same as the old one, not copying it."
             fi
@@ -2771,10 +2771,10 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
             echo "Candle: copying 3 partition version of fstab" >> /dev/kmsg
             echo "Candle: copying 3 partition version of fstab" >> $BOOT_DIR/candle_log.txt
         
-            if ! diff -q /home/pi/configuration-files/boot/fstab3.bak /etc/fstab &>/dev/null; then
+            if ! diff -q /home/pi/configuration-files/boot/firmware/fstab3.bak /etc/fstab &>/dev/null; then
                 echo "3 partition fstab file is different, copying it"
                 echo "Candle: 3 partition fstab file is different, copying it" >> /dev/kmsg
-                cp --verbose /home/pi/configuration-files/boot/fstab3.bak /etc/fstab
+                cp --verbose /home/pi/configuration-files/boot/firmware/fstab3.bak /etc/fstab
             else
                 echo "new fstab file is same as the old one, not copying it."
                 echo "Candle: new fstab file is same as the old one, not copying it." >> /dev/kmsg
@@ -2789,7 +2789,7 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
         # The only reason this is a warning and not an error (which would stop the process in de UI), is that the process is nearly done anyway.
         echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
         echo "Candle: ERROR, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> $BOOT_DIR/candle_log.txt
-        echo
+        echo ""
     
         ls /home/pi/.webthings/etc/wpa_supplicant
         ls /home/pi/.webthings/var/lib/bluetooth
@@ -2799,7 +2799,7 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
         ls /home/pi/.webthings/arduino/.arduino15
         ls /home/pi/.webthings/arduino/Arduino
     
-        echo
+        echo ""
     
     fi
 else
