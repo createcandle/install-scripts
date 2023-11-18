@@ -1766,7 +1766,7 @@ then
             echo "$i"
             #sudo -u pi pip3 install "$i" --upgrade
             sudo -u pi python3.11 -m pip install "$i" --upgrade
-            echo
+            echo ""
         done
 
     fi
@@ -1801,8 +1801,8 @@ then
     sudo -u pi pip3 uninstall -y adapt-parser || true
     sudo -u pi pip3 install pycryptodomex --break-system-packages
 
-    sudo -u pi pip3 --break-system-packages install git+https://github.com/pybluez/pybluez.git#egg=pybluez  
-    
+    sudo -u pi pip3 install git+https://github.com/pybluez/pybluez.git#egg=pybluez --break-system-packages
+    pip3 install git+https://github.com/pybluez/pybluez.git#egg=pybluez --break-system-packages
     
 
     echo "Updating existing python packages"
@@ -2895,12 +2895,12 @@ then
         if [ -d /ro ]; then
             if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] \
             || [ ! -f /ro/home/pi/node12 ] ; then
-                echo 
+                echo ""
                 echo "ERROR, detected failure to (fully) install candle-controller (/ro)"
                 echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
                 echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /home/pi/.webthings/candle.log
                 echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> $BOOT_DIR/candle_log.txt
-                echo
+                echo ""
 
                 # Show error image
                 if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
@@ -3011,11 +3011,11 @@ if [ -f /home/pi/.webthings/etc/hostname ] && [ -f /home/pi/.webthings/etc/hosts
         echo "hostname was not in /etc/hosts. Attempting to fix."
         echo "before:"
         cat /home/pi/.webthings/etc/hosts
-        echo
+        echo ""
         sed -i -E -e "s|127\.0\.1\.1[ \t]+.*|127\.0\.1\.1 \t$hostname|" /home/pi/.webthings/etc/hosts
         echo "after:"
         cat /home/pi/.webthings/etc/hosts
-        echo
+        echo ""
     fi
 else
     echo
