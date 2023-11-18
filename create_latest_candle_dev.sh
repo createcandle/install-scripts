@@ -289,14 +289,25 @@ then
             echo "Candle: creating partitions" >> $BOOT_DIR/candle_log.txt
             echo
             if [[ -z "${TINY_PARTITIONS}" ]]; then
+                echo "normal partition size"
                 printf "resizepart 2 7000MB\nyes\nmkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
                 #resizepart /dev/mmcblk0 2 12600000
-                resize2fs /dev/mmcblk0p2
-                
             else
+                echo "creating smaller partitions for update image"
                 printf "resizepart 2 5000MB\nyes\nmkpart\np\next4\n5001MB\n7500MB\nmkpart\np\next4\n7502MB\n9500MB\nquit" | parted
-                resize2fs /dev/mmcblk0p2
             fi
+
+            echo ""
+            echo "after partitioning:"
+            echo "fdisk:"
+            fdisk -l
+            echo ""
+
+            echo "lsblk:"
+            lsblk
+            
+            echo ""
+            resize2fs /dev/mmcblk0p2
             
             printf "y" | mkfs.ext4 /dev/mmcblk0p3
             printf "y" | mkfs.ext4 /dev/mmcblk0p4
@@ -307,6 +318,8 @@ then
             e2label /dev/mmcblk0p2 system
             e2label /dev/mmcblk0p3 recovery
             e2label /dev/mmcblk0p4 user
+
+            systemctl daemon-reload
         else
             echo
             echo "Partition 2 was missing. Inside chroot?"
@@ -325,7 +338,7 @@ then
         exit
     fi
     
-    lsblk
+    #lsblk
     
 else
     echo "Partitions seem to already exist (addons dir existed)"
