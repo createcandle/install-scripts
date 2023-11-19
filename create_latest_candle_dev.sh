@@ -1761,11 +1761,11 @@ then
         echo
         echo "re-installing modules for Python 11"
         for i in certifi chardet colorzero distro gpiozero idna numpy picamera2 pidng piexif Pillow python-apt python-prctl \
-            requests RPi.GPIO setuptools simplejpeg six spidev ssh-import-id toml urllib3 v4l2-python3 wheel; do
+            requests RPi.GPIO setuptools simplejpeg six spidev ssh-import-id toml urllib3 v4l2-python3 wheel PyXDG; do
 
             echo "$i"
             #sudo -u pi pip3 install "$i" --upgrade
-            sudo -u pi python3.11 -m pip install "$i" --upgrade
+            sudo -u pi python3.11 -m pip install "$i" --upgrade --break-system-packages
             echo ""
         done
 
