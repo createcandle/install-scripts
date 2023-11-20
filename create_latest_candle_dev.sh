@@ -424,11 +424,11 @@ fi
 
 # Quickly install Git if it hasn't been already
 if [ -z "$(which git)" ]; then
-    echo
+    echo ""
     echo "installing git"
     echo "Candle: installing git" >> /dev/kmsg
     echo "Candle: installing git" >> $BOOT_DIR/candle_log.txt
-    echo
+    echo ""
     apt -y install git "$reinstall" 
 fi
 
@@ -437,10 +437,10 @@ fi
 # PLYMOUTH LITE
 if [ ! -f /bin/ply-image ]; 
 then
-    echo
+    echo ""
     echo "creating Plymouth lite (to show splash images)" >> /dev/kmsg
     echo "creating Plymouth lite (to show splash images)" >> $BOOT_DIR/candle_log.txt
-    echo
+    echo ""
     git clone --depth 1 https://github.com/createcandle/Plymouth-lite.git
     cd Plymouth-lite
     ./configure
@@ -452,11 +452,11 @@ then
 fi
 
 
-echo
+echo ""
 echo "updating /usr/bin/candle_hostname_fix.sh"
 echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --static\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --transient\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --pretty' > /usr/bin/candle_hostname_fix.sh
 chmod +x /usr/bin/candle_hostname_fix.sh
-echo
+echo ""
 
 # BULLSEYE SOURCES
 
@@ -478,7 +478,7 @@ echo "modifying /etc/apt/sources.list - allowing apt access to source code"
 sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
 # Unhold browser
-echo
+echo ""
 apt-mark unhold chromium-browser
 
 
@@ -491,10 +491,15 @@ if [ $BIT_TYPE -eq 64 ]; then
     apt update -y && apt install -y screen:armhf
 fi
 
-echo
+echo ""
 echo "doing apt-get update"
-apt-get update
-echo
+if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
+    apt-get update --allow-releaseinfo-change
+else
+    apt-get update
+fi
+
+echo ""
 
 
 
