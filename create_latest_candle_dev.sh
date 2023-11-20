@@ -1620,6 +1620,8 @@ else
 fi
 
 
+apt-get install --fix-missing
+
 # Check if browser installed succesfully
 dpkg -s chromium-browser &> /dev/null
 if [ $? -eq 0 ]; then
