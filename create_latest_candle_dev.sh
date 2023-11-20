@@ -80,11 +80,14 @@ else
     CANDLE_BASE="$(pwd)"
 fi
 
+CHROMIUM_PACKAGE_NAME="chromium-browser"
+
 BOOKWORM=0
 BOOT_DIR="/boot"
 if lsblk | grep /boot/firmware; then
     echo "firmware partition is mounted at /boot/firmware"
     BOOT_DIR="/boot/firmware"
+	CHROMIUM_PACKAGE_NAME="chromium"
     BOOKWORM=1
 fi
 
@@ -479,7 +482,7 @@ sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
 # Unhold browser
 echo ""
-apt-mark unhold chromium-browser
+apt-mark unhold $CHROMIUM_PACKAGE_NAME
 
 
 # 64 BIT
@@ -788,17 +791,17 @@ then
         echo
 
 
-        apt-mark unhold chromium-browser
+        apt-mark unhold $CHROMIUM_PACKAGE_NAME
     
-        if chromium-browser --version | grep -q 'Chromium 88'; then
+        if $CHROMIUM_PACKAGE_NAME --version | grep -q 'Chromium 88'; then
             echo "Version 88 of ungoogled chromium detected. Removing..."
             echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
             echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
-            apt-get purge chromium-browser -y --allow-change-held-packages
-            apt purge chromium-browser -y --allow-change-held-packages
+            apt-get purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
+            apt purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
             apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
             apt autoremove -y --allow-change-held-packages
-            apt install chromium-browser -y --allow-change-held-packages
+            apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
         fi
 
         if [ -f $BOOT_DIR/candle_original_version.txt ] || [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
@@ -1160,7 +1163,7 @@ then
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> /dev/kmsg
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> $BOOT_DIR/candle_log.txt
         
-        apt-mark unhold chromium-browser
+        apt-mark unhold $CHROMIUM_PACKAGE_NAME
         
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt upgrade -y &
@@ -1171,14 +1174,14 @@ then
         
         
     
-        if chromium-browser --version | grep -q 'Chromium 88'; then
+        if $CHROMIUM_PACKAGE_NAME --version | grep -q 'Chromium 88'; then
             echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
             echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
-            apt-get purge chromium-browser -y --allow-change-held-packages
-            apt purge chromium-browser -y --allow-change-held-packages
+            apt-get purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
+            apt purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
             apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
             apt autoremove -y --allow-change-held-packages
-            apt install chromium-browser -y --allow-change-held-packages
+            apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
         fi
 
 
@@ -1300,31 +1303,31 @@ then
     # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
     # TODO: maybe use version 88?
     echo
-    echo "installing chromium-browser"
-    echo "Candle: installing chromium-browser" >> /dev/kmsg
-    echo "Candle: installing chromium-browser" >> $BOOT_DIR/candle_log.txt
+    echo "installing $CHROMIUM_PACKAGE_NAME"
+    echo "Candle: installing $CHROMIUM_PACKAGE_NAME" >> /dev/kmsg
+    echo "Candle: installing $CHROMIUM_PACKAGE_NAME" >> $BOOT_DIR/candle_log.txt
     echo
     
-    apt-mark unhold chromium-browser
+    apt-mark unhold $CHROMIUM_PACKAGE_NAME
     
-    if chromium-browser --version | grep -q 'Chromium 88'; then
+    if $CHROMIUM_PACKAGE_NAME --version | grep -q 'Chromium 88'; then
         echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
         echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
-        apt-get purge chromium-browser -y --allow-change-held-packages
-        apt purge chromium-browser -y --allow-change-held-packages
+        apt-get purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
+        apt purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
         apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
         apt autoremove -y --allow-change-held-packages
-        apt install chromium-browser -y --allow-change-held-packages
+        apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
     fi
     
-    apt install chromium-browser -y  --allow-change-held-packages "$reinstall" #--print-uris
-    apt install chromium-browser -y  --allow-change-held-packages
+    apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages "$reinstall" #--print-uris
+    apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages
 
-    if [ ! -f /bin/chromium-browser ]; then
+    if [ ! -f /bin/$CHROMIUM_PACKAGE_NAME ]; then
         echo
         echo "browser install failed, retrying."
-        apt purge chromium-browser -y  --allow-change-held-packages
-        apt install chromium-browser -y --allow-change-held-packages
+        apt purge $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages
+        apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
     fi
 
 
@@ -1477,7 +1480,7 @@ then
     # TODO: removed libffi7 / libffi8 check
     # For bookworm libavcodec58 was changed to libavcodec59
     for i in \
-    chromium-browser git \
+    $CHROMIUM_PACKAGE_NAME git \
     autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
     arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
@@ -1623,7 +1626,7 @@ fi
 apt-get install --fix-missing
 
 # Check if browser installed succesfully
-dpkg -s chromium-browser &> /dev/null
+dpkg -s $CHROMIUM_PACKAGE_NAME &> /dev/null
 if [ $? -eq 0 ]; then
     echo "browser installed succesfully"
 else
