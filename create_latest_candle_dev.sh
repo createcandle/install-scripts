@@ -2912,10 +2912,10 @@ then
         if [ -d /ro ]; then
             if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -f /ro/home/pi/node12 ] ; then
                 echo ""
-                echo "ERROR, detected failure to (fully) install candle-controller (/ro)"
-                echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
-                echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> /home/pi/.webthings/candle.log
-                echo "$(date) - ERROR, failed to (fully) install candle-controller (/ro)" >> $BOOT_DIR/candle_log.txt
+                echo "ERROR, detected failure to install candle-controller"
+                echo "Candle: ERROR, failed to install candle-controller" >> /dev/kmsg
+                echo "$(date) - ERROR, failed to install candle-controller" >> /home/pi/.webthings/candle.log
+                echo "$(date) - ERROR, failed to install candle-controller" >> $BOOT_DIR/candle_log.txt
                 echo ""
 
                 # Show error image
@@ -2947,6 +2947,7 @@ then
     
     else
         echo "Error, install_candle_controller.sh was missing. Should not be possible."
+	echo "Error, install_candle_controller.sh was missing." >> $BOOT_DIR/candle_log.txt
     fi
     
     
@@ -2968,6 +2969,7 @@ then
 else
     echo ""
     echo "WARNING: missing floorplan"
+    echo "Error, missing floorplan." >> $BOOT_DIR/candle_log.txt
     echo ""
 fi
 
