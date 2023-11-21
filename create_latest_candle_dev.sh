@@ -1484,7 +1484,7 @@ then
     autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
     arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
-    liblivemedia-dev libavcodec59 libavutil56 libswresample3 libffi8 libavformat59 \
+    liblivemedia-dev libavcodec59 libswresample3 libffi8 libavformat59 \
     libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
     do
@@ -2910,8 +2910,7 @@ then
         # Check if the installation of the controller succeeded
     
         if [ -d /ro ]; then
-            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] \
-            || [ ! -f /ro/home/pi/node12 ] ; then
+            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -f /ro/home/pi/node12 ] ; then
                 echo ""
                 echo "ERROR, detected failure to (fully) install candle-controller (/ro)"
                 echo "Candle: ERROR, failed to (fully) install candle-controller (/ro)" >> /dev/kmsg
@@ -2928,8 +2927,7 @@ then
                 exit 1
             fi
             
-        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] \
-        || [ ! -e /home/pi/node12 ] ; then
+        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -e /home/pi/node12 ] ; then
     
             echo 
             echo "ERROR, detected failure to (fully) install candle-controller"
