@@ -2930,10 +2930,10 @@ then
         elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -e /home/pi/node12 ] ; then
     
             echo 
-            echo "ERROR, detected failure to (fully) install candle-controller"
-            echo "Candle: ERROR, failed to (fully) install candle-controller" >> /dev/kmsg
-            echo "Candle: ERROR, failed to (fully) install candle-controller" >> /home/pi/.webthings/candle.log
-            echo "Candle: ERROR, failed to (fully) install candle-controller" >> $BOOT_DIR/candle_log.txt
+            echo "ERROR, detected failure to install candle-controller"
+            echo "Candle: ERROR, failed to install candle-controller" >> /dev/kmsg
+            echo "Candle: ERROR, failed to install candle-controller" >> /home/pi/.webthings/candle.log
+            echo "Candle: ERROR, failed to install candle-controller" >> $BOOT_DIR/candle_log.txt
             echo
 
             # Show error image
