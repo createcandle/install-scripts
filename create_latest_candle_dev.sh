@@ -1398,10 +1398,11 @@ then
 
 
     # additional programs for Candle kiosk mode:
+    # not currently installing: Plymouth:  rpd-plym-splash
     echo
     echo "installing kiosk packages"
     echo
-    for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools rpd-plym-splash; do
+    for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
