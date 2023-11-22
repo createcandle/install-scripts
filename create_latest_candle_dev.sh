@@ -2872,8 +2872,9 @@ fi
     
     
 
-if [[ -z "${SKIP_CONTROLLER}" ]] || [ "$SKIP_CONTROLLER" = no ]; 
+if [[ -z "${SKIP_CONTROLLER}" ]] || [ "$SKIP_CONTROLLER" = no ]
 then
+    echo
     
     if [ -f install_candle_controller.sh ]; then
         chmod +x ./install_candle_controller.sh
@@ -2890,7 +2891,7 @@ then
         # Check if the installation of the controller succeeded
     
         if [ -d /ro ]; then
-            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -f /ro/home/pi/node12 ] ; then
+            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -f /ro/home/pi/node12 ]; then
                 echo 
                 echo "ERROR, detected failure to install candle-controller"
                 echo "Candle: ERROR, failed to install candle-controller" >> /dev/kmsg
@@ -2907,7 +2908,8 @@ then
                 exit 1
             fi
             
-        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -e /home/pi/node12 ] ; then
+        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -e /home/pi/node12 ]
+	then
     
             echo 
             echo "ERROR, detected failure to install candle-controller"
@@ -2919,7 +2921,6 @@ then
             # Show error image
             if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
                 /bin/ply-image $BOOT_DIR/error.png
-                #sleep 7200
             fi
 
             exit 1
@@ -2947,10 +2948,10 @@ then
     mkdir -p /home/pi/.webthings/uploads
     cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/uploads/floorplan.svg
 else
-    echo ""
+    echo 
     echo "WARNING: missing floorplan"
     echo "Error, missing floorplan." >> $BOOT_DIR/candle_log.txt
-    echo ""
+    echo 
 fi
 
 
