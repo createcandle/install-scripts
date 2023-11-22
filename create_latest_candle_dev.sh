@@ -29,6 +29,7 @@ set +e # continue on errors
 # export SKIP_CONTROLLER=yes
 # export SKIP_DEBUG=yes
 # export SKIP_REBOOT=yes
+# export SKIP_SPLASH=yes
  
 #SKIP_PARTITIONS=yes
 #TINY_PARTITIONS=yes # used to create smaller partition images, which are used in the new system update process
@@ -40,6 +41,7 @@ set +e # continue on errors
 #SKIP_CONTROLLER=yes
 #SKIP_DEBUG=yes
 #SKIP_REBOOT=yes
+#SKIP_SPLASH=yes
  
 # SKIP_PARTITIONS=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_PYTHON=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER=yes SKIP_DEBUG=yes SKIP_REBOOT=yes
 
@@ -842,56 +844,58 @@ fi
 
 
 # Download splash images
-if [ -f $BOOT_DIR/cmdline.txt ]; then
-    wget https://www.candlesmarthome.com/tools/error.png -O $BOOT_DIR/error.png --retry-connrefused 
-    echo
-    echo "Candle: downloading splash images and videos" >> /dev/kmsg
-    echo "Candle: downloading splash images and videos" >> $BOOT_DIR/candle_log.txt
-    echo
-    
-    wget https://www.candlesmarthome.com/tools/splash_updating.png -O $BOOT_DIR/splash_updating.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O $BOOT_DIR/splash_updating180.png --retry-connrefused 
-    
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-    then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/splash_updating.png" ]; then
-            echo "Candle: showing updating splash image" >> /dev/kmsg
-            echo "Candle: showing updating splash image" >> $BOOT_DIR/candle_log.txt
-            if [ -f $BOOT_DIR/rotate180.txt ]; then
-                /bin/ply-image $BOOT_DIR/splash_updating180.png
-                if ps aux | grep -q /usr/bin/startx; then
-                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating180.png
-                fi
-                    
-            else
-                /bin/ply-image $BOOT_DIR/splash_updating.png
-                if ps aux | grep -q /usr/bin/startx; then
-                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating.png
-                fi
-            fi
-        fi
-        
-        # Also start SSH
-        if [ -f $BOOT_DIR/developer.txt ] || [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
-            echo "Candle: starting ssh" >> /dev/kmsg
-            echo "Candle: starting ssh" >> $BOOT_DIR/candle_log.txt
-            systemctl start ssh.service
-        fi
-                
-    fi
-    
-    # Download the rest of the images
-    wget https://www.candlesmarthome.com/tools/splash.png -O $BOOT_DIR/splash.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash180.png -O $BOOT_DIR/splash180.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splashalt.png -O $BOOT_DIR/splashalt.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash180alt.png -O $BOOT_DIR/splash180alt.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash.mp4 -O $BOOT_DIR/splash.mp4 --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O $BOOT_DIR/splash180.mp4 --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_preparing.png -O $BOOT_DIR/splash_preparing.png --retry-connrefused 
-    wget https://www.candlesmarthome.com/tools/splash_preparing180.png -O $BOOT_DIR/splash_preparing180.png --retry-connrefused 
-    
+if [ "$SKIP_SPLASH" = no ] || [[ -z "${SKIP_SPLASH}" ]]; 
+then
+	if [ -f $BOOT_DIR/cmdline.txt ]; then
+	    wget https://www.candlesmarthome.com/tools/error.png -O $BOOT_DIR/error.png --retry-connrefused 
+	    echo
+	    echo "Candle: downloading splash images and videos" >> /dev/kmsg
+	    echo "Candle: downloading splash images and videos" >> $BOOT_DIR/candle_log.txt
+	    echo
+	    
+	    wget https://www.candlesmarthome.com/tools/splash_updating.png -O $BOOT_DIR/splash_updating.png --retry-connrefused 
+	    wget https://www.candlesmarthome.com/tools/splash_updating180.png -O $BOOT_DIR/splash_updating180.png --retry-connrefused 
+	    
+	    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+	    then
+	        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/splash_updating.png" ]; then
+	            echo "Candle: showing updating splash image" >> /dev/kmsg
+	            echo "Candle: showing updating splash image" >> $BOOT_DIR/candle_log.txt
+	            if [ -f $BOOT_DIR/rotate180.txt ]; then
+	                /bin/ply-image $BOOT_DIR/splash_updating180.png
+	                if ps aux | grep -q /usr/bin/startx; then
+	                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating180.png
+	                fi
+	                    
+	            else
+	                /bin/ply-image $BOOT_DIR/splash_updating.png
+	                if ps aux | grep -q /usr/bin/startx; then
+	                    DISPLAY=:0 feh --bg-fill $BOOT_DIR/splash_updating.png
+	                fi
+	            fi
+	        fi
+	        
+	        # Also start SSH
+	        if [ -f $BOOT_DIR/developer.txt ] || [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
+	            echo "Candle: starting ssh" >> /dev/kmsg
+	            echo "Candle: starting ssh" >> $BOOT_DIR/candle_log.txt
+	            systemctl start ssh.service
+	        fi
+	                
+	    fi
+	    
+	    # Download the rest of the images
+	    wget https://www.candlesmarthome.com/tools/splash.png -O $BOOT_DIR/splash.png --retry-connrefused 
+	    wget https://www.candlesmarthome.com/tools/splash180.png -O $BOOT_DIR/splash180.png --retry-connrefused 
+	    wget https://www.candlesmarthome.com/tools/splashalt.png -O $BOOT_DIR/splashalt.png --retry-connrefused 
+	    wget https://www.candlesmarthome.com/tools/splash180alt.png -O $BOOT_DIR/splash180alt.png --retry-connrefused 
+	    wget https://www.candlesmarthome.com/tools/splash.mp4 -O $BOOT_DIR/splash.mp4 --retry-connrefused 
+	    wget https://www.candlesmarthome.com/tools/splash180.mp4 -O $BOOT_DIR/splash180.mp4 --retry-connrefused 
+	    wget https://www.candlesmarthome.com/tools/splash_preparing.png -O $BOOT_DIR/splash_preparing.png --retry-connrefused 
+	    wget https://www.candlesmarthome.com/tools/splash_preparing180.png -O $BOOT_DIR/splash_preparing180.png --retry-connrefused 
+	    
+	fi
 fi
-
 
 
 
@@ -1782,8 +1786,8 @@ then
 
             echo "$i"
             #sudo -u pi pip3 install "$i" --upgrade
-            sudo -u pi python3.11 -m pip install "$i" --upgrade --break-system-packages
-            echo ""
+            sudo -u pi python3.11 -m pip install $i --upgrade --break-system-packages
+            echo
         done
 
     fi
@@ -2918,13 +2922,13 @@ then
     
         if [ -d /ro ]; then
             if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -f /ro/home/pi/node12 ] ; then
-                echo ""
+                echo 
                 echo "ERROR, detected failure to install candle-controller"
                 echo "Candle: ERROR, failed to install candle-controller" >> /dev/kmsg
                 echo "$(date) - ERROR, failed to install candle-controller" >> /home/pi/.webthings/candle.log
                 echo "$(date) - ERROR, failed to install candle-controller" >> $BOOT_DIR/candle_log.txt
-                echo ""
-
+                echo 
+		
                 # Show error image
                 if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
                     /bin/ply-image $BOOT_DIR/error.png
