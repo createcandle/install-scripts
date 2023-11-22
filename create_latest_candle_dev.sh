@@ -781,10 +781,14 @@ then
         apt-get update --fix-missing -y
         DEBIAN_FRONTEND=noninteractive apt upgrade -y &
         wait
+	DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        wait
         apt-get update --fix-missing -y
         apt --fix-broken install -y
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-        echo
+	if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+	    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        fi
+	echo
         echo
         echo
         echo
