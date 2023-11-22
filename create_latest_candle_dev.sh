@@ -799,19 +799,6 @@ then
         echo
 
 
-        apt-mark unhold $CHROMIUM_PACKAGE_NAME
-    
-        if $CHROMIUM_PACKAGE_NAME --version | grep -q 'Chromium 88'; then
-            echo "Version 88 of ungoogled chromium detected. Removing..."
-            echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
-            echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
-            apt-get purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-            apt purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-            apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
-            apt autoremove -y --allow-change-held-packages
-            apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-        fi
-
         if [ -f $BOOT_DIR/candle_original_version.txt ] || [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
             echo
             echo "rebooting"
@@ -1173,8 +1160,6 @@ then
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> /dev/kmsg
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> $BOOT_DIR/candle_log.txt
         
-        apt-mark unhold $CHROMIUM_PACKAGE_NAME
-        
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt upgrade -y &
         wait
@@ -1183,18 +1168,6 @@ then
         echo ""
         
         
-    
-        if $CHROMIUM_PACKAGE_NAME --version | grep -q 'Chromium 88'; then
-            echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
-            echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
-            apt-get purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-            apt purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-            apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
-            apt autoremove -y --allow-change-held-packages
-            apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-        fi
-
-
         if [ -f $BOOT_DIR/candle_original_version.txt ] || [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
             echo
             echo "rebooting"
@@ -1318,17 +1291,6 @@ then
     echo "Candle: installing $CHROMIUM_PACKAGE_NAME" >> $BOOT_DIR/candle_log.txt
     echo
     
-    apt-mark unhold $CHROMIUM_PACKAGE_NAME
-    
-    if $CHROMIUM_PACKAGE_NAME --version | grep -q 'Chromium 88'; then
-        echo "Version 88 of ungoogled chromium detected. Removing..." >> /dev/kmsg
-        echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
-        apt-get purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-        apt purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-        apt purge chromium-codecs-ffmpeg-extra -y --allow-change-held-packages
-        apt autoremove -y --allow-change-held-packages
-        apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-    fi
     
     apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages "$reinstall" #--print-uris
     apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages
