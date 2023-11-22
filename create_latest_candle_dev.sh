@@ -1380,19 +1380,6 @@ then
 
     
 
-
-    # for BlueAlsa
-    echo "installing bluealsa support packages"
-    for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
-        echo "$i"
-        echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
-        apt -y install "$i" "$reinstall"  #--print-uris
-        echo
-    done
-    #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
-
-
     # Camera support
     for i in python3-picamera2 python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
@@ -1903,6 +1890,21 @@ then
     echo "Candle: building BlueAlsa (audio streaming)" >> /dev/kmsg
     echo "Candle: building BlueAlsa (audio streaming)" >> $BOOT_DIR/candle_log.txt
     echo
+    
+    
+    # for BlueAlsa
+    echo "installing bluealsa support packages"
+    for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev; do
+        echo "$i"
+        echo "Candle: installing $i" >> /dev/kmsg
+        echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
+        apt -y install "$i" "$reinstall"  #--print-uris
+        echo
+    done
+    #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
+
+
+
     
     adduser --system --group --no-create-home bluealsa
     adduser --system --group --no-create-home bluealsa-aplay
