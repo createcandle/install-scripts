@@ -465,9 +465,9 @@ echo ""
 
 # Make sure Bullseye sources are used
 if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bullseye" >> $BOOT_DIR/candle_log.txt
-    sed -i 's/buster/bullseye/' /etc/apt/sources.list.d/raspi.list
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt
+    sed -i 's/buster/bookworm/' /etc/apt/sources.list.d/raspi.list
 fi
 
 if cat /etc/apt/sources.list | grep -q buster; then
@@ -475,6 +475,9 @@ if cat /etc/apt/sources.list | grep -q buster; then
     echo "changing /etc/apt/sources.list from buster to bullseye" >> $BOOT_DIR/candle_log.txt 
     sed -i 's/buster/bullseye/' /etc/apt/sources.list
 fi
+
+
+
 
 # Add option to download source code from RaspberryPi server
 echo "modifying /etc/apt/sources.list - allowing apt access to source code"
@@ -1315,7 +1318,7 @@ then
         echo "Version 88 of ungoogled chromium detected. Removing..." >> $BOOT_DIR/candle_log.txt
         apt-get purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
         apt purge $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
-        apt purge chromium-codecs-ffmpeg-extra -y  --allow-change-held-packages
+        apt purge chromium-codecs-ffmpeg-extra -y --allow-change-held-packages
         apt autoremove -y --allow-change-held-packages
         apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
     fi
@@ -1391,7 +1394,7 @@ then
     echo
     echo "installing kiosk packages"
     echo
-    for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools; do
+    for i in xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools rpd-plym-splash; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
