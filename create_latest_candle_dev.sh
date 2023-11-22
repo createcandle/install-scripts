@@ -1754,8 +1754,9 @@ then
         echo "installing Pip"
         apt install python3-pip
 
-        echo "Setting pip version to 20.3.4"
-        sudo -u pi python3 -m pip install --upgrade pip pip==20.3.4
+	# under bookworm the downgrade to pip 20.3.4 doesn't seem necessary anymore
+        #echo "Setting pip version to 20.3.4"
+        #sudo -u pi python3 -m pip install --upgrade pip pip==20.3.4
         #sudo -u pi python3 -m pip install --upgrade pip
 
         # Allow python packages to be installed globally (since the disk will be read-only anyway)
