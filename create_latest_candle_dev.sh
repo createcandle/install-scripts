@@ -2448,8 +2448,9 @@ if [ -f $BOOT_DIR/config.txt ]; then
     
     # Use the older display driver for now, as this solves many audio headaches.
     # https://github.com/raspberrypi/linux/issues/4543
-    echo "setting fkms display driver"
-    sed -i 's/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/' $BOOT_DIR/config.txt
+    
+	#echo "setting fkms display driver"
+    #sed -i "s/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/" $BOOT_DIR/config.txt
 
 
     # Set more power for USB ports
@@ -2457,7 +2458,7 @@ if [ -f $BOOT_DIR/config.txt ]; then
     if [ $isInFile3 -eq 0 ]
     then
     	echo "- Setting USB to deliver more current in config.txt"
-    	echo 'max_usb_current=1' >> $BOOT_DIR/config.txt
+    	echo "max_usb_current=1" >> $BOOT_DIR/config.txt
     else
         echo "- USB was already set to deliver more current in config.txt"
     fi
@@ -2482,7 +2483,7 @@ fi
 
 # Modify the xinitrc file to automatically log in the pi user
 echo "- Creating xinitrc file"
-echo 'exec openbox-session' > /etc/X11/xinit/xinitrc
+echo "exec openbox-session" > /etc/X11/xinit/xinitrc
 
 echo "- Creating xwrapper.config file"
 echo "allowed_users=anybody" > /etc/X11/Xwrapper.config
@@ -2608,23 +2609,18 @@ find /tmp -type f -atime +10 -delete
 # Generate file that can be used to re-install this exact combination of Python packages's versions
 pip3 list --format=freeze > /home/pi/candle/candle_requirements.txt
 
-# Create file that simply lists the installec packages and their versions
-apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > /home/pi/candle/candle_packages.txt
+# Create file that simply lists the installed packages and their versions
+#apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > /home/pi/candle/candle_packages.txt
 
 # Create a script that could re-install all those packages if the sources were available. 
 # However, the Raspberry servers only serve the very latest versions, so this is moot.
-apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > /home/pi/candle/candle_packages_installer.sh
+#apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > /home/pi/candle/candle_packages_installer.sh
 
 # Prepare for potential download of all current versions of the packages
-mkdir -p /home/pi/.webthings/deb_packages
-chown pi:pi /home/pi/.webthings/deb_packages
-apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "echo '" $1 "' >> /dev/kmsg && apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
+#mkdir -p /home/pi/.webthings/deb_packages
+#chown pi:pi /home/pi/.webthings/deb_packages
+#apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "echo \'" $1 "\' >> /dev/kmsg && apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
 
-#if [ -f /home/pi/.webthings/deb_packages/candle_packages_downloader.sh ]; then
-#sed -i '' '1i\
-#apt update
-#' /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
-#fi
 
 
 if [ -f /home/pi/create_latest_candle_dev.sh ]; then
@@ -2750,7 +2746,7 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
         echo "COPYING FSTAB FILE"
         echo
 
-        if lsblk | grep -q 'mmcblk0p4'; 
+        if lsblk | grep -q mmcblk0p4; 
         then
             echo "copying 4 partition version of fstab"
             echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
