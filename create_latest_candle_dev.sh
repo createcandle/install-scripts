@@ -2076,10 +2076,11 @@ mkdir -p /home/pi/.webthings/etc/ssh
 if [ ! -d /home/pi/.webthings/tmp ]; then
     mkdir -p /home/pi/.webthings/tmp
     rm -rf /tmp/*
-    echo "cleared /tmp contents:"
+    echo "cleared tmp contents"
     ls -l -a /tmp
     cp -r /tmp/* /home/pi/.webthings/tmp
 fi
+mkdir -p /home/pi/.webthings/tmp
 chmod 1777 /home/pi/.webthings/tmp
 find /home/pi/.webthings/tmp \
     -mindepth 1 \
@@ -2668,7 +2669,7 @@ if [ -f /var/swap ]; then
 fi
 
 
-echo "Clearing /tmp"
+echo "Clearing tmp"
 rm -rf /tmp/*
 
 if [ -f /home/pi/.wget-hsts ]; then
