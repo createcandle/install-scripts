@@ -1290,7 +1290,7 @@ then
     
     echo
     echo "installing Pipewire audio"
-    apt install pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth -y 
+    apt install pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries -y 
 
     # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
     # TODO: maybe use version 88?
@@ -2218,6 +2218,7 @@ chown -R pi:pi /home/pi/candle
 chown -R pi:pi /home/pi/.config
 
 chown -R pi:pi /home/pi/.webthings/etc/mosquitto
+chmod 0700 /home/pi/.webthings/etc/mosquitto/mosquitto_users
 
 chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
