@@ -1286,6 +1286,11 @@ then
             fi
         fi
     fi
+    
+    
+    echo
+    echo "installing Pipewire audio"
+    apt install pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth -y 
 
     # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
     # TODO: maybe use version 88?
