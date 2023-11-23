@@ -1627,170 +1627,172 @@ fi
 
 
 # PYTHON
-if [ "$SKIP_PYTHON" = no ] || [[ -z "${SKIP_PYTHON}" ]];
+
+
+#PATH=$PATH:/home/pi/.local/bin
+if [ -d "/home/pi/.local/bin" ]
 then
-
-    #PATH=$PATH:/home/pi/.local/bin
-    if [ -d "/home/pi/.local/bin" ] ; then
-        [[ ":$PATH:" != *":$CANDLE_BASE/.local/bin:"* ]] && PATH="$CANDLE_BASE/.local/bin:${PATH}"
-    else
-        echo "WARNING, /home/pi/.local/bin does not exist"
-    fi
-
-
-    # Upgrade Python to 3.11
-
-    if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
-    then
-        echo ""
-        echo "Skipping Python upgrade"
-        
-    else
-        if [ ! -e /usr/bin/python3.11 ]; then
-            echo "Upgrading Python to 3.11"
-            echo "Upgrading Python to 3.11" >> /dev/kmsg
-
-            apt update
-
-            # Packages needed to build Python
-            for pkg in build-essential zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
-            libgdbm-dev liblzma-dev tk8.5-dev lzma lzma-dev libgdbm-dev libffi-dev
-            do
-                apt -y install $pkg --no-install-recommends
-            done
-
-            # just to be sure...
-            apt-get install libffi-dev
-
-            wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
-
-            if [ ! -f python11.tar.xz ]; then
-                echo "Error, Python 11 failed to download. Aborting."
-                exit 1
-            else
-                tar -xvf python11.tar.xz
-                rm python11.tar.xz
-                echo "ls:"
-                ls
-
-                for directory in Python-*; do
-                    [[ -d $directory ]] || continue
-                    echo "Moving directory: $directory"
-                    mv -f "$directory" ./python311
-                done
-
-                cd python311
-                ./configure --enable-optimizations #--prefix=/usr
-                make altinstall
-                #make install
-                cd ..
-                rm -rf python311
-
-                # Upgrade symlink for python3
-                #if [ -e /usr/bin/python3.11 ]; then
-                #    cd /usr/bin/
-                #    echo "creating symlink python3 -> python 3.11"
-                #    ln -vfns python3.11 python3
-                #    cd -
-
-                    # Also create simlink for pip
-                    #if [ -e /usr/bin/pip3 ] && [ -x /usr/bin/pip3.11 ] && [ -x /usr/bin/pip3.9 ]; then
-                    #    mv /usr/bin/pip3 /usr/bin/pip3.9
-                    #    mv /usr/bin/pip3.11 /usr/bin/pip3
-                    #    pip install --upgrade pip
-                    #else
-                    #    echo "Error, /usr/bin/pip3.11 seems to be missing"
-                    #    exit 1
-                    #fi
-
-                #else
-                #    echo "Error, /usr/bin/python3.11 binary is missing"
-                #    exit 1
-                #fi
-
-            fi
- 
-        else
-            echo "Python 11 seems to already be installed"
-        fi
-
-        # Install  latest version of Pip
-        apt update
-
-        echo "installing Pip"
-        apt install python3-pip
-
-	# under bookworm the downgrade to pip 20.3.4 doesn't seem necessary anymore
-        #echo "Setting pip version to 20.3.4"
-        #sudo -u pi python3 -m pip install --upgrade pip pip==20.3.4
-        #sudo -u pi python3 -m pip install --upgrade pip
-
-        # Allow python packages to be installed globally (since the disk will be read-only anyway)
-        if [ -f /etc/pip.conf ]; then
-            if cat /etc/pip.conf | grep -q break-system-packages; then
-                echo "pip break-system-packages already set"
-            else 
-                echo "break-system-packages = true" >> /etc/pip.conf
-            fi
-        else
-            echo "[global]" > /etc/pip.conf
-            echo "break-system-packages = true" >> /etc/pip.conf
-        fi
-
-        # Re-install modules that come with Raspberry Pi OS by default
-        echo
-        echo "re-installing modules for Python 11"
-        for i in certifi chardet colorzero distro gpiozero idna numpy picamera2 pidng piexif Pillow python-apt python-prctl \
-            requests RPi.GPIO setuptools simplejpeg six spidev ssh-import-id toml urllib3 v4l2-python3 wheel PyXDG; do
-
-            echo "$i"
-            #sudo -u pi pip3 install "$i" --upgrade
-            sudo -u pi python3.11 -m pip install $i --upgrade --break-system-packages
-            echo
-        done
-
-    fi
-
-
-
-
-
-
-
-
-
-
-
-    echo
-    echo "INSTALLING AND UPDATING PYTHON PACKAGES"
-    echo
-
-    echo
-    echo "installing pip3"
-    echo
-    apt install -y python3-pip
-    
-    # update pip
-    #sudo -u pi /usr/bin/python3 -m pip install --upgrade pip
-
-    # upgrade pip first
-    sudo -u pi python3 -m pip install --upgrade pip
-
-    apt install -y python3-dbus python3-rpi.gpio python3-pillow python3-wheel python3-requests python3-distro python3-certifi python3-urllib3 python3-colorzero python3-chardet python3-libevdev python3-numpy
-
-    sudo -u pi pip3 uninstall -y adapt-parser || true
-    sudo -u pi pip3 install pycryptodomex --break-system-packages
-
-    #sudo -u pi pip3 install --break-system-packages git+https://github.com/pybluez/pybluez.git#egg=pybluez
-    sudo -u pi pip3 install --break-system-packages git+https://github.com/pybluez/pybluez.git#egg=pybluez 
-    
-
-    echo "Updating existing python packages"
-    sudo -u pi pip install --upgrade ssh-import-id --break-system-packages
-
-    #echo "Installing Python gateway_addon"
-    #sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
+    [[ ":$PATH:" != *":$CANDLE_BASE/.local/bin:"* ]] && PATH="$CANDLE_BASE/.local/bin:${PATH}"
+else
+    echo "WARNING, /home/pi/.local/bin does not exist"
 fi
+
+
+# Upgrade Python to 3.11
+
+if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]]
+then
+    echo ""
+    echo "Skipping Python upgrade"
+
+else
+	if [ ! -e /usr/bin/python3.11 ]; 
+	then
+	    echo "Upgrading Python to 3.11"
+	    echo "Upgrading Python to 3.11" >> /dev/kmsg
+	
+	    apt update
+	
+	    # Packages needed to build Python
+	    for pkg in build-essential zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
+	    libgdbm-dev liblzma-dev tk8.5-dev lzma lzma-dev libgdbm-dev libffi-dev
+	    do
+		apt -y install $pkg --no-install-recommends
+	    done
+	
+	    # just to be sure...
+	    apt-get install libffi-dev
+	
+	    wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
+	
+	    if [ ! -f python11.tar.xz ]; then
+		echo "Error, Python 11 failed to download. Aborting."
+		exit 1
+	    else
+		tar -xvf python11.tar.xz
+		rm python11.tar.xz
+		echo "ls:"
+		ls
+	
+		for directory in Python-*; do
+		    [[ -d $directory ]] || continue
+		    echo "Moving directory: $directory"
+		    mv -f "$directory" ./python311
+		done
+	
+		cd python311
+		./configure --enable-optimizations #--prefix=/usr
+		make altinstall
+		#make install
+		cd ..
+		rm -rf python311
+	
+		# Upgrade symlink for python3
+		#if [ -e /usr/bin/python3.11 ]; then
+		#    cd /usr/bin/
+		#    echo "creating symlink python3 -> python 3.11"
+		#    ln -vfns python3.11 python3
+		#    cd -
+	
+		    # Also create simlink for pip
+		    #if [ -e /usr/bin/pip3 ] && [ -x /usr/bin/pip3.11 ] && [ -x /usr/bin/pip3.9 ]; then
+		    #    mv /usr/bin/pip3 /usr/bin/pip3.9
+		    #    mv /usr/bin/pip3.11 /usr/bin/pip3
+		    #    pip install --upgrade pip
+		    #else
+		    #    echo "Error, /usr/bin/pip3.11 seems to be missing"
+		    #    exit 1
+		    #fi
+	
+		#else
+		#    echo "Error, /usr/bin/python3.11 binary is missing"
+		#    exit 1
+		#fi
+	
+	    fi
+	
+	else
+	    echo "Python 11 seems to already be installed"
+	fi
+
+	# Install  latest version of Pip
+	apt update
+	
+	echo "installing Pip"
+	apt install python3-pip
+	
+	# under bookworm the downgrade to pip 20.3.4 doesn't seem necessary anymore
+	#echo "Setting pip version to 20.3.4"
+	#sudo -u pi python3 -m pip install --upgrade pip pip==20.3.4
+	#sudo -u pi python3 -m pip install --upgrade pip
+	
+	# Allow python packages to be installed globally (since the disk will be read-only anyway)
+	if [ -f /etc/pip.conf ]
+	then
+	    if cat /etc/pip.conf | grep -q break-system-packages; then
+		echo "pip break-system-packages already set"
+	    else 
+		echo "break-system-packages = true" >> /etc/pip.conf
+	    fi
+	else
+	    echo "[global]" > /etc/pip.conf
+	    echo "break-system-packages = true" >> /etc/pip.conf
+	fi
+	
+	# Re-install modules that come with Raspberry Pi OS by default
+	echo
+	echo "re-installing modules for Python 11"
+	for i in certifi chardet colorzero distro gpiozero idna numpy picamera2 pidng piexif Pillow python-apt python-prctl \
+	    requests RPi.GPIO setuptools simplejpeg six spidev ssh-import-id toml urllib3 v4l2-python3 wheel PyXDG; do
+	
+	    echo "$i"
+	    #sudo -u pi pip3 install "$i" --upgrade
+	    sudo -u pi python3.11 -m pip install $i --upgrade --break-system-packages
+	    echo
+	done
+
+fi
+
+
+
+
+
+
+
+
+
+
+
+echo
+echo "INSTALLING AND UPDATING PYTHON PACKAGES"
+echo
+
+echo
+echo "installing pip3"
+echo
+apt install -y python3-pip
+
+# update pip
+#sudo -u pi /usr/bin/python3 -m pip install --upgrade pip
+
+# upgrade pip first
+sudo -u pi python3 -m pip install --upgrade pip
+
+apt install -y python3-dbus python3-rpi.gpio python3-pillow python3-wheel python3-requests python3-distro python3-certifi python3-urllib3 python3-colorzero python3-chardet python3-libevdev python3-numpy
+
+sudo -u pi pip3 uninstall -y adapt-parser || true
+sudo -u pi pip3 install pycryptodomex --break-system-packages
+
+#sudo -u pi pip3 install --break-system-packages git+https://github.com/pybluez/pybluez.git#egg=pybluez
+sudo -u pi pip3 install --break-system-packages git+https://github.com/pybluez/pybluez.git#egg=pybluez 
+
+
+echo "Updating existing python packages"
+sudo -u pi pip install --upgrade ssh-import-id --break-system-packages
+
+#echo "Installing Python gateway_addon"
+#sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
+
 
 
 
