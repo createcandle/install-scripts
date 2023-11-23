@@ -1781,8 +1781,8 @@ then
     sudo -u pi pip3 uninstall -y adapt-parser || true
     sudo -u pi pip3 install pycryptodomex --break-system-packages
 
-    sudo -u pi pip3 install git+https://github.com/pybluez/pybluez.git#egg=pybluez --break-system-packages
-    pip3 install git+https://github.com/pybluez/pybluez.git#egg=pybluez --break-system-packages
+    #sudo -u pi pip3 install --break-system-packages git+https://github.com/pybluez/pybluez.git#egg=pybluez
+    sudo -u pi pip3 install --break-system-packages git+https://github.com/pybluez/pybluez.git#egg=pybluez 
     
 
     echo "Updating existing python packages"
@@ -1796,7 +1796,7 @@ fi
 
 
 # RASPI CONFIG
-echo "Set Raspi-config I2C, SPI, Camera"
+#echo "Set Raspi-config I2C, SPI, Camera"
 
 if [ -d /sys/kernel/config/device-tree ];
 then
