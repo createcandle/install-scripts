@@ -2077,7 +2077,14 @@ mkdir -p /home/pi/.webthings/etc/ssh
 
 #echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
-
+if [ -f /etc/bluetooth/main.conf ]; then
+    if [ cat /etc/bluetooth/main.conf | grep -q "Experimental=true" ]; then
+        echo "Bluetooth experimental already enabled"
+    else 
+        echo "Experimental=true" >> /etc/bluetooth/main.conf
+	#sed -i 's/.*kernel.panic.*/kernel.panic = 6/' /etc/bluetooth/main.conf
+    fi
+fi
 
 
 if [ ! -d /home/pi/.webthings/tmp ]; then
