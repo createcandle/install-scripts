@@ -2242,7 +2242,9 @@ chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
 if [ ! -L /home/pi/.asoundrc ]; then
     if [ -f /home/pi/.webthings/etc/asoundrc ]; then
         echo "Creating symlink from /home/pi/.asoundrc to /home/pi/.webthings/etc/asoundrc"
-        rm /home/pi/.asoundrc
+        if [ -f /home/pi/.asoundrc ]; then
+	    rm /home/pi/.asoundrc
+        fi
         ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
     fi
 fi
