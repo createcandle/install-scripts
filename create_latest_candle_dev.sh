@@ -1368,6 +1368,10 @@ then
     fi
 
 
+    # This essentially turns it into a desktop pi
+    #apt install raspberrypi-ui-mods
+
+
     # additional programs for Candle kiosk mode:
     # not currently installing: Plymouth:  rpd-plym-splash
     echo
