@@ -82,14 +82,14 @@ else
     CANDLE_BASE="$(pwd)"
 fi
 
-CHROMIUM_PACKAGE_NAME="chromium-browser"
 
 BOOKWORM=0
+CHROMIUM_PACKAGE_NAME="chromium-browser"
 BOOT_DIR="/boot"
 if lsblk | grep /boot/firmware; then
     echo "firmware partition is mounted at /boot/firmware"
     BOOT_DIR="/boot/firmware"
-	CHROMIUM_PACKAGE_NAME="chromium"
+    #CHROMIUM_PACKAGE_NAME="chromium"
     BOOKWORM=1
 fi
 
