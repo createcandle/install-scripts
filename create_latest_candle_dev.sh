@@ -2044,9 +2044,9 @@ mkdir /home/pi/.arduino15
 chown pi:pi /home/pi/.arduino15
 
 mkdir -p /home/pi/.webthings/arduino/.arduino15
-chown pi:pi /home/pi/.webthings/arduino/.arduino15
-
 mkdir -p /home/pi/.webthings/arduino/Arduino
+
+chown pi:pi /home/pi/.webthings/arduino/.arduino15
 chown pi:pi /home/pi/.webthings/arduino/Arduino
 
 touch /home/pi/.webthings/candle.log
