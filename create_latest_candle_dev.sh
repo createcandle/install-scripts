@@ -2197,7 +2197,7 @@ fi
 #chmod +x /home/pi/candle_first_run.sh
 
 mkdir -p /home/pi/.webthings/uploads
-chown -R /home/pi/.webthings/uploads
+chown -R pi:pi /home/pi/.webthings/uploads
 
 if [ ! -f /home/pi/candle/early.sh ]; then
     echo "ERROR, early.sh is missing?"
