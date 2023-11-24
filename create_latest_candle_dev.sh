@@ -493,13 +493,9 @@ apt-mark unhold $CHROMIUM_PACKAGE_NAME
 # 64 BIT
 # If this Raspbery Pi OS is 64 bit, then install support for 32 bit as well.
 
-if [ $BIT_TYPE -eq 64 ]; then
-    echo "Adding support for 32 bit architecture"
-    dpkg --add-architecture armhf
-    apt update -y && apt install -y screen:armhf
-fi
 
-echo ""
+
+echo
 echo "doing apt-get update"
 if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     apt-get update --allow-releaseinfo-change
@@ -507,8 +503,13 @@ else
     apt-get update
 fi
 
-echo ""
+echo
 
+if [ $BIT_TYPE -eq 64 ]; then
+    echo "Adding support for 32 bit architecture"
+    dpkg --add-architecture armhf
+    apt update -y && apt install -y screen:armhf
+fi
 
 
 
