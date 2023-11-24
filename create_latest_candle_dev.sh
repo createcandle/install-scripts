@@ -2081,8 +2081,8 @@ if [ -f /etc/bluetooth/main.conf ]; then
     if [ cat /etc/bluetooth/main.conf | grep -q "Experimental=true" ]; then
         echo "Bluetooth experimental already enabled"
     else 
-        echo "Experimental=true" >> /etc/bluetooth/main.conf
-	#sed -i 's/.*kernel.panic.*/kernel.panic = 6/' /etc/bluetooth/main.conf
+        #echo "Experimental=true" >> /etc/bluetooth/main.conf
+	sed -i 's/#Experimental = false/Experimental=true/' /etc/bluetooth/main.conf
     fi
 fi
 
