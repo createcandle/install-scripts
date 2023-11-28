@@ -168,7 +168,7 @@ fi
 
 
 
-if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
+if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]]
 then
     
     if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
@@ -210,11 +210,12 @@ else
 fi
 
 
-if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]; then
-echo "CHROOT       : Not in chroot"
-echo "CHROOT       : Not in chroot" >> $BOOT_DIR/candle_log.txt
+if [ "$CHROOTED" = no ] || [[ -z "${CHROOTED}" ]]
+then
+	echo "CHROOT       : Not in chroot"
+	echo "CHROOT       : Not in chroot" >> $BOOT_DIR/candle_log.txt
 else
-echo "CHROOT       : Inside chroot"
+	echo "CHROOT       : Inside chroot"
 fi
 
 
@@ -772,7 +773,9 @@ then
         apt-get --fix-missing
         apt --fix-broken install -y
         apt autoremove -y
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+	if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+        	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+	fi
         echo
         echo
         echo
@@ -841,6 +844,7 @@ then
 	if [ -f $BOOT_DIR/cmdline.txt ]; then
 	    wget https://www.candlesmarthome.com/tools/error.png -O $BOOT_DIR/error.png --retry-connrefused 
 	    echo
+            echo "Candle: downloading splash images and videos"
 	    echo "Candle: downloading splash images and videos" >> /dev/kmsg
 	    echo "Candle: downloading splash images and videos" >> $BOOT_DIR/candle_log.txt
 	    echo
@@ -977,8 +981,8 @@ fi
 
 
 
-
-
+mkdir -p /home/pi/.webthings/arduino
+mkdir -p /home/pi/.webthings/arduino/.arduino15
 
 
 
@@ -1561,8 +1565,9 @@ then
     echo ""
     
     # Fix potential issue with dhcpdp on Bullseye
-    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf
-    
+    if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf
+    fi
     echo "calling autoremove"
     apt autoremove -y
 fi
@@ -1653,6 +1658,7 @@ then
     echo "Skipping Python upgrade"
 
 else
+
 	if [ ! -e /usr/bin/python3.11 ]; 
 	then
 	    echo "Upgrading Python to 3.11"
@@ -1736,14 +1742,16 @@ else
 	# Allow python packages to be installed globally (since the disk will be read-only anyway)
 	if [ -f /etc/pip.conf ]
 	then
-	    if cat /etc/pip.conf | grep -q break-system-packages; then
+	    if [ cat /etc/pip.conf | grep -q break-system-packages ]; then
 		echo "pip break-system-packages already set"
 	    else 
+                echo "setting pip break-system-packages conf"
 		echo "break-system-packages = true" >> /etc/pip.conf
 	    fi
 	else
 	    echo "[global]" > /etc/pip.conf
 	    echo "break-system-packages = true" >> /etc/pip.conf
+            chown pi:pi /etc/pip.conf
 	fi
 	
 	# Re-install modules that come with Raspberry Pi OS by default
@@ -1757,7 +1765,8 @@ else
 	    sudo -u pi python3.11 -m pip install $i --upgrade --break-system-packages
 	    echo
 	done
-
+	echo "finished installing python modules for python 3.11"
+ 	echo
 fi
 
 
@@ -1809,6 +1818,8 @@ sudo -u pi pip install --upgrade ssh-import-id --break-system-packages
 
 if [ -d /sys/kernel/config/device-tree ];
 then
+    echo "Enabling I2C, SPI, Camera support"
+
     # enable i2c, needed for clock module support
     raspi-config nonint do_i2c 0
 
@@ -1830,7 +1841,7 @@ fi
 
 
 # RESPEAKER HAT
-if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]];
+if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]]
 then
     
     #if [ ! -f $BOOT_DIR/candle_original_version.txt ]; then
@@ -1896,7 +1907,7 @@ fi
 
 
 # BLUEALSA
-if [ "$SKIP_BLUEALSA" = no ] || [[ -z "${SKIP_BLUEALSA}" ]];
+if [ "$SKIP_BLUEALSA" = no ] || [ -z "${SKIP_BLUEALSA}" ]
 then
     
     echo
@@ -1947,6 +1958,7 @@ then
     fi
 
 else
+    echo "Candle: Skipping BlueAlsa build"
     echo "Candle: Skipping BlueAlsa build" >> /dev/kmsg
     echo "Candle: Skipping BlueAlsa build" >> $BOOT_DIR/candle_log.txt
 fi
@@ -2119,6 +2131,10 @@ cd /home/pi
 
 # PREPARE FOR BINDS IN FSTAB
 echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
+
+mkdir -p /home/pi/.webthings/arduino
+mkdir -p /home/pi/.webthings/arduino/Arduino
+mkdir -p /home/pi/.webthings/arduino/.arduino15
 
 #cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
 if [ ! -f /home/pi/.webthings/etc/ssh/ssh_config ]; then
