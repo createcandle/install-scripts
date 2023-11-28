@@ -1392,7 +1392,8 @@ then
     
 
     # Camera support
-    for i in python3-picamera2 python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
+    # disabled python3-picamera2 
+    for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
