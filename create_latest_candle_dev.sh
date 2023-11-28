@@ -1382,14 +1382,17 @@ then
     echo
     echo "installing kiosk packages"
     echo
-    
-    for i in lightdm xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools; do
-        echo "$i"
-        echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
-        apt-get -y --no-install-recommends install "$i"  "$reinstall" #--print-uris
-        echo
-    done
+
+    apt-get -y --no-install-recommends lightdm xsettingsd rtkit xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools xserver-xorg-input-mtrack
+
+    # xserver-xorg-legacy
+    #for i in lightdm xsettingsd rtkit xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools; do
+    #    echo "$i"
+    #    echo "Candle: installing $i" >> /dev/kmsg
+    #    echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
+    #    apt-get -y --no-install-recommends install "$i"  "$reinstall" #--print-uris
+    #    echo
+    #done
     
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
