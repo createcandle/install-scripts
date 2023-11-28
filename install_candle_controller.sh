@@ -561,12 +561,15 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
         NODE_OPTIONS="--max-old-space-size=2048" npm_config_yes=true npx webpack
     fi
     
+    
     if [ -f "$CANDLE_BASE/webthings/gateway2/build/app.js" ] \
     && [ -f "$CANDLE_BASE/webthings/gateway2/build/static/index.html" ] \
     && [ -d "$CANDLE_BASE/webthings/gateway2/node_modules" ] \
     && [ -d "$CANDLE_BASE/webthings/gateway2/build/static/bundle" ];
     then
-    
+
+      npx update-browserslist-db@latest
+       
       npm prune --omit=dev
     
       echo "creating .post_upgrade_complete file"
