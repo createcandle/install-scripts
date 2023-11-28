@@ -2718,8 +2718,10 @@ if [ -d /home/pi/.config/chromium ]; then
     rm -rf /home/pi/.config/chromium
 fi
 
-echo '{"optOut": true,"lastUpdateCheck": 0}' > /home/pi/.config/configstore/update-notifier-npm.json 
-chown pi:pi /home/pi/.config/configstore/update-notifier-npm.json 
+if [ -f /home/pi/.config/configstore/update-notifier-npm.jso ]; then
+    echo '{"optOut": true,"lastUpdateCheck": 0}' > /home/pi/.config/configstore/update-notifier-npm.json 
+    chown pi:pi /home/pi/.config/configstore/update-notifier-npm.json 
+fi
 
 # Remove files left over by Windows or MacOS
 rm -rf $BOOT_DIR/.Spotlight*
