@@ -1794,7 +1794,7 @@ apt install -y python3-pip
 # upgrade pip first
 sudo -u pi python3 -m pip install --upgrade pip
 
-apt install -y python3-dbus python3-rpi.gpio python3-pillow python3-wheel python3-requests python3-distro python3-certifi python3-urllib3 python3-colorzero python3-chardet python3-libevdev python3-numpy
+apt install -y python3-dbus python3-rpi.gpio python3-pillow python3-wheel python3-requests python3-distro python3-certifi python3-urllib3 python3-colorzero python3-chardet python3-libevdev python3-numpy python3-bluetooth
 
 sudo -u pi pip3 uninstall -y adapt-parser || true
 sudo -u pi pip3 install pycryptodomex --break-system-packages
