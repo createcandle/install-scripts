@@ -1383,7 +1383,7 @@ then
     echo "installing kiosk packages"
     echo
 
-    apt-get -y --no-install-recommends lightdm xsettingsd rtkit xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools xserver-xorg-input-mtrack
+    apt-get -y --no-install-recommends xsettingsd rtkit xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools xserver-xorg-input-mtrack
 
     # xserver-xorg-legacy
     #for i in lightdm xsettingsd rtkit xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools; do
