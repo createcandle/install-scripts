@@ -2090,6 +2090,7 @@ chmod 755 /var/run/mosquitto
 # Make folders that should be owned by root
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
 mkdir -p /home/pi/.webthings/etc/wpa_supplicant
+mkdir -p /home/pi/.webthings/etc/NetworkManager/system-connections
 mkdir -p /home/pi/.webthings/etc/ssh
 
 
