@@ -734,7 +734,9 @@ then
         echo "WARNING, KERNEL IS UPGRADEABLE" >> $BOOT_DIR/candle_log.txt
     fi
 
-
+    echo "quickly installing dhcpcd"
+    apt install dhcpcd resolvconf -y
+    systemctl disable dhcpcd.service
 
     if [ -n "$(apt list --upgradable | grep raspberrypi-kernel)" ] || [ -n "$(apt list --upgradable | grep raspberrypi-bootloader)" ]; then
     
