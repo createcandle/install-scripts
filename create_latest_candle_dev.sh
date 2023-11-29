@@ -193,6 +193,7 @@ echo
 
 echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
+echo "MODEL        : $(tr -d '\0' < /proc/device-tree/model)"
 echo "BITS         : $BIT_TYPE"
 echo "PATH         : $PATH"
 echo "USER         : $(whoami)"
