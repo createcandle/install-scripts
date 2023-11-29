@@ -2090,9 +2090,11 @@ chmod 755 /var/run/mosquitto
 # Make folders that should be owned by root
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
 mkdir -p /home/pi/.webthings/etc/wpa_supplicant
-mkdir -p /home/pi/.webthings/etc/NetworkManager/system-connections
+mkdir -p /home/pi/.webthings/etc/NetworkManager/
 mkdir -p /home/pi/.webthings/etc/ssh
 
+rm /etc/NetworkManager/system-connections/*
+cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
 
 
 #echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
