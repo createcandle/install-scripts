@@ -1745,7 +1745,8 @@ else
 	# Allow python packages to be installed globally (since the disk will be read-only anyway)
 	if [ -f /etc/pip.conf ]
 	then
-	    if [ cat /etc/pip.conf | grep -q break-system-packages ]; then
+	    if cat /etc/pip.conf | grep -q break-system-packages
+            then
 		echo "pip break-system-packages already set"
 	    else 
                 echo "setting pip break-system-packages conf"
@@ -2095,7 +2096,8 @@ mkdir -p /home/pi/.webthings/etc/ssh
 #echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
 if [ -f /etc/bluetooth/main.conf ]; then
-    if [ cat /etc/bluetooth/main.conf | grep -q "Experimental=true" ]; then
+    if cat /etc/bluetooth/main.conf | grep -q "Experimental=true" 
+    then
         echo "Bluetooth experimental already enabled"
     else 
         #echo "Experimental=true" >> /etc/bluetooth/main.conf
