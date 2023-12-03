@@ -715,9 +715,16 @@ then
     rm data.tar.xz
     rm control.tar.xz
     rm debian-binary
-    systemctl daemon-reload
-    systemctl disable NetworkManager.service
-    systemctl enable dhcpcd.service
+
+    if [ -f /usr/sbin/dhcpcd ]; then
+        chmod +x /usr/sbin/dhcpcd
+	chown root:root /usr/sbin/dhcpcd
+
+	chown root:netdev /etc/dhcpcd.conf
+ 
+        systemctl daemon-reload
+        systemctl disable NetworkManager.service
+        systemctl enable dhcpcd.service
 fi
 
 
