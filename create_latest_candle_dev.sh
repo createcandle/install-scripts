@@ -704,9 +704,21 @@ fi
 
 
 
-
-
-
+if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; 
+then
+    echo
+    echo "force-installing dhcpcd"
+    apt download dhcpcd
+    ar x dhcp*.deb
+    tar xvhf data.tar.xz -C /
+    rm dhcp*.deb
+    rm data.tar.xz
+    rm control.tar.xz
+    rm debian-binary
+    systemctl daemon-reload
+    systemctl disable NetworkManager.service
+    systemctl enable dhcpcd.service
+fi
 
 
 
