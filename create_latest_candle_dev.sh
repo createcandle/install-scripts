@@ -704,21 +704,24 @@ fi
 
 
 
-if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; 
-then
+if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
     echo
     echo "force-installing dhcpcd"
 
-    cd /tmp
-    
-    apt download dhcpcd
-    ar x dhcp*.deb
-    tar xvhf data.tar.xz -C /
-    rm dhcp*.deb
-    rm data.tar.xz
-    rm control.tar.xz
-    rm debian-binary
+    # binary no longer seems available for bookworm...
+    wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz 
 
+    #cd /tmp
+    
+    #apt download dhcpcd
+    #ar x dhcp*.deb
+    tar xvhf dhcpcd.tar.xz -C /
+    #rm dhcp*.deb
+    #rm data.tar.xz
+    #rm control.tar.xz
+    #rm debian-binary
+    rm dhcpcd.tar.xz
+    
     if [ -f /usr/sbin/dhcpcd ]; then
         chmod +x /usr/sbin/dhcpcd
 	chown root:root /usr/sbin/dhcpcd
@@ -728,9 +731,10 @@ then
         systemctl daemon-reload
         systemctl disable NetworkManager.service
         systemctl enable dhcpcd.service
+    fi
 fi
 
-cd $CANDLE_BASE
+#cd $CANDLE_BASE
 
 
 
