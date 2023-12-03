@@ -185,7 +185,7 @@ fi
 # OUTPUT SOME INFORMATION
 BIT_TYPE=$(getconf LONG_BIT)
 
-cd /home/pi
+cd $CANDLE_BASE
 
 echo
 echo "CREATING CANDLE"
@@ -392,7 +392,7 @@ fi
 # not compatible with /ro
 
 sleep 3
-cd /home/pi
+cd $CANDLE_BASE
 
 
 # Save the bits of the initial kernel the boot partition to a file
@@ -454,7 +454,7 @@ then
     make
     cp ply-image /usr/bin
 
-    cd /home/pi
+    cd $CANDLE_BASE
     rm -rf Plymouth-lite
 fi
 
@@ -708,6 +708,9 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]];
 then
     echo
     echo "force-installing dhcpcd"
+
+    cd /tmp
+    
     apt download dhcpcd
     ar x dhcp*.deb
     tar xvhf data.tar.xz -C /
@@ -727,7 +730,7 @@ then
         systemctl enable dhcpcd.service
 fi
 
-
+cd $CANDLE_BASE
 
 
 
@@ -1021,7 +1024,7 @@ then
     echo "Candle: starting download of Candle controller" >> $BOOT_DIR/candle_log.txt
     echo
 
-    cd /home/pi
+    cd $CANDLE_BASE
     #rm -rf /home/pi/webthings
     #rm -rf /home/pi/.webthings # too dangerous
     
@@ -1879,7 +1882,7 @@ then
         echo
     
         apt-get update
-        cd /home/pi
+        cd $CANDLE_BASE
         git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
     
         if [ -d seeed-voicecard ]; then
@@ -1911,7 +1914,7 @@ then
                 echo -e 'N\n' | ./install.sh
             fi
         
-            cd /home/pi
+            cd $CANDLE_BASE
             rm -rf seeed-voicecard
         
         else
@@ -1991,7 +1994,7 @@ else
     echo "Candle: Skipping BlueAlsa build" >> $BOOT_DIR/candle_log.txt
 fi
 
-cd /home/pi
+cd $CANDLE_BASE
 rm -rf bluez-alsa
 
 
@@ -2013,7 +2016,7 @@ echo ""
 # only install the recovery partition if the system has a recovery partition
 if lsblk | grep -q 'mmcblk0p4'; then
 
-    cd /home/pi/.webthings
+    cd $CANDLE_BASE/.webthings
     
     if [ -f recovery.fs ]; then
         echo "Warning, recovery.fs already existed. Removing it first."
@@ -2076,7 +2079,7 @@ systemctl stop triggerhappy.socket
 systemctl stop triggerhappy.service
 
 # switch back to root of home folder
-cd /home/pi
+cd $CANDLE_BASE
 
 # Make folders that should be owned by Pi user
 mkdir /home/pi/Arduino
@@ -2157,7 +2160,7 @@ chown pi:pi /home/pi/.webthings/hasdata
 
 # COPY FILES
 
-cd /home/pi
+cd $CANDLE_BASE
 
 
 
@@ -2607,7 +2610,7 @@ echo
 
 # CREATE INITIAL BACKUPS
 
-cd /home/pi
+cd $CANDLE_BASE
 
 
 # important boot files backup
@@ -2955,7 +2958,7 @@ then
         wait
         rm ./install_candle_controller.sh
 
-        cd /home/pi
+        cd $CANDLE_BASE
 
         # This should work now, but setcap has been move to install_candle_controller script instead
         #NODE_PATH=$(sudo -i -u pi which node)
@@ -3005,7 +3008,7 @@ then
     fi
     
     
-    cd /home/pi
+    cd $CANDLE_BASE
 
     if [ -f /home/pi/controller_backup.tar ]; then
         chown pi:pi /home/pi/controller_backup.tar
@@ -3030,7 +3033,7 @@ fi
 
 # Make sure permissions of newly pre-installed addons are ok
 
-cd /home/pi/.webthings
+cd $CANDLE_BASE/.webthings
 chown -R pi:pi addons
 chmod -R 755 addons
 chown -R pi:pi data
@@ -3041,7 +3044,7 @@ chown -R pi:pi chromium
 chmod -R 755 chromium
 chown -R pi:pi arduino
 chmod -R 755 arduino
-cd /home/pi/
+cd $CANDLE_BASE/
 
 #
 #  ADDITIONAL CLEANUP
@@ -3222,7 +3225,7 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
             echo "Candle: downloading all .deb files" >> /dev/kmsg
         
 
-            cd /home/pi/.webthings/deb_packages
+            cd $CANDLE_BASE/.webthings/deb_packages
             chmod +x ./candle_packages_downloader.sh
             sudo -u pi ./candle_packages_downloader.sh
         
@@ -3236,7 +3239,7 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
         
         fi
     
-        cd /home/pi/
+        cd $CANDLE_BASE/
   
         # On the next boot allow the system partition to be writeable
         # touch $BOOT_DIR/candle_rw_once.txt
