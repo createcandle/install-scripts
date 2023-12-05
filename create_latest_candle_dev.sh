@@ -275,6 +275,9 @@ if [ ! -s /etc/resolv.conf ]; then
     exit 1
 fi
 
+apt update
+
+
 
 # CREATE PARTITIONS
 
