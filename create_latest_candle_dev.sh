@@ -729,8 +729,11 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	chown root:netdev /etc/dhcpcd.conf
  
         systemctl daemon-reload
+	systemctl enable dhcpcd.service
+ 	systemctl start dhcpcd.service
+	systemctl stop NetworkManager.service
         systemctl disable NetworkManager.service
-        systemctl enable dhcpcd.service
+        
     fi
 fi
 
