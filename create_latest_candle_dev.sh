@@ -1423,7 +1423,7 @@ then
     echo "installing kiosk packages"
     echo
 
-    apt -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools xserver-xorg-input-mtrack
+    apt install -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools xserver-xorg-input-mtrack
 
     # xserver-xorg-legacy
     #for i in lightdm xsettingsd rtkit xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools; do
@@ -2404,18 +2404,18 @@ if [ -f $BOOT_DIR/config.txt ]; then
     fi
 
     # add HDMI always on
-    if [ $(cat $BOOT_DIR/config.txt | grep -c "hdmi_force_hotplug") -eq 0 ];
-    then
-    	echo "- Adding hdmi_force_hotplug=1 to config.txt"
-    	echo 'hdmi_force_hotplug=1' >> $BOOT_DIR/config.txt
-    else
-        echo "- hdmi_force_hotplug was already in config.txt"
-        if [ $(cat $BOOT_DIR/config.txt | grep -c "#hdmi_force_hotplug=1") -eq 0 ];
-        then
-            sed -i 's|#hdmi_force_hotplug=1|hdmi_force_hotplug=1|g' $BOOT_DIR/config.txt
-            
-        fi
-    fi
+    #if [ $(cat $BOOT_DIR/config.txt | grep -c "hdmi_force_hotplug") -eq 0 ];
+    #then
+    # 	echo "- Adding hdmi_force_hotplug=1 to config.txt"
+    #	echo 'hdmi_force_hotplug=1' >> $BOOT_DIR/config.txt
+    #else
+    #    echo "- hdmi_force_hotplug was already in config.txt"
+    #    if [ $(cat $BOOT_DIR/config.txt | grep -c "#hdmi_force_hotplug=1") -eq 0 ];
+    #    then
+    #        sed -i 's|#hdmi_force_hotplug=1|hdmi_force_hotplug=1|g' $BOOT_DIR/config.txt
+    #        
+    #    fi
+    #fi
 
 
     # Hide the text normally shown when linux boots up
