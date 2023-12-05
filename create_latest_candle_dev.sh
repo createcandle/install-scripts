@@ -507,7 +507,7 @@ fi
 
 echo
 
-if [ $BIT_TYPE -eq 64 ]; then
+if [ "$BIT_TYPE" -eq 64 ]; then
     echo "Adding support for 32 bit architecture"
     dpkg --add-architecture armhf
     apt update -y && apt install -y screen:armhf
