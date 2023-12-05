@@ -1690,6 +1690,7 @@ echo "checking if $CANDLE_BASE/.local/bin exists"
 #PATH=$PATH:/home/pi/.local/bin
 if [ -d "$CANDLE_BASE/.local/bin" ]
 then
+    echo "could add to path here"
 	#echo "Adding $CANDLE_BASE/.local/bin to path var"
     #[[ ":$PATH:" != *":$CANDLE_BASE/.local/bin:"* ]] && PATH="$CANDLE_BASE/.local/bin:${PATH}"
 else
