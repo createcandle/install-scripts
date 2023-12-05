@@ -275,8 +275,9 @@ if [ ! -s /etc/resolv.conf ]; then
     exit 1
 fi
 
-apt update
 
+# Do initial apt update
+apt-get --allow-releaseinfo-change-suite update 
 
 
 # CREATE PARTITIONS
