@@ -727,13 +727,15 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	chown root:root /usr/sbin/dhcpcd
 
 	chown root:netdev /etc/dhcpcd.conf
- 
+
+ 	echo "Switching to DHCPCD..."
+  
         systemctl daemon-reload
 	systemctl enable dhcpcd.service
  	systemctl start dhcpcd.service
 	systemctl stop NetworkManager.service
         systemctl disable NetworkManager.service
-        
+        echo "Switched to DHCPCD"
     fi
 fi
 
