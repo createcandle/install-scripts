@@ -1423,7 +1423,7 @@ then
     echo "installing kiosk packages"
     echo
 
-    apt-get -y --no-install-recommends xsettingsd rtkit xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools xserver-xorg-input-mtrack
+    apt -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools xserver-xorg-input-mtrack
 
     # xserver-xorg-legacy
     #for i in lightdm xsettingsd rtkit xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools; do
@@ -1652,13 +1652,13 @@ fi
 apt-get install --fix-missing
 
 # Check if browser installed succesfully
-dpkg -s $CHROMIUM_PACKAGE_NAME &> /dev/null
+dpkg -s "$CHROMIUM_PACKAGE_NAME" &> /dev/null
 if [ $? -eq 0 ]; then
     echo "browser installed succesfully"
 else
-    echo
+    echo ""
     echo "ERROR"
-    echo
+    echo ""
     echo "Error detected in the packages install phase (browser is missing). Try running the Candle install script again."
     echo ""
     echo "Candle: error browser failed to install" >> /dev/kmsg
@@ -1685,134 +1685,15 @@ fi
 
 # PYTHON
 
+echo "checking if $CANDLE_BASE/.local/bin exists"
 
 #PATH=$PATH:/home/pi/.local/bin
-if [ -d "/home/pi/.local/bin" ]
+if [ -d "$CANDLE_BASE/.local/bin" ]
 then
-    [[ ":$PATH:" != *":$CANDLE_BASE/.local/bin:"* ]] && PATH="$CANDLE_BASE/.local/bin:${PATH}"
+	#echo "Adding $CANDLE_BASE/.local/bin to path var"
+    #[[ ":$PATH:" != *":$CANDLE_BASE/.local/bin:"* ]] && PATH="$CANDLE_BASE/.local/bin:${PATH}"
 else
     echo "WARNING, /home/pi/.local/bin does not exist"
-fi
-
-
-# Upgrade Python to 3.11
-
-if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]]
-then
-    echo ""
-    echo "Skipping Python upgrade"
-
-else
-
-	if [ ! -e /usr/bin/python3.11 ]; 
-	then
-	    echo "Upgrading Python to 3.11"
-	    echo "Upgrading Python to 3.11" >> /dev/kmsg
-	
-	    apt update
-	
-	    # Packages needed to build Python
-	    for pkg in build-essential zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
-	    libgdbm-dev liblzma-dev tk8.5-dev lzma lzma-dev libgdbm-dev libffi-dev
-	    do
-		apt -y install $pkg --no-install-recommends
-	    done
-	
-	    # just to be sure...
-	    apt-get install libffi-dev
-	
-	    wget https://www.python.org/ftp/python/3.11.1/Python-3.11.1.tar.xz -O python11.tar.xz --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 3
-	
-	    if [ ! -f python11.tar.xz ]; then
-		echo "Error, Python 11 failed to download. Aborting."
-		exit 1
-	    else
-		tar -xvf python11.tar.xz
-		rm python11.tar.xz
-		echo "ls:"
-		ls
-	
-		for directory in Python-*; do
-		    [[ -d $directory ]] || continue
-		    echo "Moving directory: $directory"
-		    mv -f "$directory" ./python311
-		done
-	
-		cd python311
-		./configure --enable-optimizations #--prefix=/usr
-		make altinstall
-		#make install
-		cd ..
-		rm -rf python311
-	
-		# Upgrade symlink for python3
-		#if [ -e /usr/bin/python3.11 ]; then
-		#    cd /usr/bin/
-		#    echo "creating symlink python3 -> python 3.11"
-		#    ln -vfns python3.11 python3
-		#    cd -
-	
-		    # Also create simlink for pip
-		    #if [ -e /usr/bin/pip3 ] && [ -x /usr/bin/pip3.11 ] && [ -x /usr/bin/pip3.9 ]; then
-		    #    mv /usr/bin/pip3 /usr/bin/pip3.9
-		    #    mv /usr/bin/pip3.11 /usr/bin/pip3
-		    #    pip install --upgrade pip
-		    #else
-		    #    echo "Error, /usr/bin/pip3.11 seems to be missing"
-		    #    exit 1
-		    #fi
-	
-		#else
-		#    echo "Error, /usr/bin/python3.11 binary is missing"
-		#    exit 1
-		#fi
-	
-	    fi
-	
-	else
-	    echo "Python 11 seems to already be installed"
-	fi
-
-	# Install  latest version of Pip
-	apt update
-	
-	echo "installing Pip"
-	apt install python3-pip
-	
-	# under bookworm the downgrade to pip 20.3.4 doesn't seem necessary anymore
-	#echo "Setting pip version to 20.3.4"
-	#sudo -u pi python3 -m pip install --upgrade pip pip==20.3.4
-	#sudo -u pi python3 -m pip install --upgrade pip
-	
-	# Allow python packages to be installed globally (since the disk will be read-only anyway)
-	if [ -f /etc/pip.conf ]
-	then
-	    if cat /etc/pip.conf | grep -q break-system-packages
-            then
-		echo "pip break-system-packages already set"
-	    else 
-                echo "setting pip break-system-packages conf"
-		echo "break-system-packages = true" >> /etc/pip.conf
-	    fi
-	else
-	    echo "[global]" > /etc/pip.conf
-	    echo "break-system-packages = true" >> /etc/pip.conf
-            chown pi:pi /etc/pip.conf
-	fi
-	
-	# Re-install modules that come with Raspberry Pi OS by default
-	echo
-	echo "re-installing modules for Python 11"
-	for i in certifi chardet colorzero distro gpiozero idna numpy picamera2 pidng piexif Pillow python-apt python-prctl \
-	    requests RPi.GPIO setuptools simplejpeg six spidev ssh-import-id toml urllib3 v4l2-python3 wheel PyXDG; do
-	
-	    echo "$i"
-	    #sudo -u pi pip3 install "$i" --upgrade
-	    sudo -u pi python3.11 -m pip install $i --upgrade --break-system-packages
-	    echo
-	done
-	echo "finished installing python modules for python 3.11"
- 	echo
 fi
 
 
@@ -1832,7 +1713,31 @@ echo
 echo
 echo "installing pip3"
 echo
+
+apt update
 apt install -y python3-pip
+
+
+# Allow python packages to be installed globally (since the disk will be read-only anyway)
+if [ -f /etc/pip.conf ]
+then
+	if cat /etc/pip.conf | grep -q break-system-packages
+	then
+		echo "pip break-system-packages already set"
+	else 
+		echo "setting pip break-system-packages conf"
+		echo "break-system-packages = true" >> /etc/pip.conf
+	fi
+else
+    echo "adding break-system-packages to pip.conf"
+	
+	echo "[global]" > /etc/pip.conf
+	echo "break-system-packages = true" >> /etc/pip.conf
+	chown pi:pi /etc/pip.conf
+fi
+	
+
+
 
 # update pip
 #sudo -u pi /usr/bin/python3 -m pip install --upgrade pip
@@ -1850,7 +1755,7 @@ sudo -u pi pip3 install --break-system-packages git+https://github.com/pybluez/p
 
 
 echo "Updating existing python packages"
-sudo -u pi pip install --upgrade ssh-import-id --break-system-packages
+sudo -u pi pip3 install --upgrade ssh-import-id --break-system-packages
 
 #echo "Installing Python gateway_addon"
 #sudo -u pi python3 -m pip install git+https://github.com/WebThingsIO/gateway-addon-python#egg=gateway_addon
@@ -1862,7 +1767,7 @@ sudo -u pi pip install --upgrade ssh-import-id --break-system-packages
 # RASPI CONFIG
 #echo "Set Raspi-config I2C, SPI, Camera"
 
-if [ -d /sys/kernel/config/device-tree ];
+if [ -d /sys/kernel/config/device-tree ]
 then
     echo "Enabling I2C, SPI, Camera support"
 
@@ -1885,56 +1790,55 @@ fi
 
 
 
+echo "install seeed respeaker voicecard drivers?"
 
 # RESPEAKER HAT
 if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]]
 then
     
-    #if [ ! -f $BOOT_DIR/candle_original_version.txt ]; then
-    
-        echo
-        echo "INSTALLING RESPEAKER HAT DRIVERS"
-        echo
-    
-        apt-get update
-        cd $CANDLE_BASE
-        git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
-    
-        if [ -d seeed-voicecard ]; then
-            cd seeed-voicecard
-    
-            if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
-                mkdir -p /home/pi/candle
-                #touch /home/pi/candle/installed_respeaker_version.txt
-                cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
-            fi
-    
-            if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ];
-            then
-                echo "ReSpeaker was already installed"
-        
-                if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
-                    echo "ReSpeaker has an updated version!"
-                    echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
-                    echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
-                    ./uninstall.sh
-                    echo -e 'N\n' | ./install.sh
-                    cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
-                else
-                    echo "not a new respeaker version" >> /dev/kmsg
-                fi
-        
-            else
-                echo "Doing initial ReSpeaker install"
-                echo -e 'N\n' | ./install.sh
-            fi
-        
-            cd $CANDLE_BASE
-            rm -rf seeed-voicecard
-        
-        else
-            echo "Error, failed to download respeaker source"
-        fi
+	echo
+	echo "INSTALLING RESPEAKER HAT DRIVERS"
+	echo
+	
+	apt-get update
+	cd $CANDLE_BASE
+	git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
+	
+	if [ -d seeed-voicecard ]; then
+	    cd seeed-voicecard
+	
+	    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
+		mkdir -p /home/pi/candle
+		#touch /home/pi/candle/installed_respeaker_version.txt
+		cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+	    fi
+	
+	    if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ];
+	    then
+		echo "ReSpeaker was already installed"
+	
+		if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
+		    echo "ReSpeaker has an updated version!"
+		    echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
+		    echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
+		    ./uninstall.sh
+		    echo -e 'N\n' | ./install.sh
+		    cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+		else
+		    echo "not a new respeaker version" >> /dev/kmsg
+		fi
+	
+	    else
+		echo "Doing initial ReSpeaker install"
+		echo -e 'N\n' | ./install.sh
+	    fi
+	
+	    cd $CANDLE_BASE
+	    rm -rf seeed-voicecard
+	
+	else
+	    echo "Error, failed to download respeaker source"
+	fi
         
     #else
     #    echo "$BOOT_DIR/candle_original_version.txt already existed, skipping respeaker driver install"
@@ -2086,15 +1990,15 @@ fi
 
 
 
-echo
-echo "INSTALLING OTHER FILES AND SERVICES"
-echo
+echo ""
+echo "Installing other files and services"
+echo ""
 
 systemctl stop triggerhappy.socket
 systemctl stop triggerhappy.service
 
 # switch back to root of home folder
-cd $CANDLE_BASE
+cd "$CANDLE_BASE"
 
 # Make folders that should be owned by Pi user
 mkdir /home/pi/Arduino
@@ -2145,6 +2049,7 @@ if [ -f /etc/bluetooth/main.conf ]; then
     then
         echo "Bluetooth experimental already enabled"
     else 
+        echo "Enabling Bluetooth experimental"
         #echo "Experimental=true" >> /etc/bluetooth/main.conf
 	sed -i 's/#Experimental = false/Experimental=true/' /etc/bluetooth/main.conf
     fi
