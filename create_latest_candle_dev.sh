@@ -316,6 +316,9 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 		systemctl stop NetworkManager.service
 	        systemctl disable NetworkManager.service
 	        echo "Switched to DHCPCD"
+
+		sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
+  
 	    fi
 	fi
 else
