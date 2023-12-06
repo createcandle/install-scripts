@@ -3049,7 +3049,7 @@ fi
 # cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
 
 if [ -f $BOOT_DIR/candle_first_run_complete.txt ] && [ ! -f $BOOT_DIR/candle_original_version.txt ]; then
-    echo "2.0.0-beta" > $BOOT_DIR/candle_original_version.txt
+    echo "2.0.3" > $BOOT_DIR/candle_original_version.txt
 fi
 
 # remember when the disk image was created
