@@ -1887,15 +1887,18 @@ then
     
     # for BlueAlsa
     echo "installing bluealsa support packages"
-    for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev python3-bluetooth; do
-        echo "$i"
-        echo "Candle: installing $i" >> /dev/kmsg
-        echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
-        apt -y install "$i" "$reinstall"  #--print-uris
-        echo
-    done
+    apt-get install -y git automake build-essential libtool pkg-config python3-docutils python3-bluetooth
+    apt-get install -y libasound2-dev libbluetooth-dev libdbus-1-dev libglib2.0-dev libsbc-dev libmp3lame-dev libspandsp-dev 
+    
+    
+    #for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev python3-bluetooth; do
+    #    echo "$i"
+    #    echo "Candle: installing $i" >> /dev/kmsg
+    #    echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
+    #    apt -y install "$i" "$reinstall"  #--print-uris
+    #    echo
+    #done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
-
 
 
     
