@@ -911,7 +911,7 @@ then
 
     # Install Candle addons
     
-    for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface scenes matter-adapter; 
+    for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface scenes; 
     do
         echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
