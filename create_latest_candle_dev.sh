@@ -277,6 +277,7 @@ fi
 
 
 # Do initial apt update
+echo "doing apt update and allowing release info change"
 apt-get --allow-releaseinfo-change-suite update 
 
 
