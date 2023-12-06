@@ -277,13 +277,14 @@ fi
 
 
 # Do initial apt update
+echo
 echo "doing apt update and allowing release info change"
 apt-get --allow-releaseinfo-change-suite update 
 
 
 
-
-echo "checking/switchting to old-school dhcpcd early"
+echo
+echo "checking/switching to old-school dhcpcd early"
 if [ ! -f /usr/sbin/dhcpcd ]; then
     if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	    echo
