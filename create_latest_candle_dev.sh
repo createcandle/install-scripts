@@ -364,7 +364,7 @@ then
             fi
 
             # Tell OS to rescan
-            echo 1 > /sys/block/mmcblk0/device/rescan
+            #echo 1 > /sys/block/mmcblk0/device/rescan
             
             echo ""
             echo "after partitioning:"
@@ -505,6 +505,10 @@ then
     echo "creating Plymouth lite (to show splash images)" >> /dev/kmsg
     echo "creating Plymouth lite (to show splash images)" >> $BOOT_DIR/candle_log.txt
     echo ""
+    
+    apt update
+    apt install -y libpng-dev
+    
     git clone --depth 1 https://github.com/createcandle/Plymouth-lite.git
     cd Plymouth-lite
     ./configure
