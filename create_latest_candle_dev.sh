@@ -2348,6 +2348,7 @@ systemctl enable candle_first_run.service
 #systemctl enable candle_start_swap.service
 systemctl enable candle_early.service
 systemctl enable candle_late.service 
+systemctl enable candle_kiosk.service
 systemctl enable candle_every_minute.timer
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
