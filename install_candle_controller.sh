@@ -4,6 +4,12 @@ set +e
 # This script is part of the Candle disk image creation script, although it can be run stand-alone to only install the controller itself.
 
 BIT_TYPE=$(getconf LONG_BIT)
+ARCHSTRING="linux-arm64"
+if [ '$BIT_TYPE -ne 64' ]; then
+    ARCHSTRING="linux-arm"
+fi
+
+echo "Architecture: $ARCHSTRING"
 
 echo ""
 
@@ -22,12 +28,9 @@ if [ ! -s /etc/resolv.conf ]; then
 fi
 
 
-BOOKWORM=0
 BOOT_DIR="/boot"
-if lsblk | grep $BOOT_DIR/firmware; then
-    echo "firmware partition is mounted at $BOOT_DIR/firmware"
+if lsblk | grep -q $BOOT_DIR/firmware; then
     BOOT_DIR="$BOOT_DIR/firmware"
-    BOOKWORM=1
 fi
 
 # It should in theory be possible to install this in any directory, not just /home/pi (untested)
@@ -728,6 +731,8 @@ ln -s "$V18_PATH" node18
 
 
 
+
+
 cd "$CANDLE_BASE"
 
 
@@ -738,10 +743,7 @@ echo
 mkdir -p "$CANDLE_BASE/.webthings/addons"
 chown -R pi:pi "$CANDLE_BASE/.webthings/addons"
 
-ARCHSTRING=linux-arm
-if [ $BIT_TYPE -eq 64 ]; then
-    ARCHSTRING=linux-arm64
-fi
+
 
 if [ ! -f "$CANDLE_BASE/.webthings/config/db.sqlite3" ] || [ ! -d "$CANDLE_BASE/.webthings/addons/power-settings" ];
 then
@@ -760,19 +762,25 @@ then
             | tr -d \" \
             | sed 's/,*$//' \
             | wget -qi - -O addon.tgz
-        tar -xf addon.tgz
-        rm addon.tgz
-        
-        #for directory in createcandle-"$addon"*; do
-        #  [[ -d $directory ]] || continue
-        #  echo "Directory: $directory"
-        #  rm -rf ./"$addon"
-        #  mv -- "$directory" ./$addon
-        #done
-        rm -rf "$addon"
-        mv package "$addon"
-        chown -R pi:pi "$addon"
-        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+        if [ -f addon.tgz ]; then
+            tar -xf addon.tgz
+            rm addon.tgz
+            
+            #for directory in createcandle-"$addon"*; do
+            #  [[ -d $directory ]] || continue
+            #  echo "Directory: $directory"
+            #  rm -rf ./"$addon"
+            #  mv -- "$directory" ./$addon
+            #done
+            rm -rf "$addon"
+            mv package "$addon"
+            chown -R pi:pi "$addon"
+            mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+        else
+            echo
+            echo "ERROR, power settings tar was not downloaded from github"
+            exit 1
+        fi
     done
     
 else
