@@ -276,56 +276,6 @@ if [ ! -s /etc/resolv.conf ]; then
 fi
 
 
-# Do initial apt update
-echo
-echo "doing apt update and allowing release info change"
-apt-get --allow-releaseinfo-change-suite update 
-
-
-
-echo
-echo "checking/switching to old-school dhcpcd early"
-if [ ! -f /usr/sbin/dhcpcd ]; then
-    if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
-	    echo
-	    echo "force-installing dhcpcd"
-	
-	    # binary no longer seems available for bookworm...
-	    wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz 
-	
-	    #cd /tmp
-	    
-	    #apt download dhcpcd
-	    #ar x dhcp*.deb
-	    tar xvhf dhcpcd.tar.xz -C /
-	    #rm dhcp*.deb
-	    #rm data.tar.xz
-	    #rm control.tar.xz
-	    #rm debian-binary
-	    rm dhcpcd.tar.xz
-	    
-	    if [ -f /usr/sbin/dhcpcd ]; then
-	        chmod +x /usr/sbin/dhcpcd
-		chown root:root /usr/sbin/dhcpcd
-	
-		chown root:netdev /etc/dhcpcd.conf
-	
-	 	echo "Switching to DHCPCD..."
-	  
-	        systemctl daemon-reload
-		systemctl enable dhcpcd.service
-	 	systemctl start dhcpcd.service
-		systemctl stop NetworkManager.service
-	        systemctl disable NetworkManager.service
-	        echo "Switched to DHCPCD"
-
-		sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
-  
-	    fi
-	fi
-else
-	echo "DHCPCD seems to already be installed"
-fi
 
 
 
@@ -450,6 +400,66 @@ fi
 
 sleep 3
 cd $CANDLE_BASE
+
+
+
+# Do initial apt update
+echo
+echo "doing apt update and allowing release info change"
+apt-get --allow-releaseinfo-change-suite update 
+
+
+
+echo
+echo "checking/switching to old-school dhcpcd early"
+if [ ! -f /usr/sbin/dhcpcd ]; then
+    if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
+	    echo
+	    echo "force-installing dhcpcd"
+	
+	    # binary no longer seems available for bookworm...
+	    wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz 
+	
+	    #cd /tmp
+	    
+	    #apt download dhcpcd
+	    #ar x dhcp*.deb
+	    tar xvhf dhcpcd.tar.xz -C /
+	    #rm dhcp*.deb
+	    #rm data.tar.xz
+	    #rm control.tar.xz
+	    #rm debian-binary
+	    rm dhcpcd.tar.xz
+	    
+	    if [ -f /usr/sbin/dhcpcd ]; then
+	        chmod +x /usr/sbin/dhcpcd
+		chown root:root /usr/sbin/dhcpcd
+	
+		chown root:netdev /etc/dhcpcd.conf
+	
+	 	echo "Switching to DHCPCD..."
+	  
+	        systemctl daemon-reload
+		systemctl enable dhcpcd.service
+	 	systemctl start dhcpcd.service
+		systemctl stop NetworkManager.service
+	        systemctl disable NetworkManager.service
+	        echo "Switched to DHCPCD"
+
+		sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
+  
+	    fi
+	fi
+else
+	echo "DHCPCD seems to already be installed"
+fi
+
+
+
+
+
+
+
 
 
 # Save the bits of the initial kernel the boot partition to a file
