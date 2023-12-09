@@ -1460,15 +1460,15 @@ then
     
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
-    
+    apt install -y python3-picamera2 
 
     # Camera support
     # disabled python3-picamera2 
-    for i in python3-libcamera python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
+    for i in python3-libcamera python3-picamera2 python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
-        apt -y install "$i"  "$reinstall" #--print-uris
+        apt -y --no-install-recommends install "$i"  "$reinstall" #--print-uris
         echo
     done
     
