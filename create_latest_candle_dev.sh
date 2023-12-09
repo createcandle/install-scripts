@@ -1376,7 +1376,7 @@ then
         echo
         echo "browser install failed, retrying."
         apt purge $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages
-        apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages
+        apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages --no-install-recommends
     fi
 
 
@@ -1420,11 +1420,11 @@ then
     echo
 
     # Debian Bookworm doesn't have libffi7 anymore
-    for i in arping autoconf ffmpeg libswresample3  libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils jq i2c-tools; do
+    for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils jq i2c-tools; do
             echo "$i"
             echo "Candle: installing $i" >> /dev/kmsg
             echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
-            apt -y install "$i" --print-uris "$reinstall" 
+            apt -y install "$i" --no-install-recommends --print-uris "$reinstall" 
             echo
         done
 
@@ -1460,15 +1460,12 @@ then
     
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
-    apt install -y python3-picamera2 
-
     # Camera support
-    # disabled python3-picamera2 
     for i in python3-libcamera python3-picamera2 python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
-        apt -y --no-install-recommends install "$i"  "$reinstall" #--print-uris
+        apt install -y --no-install-recommends "$i"  "$reinstall" #--print-uris
         echo
     done
     
@@ -1521,7 +1518,7 @@ then
             echo "Candle: WARNING, $i binary not found. Reinstalling."  >> $BOOT_DIR/candle_log.txt
             apt -y purge "$i"
             sleep 2
-            apt -y install "$i"
+            apt install -y --no-install-recommends "$i"
         fi
     done
 
@@ -1550,7 +1547,7 @@ then
             echo "Candle: trying to install it again..."
             apt -y purge "$i"
             sleep 2
-            apt -y install "$i"
+            apt install -y --no-install-recommends "$i"
             
             echo
             if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
@@ -1674,7 +1671,7 @@ else
 fi
 
 
-apt-get install --fix-missing
+apt-get install -y --no-install-recommends --fix-missing
 
 # Check if browser installed succesfully
 dpkg -s "$CHROMIUM_PACKAGE_NAME" &> /dev/null
@@ -1771,8 +1768,7 @@ fi
 # upgrade pip first
 sudo -u pi python3 -m pip install --upgrade pip
 
-apt install -y python3-dbus python3-rpi.gpio python3-pillow python3-wheel python3-requests python3-distro python3-certifi python3-urllib3 python3-colorzero python3-chardet python3-libevdev python3-numpy python3-bluetooth
-
+apt install -y --no-install-recommends python3-dbus python3-rpi.gpio python3-pillow python3-wheel python3-requests python3-distro python3-certifi python3-urllib3 python3-colorzero python3-chardet python3-libevdev python3-numpy python3-bluetooth
 sudo -u pi pip3 uninstall -y adapt-parser || true
 sudo -u pi pip3 install pycryptodomex --break-system-packages
 
@@ -1895,8 +1891,8 @@ then
     
     # for BlueAlsa
     echo "installing bluealsa support packages"
-    apt-get install -y git automake build-essential libtool pkg-config python3-docutils python3-bluetooth
-    apt-get install -y libasound2-dev libbluetooth-dev libdbus-1-dev libglib2.0-dev libsbc-dev libmp3lame-dev libspandsp-dev 
+    apt-get install -y --no-install-recommends git automake build-essential libtool pkg-config python3-docutils python3-bluetooth
+    apt-get install -y --no-install-recommends libasound2-dev libbluetooth-dev libdbus-1-dev libglib2.0-dev libsbc-dev libmp3lame-dev libspandsp-dev 
     
     
     #for i in libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev python3-bluetooth; do
