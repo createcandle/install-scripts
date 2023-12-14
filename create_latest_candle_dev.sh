@@ -425,7 +425,7 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 	    
 	    #apt download dhcpcd
 	    #ar x dhcp*.deb
-	    if [ -f xvhf dhcpcd.tar.xz ]; then
+	    if [ -f dhcpcd.tar.xz ]; then
 
 		    tar xvhf dhcpcd.tar.xz -C /
 		    #rm dhcp*.deb
