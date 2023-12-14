@@ -417,7 +417,9 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 	    echo
 	    echo "force-installing dhcpcd"
 	    echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
- 
+
+ 		rm dhcpcd.tar.*
+   
 	    # binary no longer seems available for bookworm...
 	    wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused 
 	
