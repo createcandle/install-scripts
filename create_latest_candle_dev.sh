@@ -418,7 +418,7 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 	    echo "force-installing dhcpcd"
 	    echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
 
- 		rm dhcpcd.tar.*
+	    rm dhcpcd.tar.*
    
 	    # binary no longer seems available for bookworm...
 	    wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused 
@@ -434,7 +434,7 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 		    #rm data.tar.xz
 		    #rm control.tar.xz
 		    #rm debian-binary
-		    rm dhcpcd.tar.xz
+		    rm dhcpcd.tar.*
 		    
 		    if [ -f /usr/sbin/dhcpcd ]; then
 		        chmod +x /usr/sbin/dhcpcd
