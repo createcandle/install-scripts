@@ -416,7 +416,8 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
     if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	    echo
 	    echo "force-installing dhcpcd"
-	
+	    echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
+ 
 	    # binary no longer seems available for bookworm...
 	    wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz 
 	
@@ -424,30 +425,37 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 	    
 	    #apt download dhcpcd
 	    #ar x dhcp*.deb
-	    tar xvhf dhcpcd.tar.xz -C /
-	    #rm dhcp*.deb
-	    #rm data.tar.xz
-	    #rm control.tar.xz
-	    #rm debian-binary
-	    rm dhcpcd.tar.xz
-	    
-	    if [ -f /usr/sbin/dhcpcd ]; then
-	        chmod +x /usr/sbin/dhcpcd
-		chown root:root /usr/sbin/dhcpcd
-	
-		chown root:netdev /etc/dhcpcd.conf
-	
-	 	echo "Switching to DHCPCD..."
-	  
-	        systemctl daemon-reload
-		systemctl enable dhcpcd.service
-	 	systemctl start dhcpcd.service
-		systemctl stop NetworkManager.service
-	        systemctl disable NetworkManager.service
-	        echo "Switched to DHCPCD"
+	    if [ -f xvhf dhcpcd.tar.xz ]; then
 
-		sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
-  
+		    tar xvhf dhcpcd.tar.xz -C /
+		    #rm dhcp*.deb
+		    #rm data.tar.xz
+		    #rm control.tar.xz
+		    #rm debian-binary
+		    rm dhcpcd.tar.xz
+		    
+		    if [ -f /usr/sbin/dhcpcd ]; then
+		        chmod +x /usr/sbin/dhcpcd
+				chown root:root /usr/sbin/dhcpcd
+			
+				chown root:netdev /etc/dhcpcd.conf
+			
+			 	echo "Switching to DHCPCD..."
+			  
+			    systemctl daemon-reload
+				systemctl enable dhcpcd.service
+			 	systemctl start dhcpcd.service
+				systemctl stop NetworkManager.service
+			    systemctl disable NetworkManager.service
+			    echo "Switched to DHCPCD"
+		
+				sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
+			fi
+
+  		else
+			echo "Error, failed to download DHCPCD from candlesmarthome.com/tools"
+   			echo "Error, failed to download DHCPCD from candlesmarthome.com/tools" >> $BOOT_DIR/candle_log.txt
+	  		exit 1
 	    fi
 	fi
 else
