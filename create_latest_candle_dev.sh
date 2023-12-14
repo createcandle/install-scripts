@@ -419,7 +419,7 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 	    echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
  
 	    # binary no longer seems available for bookworm...
-	    wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz 
+	    wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused 
 	
 	    #cd /tmp
 	    
