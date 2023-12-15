@@ -445,9 +445,17 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 			 	echo "Switching to DHCPCD..."
 			  
 			    systemctl daemon-reload
+	   			echo "Enabling dhcpcd.service..."
 				systemctl enable dhcpcd.service
+				echo "Starting dhcpcd.service..."
 			 	systemctl start dhcpcd.service
+	 			
+	 			echo "Both should now be active..."
+	 			sleep 1
+	 			systemctl status dhcpcd.service
+	 			echo "Stopping NetworkManager..."
 				systemctl stop NetworkManager.service
+				echo "Disabling NetworkManager..."
 			    systemctl disable NetworkManager.service
 			    echo "Switched to DHCPCD"
 		
