@@ -449,9 +449,7 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 				systemctl enable dhcpcd.service
 				echo "Starting dhcpcd.service..."
 			 	systemctl start dhcpcd.service
-	 			
 	 			echo "Both should now be active..."
-	 			sleep 1
 	 			systemctl status dhcpcd.service
 	 			echo "Stopping NetworkManager..."
 				systemctl stop NetworkManager.service
