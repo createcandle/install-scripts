@@ -447,17 +447,17 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 			    systemctl daemon-reload
 	   			echo "Enabling dhcpcd.service..."
 				systemctl enable dhcpcd.service
-				echo "Starting dhcpcd.service..."
-			 	systemctl start dhcpcd.service
-	 			echo "Both should now be active..."
-	 			systemctl status dhcpcd.service
-	 			echo "Stopping NetworkManager..."
-				systemctl stop NetworkManager.service
+				#echo "Starting dhcpcd.service..."
+			 	#systemctl start dhcpcd.service
+	 			#echo "Both should now be active..."
+	 			#systemctl status dhcpcd.service
+	 			#echo "Stopping NetworkManager..."
+				#systemctl stop NetworkManager.service
 				echo "Disabling NetworkManager..."
 			    systemctl disable NetworkManager.service
 			    echo "Switched to DHCPCD"
 		
-				sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
+				#sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
 			fi
 
   		else
