@@ -1440,7 +1440,7 @@ then
     echo
 
     # Debian Bookworm doesn't have libffi7 anymore
-    for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 nbtscan ufw iptables liblivemedia-dev libcamera-apps avahi-utils jq i2c-tools; do
+    for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools libcamera-v4l2 avahi-utils jq i2c-tools; do
             echo "$i"
             echo "Candle: installing $i" >> /dev/kmsg
             echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
