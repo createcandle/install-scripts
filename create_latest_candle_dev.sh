@@ -2637,6 +2637,7 @@ echo
 echo "Candle: almost done, cleaning up" >> /dev/kmsg
 echo "Candle: almost done, cleaning up" >> $BOOT_DIR/candle_log.txt
 
+git config --global http.postBuffer 157286400
 
 # Clean NPM cache
 export NVM_DIR="/home/pi/.nvm"
