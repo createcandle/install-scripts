@@ -917,7 +917,7 @@ then
     fi
     
 fi
-
+apt update
 
 
 
