@@ -1577,7 +1577,7 @@ then
     arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
     liblivemedia-dev libavcodec59 libswresample3 libffi8 libavformat59 \
     libasound2-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
-    python3-libcamera2 python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
+    python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
     do
         echo
         if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
