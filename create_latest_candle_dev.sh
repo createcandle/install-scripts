@@ -1394,7 +1394,7 @@ then
     echo "Candle: installing $CHROMIUM_PACKAGE_NAME" >> $BOOT_DIR/candle_log.txt
     echo
     
-    
+    apt update
     #apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages "$reinstall" --no-install-recommends #--print-uris
     apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages --no-install-recommends
 
