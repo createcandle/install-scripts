@@ -1391,11 +1391,7 @@ then
 
     # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
     # TODO: maybe use version 88?
-    echo
-    echo "installing $CHROMIUM_PACKAGE_NAME"
-    echo "Candle: installing $CHROMIUM_PACKAGE_NAME" >> /dev/kmsg
-    echo "Candle: installing $CHROMIUM_PACKAGE_NAME" >> $BOOT_DIR/candle_log.txt
-    echo
+
     
     apt update
 
@@ -1403,6 +1399,13 @@ then
 	if [ "$SKIP_BROWSER" = no ] || [[ -z "${SKIP_BROWSER}" ]]; 
 	then
 
+		echo
+    	echo "installing web browser"
+    	echo "Candle: installing web browser" >> /dev/kmsg
+    	echo "Candle: installing web browser" >> $BOOT_DIR/candle_log.txt
+    	echo
+ 
+		# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
   		wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
 		dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
 		rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
