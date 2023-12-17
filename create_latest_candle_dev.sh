@@ -30,7 +30,9 @@ set +e # continue on errors
 # export SKIP_DEBUG=yes
 # export SKIP_REBOOT=yes
 # export SKIP_SPLASH=yes
- 
+# export SKIP_SPLASH=yes
+# export SKIP_BROWSER=yes
+
 #SKIP_PARTITIONS=yes
 #TINY_PARTITIONS=yes # used to create smaller partition images, which are used in the new system update process
 #SKIP_APT_INSTALL=yes
@@ -42,6 +44,7 @@ set +e # continue on errors
 #SKIP_DEBUG=yes
 #SKIP_REBOOT=yes
 #SKIP_SPLASH=yes
+#SKIP_BROWSER=yes
  
 # SKIP_PARTITIONS=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_PYTHON=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER=yes SKIP_DEBUG=yes SKIP_REBOOT=yes
 
@@ -1395,16 +1398,29 @@ then
     echo
     
     apt update
-    #apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages "$reinstall" --no-install-recommends #--print-uris
-    apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages --no-install-recommends
 
-    if [ ! -f /bin/$CHROMIUM_PACKAGE_NAME ]; then
-        echo
-        echo "browser install failed, retrying."
-        apt purge $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages
-        apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages --no-install-recommends
-    fi
+    # Install browser
+	if [ "$SKIP_BROWSER" = no ] || [[ -z "${SKIP_BROWSER}" ]]; 
+	then
 
+  		wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
+		dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
+		rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
+		apt-get -f install --no-install-recommends
+
+ 		
+	    #apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages --no-install-recommends
+	    #if [ ! -f /bin/$CHROMIUM_PACKAGE_NAME ]; then
+	    #    echo
+	    #    echo "browser install failed, retrying."
+	    #    apt purge $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages
+	    #    apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages --no-install-recommends
+	    #fi
+    else
+	    echo
+	    echo "Skipping installation of browser"
+	    echo
+	fi
 
     echo
     echo "installing git"
