@@ -523,6 +523,7 @@ if [ -z "$(which git)" ]; then
     echo "Candle: installing git" >> $BOOT_DIR/candle_log.txt
     echo ""
     apt -y install git "$reinstall" 
+    git config --global http.postBuffer 157286400
 fi
 
 
@@ -2636,8 +2637,6 @@ echo "CLEANING UP"
 echo
 echo "Candle: almost done, cleaning up" >> /dev/kmsg
 echo "Candle: almost done, cleaning up" >> $BOOT_DIR/candle_log.txt
-
-git config --global http.postBuffer 157286400
 
 # Clean NPM cache
 export NVM_DIR="/home/pi/.nvm"
