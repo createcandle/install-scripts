@@ -1616,9 +1616,10 @@ then
     
     
     # again, but this time with 'no-install-recommends'
+    # removed xserver-xorg-legacy
     for i in \
     vlc \
-    xinput xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
+    xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
     do
         echo
         if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
