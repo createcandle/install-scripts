@@ -1718,36 +1718,6 @@ fi
 
 apt-get install -y --no-install-recommends --fix-missing
 
-# Check if browser installed succesfully
-dpkg -s "$CHROMIUM_PACKAGE_NAME" &> /dev/null
-if [ $? -eq 0 ]; then
-    echo "browser installed succesfully"
-else
-    echo ""
-    echo "ERROR"
-    echo ""
-    echo "Error detected in the packages install phase (browser is missing). Try running the Candle install script again."
-    echo ""
-    echo "Candle: error browser failed to install" >> /dev/kmsg
-    echo "Candle: error browser failed to install" >> $BOOT_DIR/candle_log.txt
-    
-    # Show error image
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-    then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/error.png" ]; then
-            /bin/ply-image $BOOT_DIR/error.png
-            #sleep 7200
-        fi
-    fi
-    
-    exit 1
-fi
-
-
-
-
-
-
 
 
 # PYTHON
