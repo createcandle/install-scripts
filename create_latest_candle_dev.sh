@@ -1395,8 +1395,8 @@ then
     echo
     
     
-    apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages "$reinstall" #--print-uris
-    apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages
+    #apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages "$reinstall" --no-install-recommends #--print-uris
+    apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages --no-install-recommends
 
     if [ ! -f /bin/$CHROMIUM_PACKAGE_NAME ]; then
         echo
