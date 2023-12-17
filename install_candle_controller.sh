@@ -659,6 +659,12 @@ if [ ! -f "$CANDLE_BASE/webthings/gateway/build/app.js" ] \
 then
     echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! Backup not created."   | sudo tee -a /dev/kmsg
     echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! Backup not created." | sudo tee -a $BOOT_DIR/candle_log.txt
+
+    ls "$CANDLE_BASE/webthings/gateway/build/app.js"
+    ls "$CANDLE_BASE/webthings/gateway/build/static/index.html"
+    ls "$CANDLE_BASE/webthings/gateway/.post_upgrade_complete"
+    ls "$CANDLE_BASE/webthings/gateway/node_modules"
+    ls "$CANDLE_BASE/webthings/gateway/build/static/bundle"
     
     # restore the backup in case something has gone very wrong
     if [ -f "$CANDLE_BASE/controller_backup.tar" ];
