@@ -2518,7 +2518,7 @@ fi
 
 # Disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
 rm /etc/xdg/openbox/rc.xml
-wget https://www.candlesmarthome.com/tools/rc.xml /etc/xdg/openbox/rc.xml --retry-connrefused 
+wget https://www.candlesmarthome.com/tools/rc.xml -O /etc/xdg/openbox/rc.xml --retry-connrefused 
 
 # Modify the xinitrc file to automatically log in the pi user
 echo "- Creating xinitrc file"
