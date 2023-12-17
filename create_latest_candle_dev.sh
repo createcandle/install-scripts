@@ -1599,7 +1599,7 @@ then
             else
                 echo
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
-                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
+                #echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> $BOOT_DIR/candle_log.txt
                 dpkg -s "$i"
                 
@@ -1641,7 +1641,7 @@ then
             else
                 echo
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
-                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
+                #echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> $BOOT_DIR/candle_log.txt
                 dpkg -s "$i"
                 
