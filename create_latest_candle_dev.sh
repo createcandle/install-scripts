@@ -1893,6 +1893,15 @@ fi
 
 
 
+# Experiment: install mode modern pipewire bluetooth audio option
+apt install -y pipewire libspa-0.2-bluetooth
+raspi-config nonint do_audioconf 2
+
+if [ -f /etc/bluetooth/main.conf ]; then
+    sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
+fi
+
+
 
 # BLUEALSA
 if [ "$SKIP_BLUEALSA" = no ] || [ -z "${SKIP_BLUEALSA}" ]
