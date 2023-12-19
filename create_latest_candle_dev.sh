@@ -450,16 +450,18 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 			    systemctl daemon-reload
 	   			echo "Enabling dhcpcd.service..."
 				systemctl enable dhcpcd.service
-				#echo "Starting dhcpcd.service..."
-			 	#systemctl start dhcpcd.service
+				echo "Starting dhcpcd.service..."
+			 	systemctl start dhcpcd.service
 	 			#echo "Both should now be active..."
 	 			#systemctl status dhcpcd.service
 	 			#echo "Stopping NetworkManager..."
 				#systemctl stop NetworkManager.service
 				echo "Disabling NetworkManager..."
 			    systemctl disable NetworkManager.service
+       			    echo "completely removing network manager"
+	   		    apt purge --auto-remove network-manager
 			    echo "Switched to DHCPCD"
-		
+			    
 				#sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
 			fi
 
@@ -2086,12 +2088,13 @@ chmod 755 /var/run/mosquitto
 # Make folders that should be owned by root
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
 mkdir -p /home/pi/.webthings/etc/wpa_supplicant
-mkdir -p /home/pi/.webthings/etc/NetworkManager/
+#mkdir -p /home/pi/.webthings/etc/NetworkManager/
 mkdir -p /home/pi/.webthings/etc/ssh
 
-rm /etc/NetworkManager/system-connections/*
-cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
-
+if [ -d /etc/NetworkManager/system-connections ]; then
+	rm /etc/NetworkManager/system-connections/*
+	#cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
+fi
 
 #echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
