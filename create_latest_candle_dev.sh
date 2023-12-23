@@ -2051,6 +2051,8 @@ echo ""
 
 systemctl stop triggerhappy.socket
 systemctl stop triggerhappy.service
+#systemctl disable triggerhappy.socket
+#systemctl disable triggerhappy.service
 
 # switch back to root of home folder
 cd "$CANDLE_BASE"
@@ -2377,6 +2379,7 @@ systemctl enable candle_first_run.service
 systemctl enable candle_early.service
 systemctl enable candle_late.service 
 systemctl enable candle_kiosk.service
+systemctl enable candle_splash_video.service
 systemctl enable candle_every_minute.timer
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
