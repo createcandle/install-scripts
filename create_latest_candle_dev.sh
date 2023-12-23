@@ -2247,6 +2247,7 @@ chmod +x /home/pi/candle/reboot_to_recovery.sh
 chmod +x /etc/xdg/openbox/autostart
 chmod +x /home/pi/candle/late.sh
 chmod +x /home/pi/candle/kiosk.sh
+chmod +x /home/pi/candle/splash_video.sh
 chmod +x /home/pi/candle/every_minute.sh
 chmod +x /home/pi/candle/debug.sh
 chmod +x /home/pi/candle/files_check.sh
