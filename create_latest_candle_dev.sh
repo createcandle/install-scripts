@@ -2534,8 +2534,8 @@ rm /etc/xdg/openbox/rc.xml
 wget https://www.candlesmarthome.com/tools/rc.xml -O /etc/xdg/openbox/rc.xml --retry-connrefused 
 
 # Modify the xinitrc file to automatically log in the pi user
-echo "- Creating xinitrc file"
-echo "exec openbox-session" > /etc/X11/xinit/xinitrc
+#echo "- Creating xinitrc file"
+#echo "exec openbox-session" > /etc/X11/xinit/xinitrc
 
 echo "- Creating xwrapper.config file"
 echo "allowed_users=anybody" > /etc/X11/Xwrapper.config
