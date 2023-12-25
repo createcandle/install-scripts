@@ -1850,20 +1850,23 @@ then
 	cd $CANDLE_BASE
 	git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
 	
-	if [ -d seeed-voicecard ]; then
+	if [ -d seeed-voicecard ]
+        then
 	    cd seeed-voicecard
 	
-	    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]; then
+	    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]
+	    then
 		mkdir -p /home/pi/candle
 		#touch /home/pi/candle/installed_respeaker_version.txt
 		cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
 	    fi
 	
-	    if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ];
+	    if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ]
 	    then
 		echo "ReSpeaker was already installed"
 	
-		if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null; then
+		if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null
+  		then
 		    echo "ReSpeaker has an updated version!"
 		    echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
 		    echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
@@ -1953,7 +1956,8 @@ then
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
     git clone --depth 1 https://github.com/createcandle/bluez-alsa.git
     
-    if [ -d bluez-alsa ]; then
+    if [ -d bluez-alsa ]
+    then
         echo "generating bluealsa from source"
         cd bluez-alsa
         autoreconf --install --force
