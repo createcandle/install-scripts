@@ -1624,9 +1624,10 @@ then
     
     # again, but this time with 'no-install-recommends'
     # removed xserver-xorg-legacy
+	# removed openbox 
     for i in \
     vlc \
-    xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
+    xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
     do
         echo
         if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
@@ -2249,7 +2250,9 @@ fi
 chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
 chmod +x /home/pi/candle/reboot_to_recovery.sh
-chmod +x /etc/xdg/openbox/autostart
+if [ -f /etc/xdg/openbox/autostart ]; then
+	chmod +x /etc/xdg/openbox/autostart
+fi
 chmod +x /home/pi/candle/late.sh
 chmod +x /home/pi/candle/kiosk.sh
 chmod +x /home/pi/candle/splash_video.sh
@@ -2539,8 +2542,10 @@ then
 fi
 
 # Disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
-rm /etc/xdg/openbox/rc.xml
-wget https://www.candlesmarthome.com/tools/rc.xml -O /etc/xdg/openbox/rc.xml --retry-connrefused 
+if [ -f /etc/xdg/openbox/rc.xml ]; then
+	rm /etc/xdg/openbox/rc.xml
+	wget https://www.candlesmarthome.com/tools/rc.xml -O /etc/xdg/openbox/rc.xml --retry-connrefused 
+fi
 
 # Modify the xinitrc file to automatically log in the pi user
 #echo "- Creating xinitrc file"
@@ -2615,7 +2620,7 @@ if [ -f /etc/xdg/openbox/autostart ]; then
         cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
     fi
 else
-    echo "ERROR, autostart does not exist"
+    echo "Openbox autostart does not exist"
 fi
 
 
