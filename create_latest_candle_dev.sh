@@ -1501,7 +1501,12 @@ then
 # also removed rtkit, as it uses quite a bit of memory
 # TODO: do not do manage keyboard/touch input via XORG, but let kernel handle it.
 #    apt install -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
-    apt install -y --no-install-recommends xsettingsd xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
+
+#    apt install -y --no-install-recommends xsettingsd xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
+    apt install -y --no-install-recommends xserver-xorg edid-decode xinit
+
+
+ 
 
     # xserver-xorg-legacy
     #for i in lightdm xsettingsd rtkit xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools
@@ -1629,7 +1634,8 @@ then
 	# removed openbox 
     for i in \
     vlc \
-    xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
+    git
+    #xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
     do
         echo
         if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
