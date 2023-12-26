@@ -87,9 +87,9 @@ fi
 
 
 BOOKWORM=0
-CHROMIUM_PACKAGE_NAME="chromium-browser"
+CHROMIUM_PACKAGE_NAME="chromium"
 BOOT_DIR="/boot"
-if lsblk | grep /boot/firmware; then
+if lsblk | grep -q /boot/firmware; then
     echo "firmware partition is mounted at /boot/firmware"
     BOOT_DIR="/boot/firmware"
     #CHROMIUM_PACKAGE_NAME="chromium"
