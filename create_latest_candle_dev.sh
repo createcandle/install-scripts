@@ -458,8 +458,11 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 				#systemctl stop NetworkManager.service
 				echo "Disabling NetworkManager..."
 			    systemctl disable NetworkManager.service
-       			    echo "completely removing network manager"
+       			echo "completely removing network manager"
 	   		    apt purge --auto-remove network-manager
+				sleep 1
+    			sudo apt-get --reinstall install dhcpcd
+   
 			    echo "Switched to DHCPCD"
 			    
 				#sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
