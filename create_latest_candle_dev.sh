@@ -1540,8 +1540,9 @@ then
     systemctl disable hostapd.service
     systemctl stop hostapd.service
 
-    
 
+	echo 
+    echo "apt: doing fix-missing and autoremove"
     # Try to fix anything that may have gone wrong
     apt update
     apt-get update --fix-missing -y
@@ -1554,7 +1555,6 @@ then
     for i in \
         hostapd \
         dnsmasq \
-        openbox \
         xinit \
         mosquitto \
         wmctrl \
@@ -1564,7 +1564,6 @@ then
         sqlite3 \
         nbtscan \
         unclutter \
-        xinput \
         jq \
         autoconf;
     do
