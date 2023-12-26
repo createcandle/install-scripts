@@ -842,9 +842,9 @@ then
         # A little overkill:
 
         apt-get update -y
-        DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
-        wait
-        apt-get --fix-missing
+        DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
+        #wait
+        apt-get --fix-missing -y
         apt --fix-broken install -y
         if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
             sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
@@ -863,9 +863,9 @@ then
         
         
         apt-get update -y
-        DEBIAN_FRONTEND=noninteractive apt full-upgrade -y &
+        DEBIAN_FRONTEND=noninteractive apt full-upgrade -y
         wait
-        apt-get --fix-missing
+        apt-get --fix-missing -y
         apt --fix-broken install -y
         apt autoremove -y
 	if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
@@ -1591,11 +1591,13 @@ then
     arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
     liblivemedia-dev libavcodec59 libswresample3 libffi8 libavformat59 \
     libasound2-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
-    python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7;
+    python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7
     do
         echo
-        if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
+        if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]
+	then
             echo "$i installed OK"
+	    
         else
             echo
             echo "Candle: WARNING, $i did not install ok"
@@ -1608,7 +1610,8 @@ then
             apt install -y --no-install-recommends "$i"
             
             echo
-            if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
+            if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]
+	    then
                 echo "$i installed OK"
             else
                 echo
@@ -1627,18 +1630,21 @@ then
             fi
         fi
     done
-    
-    
+
+	echo "--"
+    echo "Done checking if packages installed ok"
+    echo "--"
+	
     # again, but this time with 'no-install-recommends'
     # removed xserver-xorg-legacy
 	# removed openbox 
     for i in \
-    vlc \
-    git
+    vlc git
     #xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
     do
         echo
-        if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
+        if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]
+		then
             echo "$i installed OK"
         else
             echo
@@ -1688,8 +1694,8 @@ then
     echo
     #apt upgrade -y
     apt-get update -y
-    DEBIAN_FRONTEND=noninteractive apt upgrade -y &
-    wait
+    DEBIAN_FRONTEND=noninteractive apt upgrade -y
+    #wait
     echo ""
     
     # Fix potential issue with dhcpdp on Bullseye
@@ -1962,12 +1968,12 @@ then
     #usermod -a -G audio bluealsa-aplay
     
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
-    git clone --depth 1 https://github.com/createcandle/bluez-alsa.git
+    git clone --depth 1 'https://github.com/createcandle/bluez-alsa.git'
     
-    if [ -d bluez-alsa ]
+    if [ -d 'bluez-alsa' ]
     then
         echo "generating bluealsa from source"
-        cd bluez-alsa
+        cd 'bluez-alsa'
         autoreconf --install --force
         mkdir build
         cd build 
@@ -1985,6 +1991,7 @@ else
 fi
 
 cd $CANDLE_BASE
+
 rm -rf bluez-alsa
 
 
