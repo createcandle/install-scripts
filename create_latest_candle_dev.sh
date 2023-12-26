@@ -1454,7 +1454,7 @@ then
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six; do
         
         echo "$i"
-        apt  -y install "$i"  --print-uris "$reinstall"
+        apt  -y install "$i"  --no-install-recommends --print-uris "$reinstall"
         echo
     done
 
