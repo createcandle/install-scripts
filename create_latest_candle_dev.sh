@@ -1311,7 +1311,7 @@ then
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
 
-        apt autoremove
+        apt autoremove -y
 	
     fi
     
