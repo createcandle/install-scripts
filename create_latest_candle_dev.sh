@@ -421,10 +421,25 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 	    echo "force-installing dhcpcd"
 	    echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
 
-	    rm dhcpcd.tar.*
+		ifconfig
+  		
+		apt install -y dhcpcd resolvconf
+
+  		#systemctl stop dnsmasq.service
+	    systemctl disable dnsmasq.service
+
+		systemctl stop NetworkManager.service
+		systemctl disable NetworkManager.service
+
+		echo "completely removing network manager"
+	   	apt purge --auto-remove network-manager
+
+		apt install -y  dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 libteamdctl0 raspberrypi-net-mods
+ 
+	    #rm dhcpcd.tar.*
    
 	    # binary no longer seems available for bookworm...
-	    wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused 
+	    #wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused 
 	
 	    #cd /tmp
 	    
@@ -469,9 +484,11 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 			fi
 
   		else
-			echo "Error, failed to download DHCPCD from candlesmarthome.com/tools"
-   			echo "Error, failed to download DHCPCD from candlesmarthome.com/tools" >> $BOOT_DIR/candle_log.txt
-	  		exit 1
+			
+ 
+			#echo "Error, failed to download DHCPCD from candlesmarthome.com/tools"
+   			#echo "Error, failed to download DHCPCD from candlesmarthome.com/tools" >> $BOOT_DIR/candle_log.txt
+	  		#exit 1
 	    fi
 	fi
 else
@@ -1539,14 +1556,15 @@ then
     systemctl stop dnsmasq.service
     
 
-    echo 
+    echo "installing hostapd"
     apt -y install hostapd "$reinstall" #--print-uris 
     systemctl unmask hostapd.service
     systemctl disable hostapd.service
     systemctl stop hostapd.service
 
 
-	echo 
+	echo "hostapd installed"
+ 	echo
     echo "apt: doing fix-missing and autoremove"
     # Try to fix anything that may have gone wrong
     apt update
@@ -1653,7 +1671,7 @@ then
             
             echo
             echo "Candle: trying to install it again..."
-            apt -y purge "$i"
+            apt -y purge --auto-remove"$i"
             sleep 2
             apt -y --no-install-recommends install "$i"
             
