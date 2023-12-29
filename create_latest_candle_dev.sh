@@ -427,14 +427,18 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 
   		#systemctl stop dnsmasq.service
 	    systemctl disable dnsmasq.service
-
+		
+		echo "attempting switch to dhcpcd"
+  		systemctl start dhcpcd.service
+		systemctl restart avahi-daemon.service
 		systemctl stop NetworkManager.service
+		systemctl restart avahi-daemon.service
 		systemctl disable NetworkManager.service
 
 		echo "completely removing network manager"
-	   	apt purge --auto-remove network-manager
+	   	apt purge -y network-manager
 
-		apt install -y  dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 libteamdctl0 raspberrypi-net-mods
+		apt install -y dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 libteamdctl0 raspberrypi-net-mods iptables
  
 	    #rm dhcpcd.tar.*
    
@@ -474,9 +478,9 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 				echo "Disabling NetworkManager..."
 			    systemctl disable NetworkManager.service
        			echo "completely removing network manager"
-	   		    apt purge --auto-remove network-manager
+	   		    apt purge -y --auto-remove network-manager
 				sleep 1
-    			sudo apt-get --reinstall install dhcpcd
+    			sudo apt-get -y --reinstall install dhcpcd
    
 			    echo "Switched to DHCPCD"
 			    
