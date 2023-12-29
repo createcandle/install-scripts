@@ -1634,7 +1634,7 @@ then
             
             echo
             echo "Candle: trying to install it again..."
-            apt -y purge --auto-remove "$i"
+            apt -y purge "$i"
             sleep 2
             apt -y --no-install-recommends install "$i"
             
@@ -2611,20 +2611,6 @@ echo
 # CREATE INITIAL BACKUPS
 
 cd $CANDLE_BASE
-
-
-# important boot files backup
-if [ ! -f /etc/rc.local.bak ]; then
-    cp /etc/rc.local /etc/rc.local.bak
-fi
-if [ -f /home/pi/candle/early.sh ]; then
-    if [ ! -f /home/pi/candle/early.sh.bak ]; then
-        cp /home/pi/candle/early.sh /home/pi/candle/early.sh.bak
-    fi
-else
-    echo
-    echo "ERROR, early.sh does not exist!"
-fi    
 
 if [ -f /etc/xdg/openbox/autostart ]; then
     if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
