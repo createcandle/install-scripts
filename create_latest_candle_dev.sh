@@ -3272,6 +3272,10 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
 fi
 
 
+chmod +x /home/pi/.webthings/etc/wpa_supplicant/*.sh
+
+
+
 # If developer mode is active during a system update, then the system will permanently have SSH enabled
 if [ ! -f $BOOT_DIR/developer.txt ]; then
     # Disable SSH access
