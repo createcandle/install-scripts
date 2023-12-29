@@ -415,98 +415,50 @@ apt-get --allow-releaseinfo-change-suite update
 
 echo
 echo "checking/switching to old-school dhcpcd early"
-if [ ! -f /usr/sbin/dhcpcd ]; then
-    if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
-	    echo
-	    echo "force-installing dhcpcd"
-	    echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
+if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
+	echo
+	echo "force-installing dhcpcd"
+	echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
 
-		ifconfig
-  		
-		apt install -y dhcpcd resolvconf
-
-  		#systemctl stop dnsmasq.service
-		systemctl enable dnsmasq.service
-	    systemctl disable dnsmasq.service
-		
-		echo "attempting switch to dhcpcd"
-  		systemctl start dhcpcd.service
-		systemctl restart avahi-daemon.service
-		systemctl stop NetworkManager.service
-		systemctl restart avahi-daemon.service
-		systemctl disable NetworkManager.service
-
-		echo "completely removing network manager"
-		rm -rf /etc/NetworkManager/system-connections/*
-	 	apt purge -y network-manager
-
-		apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 libteamdctl0 raspberrypi-net-mods iptables
-
-		ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
- 
-	    #rm dhcpcd.tar.*
-   
-	    # binary no longer seems available for bookworm...
-	    #wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused 
+	ifconfig
 	
-	    #cd /tmp
-	    
-	    #apt download dhcpcd
-	    #ar x dhcp*.deb
-	    if [ -f dhcpcd.tar.xz ]; then
+	apt install -y dhcpcd resolvconf
 
-		    tar xvhf dhcpcd.tar.xz -C /
-		    #rm dhcp*.deb
-		    #rm data.tar.xz
-		    #rm control.tar.xz
-		    #rm debian-binary
-		    rm dhcpcd.tar.*
-		    
-		    if [ -f /usr/sbin/dhcpcd ]; then
-		        chmod +x /usr/sbin/dhcpcd
-				chown root:root /usr/sbin/dhcpcd
-			
-				chown root:netdev /etc/dhcpcd.conf
-			
-			 	echo "Switching to DHCPCD..."
-			  
-			    systemctl daemon-reload
-	   			echo "Enabling dhcpcd.service..."
-				systemctl enable dhcpcd.service
-				echo "Starting dhcpcd.service..."
-			 	systemctl start dhcpcd.service
-	 			#echo "Both should now be active..."
-	 			#systemctl status dhcpcd.service
-	 			#echo "Stopping NetworkManager..."
-				#systemctl stop NetworkManager.service
-				echo "Disabling NetworkManager..."
-			    systemctl disable NetworkManager.service
-       			echo "completely removing network manager"
-	   		    apt purge -y --auto-remove network-manager
-				sleep 1
-    			sudo apt-get -y --reinstall install dhcpcd
-   
-			    echo "Switched to DHCPCD"
-			    
-				#sysctl -w net.ipv6.neigh.wlan0.retrans_time_ms=1000
-			fi
+	#systemctl stop dnsmasq.service
+	systemctl enable dnsmasq.service
+	systemctl disable dnsmasq.service
+	
+	echo "attempting switch to dhcpcd"
+	systemctl start dhcpcd.service
+	systemctl restart avahi-daemon.service
+	systemctl stop NetworkManager.service
+	systemctl restart avahi-daemon.service
+	systemctl disable NetworkManager.service
 
-  		else
-			
- 
-			#echo "Error, failed to download DHCPCD from candlesmarthome.com/tools"
-   			#echo "Error, failed to download DHCPCD from candlesmarthome.com/tools" >> $BOOT_DIR/candle_log.txt
-	  		#exit 1
-	    fi
-	fi
-else
-	echo "DHCPCD seems to already be installed"
+	echo "completely removing network manager"
+	rm -rf /etc/NetworkManager/system-connections/*
+	apt purge -y network-manager
+
+	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 libteamdctl0 raspberrypi-net-mods iptables
+
+	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
+
+	#rm dhcpcd.tar.*
+
+	# binary no longer seems available for bookworm...
+	#wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused   
 fi
 
-if cat /etc/dhcpcd.conf | grep -q -v denyinterfaces; then
-	echo "" >> /etc/dhcpcd.conf
-	echo "For Candle Hostpot" >> /etc/dhcpcd.conf
-	echo "denyinterfaces uap0 ap" >> /etc/dhcpcd.conf
+if [ -s /etc/dhcpcd.conf ]; then
+	if cat /etc/dhcpcd.conf | grep -q -v denyinterfaces; then
+		echo "" >> /etc/dhcpcd.conf
+		echo "For Candle Hostpot" >> /etc/dhcpcd.conf
+		echo "denyinterfaces uap0 ap" >> /etc/dhcpcd.conf
+	fi
+else
+	echo "ERROR: /etc/dhcpcd.conf is missing"
+ 	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
+	exit 1
 fi
 
 # Save the bits of the initial kernel the boot partition to a file
