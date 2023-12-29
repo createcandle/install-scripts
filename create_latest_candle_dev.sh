@@ -72,8 +72,8 @@ set +e # continue on errors
 
 # Check if script is being run as root
 if [ "$EUID" -ne 0 ]; then
-  echo "Please run candle update script as root (use sudo)"
-  exit
+	echo "Please run candle update script as root (use sudo)"
+	exit
 fi
 
 scriptname=$(basename "$0")
@@ -419,13 +419,13 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	echo
 	echo "force-installing dhcpcd"
 	echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
-
+	
 	ifconfig
 	
-	apt install -y dhcpcd resolvconf
-
-	#systemctl stop dnsmasq.service
-	systemctl enable dnsmasq.service
+	apt install -y dhcpcd resolvconf dnsmasq
+	
+	systemctl stop dnsmasq.service
+	#systemctl enable dnsmasq.service
 	systemctl disable dnsmasq.service
 	
 	echo "attempting switch to dhcpcd"
@@ -434,17 +434,17 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	systemctl stop NetworkManager.service
 	systemctl restart avahi-daemon.service
 	systemctl disable NetworkManager.service
-
+	
 	echo "completely removing network manager"
 	rm -rf /etc/NetworkManager/system-connections/*
 	apt purge -y network-manager
-
+	
 	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 libteamdctl0 raspberrypi-net-mods iptables
-
+	
 	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
-
+	
 	#rm dhcpcd.tar.*
-
+	
 	# binary no longer seems available for bookworm...
 	#wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused   
 fi
