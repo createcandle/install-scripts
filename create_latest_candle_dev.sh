@@ -503,13 +503,11 @@ else
 	echo "DHCPCD seems to already be installed"
 fi
 
-
-
-
-
-
-
-
+if cat /etc/dhcpcd.conf | grep -q -v denyinterfaces; then
+	echo "" >> /etc/dhcpcd.conf
+	echo "For Candle Hostpot" >> /etc/dhcpcd.conf
+	echo "denyinterfaces uap0 ap" >> /etc/dhcpcd.conf
+fi
 
 # Save the bits of the initial kernel the boot partition to a file
 if [ "$BIT_TYPE" == 64 ]; then
@@ -588,7 +586,7 @@ echo ""
 
 # BULLSEYE SOURCES
 
-# Make sure Bullseye sources are used
+# Make sure Bullseye sources are used - this is no longer needed
 if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
     echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> /dev/kmsg
     echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt
@@ -596,9 +594,9 @@ if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
 fi
 
 if cat /etc/apt/sources.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list from buster to bullseye" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list from buster to bullseye" >> $BOOT_DIR/candle_log.txt 
-    sed -i 's/buster/bullseye/' /etc/apt/sources.list
+    echo "changing /etc/apt/sources.list from buster to bookworm" >> /dev/kmsg
+    echo "changing /etc/apt/sources.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt 
+    sed -i 's/buster/bookworm/' /etc/apt/sources.list
 fi
 
 
