@@ -3273,6 +3273,8 @@ fi
 
 
 chmod +x /home/pi/.webthings/etc/wpa_supplicant/*.sh
+sudo systemctl disable hostapd.service 
+
 
 
 
