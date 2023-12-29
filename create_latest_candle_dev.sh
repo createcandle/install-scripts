@@ -96,6 +96,7 @@ if lsblk | grep -q /boot/firmware; then
     BOOKWORM=1
 fi
 
+reinstall=""
 
 
 
@@ -1511,7 +1512,7 @@ then
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
     echo "Candle: installing hostapd and dnsmasq" >> $BOOT_DIR/candle_log.txt
 
-    apt -y install dnsmasq  "$reinstall" #--print-uris
+    apt -y install dnsmasq "$reinstall" #--print-uris
     systemctl disable dnsmasq.service
     systemctl stop dnsmasq.service
     
@@ -1533,7 +1534,8 @@ then
     apt --fix-broken install -y
     apt autoremove -y
     
-    
+    wait
+	
     # Check if the binaries eactually exist
     for i in \
         hostapd \
@@ -1560,6 +1562,7 @@ then
     done
 
 
+	wait
     # TODO: removed libffi7 / libffi8 check
     # removed libdbus-glib-1-dev (bluealsa now uses version 2 instead)
     # For bookworm libavcodec58 was changed to libavcodec59
