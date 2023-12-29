@@ -1620,7 +1620,7 @@ then
     # removed xserver-xorg-legacy
 	# removed openbox 
     for i in \
-    vlc git
+    vlc git unclutter
     #xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
     do
         echo
@@ -1634,7 +1634,7 @@ then
             
             echo
             echo "Candle: trying to install it again..."
-            apt -y purge --auto-remove"$i"
+            apt -y purge --auto-remove "$i"
             sleep 2
             apt -y --no-install-recommends install "$i"
             
@@ -1664,6 +1664,10 @@ then
     
 fi
 
+echo
+echo "Most packages are now installed"
+echo
+
 
 # Superfluous?
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
@@ -1689,7 +1693,9 @@ fi
 
 
 
-
+echo 
+echo "Sanity checks"
+echo
 
 # SANITY CHECKS
 
@@ -1719,8 +1725,8 @@ else
 fi
 
 
-apt-get install -y --no-install-recommends --fix-missing
-
+apt install -y --no-install-recommends --fix-missing
+wait
 
 
 # PYTHON
@@ -1846,35 +1852,36 @@ then
 	git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
 	
 	if [ -d seeed-voicecard ]
-        then
+    then
 	    cd seeed-voicecard
 	
 	    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]
 	    then
-		mkdir -p /home/pi/candle
-		#touch /home/pi/candle/installed_respeaker_version.txt
-		cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+			mkdir -p /home/pi/candle
+			#touch /home/pi/candle/installed_respeaker_version.txt
+			cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
 	    fi
 	
 	    if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ]
 	    then
-		echo "ReSpeaker was already installed"
+			echo "ReSpeaker was already installed"
 	
-		if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null
-  		then
-		    echo "ReSpeaker has an updated version!"
-		    echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
-		    echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
-		    ./uninstall.sh
-		    echo -e 'N\n' | ./install.sh
-		    cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
-		else
-		    echo "not a new respeaker version" >> /dev/kmsg
-		fi
+			if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null
+  			then
+		    	echo "ReSpeaker has an updated version!"
+		    	echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
+		    	echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
+		    	./uninstall.sh
+		    	echo -e 'N\n' | ./install.sh
+		    	cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+			else
+		    	echo "not a new respeaker version" >> /dev/kmsg
+			fi
 	
 	    else
-		echo "Doing initial ReSpeaker install"
-		echo -e 'N\n' | ./install.sh
+			echo "Doing initial ReSpeaker install"
+			echo -e 'N\n' | ./install.sh
+   			wait
 	    fi
 	
 	    cd $CANDLE_BASE
@@ -1950,7 +1957,10 @@ then
     
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
     git clone --depth 1 'https://github.com/createcandle/bluez-alsa.git'
-    
+
+	echo
+ 	wait
+ 
     if [ -d 'bluez-alsa' ]
     then
         echo "generating bluealsa from source"
@@ -1961,6 +1971,7 @@ then
         ../configure --enable-msbc --enable-mp3lame --enable-faststream --enable-systemd
         make
         make install
+		wait
     else
         echo "Error, Failed to download bluealsa source from github"
     fi
