@@ -426,6 +426,7 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 		apt install -y dhcpcd resolvconf
 
   		#systemctl stop dnsmasq.service
+		systemctl enable dnsmasq.service
 	    systemctl disable dnsmasq.service
 		
 		echo "attempting switch to dhcpcd"
@@ -436,9 +437,12 @@ if [ ! -f /usr/sbin/dhcpcd ]; then
 		systemctl disable NetworkManager.service
 
 		echo "completely removing network manager"
-	   	apt purge -y network-manager
+		rm -rf /etc/NetworkManager/system-connections/*
+	 	apt purge -y network-manager
 
-		apt install -y dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 libteamdctl0 raspberrypi-net-mods iptables
+		apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 libteamdctl0 raspberrypi-net-mods iptables
+
+		ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
  
 	    #rm dhcpcd.tar.*
    
