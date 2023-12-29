@@ -423,8 +423,8 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	ifconfig
 	
 	apt install -y dhcpcd resolvconf dnsmasq
-	
 	systemctl stop dnsmasq.service
+ 	resolvconf -u
 	#systemctl enable dnsmasq.service
 	systemctl disable dnsmasq.service
 	
@@ -432,13 +432,14 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	systemctl start dhcpcd.service
 	systemctl restart avahi-daemon.service
 	systemctl stop NetworkManager.service
+ 	resolvconf -u
 	systemctl restart avahi-daemon.service
 	systemctl disable NetworkManager.service
 	
 	echo "completely removing network manager"
 	rm -rf /etc/NetworkManager/system-connections/*
 	apt purge -y network-manager
-
+	resolvconf -u
  	# libteamdctl0 raspberrypi-net-mods
 	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
 	
