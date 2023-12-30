@@ -173,7 +173,7 @@ python3.11 --version && python3.11 -m pip install git+https://github.com/createc
 #python3 -m pip install --force-reinstall -v "websocket-client==1.4.2"
 
 
-if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 12 ];
+if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 18 ];
 then
     echo
     echo "NPM could not be found. Installing it now."
