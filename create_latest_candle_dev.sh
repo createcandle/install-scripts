@@ -1487,7 +1487,7 @@ then
 	#    apt install -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
 	
 	#    apt install -y --no-install-recommends xsettingsd xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
-    apt install -y --no-install-recommends xserver-xorg-core x11-xserver-utils xauth xinput xserver-xorg-input-evdev feh edid-decode unclutter xdotool
+    apt install -y --no-install-recommends xserver-xorg-core x11-xserver-utils xauth xinput xserver-xorg-input-evdev feh edid-decode unclutter xdotool xfonts-base
 
 
  
