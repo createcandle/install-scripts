@@ -453,11 +453,14 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 fi
 
 if [ -s /etc/dhcpcd.conf ]; then
-	if cat /etc/dhcpcd.conf | grep -q -v denyinterfaces; then
+	if cat /etc/dhcpcd.conf | grep -q denyinterfaces; then
+		echo "denyinterfaces added to dhcpcd.conf already"
+ 	else
 		echo "" >> /etc/dhcpcd.conf
-		echo "For Candle Hostpot" >> /etc/dhcpcd.conf
+		echo "#For Candle Hostpot" >> /etc/dhcpcd.conf
 		echo "denyinterfaces uap0 ap" >> /etc/dhcpcd.conf
 	fi
+	echo "" > /etc/resolvconf/resolv.conf.d/original
 else
 	echo "ERROR: /etc/dhcpcd.conf is missing"
  	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
