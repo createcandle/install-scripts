@@ -1449,7 +1449,10 @@ then
     echo
 
     # Debian Bookworm doesn't have libffi7 anymore
-    for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups cpufrequtils lsb-release ; do
+    for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 \
+	nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
+ 	cpufrequtils lsb-release \
+  	libsbc-dev libasound2-dev libmp3lame-dev; do
             echo "$i"
             echo "Candle: installing $i" >> /dev/kmsg
             echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
@@ -1475,12 +1478,12 @@ then
     echo "installing kiosk packages"
     echo
 
-# experiment to do without openbox
-# also removed rtkit, as it uses quite a bit of memory
-# TODO: do not do manage keyboard/touch input via XORG, but let kernel handle it.
-#    apt install -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
-
-#    apt install -y --no-install-recommends xsettingsd xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
+	# experiment to do without openbox
+	# also removed rtkit, as it uses quite a bit of memory
+	# TODO: do not do manage keyboard/touch input via XORG, but let kernel handle it.
+	#    apt install -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
+	
+	#    apt install -y --no-install-recommends xsettingsd xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
     apt install -y --no-install-recommends xserver-xorg-core x11-xserver-utils xauth xinput xserver-xorg-input-evdev feh edid-decode unclutter
 
 
@@ -1540,9 +1543,7 @@ then
     for i in \
         hostapd \
         dnsmasq \
-        xinit \
         mosquitto \
-        wmctrl \
         ffmpeg \
         arping \
         ufw \
