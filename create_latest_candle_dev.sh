@@ -458,7 +458,7 @@ if [ -s /etc/dhcpcd.conf ]; then
  	else
 		echo "" >> /etc/dhcpcd.conf
 		echo "#For Candle Hostpot" >> /etc/dhcpcd.conf
-		echo "denyinterfaces uap0 ap" >> /etc/dhcpcd.conf
+		echo "denyinterfaces uap0 uap1" >> /etc/dhcpcd.conf
 	fi
 	echo "" > /etc/resolvconf/resolv.conf.d/original
 else
