@@ -1432,7 +1432,7 @@ then
     echo
     echo "installing build tools"
     for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
-        libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six; do
+        libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-pip python3-six; do
         
         echo "$i"
         apt  -y install "$i"  --no-install-recommends --print-uris "$reinstall"
@@ -1505,7 +1505,7 @@ then
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
     # Camera support
-    for i in python3-libcamera python3-picamera2 python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
+    for i in python3-pip python3-libcamera python3-picamera2 python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
@@ -1576,7 +1576,7 @@ then
     arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
     liblivemedia-dev libavcodec59 libswresample3 libffi8 libavformat59 \
     libasound2-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
-    python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7
+    python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7 python3-pip
     do
         echo
         if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]
