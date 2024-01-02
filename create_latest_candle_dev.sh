@@ -1916,13 +1916,14 @@ fi
 #raspi-config nonint do_audioconf 2
 
 if [ -f /etc/bluetooth/main.conf ]; then
+	echo "setting justWorksRepairing for Bluetooth"
     sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
 fi
 
 
 
 # BLUEALSA
-if [ "$SKIP_BLUEALSA" = no ] || [ -z "${SKIP_BLUEALSA}" ]
+if [ "$SKIP_BLUEALSA" = no ] || [ -z "${SKIP_BLUEALSA}" ];
 then
     
     echo
@@ -1946,9 +1947,11 @@ then
     #    echo
     #done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
+	sleep 5 &
+ 	wait
 
-
-    
+    echo "adding BlueAlsa users"
+	
     adduser --system --group --no-create-home bluealsa
     adduser --system --group --no-create-home bluealsa-aplay
     adduser bluealsa audio
@@ -1958,16 +1961,20 @@ then
     #usermod -a -G bluetooth bluealsa 
     #usermod -a -G audio bluealsa 
     #usermod -a -G audio bluealsa-aplay
-    
-    # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
-    git clone --depth 1 'https://github.com/createcandle/bluez-alsa.git'
 
-	echo
+	echo "Cloning bluez-alsa.git"
+ 
+    # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
+    git clone https://github.com/createcandle/bluez-alsa.git
+
+	echo "checking if bluez-alsa dir exists"
  	wait
  
-    if [ -d 'bluez-alsa' ]
+    if [ -d 'bluez-alsa' ];
     then
+	
         echo "generating bluealsa from source"
+		
         cd 'bluez-alsa'
         autoreconf --install --force
         mkdir build
@@ -1976,6 +1983,7 @@ then
         make
         make install
 		wait
+  
     else
         echo "Error, Failed to download bluealsa source from github"
     fi
