@@ -672,6 +672,7 @@ if [ -f ./ro-root.sh ]; then
     
         # Avoid risky move if possible
         if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
+		    wait
             echo "ro-root.sh file is different, moving it into place"
             echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
             echo "Candle: ro-root.sh file is different, moving it into place" >> $BOOT_DIR/candle_log.txt
@@ -680,7 +681,7 @@ if [ -f ./ro-root.sh ]; then
             fi
             mv -f ./ro-root.sh /bin/ro-root.sh
             chmod +x /bin/ro-root.sh
-        
+        	
         else
             echo "new ro-root.sh file is same as the old one, not moving it"
             echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
@@ -859,9 +860,9 @@ then
 
         apt-get update -y
         apt-get update --fix-missing -y
-        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
-	DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+	    DEBIAN_FRONTEND=noninteractive apt upgrade -y 
         wait
         apt-get update --fix-missing -y
         apt --fix-broken install -y
@@ -1127,9 +1128,9 @@ then
         
         if [ -f /home/pi/latest_stable_controller.tar ] && [ -f /home/pi/latest_stable_controller.tar.txt ]; then
             
-            echo "controller tar & md5 downloaded OK"
-            echo "Candle: controller tar & md5 downloaded OK" >> /dev/kmsg
-            echo "Candle: controller tar & md5 downloaded OK" >> $BOOT_DIR/candle_log.txt
+            echo "controller tar and md5 downloaded OK"
+            echo "Candle: controller tar and md5 downloaded OK" >> /dev/kmsg
+            echo "Candle: controller tar and md5 downloaded OK" >> $BOOT_DIR/candle_log.txt
             
             if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat /home/pi/latest_stable_controller.tar.txt)" ]; then
                 echo "MD5 checksum of latest_stable_controller.tar matched"
@@ -1246,7 +1247,7 @@ then
         echo "STRANGE ERROR, the kernel update should already be done at this point" >> $BOOT_DIR/candle_log.txt
         
         apt-get update -y
-        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
@@ -1279,14 +1280,14 @@ then
         apt-mark unhold raspberrypi-bootloader
         
         apt-get update -y
-        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
         
         apt-get update -y
-        DEBIAN_FRONTEND=noninteractive apt upgrade -y &
+        DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
         apt --fix-broken install -y
         sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
@@ -1704,7 +1705,8 @@ echo
 # SANITY CHECKS
 
 # Check if GIT installed succesfully
-dpkg -s git &> /dev/null
+#dpkg -s git &> /dev/null
+dpkg -s git
 if [ $? -eq 0 ]; then
     echo "git installed succesfully"
 else
@@ -1947,7 +1949,7 @@ then
     #    echo
     #done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
-	sleep 5 &
+	sleep 5
  	wait
 
     echo "adding BlueAlsa users"
