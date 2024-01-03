@@ -443,7 +443,7 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	resolvconf -u
  	# libteamdctl0 raspberrypi-net-mods
 	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
-	
+	#TemporaryTimeout = 30
 	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
 	
 	#rm dhcpcd.tar.*
@@ -1928,8 +1928,10 @@ fi
 #raspi-config nonint do_audioconf 2
 
 if [ -f /etc/bluetooth/main.conf ]; then
-	echo "setting justWorksRepairing for Bluetooth"
-    sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
+    echo "setting justWorksRepairing for Bluetooth"
+    sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
+	sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
+	sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
 fi
 
 
