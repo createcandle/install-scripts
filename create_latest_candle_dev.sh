@@ -453,12 +453,22 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 fi
 
 if [ -s /etc/dhcpcd.conf ]; then
-	if cat /etc/dhcpcd.conf | grep -q denyinterfaces; then
-		echo "denyinterfaces added to dhcpcd.conf already"
+	if cat /etc/dhcpcd.conf | grep -q uap0; then
+		echo "uap0 exception added to dhcpcd.conf already"
  	else
 		echo "" >> /etc/dhcpcd.conf
 		echo "#For Candle Hostpot" >> /etc/dhcpcd.conf
-		echo "denyinterfaces uap0 uap1" >> /etc/dhcpcd.conf
+		
+  		echo "interface uap0 " >> /etc/dhcpcd.conf
+  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+		echo "" >> /etc/dhcpcd.conf
+	    echo "interface uap1 " >> /etc/dhcpcd.conf
+  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+		echo "" >> /etc/dhcpcd.conf
+ 		echo "interface uap2 " >> /etc/dhcpcd.conf
+   		echo "denyinterfaces uap2" >> /etc/dhcpcd.conf
+  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+ 	
 	fi
 	echo "" > /etc/resolvconf/resolv.conf.d/original
 else
