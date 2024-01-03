@@ -2538,7 +2538,7 @@ if [ -f $BOOT_DIR/config.txt ]; then
     # Use the older display driver for now, as this solves many audio headaches.
     # https://github.com/raspberrypi/linux/issues/4543
     
-	#echo "setting fkms display driver"
+    #echo "setting fkms display driver"
     #sed -i "s/dtoverlay=vc4-kms-v3d/dtoverlay=vc4-fkms-v3d/" $BOOT_DIR/config.txt
 
 
@@ -2590,8 +2590,13 @@ usermod -a -G tty pi
 
 # Add policy file to disable things like file selection
 mkdir -p /etc/chromium/policies/managed/
-echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFillEnabled": false, "PasswordManagerEnabled": false}' > /etc/chromium/policies/managed/candle.json
+echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFillEnabled": false, "PasswordManagerEnabled": false, "deleteDataPostSession":false}' > /etc/chromium/policies/managed/candle.json
 
+
+if [ -f /etc/pam.d/sshd ]; then
+	echo "removing pam_env.so user_readenv=1 from /etc/pam.d/sshd config file"
+	sed -i "s/pam_env.so user_readenv=1//" /etc/pam.d/sshd
+fi
 
 
 
