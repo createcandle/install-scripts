@@ -2258,9 +2258,6 @@ chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
 
 
 
-
-
-
 # ADD SYMLINKS
 
 # Create symlink for .asoundrc
