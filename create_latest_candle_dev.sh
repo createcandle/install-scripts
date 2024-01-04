@@ -3222,6 +3222,9 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
 
 fi
 
+if [ -f /etc/asound.conf ]; then
+    rm /etc/asound.conf
+fi
 
 chmod +x /home/pi/.webthings/etc/wpa_supplicant/*.sh
 sudo systemctl disable hostapd.service 
