@@ -1872,7 +1872,7 @@ if [ -f /etc/bluetooth/main.conf ]; then
     then
         echo "Bluetooth experimental already enabled"
     else 
-        echo "Enabling Bluetooth experimental"
+        echo "Enabling Bluetooth experimental in /etc/bluetooth/main.conf"
 
 	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
         sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
