@@ -3227,11 +3227,11 @@ chmod +x /home/pi/.webthings/etc/wpa_supplicant/*.sh
 sudo systemctl disable hostapd.service 
 
 # remove cron files
-rm /etc/cron.daily/apt-compat
-rm /etc/cron.daily/man-db
-rm /etc/cron.daily/dpkg
-rm /etc/cron.weekly/*
-cat '#!/bin/sh' > /usr/lib/apt/apt.systemd.daily
+#rm /etc/cron.daily/apt-compat
+#rm /etc/cron.daily/man-db
+#rm /etc/cron.daily/dpkg
+#rm /etc/cron.weekly/*
+#cat '#!/bin/sh' > /usr/lib/apt/apt.systemd.daily
 
 
 rm -rf /var/backups/*
@@ -3239,11 +3239,11 @@ systemctl disable dpkg-db-backup.timer
 systemctl disable dphys-swapfile
 
 
-systemctl disable apt-daily.service
-systemctl disable apt-daily.timer
+#systemctl disable apt-daily.service
+#systemctl disable apt-daily.timer
 
-systemctl disable apt-daily-upgrade.timer
-systemctl disable apt-daily-upgrade.service
+#systemctl disable apt-daily-upgrade.timer
+#systemctl disable apt-daily-upgrade.service
 
 
 chown pi:pi /home/pi/.webthings/ssl/
