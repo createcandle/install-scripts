@@ -1577,7 +1577,7 @@ then
     done
 
 
-	wait
+    wait
     # TODO: removed libffi7 / libffi8 check
     # removed libdbus-glib-1-dev (bluealsa now uses version 2 instead)
     # For bookworm libavcodec58 was changed to libavcodec59
@@ -1627,20 +1627,20 @@ then
         fi
     done
 
-	echo "--"
+    echo "--"
     echo "Done checking if packages installed ok"
     echo "--"
 	
     # again, but this time with 'no-install-recommends'
     # removed xserver-xorg-legacy
-	# removed openbox 
+    # removed openbox 
     for i in \
     vlc git unclutter
     #xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
     do
         echo
         if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]
-		then
+        then
             echo "$i installed OK"
         else
             echo
@@ -1679,11 +1679,15 @@ then
     
 fi
 
+
+sleep 5
+
 echo
 echo "Most packages are now installed"
 echo
 
-
+sleep 5
+wait 
 # Superfluous?
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
@@ -1707,38 +1711,13 @@ then
 fi
 
 
-
+wait
 echo 
 echo "Sanity checks"
 echo
 
 # SANITY CHECKS
 
-# Check if GIT installed succesfully
-#dpkg -s git &> /dev/null
-dpkg -s git
-if [ $? -eq 0 ]; then
-    echo "git installed succesfully"
-else
-    echo
-    echo "ERROR"
-    echo
-    echo "Error detected in the packages install phase (git is missing). Try running the Candle install script again."
-    echo ""
-    echo "Candle: error GIT failed to install" >> /dev/kmsg
-    echo "Candle: error GIT failed to install" >> $BOOT_DIR/candle_log.txt
-    
-    # Show error image
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-    then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/error.png" ]; then
-            /bin/ply-image $BOOT_DIR/error.png
-            #sleep 7200
-        fi
-    fi
-    
-    exit 1
-fi
 
 
 apt install -y --no-install-recommends --fix-missing
@@ -1930,14 +1909,14 @@ fi
 if [ -f /etc/bluetooth/main.conf ]; then
     echo "setting justWorksRepairing for Bluetooth"
     sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
-	sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
-	sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
+    sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
+    sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
 fi
 
 
 
 # BLUEALSA
-if [ "$SKIP_BLUEALSA" = no ] || [ -z "${SKIP_BLUEALSA}" ];
+if [ "$SKIP_BLUEALSA" = no ] || [ -z "${SKIP_BLUEALSA}" ]
 then
     
     echo
@@ -1967,10 +1946,10 @@ then
     echo "adding BlueAlsa users"
 	
     adduser --system --group --no-create-home bluealsa
-    adduser --system --group --no-create-home bluealsa-aplay
+    adduser --system --group --no-create-home 'bluealsa-aplay'
     adduser bluealsa audio
     adduser bluealsa bluetooth
-    adduser bluealsa-aplay audio
+    adduser 'bluealsa-aplay' audio
 
     #usermod -a -G bluetooth bluealsa 
     #usermod -a -G audio bluealsa 
@@ -1984,14 +1963,14 @@ then
 	echo "checking if bluez-alsa dir exists"
  	wait
  
-    if [ -d 'bluez-alsa' ];
+    if [ -d "bluez-alsa" ]
     then
 	
         echo "generating bluealsa from source"
 		
-        cd 'bluez-alsa'
+        cd "bluez-alsa"
         autoreconf --install --force
-        mkdir build
+        mkdir -p build
         cd build 
         ../configure --enable-msbc --enable-mp3lame --enable-faststream --enable-systemd
         make
@@ -2010,8 +1989,11 @@ fi
 
 cd $CANDLE_BASE
 
-rm -rf bluez-alsa
-
+if [ -d "bluez-alsa" ]
+then
+	echo "Removing bluealsa git dir"
+	rm -rf "bluez-alsa"
+fi
 
 
 
