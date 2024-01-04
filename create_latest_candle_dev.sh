@@ -3226,7 +3226,9 @@ fi
 chmod +x /home/pi/.webthings/etc/wpa_supplicant/*.sh
 sudo systemctl disable hostapd.service 
 
-
+rm -rf /var/backups/*
+systemctl disable dpkg-db-backup.timer
+systemctl disable dphys-swapfile
 
 
 # If developer mode is active during a system update, then the system will permanently have SSH enabled
