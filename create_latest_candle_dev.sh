@@ -1876,8 +1876,8 @@ if [ -f /etc/bluetooth/main.conf ]; then
 
 	#sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
         sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
-        sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
-	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
+        #sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
+	#sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
     fi
 fi
 
