@@ -516,6 +516,9 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     echo "Candle: Installing Node modules (takes a while)" | sudo tee -a $BOOT_DIR/candle_log.txt
     
     echo "Do not worry about the errors you will see with optipng and jpegtran"
+
+    # attempt to fix "ECONNRESET" issue
+    npm config set registry http://registry.npmjs.org/
     
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
     CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
@@ -529,7 +532,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     #npm run build
 
     #npm install -D webpack-cli
-
+    npm install -D typescript
+    
     rm -rf build
     cp -rL src build
     cp -rL static build/static
