@@ -552,9 +552,10 @@ echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nhostnamectl 
 chmod +x /usr/bin/candle_hostname_fix.sh
 echo ""
 
-# BULLSEYE SOURCES
 
-# Make sure Bullseye sources are used - this is no longer needed
+# BOOKWORM SOURCES
+
+# Make sure Bullseye sources are used - this is no longer needed because the "run the install script again" upgrade path is deprecated
 if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
     echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> /dev/kmsg
     echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt
@@ -1466,6 +1467,7 @@ then
     for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 \
 	nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
  	cpufrequtils lsb-release \
+  #	libspandsp-dev libgirepository1.0-dev\
   	libsbc-dev libasound2-dev libmp3lame-dev; do
             echo "$i"
             echo "Candle: installing $i" >> /dev/kmsg
@@ -1581,13 +1583,15 @@ then
     # TODO: removed libffi7 / libffi8 check
     # removed libdbus-glib-1-dev (bluealsa now uses version 2 instead)
     # For bookworm libavcodec58 was changed to libavcodec59
+    # removed libgirepository1.0-dev to test if it's still needed
     for i in \
     git autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
     libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
     arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
     liblivemedia-dev libavcodec59 libswresample3 libffi8 libavformat59 \
-    libasound2-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev \
-    python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7 python3-pip
+    libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
+    python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7 python3-pip \
+    vlc unclutter;
     do
         echo
         if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]
@@ -1630,53 +1634,7 @@ then
     echo "--"
     echo "Done checking if packages installed ok"
     echo "--"
-	
-    # again, but this time with 'no-install-recommends'
-    # removed xserver-xorg-legacy
-    # removed openbox 
-    for i in \
-    vlc git unclutter
-    #xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools;
-    do
-        echo
-        if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]
-        then
-            echo "$i installed OK"
-        else
-            echo
-            echo "Candle: WARNING, $i did not install ok"
-            dpkg -s "$i"
-            
-            echo
-            echo "Candle: trying to install it again..."
-            apt -y purge "$i"
-            sleep 2
-            apt -y --no-install-recommends install "$i"
-            
-            echo
-            if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]; then
-                echo "$i installed OK"
-            else
-                echo
-                echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
-                #echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
-                echo "Candle: ERROR, $i package still did not install. Aborting..." >> $BOOT_DIR/candle_log.txt
-                dpkg -s "$i"
-                
-                # Show error image
-                if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-                then
-                    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f "$BOOT_DIR/error.png" ]; then
-                        /bin/ply-image $BOOT_DIR/error.png
-                        #sleep 7200
-                    fi
-                fi
-    
-                exit 1
-            fi
-        fi
-    done
-    
+
 fi
 
 
@@ -1838,53 +1796,53 @@ echo "install seeed respeaker voicecard drivers?"
 if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]]
 then
     
-	echo
-	echo "INSTALLING RESPEAKER HAT DRIVERS"
-	echo
+    echo
+    echo "INSTALLING RESPEAKER HAT DRIVERS"
+    echo
 	
-	apt-get update
-	cd $CANDLE_BASE
-	git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
+    apt-get update
+    cd $CANDLE_BASE
+    git clone --depth 1 https://github.com/HinTak/seeed-voicecard.git
 	
-	if [ -d seeed-voicecard ]
+    if [ -d seeed-voicecard ]
     then
-	    cd seeed-voicecard
+        cd seeed-voicecard
 	
-	    if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]
-	    then
+        if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]
+        then
 			mkdir -p /home/pi/candle
 			#touch /home/pi/candle/installed_respeaker_version.txt
 			cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
-	    fi
+        fi
 	
-	    if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ]
-	    then
-			echo "ReSpeaker was already installed"
+        if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ]
+        then
+            echo "ReSpeaker was already installed"
 	
-			if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null
-  			then
-		    	echo "ReSpeaker has an updated version!"
-		    	echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
-		    	echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
-		    	./uninstall.sh
-		    	echo -e 'N\n' | ./install.sh
-		    	cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
-			else
-		    	echo "not a new respeaker version" >> /dev/kmsg
-			fi
+            if [ ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null ]
+            then
+                echo "ReSpeaker has an updated version!"
+		echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
+		echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
+		./uninstall.sh
+		echo -e 'N\n' | ./install.sh
+		cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+            else
+		echo "not a new respeaker version" >> /dev/kmsg
+            fi
 	
-	    else
-			echo "Doing initial ReSpeaker install"
-			echo -e 'N\n' | ./install.sh
-   			wait
-	    fi
+        else
+            echo "Doing initial ReSpeaker install"
+            echo -e 'N\n' | ./install.sh
+            wait
+        fi
 	
-	    cd $CANDLE_BASE
-	    rm -rf seeed-voicecard
+        cd $CANDLE_BASE
+        rm -rf seeed-voicecard
 	
-	else
-	    echo "Error, failed to download respeaker source"
-	fi
+    else
+        echo "Error, failed to download respeaker source"
+    fi
         
     #else
     #    echo "$BOOT_DIR/candle_original_version.txt already existed, skipping respeaker driver install"
@@ -1940,8 +1898,8 @@ then
     #    echo
     #done
     #apt install libasound2-dev libdbus-glib-1-dev libgirepository1.0-dev libsbc-dev libmp3lame-dev libspandsp-dev -y
-	sleep 5
- 	wait
+    sleep 5
+    wait
 
     echo "adding BlueAlsa users"
 	
@@ -1955,13 +1913,13 @@ then
     #usermod -a -G audio bluealsa 
     #usermod -a -G audio bluealsa-aplay
 
-	echo "Cloning bluez-alsa.git"
+    echo "Cloning bluez-alsa.git"
  
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
-    git clone https://github.com/createcandle/bluez-alsa.git
+    git clone "https://github.com/createcandle/bluez-alsa.git"
 
-	echo "checking if bluez-alsa dir exists"
- 	wait
+    echo "checking if bluez-alsa dir exists"
+    wait
  
     if [ -d "bluez-alsa" ]
     then
@@ -1975,7 +1933,7 @@ then
         ../configure --enable-msbc --enable-mp3lame --enable-faststream --enable-systemd
         make
         make install
-		wait
+        wait
   
     else
         echo "Error, Failed to download bluealsa source from github"
@@ -1991,8 +1949,8 @@ cd $CANDLE_BASE
 
 if [ -d "bluez-alsa" ]
 then
-	echo "Removing bluealsa git dir"
-	rm -rf "bluez-alsa"
+    echo "Removing bluealsa git dir"
+    rm -rf "bluez-alsa"
 fi
 
 
