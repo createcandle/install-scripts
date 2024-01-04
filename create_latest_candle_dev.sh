@@ -3249,6 +3249,8 @@ systemctl disable apt-daily-upgrade.timer
 systemctl disable apt-daily-upgrade.service
 
 
+chown pi:pi /home/pi/.webthings/ssl/
+
 # If developer mode is active during a system update, then the system will permanently have SSH enabled
 if [ ! -f $BOOT_DIR/developer.txt ]; then
     # Disable SSH access
