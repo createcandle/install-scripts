@@ -1467,7 +1467,7 @@ then
   #	libspandsp-dev libgirepository1.0-dev\
     for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 \
 	nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
- 	cpufrequtils lsb-release libsbc-dev libasound2-dev libmp3lame-dev; do
+ 	cpufrequtils lsb-release libsbc-dev libasound2-dev libmp3lame-dev tcpdump dnstop; do
             echo "$i"
             echo "Candle: installing $i" >> /dev/kmsg
             echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
