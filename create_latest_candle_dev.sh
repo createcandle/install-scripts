@@ -1818,7 +1818,7 @@ then
         then
             echo "ReSpeaker was already installed"
 	
-            if [ ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null ]
+            if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null
             then
                 echo "ReSpeaker has an updated version!"
 		echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
