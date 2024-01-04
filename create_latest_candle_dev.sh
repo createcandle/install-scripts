@@ -1493,7 +1493,7 @@ then
     echo "installing kiosk packages"
     echo
 
-	# experiment to do without openbox
+	# attempt to do without openbox
 	# also removed rtkit, as it uses quite a bit of memory
 	# TODO: do not do manage keyboard/touch input via XORG, but let kernel handle it.
 	#    apt install -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
@@ -1874,10 +1874,10 @@ if [ -f /etc/bluetooth/main.conf ]; then
     else 
         echo "Enabling Bluetooth experimental in /etc/bluetooth/main.conf"
 
-	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
+	#sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
         sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
         sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
-	sed -i 's/#Experimental = false/Experimental=true/' /etc/bluetooth/main.conf
+	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
     fi
 fi
 
