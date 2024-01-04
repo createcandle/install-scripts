@@ -2229,9 +2229,9 @@ fi
 chmod +x /home/pi/candle/early.sh
 chmod +x /etc/rc.local
 chmod +x /home/pi/candle/reboot_to_recovery.sh
-if [ -f /etc/xdg/openbox/autostart ]; then
-	chmod +x /etc/xdg/openbox/autostart
-fi
+#if [ -f /etc/xdg/openbox/autostart ]; then
+#    chmod +x /etc/xdg/openbox/autostart
+#fi
 chmod +x /home/pi/candle/late.sh
 chmod +x /home/pi/candle/kiosk.sh
 chmod +x /home/pi/candle/splash_video.sh
@@ -2241,7 +2241,7 @@ chmod +x /home/pi/candle/files_check.sh
 chmod +x /home/pi/candle/install_samba.sh
 chmod +x /home/pi/candle/prepare_for_disk_image.sh
 chmod +x /home/pi/candle/unsnap.sh
-
+chmod +x /home/pi/candle/respeaker_check.sh
 
 
 # CHOWN THE NEW FILES
@@ -2514,17 +2514,17 @@ fi
 #mkdir -p /etc/X11/xinit
 #mkdir -p /etc/xdg/openbox
 
-if [ ! -d "/etc/xdg/openbox" ];
-then
-    echo "missing dir: /etc/xdg/openbox"
-    mkdir -p /etc/xdg/openbox
-fi
+#if [ ! -d "/etc/xdg/openbox" ];
+#then
+#    echo "missing dir: /etc/xdg/openbox"
+#    mkdir -p /etc/xdg/openbox
+#fi
 
 # Disable Openbox keyboard shortcuts to make the kiosk mode harder to escape
-if [ -f /etc/xdg/openbox/rc.xml ]; then
-	rm /etc/xdg/openbox/rc.xml
-	wget https://www.candlesmarthome.com/tools/rc.xml -O /etc/xdg/openbox/rc.xml --retry-connrefused 
-fi
+#if [ -f /etc/xdg/openbox/rc.xml ]; then
+#    rm /etc/xdg/openbox/rc.xml
+#    wget https://www.candlesmarthome.com/tools/rc.xml -O /etc/xdg/openbox/rc.xml --retry-connrefused 
+#fi
 
 # Modify the xinitrc file to automatically log in the pi user
 #echo "- Creating xinitrc file"
@@ -2585,13 +2585,13 @@ echo
 
 cd $CANDLE_BASE
 
-if [ -f /etc/xdg/openbox/autostart ]; then
-    if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
-        cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
-    fi
-else
-    echo "Openbox autostart does not exist"
-fi
+#if [ -f /etc/xdg/openbox/autostart ]; then
+#    if [ ! -f /etc/xdg/openbox/autostart.bak ]; then
+#        cp /etc/xdg/openbox/autostart /etc/xdg/openbox/autostart.bak
+#    fi
+#else
+#    echo "Openbox autostart does not exist"
+#fi
 
 
 
