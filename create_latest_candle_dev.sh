@@ -1865,10 +1865,22 @@ fi
 
 if [ -f /etc/bluetooth/main.conf ]; then
     echo "setting justWorksRepairing for Bluetooth"
-    sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
-    sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
-    sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
+    
 fi
+if [ -f /etc/bluetooth/main.conf ]; then
+    if cat /etc/bluetooth/main.conf | grep -q "Experimental=true" 
+    then
+        echo "Bluetooth experimental already enabled"
+    else 
+        echo "Enabling Bluetooth experimental"
+
+	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
+        sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
+        sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
+	sed -i 's/#Experimental = false/Experimental=true/' /etc/bluetooth/main.conf
+    fi
+fi
+
 
 
 
@@ -2082,16 +2094,7 @@ fi
 
 #echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
-if [ -f /etc/bluetooth/main.conf ]; then
-    if cat /etc/bluetooth/main.conf | grep -q "Experimental=true" 
-    then
-        echo "Bluetooth experimental already enabled"
-    else 
-        echo "Enabling Bluetooth experimental (DISABLED FOR NOW)"
-        #echo "Experimental=true" >> /etc/bluetooth/main.conf
-	#sed -i 's/#Experimental = false/Experimental=true/' /etc/bluetooth/main.conf
-    fi
-fi
+
 
 
 if [ ! -d /home/pi/.webthings/tmp ]; then
