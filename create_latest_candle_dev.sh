@@ -3234,9 +3234,9 @@ sudo systemctl disable hostapd.service
 #cat '#!/bin/sh' > /usr/lib/apt/apt.systemd.daily
 
 
-rm -rf /var/backups/*
-systemctl disable dpkg-db-backup.timer
-systemctl disable dphys-swapfile
+#rm -rf /var/backups/*
+#systemctl disable dpkg-db-backup.timer
+#systemctl disable dphys-swapfile
 
 
 #systemctl disable apt-daily.service
