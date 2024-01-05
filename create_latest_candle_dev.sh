@@ -2495,7 +2495,7 @@ if [ -f $BOOT_DIR/config.txt ]; then
 
     # Set more power for USB ports
     isInFile3=$(cat $BOOT_DIR/config.txt | grep -c "max_usb_current")
-    if [ $isInFile3 -eq 0 ]
+    if [ "$isInFile3" -eq 0 ]
     then
     	echo "- Setting USB to deliver more current in config.txt"
     	echo "max_usb_current=1" >> $BOOT_DIR/config.txt
