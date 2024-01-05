@@ -162,15 +162,15 @@ fi
 
 echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 echo "candle: installing python gateway addon" | sudo tee -a $BOOT_DIR/candle_log.txt
-python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages
+python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 
 # Install the gateway addon for Python 3.11 too, if Python 3.11 exists
-python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon
+python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --trusted-host pypi.org --trusted-host files.pythonhosted.org
 
 
 
 # install newer version of Python websocket client
-#python3 -m pip install --force-reinstall -v "websocket-client==1.4.2"
+#python3 -m pip install --force-reinstall -v "websocket-client==1.4.2" --trusted-host pypi.org --trusted-host files.pythonhosted.org
 
 
 if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 18 ];
