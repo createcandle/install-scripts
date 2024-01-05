@@ -1464,19 +1464,21 @@ then
     echo
 
     # Debian Bookworm doesn't have libffi7 anymore
-  #	libspandsp-dev libgirepository1.0-dev\
+    # libspandsp-dev libgirepository1.0-dev\
     for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 \
-	nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
- 	cpufrequtils lsb-release libsbc-dev libasound2-dev libmp3lame-dev tcpdump dnstop; do
-            echo "$i"
-            echo "Candle: installing $i" >> /dev/kmsg
-            echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
-            apt -y install "$i" --no-install-recommends --print-uris "$reinstall" 
-            echo
-        done
+	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
+ 	    cpufrequtils lsb-release libsbc-dev libasound2-dev libmp3lame-dev tcpdump dnstop; do
+            
+		echo "$i"
+        echo "Candle: installing $i" >> /dev/kmsg
+        echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
+        apt -y install "$i" --no-install-recommends --print-uris "$reinstall" 
+        echo ""
+		
+    done
 
     # Quick sanity check
-    if [ ! -f /usr/sbin/mosquitto ]; then
+    if ! [ -f /usr/sbin/mosquitto ]; then
         echo "Candle: WARNING, mosquitto failed to install the first time" >> /dev/kmsg
         echo "Candle: WARNING, mosquitto failed to install the first time" >> $BOOT_DIR/candle_log.txt
         apt -y --reinstall install mosquitto  
@@ -1592,9 +1594,10 @@ then
     python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7 python3-pip \
     vlc unclutter;
     do
-        echo
+        echo ""
+		
         if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]
-	then
+        then
             echo "$i installed OK"
 	    
         else
@@ -1610,7 +1613,7 @@ then
             
             echo
             if [ -n "$(dpkg -s $i | grep 'install ok installed')" ]
-	    then
+            then
                 echo "$i installed OK"
             else
                 echo
@@ -1645,6 +1648,7 @@ echo
 
 sleep 5
 wait 
+
 # Superfluous?
 if [ "$SKIP_APT_UPGRADE" = no ] || [[ -z "${SKIP_APT_UPGRADE}" ]]; 
 then
@@ -1683,7 +1687,7 @@ wait
 
 # PYTHON
 
-echo "checking if $CANDLE_BASE/.local/bin exists"
+#echo "checking if $CANDLE_BASE/.local/bin exists"
 
 #PATH=$PATH:/home/pi/.local/bin
 if [ -d "$CANDLE_BASE/.local/bin" ]
@@ -1807,7 +1811,7 @@ then
     then
         cd seeed-voicecard
 	
-        if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]
+        if ! [ -f /home/pi/candle/installed_respeaker_version.txt ]
         then
             mkdir -p /home/pi/candle
             #touch /home/pi/candle/installed_respeaker_version.txt
@@ -1821,13 +1825,13 @@ then
             if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null
             then
                 echo "ReSpeaker has an updated version!"
-		echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
-		echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
-		./uninstall.sh
-		echo -e 'N\n' | ./install.sh
-		cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+                echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
+                echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
+                ./uninstall.sh
+                echo -e 'N\n' | ./install.sh
+                cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
             else
-		echo "not a new respeaker version" >> /dev/kmsg
+                echo "not a new respeaker version" >> /dev/kmsg
             fi
 	
         else
@@ -1864,20 +1868,20 @@ fi
 #raspi-config nonint do_audioconf 2
 
 if [ -f /etc/bluetooth/main.conf ]; then
-    echo "setting justWorksRepairing for Bluetooth"
-    
-fi
-if [ -f /etc/bluetooth/main.conf ]; then
     if cat /etc/bluetooth/main.conf | grep -q "Experimental=true" 
     then
         echo "Bluetooth experimental already enabled"
     else 
-        echo "Enabling Bluetooth experimental in /etc/bluetooth/main.conf"
-
-	#sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
+        #echo "Enabling Bluetooth experimental in /etc/bluetooth/main.conf"
+ 		#sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
+        #sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
+   
+ 		echo "setting justWorksRepairing for Bluetooth"    
         sed -i 's/#JustWorksRepairing.*/JustWorksRepairing = always/' /etc/bluetooth/main.conf
-        #sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
-	#sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
+
+		echo "setting discovered devices timeout for Bluetooth"    
+		#sed -i 's/#TemporaryTimeout = 30/TemporaryTimeout = 60/' /etc/bluetooth/main.conf
+ 		
     fi
 fi
 
@@ -1888,11 +1892,11 @@ fi
 if [ "$SKIP_BLUEALSA" = no ] || [ -z "${SKIP_BLUEALSA}" ]
 then
     
-    echo
+    echo ""
     echo "INSTALLING BLUEALSA BLUETOOTH SPEAKER DRIVERS"
     echo "Candle: building BlueAlsa (audio streaming)" >> /dev/kmsg
     echo "Candle: building BlueAlsa (audio streaming)" >> $BOOT_DIR/candle_log.txt
-    echo
+    echo ""
     
     
     # for BlueAlsa
@@ -1927,11 +1931,11 @@ then
     echo "Cloning bluez-alsa.git"
  
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
-    git clone "https://github.com/createcandle/bluez-alsa.git"
-	if ! [ -d "bluez-alsa" ]; then
- 	echo "attemting re-download of bluez-alsa from Candle git"
-		git clone "https://github.com/createcandle/bluez-alsa.git"
-	fi
+    git clone https://github.com/createcandle/bluez-alsa.git
+    if ! [ -d "bluez-alsa" ]; then
+        echo "attemting re-download of bluez-alsa from Candle git"
+        git clone https://github.com/createcandle/bluez-alsa.git
+    fi
 
     echo "checking if bluez-alsa dir exists"
     wait
@@ -1948,7 +1952,8 @@ then
         ../configure --enable-msbc --enable-mp3lame --enable-faststream --enable-systemd
         make
         make install
-        wait
+        
+		wait
   
     else
         echo "Error, Failed to download bluealsa source from github"
@@ -3022,7 +3027,52 @@ fi
 chown pi:pi /home/pi/*
 chown -R pi:pi /home/pi/candle/*
 
-rm -rf python311
+#rm -rf python311
+
+
+if [ -f /etc/asound.conf ]; then
+    rm /etc/asound.conf
+fi
+
+chmod +x /home/pi/.webthings/etc/wpa_supplicant/*.sh
+sudo systemctl disable hostapd.service 
+
+# remove cron files
+#rm /etc/cron.daily/apt-compat
+#rm /etc/cron.daily/man-db
+#rm /etc/cron.daily/dpkg
+#rm /etc/cron.weekly/*
+#cat '#!/bin/sh' > /usr/lib/apt/apt.systemd.daily
+
+
+#rm -rf /var/backups/*
+#systemctl disable dpkg-db-backup.timer
+#systemctl disable dphys-swapfile
+
+
+#systemctl disable apt-daily.service
+#systemctl disable apt-daily.timer
+
+#systemctl disable apt-daily-upgrade.timer
+#systemctl disable apt-daily-upgrade.service
+
+
+chown pi:pi /home/pi/.webthings/ssl/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #
@@ -3223,34 +3273,7 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
 
 fi
 
-if [ -f /etc/asound.conf ]; then
-    rm /etc/asound.conf
-fi
 
-chmod +x /home/pi/.webthings/etc/wpa_supplicant/*.sh
-sudo systemctl disable hostapd.service 
-
-# remove cron files
-#rm /etc/cron.daily/apt-compat
-#rm /etc/cron.daily/man-db
-#rm /etc/cron.daily/dpkg
-#rm /etc/cron.weekly/*
-#cat '#!/bin/sh' > /usr/lib/apt/apt.systemd.daily
-
-
-#rm -rf /var/backups/*
-#systemctl disable dpkg-db-backup.timer
-#systemctl disable dphys-swapfile
-
-
-#systemctl disable apt-daily.service
-#systemctl disable apt-daily.timer
-
-#systemctl disable apt-daily-upgrade.timer
-#systemctl disable apt-daily-upgrade.service
-
-
-chown pi:pi /home/pi/.webthings/ssl/
 
 # If developer mode is active during a system update, then the system will permanently have SSH enabled
 if [ ! -f $BOOT_DIR/developer.txt ]; then
