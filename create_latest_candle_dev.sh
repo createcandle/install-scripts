@@ -2552,10 +2552,10 @@ mkdir -p /etc/chromium/policies/managed/
 echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFillEnabled": false, "PasswordManagerEnabled": false, "deleteDataPostSession":false}' > /etc/chromium/policies/managed/candle.json
 
 
-if [ -f /etc/pam.d/sshd ]; then
-	echo "removing pam_env.so user_readenv=1 from /etc/pam.d/sshd config file"
-	sed -i "s/pam_env.so user_readenv=1//" /etc/pam.d/sshd
-fi
+#if [ -f /etc/pam.d/sshd ]; then
+#	echo "removing pam_env.so user_readenv=1 from /etc/pam.d/sshd config file"
+#	sed -i "s/pam_env.so user_readenv=1//" /etc/pam.d/sshd
+#fi
 
 
 
