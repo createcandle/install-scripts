@@ -575,9 +575,9 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     && [ -d "$CANDLE_BASE/webthings/gateway2/build/static/bundle" ];
     then
 
-      npx update-browserslist-db@latest
+      npx update-browserslist-db@latest --force-yes
        
-      npm prune --omit=dev
+      npm prune --omit=dev --force-yes
     
       echo "creating .post_upgrade_complete file"
       touch .post_upgrade_complete
