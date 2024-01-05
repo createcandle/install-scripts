@@ -2424,8 +2424,16 @@ if [ -f /etc/sysctl.conf ]; then
     fi
 fi
 
+#RuntimeWatchdogSec=off
+#RuntimeWatchdogPreSec=off
+#RuntimeWatchdogPreGovernor=
+#RebootWatchdogSec=10min
+#KExecWatchdogSec=off
+#WatchdogDevice=
+
 if [ -f /etc/systemd/system.conf ]; then
     sed -i 's/.*RuntimeWatchdogSec.*/RuntimeWatchdogSec=15s/' /etc/systemd/system.conf
+    sed -i 's/.*KExecWatchdogSec.*/KExecWatchdogSec=60s/'  /etc/systemd/system.conf
     sed -i 's/.*RebootWatchdogSec.*/RebootWatchdogSec=5min/'  /etc/systemd/system.conf
     #sed -i 's/.*DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=90s/' /etc/systemd/system.conf
 fi
