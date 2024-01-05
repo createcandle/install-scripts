@@ -65,7 +65,7 @@ Note: There are some other options which are described in the create_latest_cand
 
 For example, this command creates a disk image (though you likely have to run it twice). It creates the cutting-edge version of Candle.
 ```
-curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes bash
+curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh -o create_latest_candle_dev.sh; sudo chmod +x create_latest_candle_dev.sh; sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes bash ./create_latest_candle_dev.sh
 ```
 Or the tiny partition version, which is used to create downloadable system updates only:
 ```
@@ -113,6 +113,13 @@ https://github.com/createcandle/configuration-files/blob/a11fcef2a77c59a2d38a5b8
 
 ### Live update script (deprecated)
 With the latest versions of Candle it's now possible to fully update the controller even when read-only protection is enabled, with out needing a reboot first. This is experimental, so use at your own risk. It automatically detects if your controller is compatible. We prefer to just disable read-only first through a reboot.
+
+Ols version of install script:
+```
+curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes bash
+```
+
+
 ```
 curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo bash
 ```
