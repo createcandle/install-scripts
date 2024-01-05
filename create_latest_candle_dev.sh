@@ -1398,31 +1398,22 @@ then
 	if [ "$SKIP_BROWSER" = no ] || [[ -z "${SKIP_BROWSER}" ]]; 
 	then
 
-		echo
+        echo ""
     	echo "installing web browser"
     	echo "Candle: installing web browser" >> /dev/kmsg
     	echo "Candle: installing web browser" >> $BOOT_DIR/candle_log.txt
-    	echo
+    	echo ""
  
-		# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
-  		wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
-		dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
-		rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
-		apt-get -f install --no-install-recommends
-
- 		
-	    #apt install $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages --no-install-recommends
-	    #if [ ! -f /bin/$CHROMIUM_PACKAGE_NAME ]; then
-	    #    echo
-	    #    echo "browser install failed, retrying."
-	    #    apt purge $CHROMIUM_PACKAGE_NAME -y  --allow-change-held-packages
-	    #    apt install $CHROMIUM_PACKAGE_NAME -y --allow-change-held-packages --no-install-recommends
-	    #fi
+    	# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
+    	wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    	dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    	rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    	apt-get -f install --no-install-recommends
     else
-	    echo
-	    echo "Skipping installation of browser"
-	    echo
-	fi
+    	echo
+    	echo "Skipping installation of browser"
+    	echo
+    fi
 
     echo
     echo "installing git"
@@ -1467,7 +1458,7 @@ then
     # libspandsp-dev libgirepository1.0-dev\
     for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 \
 	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
- 	    cpufrequtils lsb-release libsbc-dev libasound2-dev libmp3lame-dev tcpdump dnstop; do
+ 	    cpufrequtils lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop; do
             
 		echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
@@ -1544,8 +1535,8 @@ then
     systemctl stop hostapd.service
 
 
-	echo "hostapd installed"
- 	echo
+    echo "hostapd installed"
+    echo
     echo "apt: doing fix-missing and autoremove"
     # Try to fix anything that may have gone wrong
     apt update
@@ -1664,9 +1655,9 @@ then
     echo ""
     
     # Fix potential issue with dhcpdp on Bullseye
-    if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf
-    fi
+    #if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+    #    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf
+    #fi
     echo "calling autoremove"
     apt autoremove -y
 fi
@@ -1953,7 +1944,7 @@ then
         make
         make install
         
-		wait
+        wait
   
     else
         echo "Error, Failed to download bluealsa source from github"
