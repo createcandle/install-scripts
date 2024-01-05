@@ -1809,9 +1809,9 @@ then
 	
         if [ ! -f /home/pi/candle/installed_respeaker_version.txt ]
         then
-			mkdir -p /home/pi/candle
-			#touch /home/pi/candle/installed_respeaker_version.txt
-			cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+            mkdir -p /home/pi/candle
+            #touch /home/pi/candle/installed_respeaker_version.txt
+            cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
         fi
 	
         if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ]
@@ -1928,6 +1928,10 @@ then
  
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
     git clone "https://github.com/createcandle/bluez-alsa.git"
+	if ! [ -d "bluez-alsa" ]; then
+ 	echo "attemting re-download of bluez-alsa from Candle git"
+		git clone "https://github.com/createcandle/bluez-alsa.git"
+	fi
 
     echo "checking if bluez-alsa dir exists"
     wait
