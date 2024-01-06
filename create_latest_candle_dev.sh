@@ -456,8 +456,12 @@ if [ -s /etc/dhcpcd.conf ]; then
 	if cat /etc/dhcpcd.conf | grep -q uap0; then
 		echo "uap0 exception added to dhcpcd.conf already"
  	else
+  		
+ 		sed -i 's/^#clientid/clientid/' /etc/dhcpcd.conf
+		sed -i 's/^duid/#duid/' /etc/dhcpcd.conf
+  
 		echo "" >> /etc/dhcpcd.conf
-		echo "#For Candle Hostpot" >> /etc/dhcpcd.conf
+		echo "# For Candle Hotspot" >> /etc/dhcpcd.conf
 		
   		echo "interface uap0 " >> /etc/dhcpcd.conf
   		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
@@ -470,7 +474,9 @@ if [ -s /etc/dhcpcd.conf ]; then
   		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
  	
 	fi
-	echo "" > /etc/resolvconf/resolv.conf.d/original
+ 	if [ -s /etc/resolvconf/resolv.conf.d/original ]; then 
+		echo "" > /etc/resolvconf/resolv.conf.d/original
+    fi
 else
 	echo "ERROR: /etc/dhcpcd.conf is missing"
  	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
