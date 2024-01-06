@@ -535,9 +535,10 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     #npx update-browserslist-db@latest -y --force-yes
        
     
-
-    #npm install -D webpack-cli
-    npm_config_yes=true 
+	npm_config_yes=true 
+ 	npm install -D webpack --force-yes
+    npm install -D webpack-cli --force-yes
+    
 	npm install -D typescript --force-yes
 
 	echo ""
