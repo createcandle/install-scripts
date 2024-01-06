@@ -525,14 +525,19 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
 
 
-    echo
+    echo ""
     #echo "COMPILING TYPESCRIPT AND RUNNING WEBPACK"
     #echo "Compiling Typescript and running Webpack" | sudo tee -a /dev/kmsg
 
     #npm run build
 
+	npx install -D typescript -y --force-yes
+    npx update-browserslist-db@latest -y --force-yes
+       
+    
+
     #npm install -D webpack-cli
-    npm install -D typescript
+    npm install -D typescript -y --force-yes
     
     rm -rf build
     cp -rL src build
@@ -542,7 +547,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     echo "Compiling typescript. this will take a while..."
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a $BOOT_DIR/candle_log.txt
-    npx tsc -p .
+    npx tsc -p . -y 
     echo "(it probably found some errors, don't worry about those)"
     echo
     #echo "Running webpack. this will take a while too..."
@@ -575,10 +580,9 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     && [ -d "$CANDLE_BASE/webthings/gateway2/build/static/bundle" ];
     then
 
-      npx update-browserslist-db@latest --force-yes
-       
-      npm prune --omit=dev --force-yes
-    
+      # remove now unnecessary node modules
+	  npm prune --omit=dev -y --force-yes
+
       echo "creating .post_upgrade_complete file"
       touch .post_upgrade_complete
       echo "$(date +%s)" > update_date.txt
