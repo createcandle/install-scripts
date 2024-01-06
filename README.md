@@ -114,14 +114,16 @@ https://github.com/createcandle/configuration-files/blob/a11fcef2a77c59a2d38a5b8
 ### Live update script (deprecated)
 With the latest versions of Candle it's now possible to fully update the controller even when read-only protection is enabled, with out needing a reboot first. This is experimental, so use at your own risk. It automatically detects if your controller is compatible. We prefer to just disable read-only first through a reboot.
 
-Ols version of install script:
+```
+curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo bash
+```
+
+### Old version of install script:
 ```
 curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes bash
 ```
 
 
-```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/live_system_update.sh | sudo bash
-```
+
 
 
