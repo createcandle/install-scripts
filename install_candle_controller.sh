@@ -531,25 +531,29 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     #npm run build
 
-	npx install -D typescript -y --force-yes
-    npx update-browserslist-db@latest -y --force-yes
+	npm_config_yes=true npx install -D typescript --force-yes
+    #npx update-browserslist-db@latest -y --force-yes
        
     
 
     #npm install -D webpack-cli
-    npm install -D typescript -y --force-yes
-    
+    npm_config_yes=true npm install -D typescript --force-yes
+
+	echo ""
+	echo "typescript should now be installed"
+	echo ""
+ 
     rm -rf build
     cp -rL src build
     cp -rL static build/static
     find build -name '*.ts' -delete
-    echo
+    echo ""
     echo "Compiling typescript. this will take a while..."
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a $BOOT_DIR/candle_log.txt
-    npx tsc -p . -y 
+    npm_config_yes=true npx tsc -p -y . 
     echo "(it probably found some errors, don't worry about those)"
-    echo
+    echo ""
     #echo "Running webpack. this will take a while too..."
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a $BOOT_DIR/candle_log.txt
@@ -559,18 +563,18 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     if [ "$totalk" -lt 600000 ]
     then
         echo "very low memory, --max-old-space-size=496"
-        NODE_OPTIONS="--max-old-space-size=496" npm_config_yes=true npx webpack
+        NODE_OPTIONS="--max-old-space-size=496" npm_config_yes=true npx webpack -y
     elif [ "$totalk" -lt 1200000 ]
     then
         echo "low memory, --max-old-space-size=750"
-        NODE_OPTIONS="--max-old-space-size=750" npm_config_yes=true npx webpack
+        NODE_OPTIONS="--max-old-space-size=750" npm_config_yes=true npx webpack -y
     elif [ "$totalk" -lt 2200000 ]
     then
         echo "normal memory, --max-old-space-size=1024"
-        NODE_OPTIONS="--max-old-space-size=1024" npm_config_yes=true npx webpack  #--yes
+        NODE_OPTIONS="--max-old-space-size=1024" npm_config_yes=true npx webpack -y
     else
         echo "big memory, --max-old-space-size=2048"
-        NODE_OPTIONS="--max-old-space-size=2048" npm_config_yes=true npx webpack
+        NODE_OPTIONS="--max-old-space-size=2048" npm_config_yes=true npx webpack -y
     fi
     
     
@@ -581,7 +585,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     then
 
       # remove now unnecessary node modules
-	  npm prune --omit=dev -y --force-yes
+	  npm_config_yes=true npm prune --omit=dev -y --force-yes
 
       echo "creating .post_upgrade_complete file"
       touch .post_upgrade_complete
