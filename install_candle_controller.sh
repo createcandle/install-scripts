@@ -537,7 +537,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     
 
     #npm install -D webpack-cli
-    npm_config_yes=true npm install -D typescript --force-yes
+    npm_config_yes=true 
+	npm install -D typescript --force-yes
 
 	echo ""
 	echo "typescript should now be installed"
@@ -547,13 +548,17 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     cp -rL src build
     cp -rL static build/static
     find build -name '*.ts' -delete
+
+ 
     echo ""
     echo "Compiling typescript. this will take a while..."
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a $BOOT_DIR/candle_log.txt
-    npm_config_yes=true npx tsc -p -y . 
+    npx tsc -p . 
     echo "(it probably found some errors, don't worry about those)"
     echo ""
+
+ 
     #echo "Running webpack. this will take a while too..."
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
     echo "Candle: Running webpack. This will take a while too..." | sudo tee -a $BOOT_DIR/candle_log.txt
@@ -563,20 +568,20 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     if [ "$totalk" -lt 600000 ]
     then
         echo "very low memory, --max-old-space-size=496"
-        NODE_OPTIONS="--max-old-space-size=496" npm_config_yes=true npx webpack -y
+        NODE_OPTIONS="--max-old-space-size=496" npx webpack
     elif [ "$totalk" -lt 1200000 ]
     then
         echo "low memory, --max-old-space-size=750"
-        NODE_OPTIONS="--max-old-space-size=750" npm_config_yes=true npx webpack -y
+        NODE_OPTIONS="--max-old-space-size=750" npx webpack
     elif [ "$totalk" -lt 2200000 ]
     then
         echo "normal memory, --max-old-space-size=1024"
-        NODE_OPTIONS="--max-old-space-size=1024" npm_config_yes=true npx webpack -y
+        NODE_OPTIONS="--max-old-space-size=1024" npx webpack
     else
         echo "big memory, --max-old-space-size=2048"
-        NODE_OPTIONS="--max-old-space-size=2048" npm_config_yes=true npx webpack -y
+        NODE_OPTIONS="--max-old-space-size=2048" npx webpack
     fi
-    
+
     
     if [ -f "$CANDLE_BASE/webthings/gateway2/build/app.js" ] \
     && [ -f "$CANDLE_BASE/webthings/gateway2/build/static/index.html" ] \
