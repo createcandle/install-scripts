@@ -2395,11 +2395,17 @@ systemctl disable apt-daily-upgrade.service
 systemctl disable man-db.timer
 
 # disable modemManager
-systemctl disable ModemManager.service
+if systemctl list-units --full -all | grep -Fq ModemManager.service; then
+    systemctl disable ModemManager.service
+    systemctl mask ModemManager.service
+fi
 
 #disable wpa_supplicant service because dhpcpcd is managing it. Otherwise it runs twice.
 systemctl disable wpa_supplicant.service
+systemctl mask wpa_supplicant.service
 
+systemctl disable regenerate_ssh_host_keys.service
+systemctl mask regenerate_ssh_host_keys.service
 
 # enable half-hourly save of time
 systemctl enable fake-hwclock-save.service
@@ -2836,7 +2842,7 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
 
     
     else
-        echo
+        echo ""
         echo "ERROR, SOME VITAL FSTAB MOUNTPOINTS DO NOT EXIST!"
         # The only reason this is a warning and not an error (which would stop the process in de UI), is that the process is nearly done anyway.
         echo "Candle: WARNING, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> /dev/kmsg
