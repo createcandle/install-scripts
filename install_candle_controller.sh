@@ -536,8 +536,9 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
        
     
 	npm_config_yes=true 
+ 	npm install -D webpack-cli --force-yes
  	npm install -D webpack --force-yes
-    npm install -D webpack-cli --force-yes
+    
     
 	npm install -D typescript --force-yes
 
