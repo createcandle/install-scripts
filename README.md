@@ -67,9 +67,14 @@ For example, this command creates a disk image (though you likely have to run it
 ```
 curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh -o create_latest_candle_dev.sh; sudo chmod +x create_latest_candle_dev.sh; sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes bash ./create_latest_candle_dev.sh
 ```
+This variation uses nohup so that the installation process will continue even if SSH disconnects.
+```
+curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh -o create_latest_candle_dev.sh; sudo chmod +x create_latest_candle_dev.sh; sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes nohup bash ./create_latest_candle_dev.sh &
+```
+
 Or the tiny partition version, which is used to create downloadable system updates only:
 ```
-curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh | sudo CUTTING_EDGE=yes TINY_PARTITIONS=yes CREATE_DISK_IMAGE=yes bash
+curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh -o create_latest_candle_dev.sh; sudo chmod +x create_latest_candle_dev.sh; sudo CUTTING_EDGE=yes TINY_PARTITIONS=yes CREATE_DISK_IMAGE=yes bash ./create_latest_candle_dev.sh
 ```
 (It's the command we really use to create the Candle disk images. Once done, do `touch /boot/candle_rw_once.txt` and then reboot the controller. Log in, wait for Zigbee2MQTT to be fully installed, and only then run the `prepare_for_disk_image.sh` script)
 
