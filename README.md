@@ -69,7 +69,7 @@ curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createc
 ```
 This variation uses nohup so that the installation process will continue even if SSH disconnects.
 ```
-curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh -o create_latest_candle_dev.sh; sudo chmod +x create_latest_candle_dev.sh; sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes nohup bash ./create_latest_candle_dev.sh > /boot/firmware/candle_build_log.txt 2>&1 &
+curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh -o create_latest_candle_dev.sh; sudo chmod +x create_latest_candle_dev.sh; sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes nohup bash ./create_latest_candle_dev.sh > /boot/firmware/candle_build_log.txt 2>&1 & tail -f /boot/firmware/candle_build_log.txt
 ```
 
 Or the tiny partition version, which is used to create downloadable system updates only:
