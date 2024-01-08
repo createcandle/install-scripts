@@ -440,6 +440,7 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	echo "completely removing network manager"
 	rm -rf /etc/NetworkManager/system-connections/*
 	apt purge -y network-manager
+    apt purge -y isc-dhcp-client
 	resolvconf -u
  	# libteamdctl0 raspberrypi-net-mods
 	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
