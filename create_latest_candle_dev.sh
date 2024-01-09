@@ -425,10 +425,10 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	
 	apt install -y dhcpcd resolvconf dnsmasq
 	systemctl stop dnsmasq.service
- 	resolvconf -u
 	#systemctl enable dnsmasq.service
 	systemctl disable dnsmasq.service
-	
+	resolvconf -u
+ 
 	echo "attempting switch to dhcpcd"
 	systemctl start dhcpcd.service
 	systemctl restart avahi-daemon.service
@@ -1410,12 +1410,16 @@ then
     	echo "Candle: installing web browser" >> /dev/kmsg
     	echo "Candle: installing web browser" >> $BOOT_DIR/candle_log.txt
     	echo ""
- 
+
+		apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp25 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-9 libminizip1 --no-install-recommends
+   
     	# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
     	wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
-    	dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb -y
+    	yes | dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
     	rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
-    	apt-get -f install -y --no-install-recommends
+    	#apt-get -f install -y
+	    apt --fix-broken install
+	 	#  --no-install-recommends
     else
     	echo
     	echo "Skipping installation of browser"
