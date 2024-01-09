@@ -1418,7 +1418,7 @@ then
     	yes | dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
     	rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
     	#apt-get -f install -y
-	    apt --fix-broken install
+	    apt --fix-broken -y install
 	 	#  --no-install-recommends
     else
     	echo
