@@ -41,6 +41,8 @@ else
     CANDLE_BASE="$(pwd)"
 fi
 
+#Make sure .webthings dir exists
+mkdir -p $CANDLE_BASE/.webthings
 
 # Add /home/pi/.local/bin to path
 if [ -z "$(printenv PATH | grep $CANDLE_BASE/.local/bin)" ]; then 
