@@ -511,7 +511,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
     # CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
-    # npm install typescript --save-dev # TODO: check if this is now in package.json already
+    npm install typescript --save-dev --force-yes # TODO: check if this is now in package.json already
 
     # npm install
     echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
@@ -558,7 +558,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     echo "Compiling typescript. this will take a while..."
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a $BOOT_DIR/candle_log.txt
-    npx tsc -p . 
+    yes "y" | npx tsc -p . 
     echo "(it probably found some errors, don't worry about those)"
     echo ""
 
