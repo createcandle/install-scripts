@@ -1503,7 +1503,7 @@ then
 	#    apt install -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
 	
 	#    apt install -y --no-install-recommends xsettingsd xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
-    apt install -y --no-install-recommends xserver-xorg-core x11-xserver-utils xauth xinit xinput xserver-xorg-input-evdev feh edid-decode unclutter xdotool xfonts-base
+    apt install -y --no-install-recommends xserver-xorg-core x11-xserver-utils xauth xinit xinput xserver-xorg-input-evdev feh edid-decode unclutter xdotool xfonts-base fonts-noto-color-emoji fonts-symbola
 
 
  
@@ -2744,7 +2744,6 @@ rm -rf $BOOT_DIR/.Spotlight*
 if [ -f $BOOT_DIR/._cmdline.txt ]; then
     rm $BOOT_DIR/._cmdline.txt
 fi
-
 
 
 # clean up resolvconf files after NetworkManager uninstall
