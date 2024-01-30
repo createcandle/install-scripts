@@ -511,7 +511,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
     # CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
-    npm install typescript --save-dev --force-yes # TODO: check if this is now in package.json already
+    npm --yes install typescript --save-dev --force-yes # TODO: check if this is now in package.json already
 
     # npm install
     echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
@@ -523,7 +523,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     #npm config set registry http://registry.npmjs.org/
     
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
-    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci
+    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes ci
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
 
 
@@ -533,16 +533,16 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     #npm run build
 
-	npm_config_yes=true npx install -D typescript --force-yes
+	npm_config_=true npx --yes install -D typescript --force-yes
     #npx update-browserslist-db@latest -y --force-yes
        
     
 	npm_config_yes=true 
- 	npm install -D webpack-cli --force-yes
- 	npm install -D webpack --force-yes
+ 	yes "y" | npm --yes install -D webpack-cli --force-yes
+ 	yes "y" | npm --yes install -D webpack --force-yes
     
     
-	npm install -D typescript --force-yes
+	yes "y" | npm --yes install -D typescript --force-yes
 
 	echo ""
 	echo "typescript should now be installed"
@@ -572,18 +572,18 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     if [ "$totalk" -lt 600000 ]
     then
         echo "very low memory, --max-old-space-size=496"
-        NODE_OPTIONS="--max-old-space-size=496" npx webpack
+        NODE_OPTIONS="--max-old-space-size=496" npx --yes webpack
     elif [ "$totalk" -lt 1200000 ]
     then
         echo "low memory, --max-old-space-size=750"
-        NODE_OPTIONS="--max-old-space-size=750" npx webpack
+        NODE_OPTIONS="--max-old-space-size=750" npx --yes webpack
     elif [ "$totalk" -lt 2200000 ]
     then
         echo "normal memory, --max-old-space-size=1024"
-        NODE_OPTIONS="--max-old-space-size=1024" npx webpack
+        NODE_OPTIONS="--max-old-space-size=1024" npx --yes webpack
     else
         echo "big memory, --max-old-space-size=2048"
-        NODE_OPTIONS="--max-old-space-size=2048" npx webpack
+        NODE_OPTIONS="--max-old-space-size=2048" npx --yes webpack
     fi
 
     
