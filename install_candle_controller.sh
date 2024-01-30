@@ -594,7 +594,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     then
 
       # remove now unnecessary node modules
-	  npm_config_yes=true npm prune --omit=dev -y --force-yes
+      npm_config_yes=true npm prune --omit=dev -y --force-yes
 
       echo "creating .post_upgrade_complete file"
       touch .post_upgrade_complete
@@ -602,7 +602,39 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
       #echo "Controller installation seems ok"
       echo "Controller installation seems ok, at $(pwd)"
       echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
-      
+
+      echo
+	    echo "New controller was created at $(pwd)"
+	    echo
+	    # Move the freshly created gateway into position
+	    cd "$CANDLE_BASE"
+	    if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
+	    
+	        echo "Starting move/copy of $CANDLE_BASE/webthings/gateway2 to $CANDLE_BASE/webthings/gateway"
+	
+	        if [ ! -d "$CANDLE_BASE/webthings/gateway" ]; then
+	            echo "Candle: Gateway didn't exist, moving gateway2 into position"
+	            echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
+	            echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a $BOOT_DIR/candle_log.txt
+	            mv "$CANDLE_BASE/webthings/gateway2" "$CANDLE_BASE/webthings/gateway"
+	        else
+	            echo "Candle: Gateway dir existed, doing rsync from gateway2"
+	            echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
+	            echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a $BOOT_DIR/candle_log.txt
+	            
+	            # rsync recursive, quiet, checksum, copy symlinks as symlinks, preserve Executability, delete extraneous files from destination, show progress
+	            rsync -r -q -c -l -E --delete --progress "$CANDLE_BASE/webthings/gateway2/" "$CANDLE_BASE/webthings/gateway/"
+	            
+	            chown -R pi:pi "$CANDLE_BASE/webthings/gateway"
+	            rm -rf "$CANDLE_BASE/webthings/gateway2"
+	        fi
+	    else
+	        # This should never happen
+	        echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /dev/kmsg
+	        echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a $BOOT_DIR/candle_log.txt
+	    fi
+
+   
     else
       echo  
       echo "ERROR, controller installation is missing parts"
@@ -615,36 +647,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
       echo
     fi
 
-    echo
-    echo "New controller was created at $(pwd)"
-    echo
-    # Move the freshly created gateway into position
-    cd "$CANDLE_BASE"
-    if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     
-        echo "Starting move/copy of $CANDLE_BASE/webthings/gateway2 to $CANDLE_BASE/webthings/gateway"
-
-        if [ ! -d "$CANDLE_BASE/webthings/gateway" ]; then
-            echo "Candle: Gateway didn't exist, moving gateway2 into position"
-            echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
-            echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a $BOOT_DIR/candle_log.txt
-            mv "$CANDLE_BASE/webthings/gateway2" "$CANDLE_BASE/webthings/gateway"
-        else
-            echo "Candle: Gateway dir existed, doing rsync from gateway2"
-            echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
-            echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a $BOOT_DIR/candle_log.txt
-            
-            # rsync recursive, quiet, checksum, copy symlinks as symlinks, preserve Executability, delete extraneous files from destination, show progress
-            rsync -r -q -c -l -E --delete --progress "$CANDLE_BASE/webthings/gateway2/" "$CANDLE_BASE/webthings/gateway/"
-            
-            chown -R pi:pi "$CANDLE_BASE/webthings/gateway"
-            rm -rf "$CANDLE_BASE/webthings/gateway2"
-        fi
-    else
-        # This should never happen
-        echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /dev/kmsg
-        echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a $BOOT_DIR/candle_log.txt
-    fi
     
 fi
 
