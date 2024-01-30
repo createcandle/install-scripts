@@ -315,7 +315,6 @@ sudo setcap cap_net_raw+eip $(eval readlink -f `which python3`)
 
 echo ""
 echo "INSTALLING CANDLE CONTROLLER"
-
 echo ""
 
 
@@ -645,6 +644,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
       ls "$CANDLE_BASE/webthings/gateway2/node_modules"
       ls "$CANDLE_BASE/webthings/gateway2/build/static/bundle" 
       echo
+
+      exit 1
     fi
 
     
