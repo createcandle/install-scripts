@@ -38,8 +38,8 @@ set +e # continue on errors
 #SKIP_APT_INSTALL=yes
 #SKIP_APT_UPGRADE=yes
 #SKIP_PYTHON=yes
-#SKIP_RESPEAKER=yes
-#SKIP_BLUEALSA=yes
+SKIP_RESPEAKER=yes
+SKIP_BLUEALSA=yes
 #SKIP_CONTROLLER=yes
 #SKIP_DEBUG=yes
 #SKIP_REBOOT=yes
@@ -1390,12 +1390,21 @@ then
         fi
     fi
     
-    
+
+	echo
+    echo "installing git"
+    echo "Candle: installing git" >> /dev/kmsg
+    echo "Candle: installing git" >> $BOOT_DIR/candle_log.txt
+    echo
+    apt -y install git --no-install-recommends "$reinstall" 
+	
+ 
     echo
     echo "installing Pipewire audio"
     apt install -y pipewire-alsa pipewire-jack pipewire-pulse wireplumber libspa-0.2-bluetooth pipewire-audio-client-libraries --no-install-recommends
-    
+    raspi-config nonint do_audioconf 2
     apt update -y
+	
 
     # Install browser
 	if [ "$SKIP_BROWSER" = no ] || [[ -z "${SKIP_BROWSER}" ]]; 
@@ -1422,12 +1431,7 @@ then
     	echo
     fi
 
-    echo
-    echo "installing git"
-    echo "Candle: installing git" >> /dev/kmsg
-    echo "Candle: installing git" >> $BOOT_DIR/candle_log.txt
-    echo
-    apt -y install git "$reinstall" 
+    
 
 
     echo
@@ -1530,13 +1534,13 @@ then
     echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
     echo "Candle: installing hostapd and dnsmasq" >> $BOOT_DIR/candle_log.txt
 
-    apt -y install dnsmasq "$reinstall" #--print-uris
+    apt install -y dnsmasq "$reinstall" #--print-uris
     systemctl disable dnsmasq.service
     systemctl stop dnsmasq.service
     
 
     echo "installing hostapd"
-    apt -y install hostapd "$reinstall" #--print-uris 
+    apt install -y hostapd "$reinstall" #--print-uris 
     systemctl unmask hostapd.service
     systemctl disable hostapd.service
     systemctl stop hostapd.service
@@ -1791,7 +1795,62 @@ fi
 
 
 
-echo "install seeed respeaker voicecard drivers?"
+
+
+cd $CANDLE_BASE 
+ 
+# install alternative WM8960 drivers
+if [ "$SKIP_RESPEAKER_ALTERNATIVE" = no ] || [[ -z "${SKIP_RESPEAKER_ALTERNATIVE}" ]]
+then
+	echo
+    echo "INSTALLING ALTERNATIVE RESPEAKER HAT DRIVERS"
+    echo
+
+	#download the archive
+	git clone https://github.com/waveshare/WM8960-Audio-HAT
+	cd WM8960-Audio-HAT
+	
+	# install dtbos
+	#cp wm8960-soundcard.dtbo /boot/overlays
+	
+	
+	#set kernel moduels
+	grep -q "i2c-dev" /etc/modules || \
+	  echo "i2c-dev" >> /etc/modules  
+	grep -q "snd-soc-wm8960" /etc/modules || \
+	  echo "snd-soc-wm8960" >> /etc/modules  
+	grep -q "snd-soc-wm8960-soundcard" /etc/modules || \
+	  echo "snd-soc-wm8960-soundcard" >> /etc/modules  
+	  
+	#set dtoverlays
+	sed -i -e 's:#dtparam=i2s=on:dtparam=i2s=on:g'  /boot/firmware/config.txt || true
+	sed -i -e 's:#dtparam=i2c_arm=on:dtparam=i2c_arm=on:g'  /boot/firmware/config.txt || true
+	grep -q "dtoverlay=i2s-mmap" /boot/firmware/config.txt || \
+	  echo "dtoverlay=i2s-mmap" >> /boot/firmware/config.txt
+	
+	grep -q "dtparam=i2s=on" /boot/firmware/config.txt || \
+	  echo "dtparam=i2s=on" >> /boot/firmware/config.txt
+	
+	grep -q "dtoverlay=wm8960-soundcard" /boot/firmware/config.txt || \
+	  echo "dtoverlay=wm8960-soundcard" >> /boot/firmware/config.txt
+	  
+	#install config files
+	mkdir /etc/wm8960-soundcard || true
+	cp *.conf /etc/wm8960-soundcard
+	cp *.state /etc/wm8960-soundcard
+	
+	#set service 
+	cp wm8960-soundcard /usr/bin/
+	cp wm8960-soundcard.service /lib/systemd/system/
+	#systemctl enable  wm8960-soundcard.service 
+	#systemctl start wm8960-soundcard
+
+	cd $CANDLE_BASE
+	rm -rf ./WM8960-Audio-HAT
+
+fi
+
+
 
 # RESPEAKER HAT
 if [ "$SKIP_RESPEAKER" = no ] || [[ -z "${SKIP_RESPEAKER}" ]]
