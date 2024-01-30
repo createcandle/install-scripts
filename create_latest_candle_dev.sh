@@ -1392,14 +1392,10 @@ then
     
     
     echo
-    #echo "installing Pipewire audio"
-    #apt install pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries -y 
-
-    # Install browser. Unfortunately its chromium, and not firefox, because its so much better at being a kiosk, and so much more customisable.
-    # TODO: maybe use version 88?
-
+    echo "installing Pipewire audio"
+    apt install -y pipewire-alsa pipewire-jack pipewire-pulse wireplumber libspa-0.2-bluetooth pipewire-audio-client-libraries --no-install-recommends
     
-    apt update
+    apt update -y
 
     # Install browser
 	if [ "$SKIP_BROWSER" = no ] || [[ -z "${SKIP_BROWSER}" ]]; 
