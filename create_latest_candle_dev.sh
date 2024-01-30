@@ -1445,7 +1445,7 @@ then
 
     echo
     echo "installing build tools"
-    for i in autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
+    for i in autoconf automake build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-pip python3-six; do
         
         echo "$i"
