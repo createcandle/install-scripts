@@ -1806,6 +1806,8 @@ then
     echo "INSTALLING ALTERNATIVE RESPEAKER HAT DRIVERS"
     echo
 
+    # from: https://github.com/HinTak/seeed-voicecard/issues/19#issuecomment-1879387637
+	
 	#download the archive
 	git clone https://github.com/waveshare/WM8960-Audio-HAT
 	cd WM8960-Audio-HAT
