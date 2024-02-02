@@ -2087,10 +2087,7 @@ mkdir -p /home/pi/.webthings/etc/wpa_supplicant
 #mkdir -p /home/pi/.webthings/etc/NetworkManager/
 mkdir -p /home/pi/.webthings/etc/ssh
 
-if [ -d /etc/NetworkManager/system-connections ]; then
-	rm /etc/NetworkManager/system-connections/*
-	#cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
-fi
+
 
 #echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
@@ -3216,7 +3213,8 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	systemctl disable NetworkManager.service
 	
 	echo "completely removing network manager"
-	rm -rf /etc/NetworkManager/system-connections/*
+
+	
 	apt purge -y network-manager
     apt purge -y isc-dhcp-client
 	resolvconf -u
@@ -3224,7 +3222,13 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
 	#TemporaryTimeout = 30
 	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
-	
+
+		if [ -d /etc/NetworkManager/system-connections ]; then
+		rm /etc/NetworkManager/system-connections/*
+  		rm -rf /etc/NetworkManager/system-connections/*
+		#cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
+	fi
+ 
 	#rm dhcpcd.tar.*
 	
 	# binary no longer seems available for bookworm...
