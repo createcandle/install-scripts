@@ -540,7 +540,9 @@ if [ "$BIT_TYPE" -eq 64 ]; then
     apt update -y && apt install -y screen:armhf
 fi
 
-
+if [ -f /home/pi/nohup.out ]; then
+    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+fi
 
 
 
@@ -758,6 +760,9 @@ then
         echo "WARNING, KERNEL IS UPGRADEABLE" >> $BOOT_DIR/candle_log.txt
     fi
 
+ 	if [ -f /home/pi/nohup.out ]; then
+    	cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+	fi
     #echo "quickly installing dhcpcd"
     #apt install dhcpcd5 resolvconf -y
     #systemctl disable dhcpcd.service
@@ -800,14 +805,15 @@ then
         apt-get --fix-missing -y
         apt --fix-broken install -y
         apt autoremove -y
-	if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+	
+ 		if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
         	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-	fi
+		fi
         echo
         echo
         echo
         echo
-
+		
         apt-get update -y
         apt-get update --fix-missing -y
         DEBIAN_FRONTEND=noninteractive apt upgrade -y
@@ -816,10 +822,10 @@ then
         wait
         apt-get update --fix-missing -y
         apt --fix-broken install -y
-	if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
-	    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+		if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+	    	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         fi
-	echo
+		echo
         echo
         echo
         echo
@@ -832,6 +838,10 @@ then
         echo "Candle: Apt upgrade complete." >> /dev/kmsg
         echo "Apt upgrade done" >> $BOOT_DIR/candle_log.txt
         echo
+
+		if [ -f /home/pi/nohup.out ]; then
+    		cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+		fi
 
 
         if [ -f $BOOT_DIR/candle_original_version.txt ] || [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
@@ -858,7 +868,7 @@ then
     fi
     
 fi
-apt update
+apt update -y
 
 
 
@@ -871,7 +881,7 @@ then
 	if [ -f $BOOT_DIR/cmdline.txt ]; then
 	    wget https://www.candlesmarthome.com/tools/error.png -O $BOOT_DIR/error.png --retry-connrefused 
 	    echo
-            echo "Candle: downloading splash images and videos"
+		echo "Candle: downloading splash images and videos"
 	    echo "Candle: downloading splash images and videos" >> /dev/kmsg
 	    echo "Candle: downloading splash images and videos" >> $BOOT_DIR/candle_log.txt
 	    echo
@@ -1011,6 +1021,9 @@ fi
 mkdir -p /home/pi/.webthings/arduino
 mkdir -p /home/pi/.webthings/arduino/.arduino15
 
+if [ -f /home/pi/nohup.out ]; then
+    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+fi
 
 
 
@@ -1166,7 +1179,9 @@ then
     
 fi
 
-
+if [ -f /home/pi/nohup.out ]; then
+    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+fi
 
 
 # APT UPGRADE
@@ -1249,7 +1264,9 @@ then
     
 fi
 
-
+if [ -f /home/pi/nohup.out ]; then
+    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+fi
 
 
 
@@ -1336,7 +1353,11 @@ then
     apt install -y pipewire-alsa pipewire-jack pipewire-pulse wireplumber libspa-0.2-bluetooth pipewire-audio-client-libraries --no-install-recommends
     raspi-config nonint do_audioconf 2
     apt update -y
-	
+
+
+ 	if [ -f /home/pi/nohup.out ]; then
+    	cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+	fi
 
     # Install browser
 	if [ "$SKIP_BROWSER" = no ] || [[ -z "${SKIP_BROWSER}" ]]; 
@@ -1579,6 +1600,12 @@ sleep 5
 echo
 echo "Most packages are now installed"
 echo
+
+if [ -f /home/pi/nohup.out ]; then
+    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+fi
+
+
 
 sleep 5
 wait 
@@ -2910,7 +2937,9 @@ fi
 
 
 
-
+if [ -f /home/pi/nohup.out ]; then
+    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+fi
 
 
 
@@ -3266,10 +3295,23 @@ else
 	exit 1
 fi
 
+if [ -f /home/pi/nohup.out ]; then
+    mv /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+fi
 
+SDCARD_SIZE=$(blockdev --getsize64 /dev/mmcblk0)
+if [ "$SDCARD_SIZE" -gt "21914983424" ]; then
 
+	
+ 	echo "$(date) - Large SD Card, so stopping early" >> /home/pi/.webthings/candle.log
+	
+	# Show installation complete indication image
+	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/splash_updating-5.png ]; then
+		/bin/ply-image $BOOT_DIR/splash_updating-5.png
+	fi
 
-
+	exit 0
+fi
 
 # RUN DEBUG SCRIPT
 
