@@ -2233,13 +2233,8 @@ fi
 #    echo "No new config version detected"
 #fi
 
-# This is handled by prepare_disk_image
-#if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
-#    if [ -f /home/pi/candle/candle_first_run.sh ]; then
-#        cp /home/pi/candle/candle_first_run.sh $BOOT_DIR/candle_first_run.sh
-#    fi
-#fi
-#chmod +x /home/pi/candle_first_run.sh
+
+
 
 mkdir -p /home/pi/.webthings/uploads
 chown -R pi:pi /home/pi/.webthings/uploads
@@ -3211,9 +3206,6 @@ if [ -d /home/pi/configuration-files ]; then
     rm -rf /home/pi/configuration-files
 fi
 
-# DONE!
-echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
-echo "$(date) - system update complete" >> $BOOT_DIR/candle_log.txt
 
 
 
@@ -3299,6 +3291,14 @@ if [ -f /home/pi/nohup.out ]; then
     mv /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
+# This is handled by prepare_disk_image
+chmod +x /home/pi/candle/candle_first_run.sh
+if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
+    if [ -f /home/pi/candle/candle_first_run.sh ]; then
+        cp /home/pi/candle/candle_first_run.sh $BOOT_DIR/candle_first_run.sh
+    fi
+fi
+
 SDCARD_SIZE=$(blockdev --getsize64 /dev/mmcblk0)
 if [ "$SDCARD_SIZE" -gt "21914983424" ]; then
 
@@ -3312,6 +3312,20 @@ if [ "$SDCARD_SIZE" -gt "21914983424" ]; then
 
 	exit 0
 fi
+
+
+
+
+# DONE!
+echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
+echo "$(date) - system update complete" >> $BOOT_DIR/candle_log.txt
+
+
+
+
+
+
+
 
 # RUN DEBUG SCRIPT
 
