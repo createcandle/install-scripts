@@ -3148,6 +3148,11 @@ else
     echo "Error, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist"
     echo "Candle: ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> /dev/kmsg
     echo "ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> $BOOT_DIR/candle_log.txt
+
+ 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+    	/bin/ply-image $BOOT_DIR/error.png
+   	fi
+	
     exit 1
 fi
 
@@ -3218,7 +3223,17 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	
 	ifconfig
 	
-	apt install -y dhcpcd resolvconf dnsmasq
+	apt install -y resolvconf dnsmasq dhcpcd
+	
+	if [ ! -f /usr/sbin/resolvconf ]; then
+ 		echo "Candle ERROR: resolvconf is missing"
+		echo "Candle ERROR: resolvconf is missing" >> $BOOT_DIR/candle_log.txt
+  		if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+        	/bin/ply-image $BOOT_DIR/error.png
+   		fi
+		exit 1
+ 	fi
+ 
 	systemctl stop dnsmasq.service
 	#systemctl enable dnsmasq.service
 	systemctl disable dnsmasq.service
@@ -3239,6 +3254,7 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	apt purge -y network-manager
     apt purge -y isc-dhcp-client
 	resolvconf -u
+ 	apt autoremove -y
  	# libteamdctl0 raspberrypi-net-mods
 	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
 	#TemporaryTimeout = 30
@@ -3284,6 +3300,12 @@ if [ -s /etc/dhcpcd.conf ]; then
 else
 	echo "ERROR: /etc/dhcpcd.conf is missing"
  	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
+	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> $BOOT_DIR/candle_log.txt
+
+ 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+        /bin/ply-image $BOOT_DIR/error.png
+    fi
+  
 	exit 1
 fi
 
