@@ -414,75 +414,7 @@ apt-get --allow-releaseinfo-change-suite update
 
 
 
-echo
-echo "checking/switching to old-school dhcpcd early"
-if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
-	echo
-	echo "force-installing dhcpcd"
-	echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
-	
-	ifconfig
-	
-	apt install -y dhcpcd resolvconf dnsmasq
-	systemctl stop dnsmasq.service
-	#systemctl enable dnsmasq.service
-	systemctl disable dnsmasq.service
-	resolvconf -u
- 
-	echo "attempting switch to dhcpcd"
-	systemctl start dhcpcd.service
-	systemctl restart avahi-daemon.service
-	systemctl stop NetworkManager.service
- 	resolvconf -u
-	systemctl restart avahi-daemon.service
-	systemctl disable NetworkManager.service
-	
-	echo "completely removing network manager"
-	rm -rf /etc/NetworkManager/system-connections/*
-	apt purge -y network-manager
-    apt purge -y isc-dhcp-client
-	resolvconf -u
- 	# libteamdctl0 raspberrypi-net-mods
-	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
-	#TemporaryTimeout = 30
-	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
-	
-	#rm dhcpcd.tar.*
-	
-	# binary no longer seems available for bookworm...
-	#wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused   
-fi
 
-if [ -s /etc/dhcpcd.conf ]; then
-	if cat /etc/dhcpcd.conf | grep -q uap0; then
-		echo "uap0 exception added to dhcpcd.conf already"
- 	else
-  		
- 		sed -i 's/^#clientid/clientid/' /etc/dhcpcd.conf
-		sed -i 's/^duid/#duid/' /etc/dhcpcd.conf
-  
-		echo "" >> /etc/dhcpcd.conf
-		echo "# For Candle Hotspot" >> /etc/dhcpcd.conf
-		
-  		echo "interface uap0 " >> /etc/dhcpcd.conf
-  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
-		echo "" >> /etc/dhcpcd.conf
-	    echo "interface uap1 " >> /etc/dhcpcd.conf
-  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
-		echo "" >> /etc/dhcpcd.conf
- 		echo "interface uap2 " >> /etc/dhcpcd.conf
-   		echo "denyinterfaces uap2" >> /etc/dhcpcd.conf
-  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
- 	
-	fi
- 	if [ -s /etc/resolvconf/resolv.conf.d/original ]; then 
-		echo "" > /etc/resolvconf/resolv.conf.d/original
-    fi
-else
-	echo "ERROR: /etc/dhcpcd.conf is missing"
- 	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
-	exit 1
-fi
 
 # Save the bits of the initial kernel the boot partition to a file
 if [ "$BIT_TYPE" == 64 ]; then
@@ -3257,6 +3189,78 @@ fi
 echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
 echo "$(date) - system update complete" >> $BOOT_DIR/candle_log.txt
 
+
+
+echo
+echo "checking/switching to old-school dhcpcd late"
+if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
+	echo
+	echo "force-installing dhcpcd"
+	echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
+	
+	ifconfig
+	
+	apt install -y dhcpcd resolvconf dnsmasq
+	systemctl stop dnsmasq.service
+	#systemctl enable dnsmasq.service
+	systemctl disable dnsmasq.service
+	resolvconf -u
+ 
+	echo "attempting switch to dhcpcd"
+    systemctl enable dhcpcd.service
+	systemctl start dhcpcd.service
+	systemctl restart avahi-daemon.service
+	systemctl stop NetworkManager.service
+ 	resolvconf -u
+	systemctl restart avahi-daemon.service
+	systemctl disable NetworkManager.service
+	
+	echo "completely removing network manager"
+	rm -rf /etc/NetworkManager/system-connections/*
+	apt purge -y network-manager
+    apt purge -y isc-dhcp-client
+	resolvconf -u
+ 	# libteamdctl0 raspberrypi-net-mods
+	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
+	#TemporaryTimeout = 30
+	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
+	
+	#rm dhcpcd.tar.*
+	
+	# binary no longer seems available for bookworm...
+	#wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused   
+fi
+
+if [ -s /etc/dhcpcd.conf ]; then
+	if cat /etc/dhcpcd.conf | grep -q uap0; then
+		echo "uap0 exception added to dhcpcd.conf already"
+ 	else
+  		
+ 		sed -i 's/^#clientid/clientid/' /etc/dhcpcd.conf
+		sed -i 's/^duid/#duid/' /etc/dhcpcd.conf
+  
+		echo "" >> /etc/dhcpcd.conf
+		echo "# For Candle Hotspot" >> /etc/dhcpcd.conf
+		
+  		echo "interface uap0 " >> /etc/dhcpcd.conf
+  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+		echo "" >> /etc/dhcpcd.conf
+	    echo "interface uap1 " >> /etc/dhcpcd.conf
+  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+		echo "" >> /etc/dhcpcd.conf
+ 		echo "interface uap2 " >> /etc/dhcpcd.conf
+   		echo "denyinterfaces uap2" >> /etc/dhcpcd.conf
+  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+ 	
+	fi
+ 	if [ -s /etc/resolvconf/resolv.conf.d/original ]; then 
+		echo "" > /etc/resolvconf/resolv.conf.d/original
+    fi
+else
+	echo "ERROR: /etc/dhcpcd.conf is missing"
+ 	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
+	exit 1
+fi
 
 
 
