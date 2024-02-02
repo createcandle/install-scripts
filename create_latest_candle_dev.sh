@@ -276,6 +276,11 @@ if [ ! -s /etc/resolv.conf ]; then
     echo "no nameserver, aborting"
     echo "Candle: no nameserver, aborting" >> /dev/kmsg
     echo "Candle: no nameserver, aborting" >> $BOOT_DIR/candle_log.txt
+
+ 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+    	/bin/ply-image $BOOT_DIR/error.png
+   	fi
+ 
     exit 1
 fi
 
@@ -1121,7 +1126,7 @@ then
                 then
                     if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
                         /bin/ply-image $BOOT_DIR/error.png
-                        #sleep 7200
+						sleep 10
                     fi
                 fi
     
@@ -1145,7 +1150,7 @@ then
             then
                 if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
                     /bin/ply-image $BOOT_DIR/error.png
-                    #sleep 7200
+                    sleep 10
                 fi
             fi
     
@@ -1354,6 +1359,11 @@ then
     raspi-config nonint do_audioconf 2
     apt update -y
 
+	echo "installing some network applications"
+	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
+	systemctl stop dnsmasq.service
+	#systemctl enable dnsmasq.service
+	systemctl disable dnsmasq.service
 
  	if [ -f /home/pi/nohup.out ]; then
     	cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
@@ -1499,6 +1509,9 @@ then
     systemctl stop hostapd.service
 
 
+ 	
+
+ 
     echo "hostapd installed"
     echo
     echo "apt: doing fix-missing and autoremove"
@@ -3038,6 +3051,8 @@ fi
 
 # Make sure permissions of newly pre-installed addons are ok
 
+chown pi:pi $CANDLE_BASE
+
 cd $CANDLE_BASE/.webthings
 chown -R pi:pi addons
 chmod -R 755 addons
@@ -3050,6 +3065,7 @@ chmod -R 755 chromium
 chown -R pi:pi arduino
 chmod -R 755 arduino
 cd $CANDLE_BASE/
+
 
 #
 #  ADDITIONAL CLEANUP
@@ -3222,8 +3238,9 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	echo "switching to DHCPCD" >> $BOOT_DIR/candle_log.txt
 	
 	ifconfig
-	
-	apt install -y resolvconf dnsmasq dhcpcd
+
+ 	apt update -y
+	apt install -y resolvconf dnsmasq
 	
 	if [ ! -f /usr/sbin/resolvconf ]; then
  		echo "Candle ERROR: resolvconf is missing"
@@ -3233,11 +3250,13 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
    		fi
 		exit 1
  	fi
- 
+
 	systemctl stop dnsmasq.service
 	#systemctl enable dnsmasq.service
 	systemctl disable dnsmasq.service
 	resolvconf -u
+
+	apt install -y dhcpcd
  
 	echo "attempting switch to dhcpcd"
     systemctl enable dhcpcd.service
@@ -3249,14 +3268,13 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	systemctl disable NetworkManager.service
 	
 	echo "completely removing network manager"
-
 	
 	apt purge -y network-manager
     apt purge -y isc-dhcp-client
 	resolvconf -u
  	apt autoremove -y
  	# libteamdctl0 raspberrypi-net-mods
-	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
+	
 	#TemporaryTimeout = 30
 	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
 
