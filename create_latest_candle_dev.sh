@@ -2779,6 +2779,7 @@ if [ -f /etc/cups/cups.conf ]; then
  	sed -i ' 1 s/LogLevel .*/LogLevel none/' /etc/cups/cups.conf
 	sed -i ' 1 s/MaxLogSize 0/MaxLogSize 1/' /etc/cups/cups.conf
  	sed -i ' 1 s/ErrorPolicy retry-job/ErrorPolicy abort-job/' /etc/cups/cups.conf
+    usermod -a -G lpadmin pi
 fi
 
 
