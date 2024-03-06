@@ -3118,7 +3118,8 @@ systemctl disable apt-daily-upgrade.service
 chown pi:pi /home/pi/.webthings/ssl/
 
 
-
+# clear some caches
+pip cache purge
 
 
 
@@ -3332,6 +3333,12 @@ if [ -f /home/pi/nohup.out ]; then
     mv /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
+# clear some caches
+pip cache purge
+apt-get autoclean
+apt-get autoremove
+apt clean
+
 # This is handled by prepare_disk_image
 chmod +x /home/pi/candle/candle_first_run.sh
 if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
@@ -3358,8 +3365,8 @@ fi
 
 
 # DONE!
-echo "$(date) - system update complete" >> /home/pi/.webthings/candle.log
-echo "$(date) - system update complete" >> $BOOT_DIR/candle_log.txt
+echo "$(date) - Candle install script done" >> /home/pi/.webthings/candle.log
+echo "$(date) - Candle install script done" >> $BOOT_DIR/candle_log.txt
 
 
 
