@@ -1432,7 +1432,8 @@ then
     # libspandsp-dev libgirepository1.0-dev\
     for i in arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 \
 	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
- 	    cpufrequtils lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop; do
+ 	    cpufrequtils lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
+	    netcat-traditional; do
             
 		echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
