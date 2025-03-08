@@ -194,7 +194,7 @@ then
     #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
     #wget https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh -O install_nvm.sh
     #wget https://raw.githubusercontent.com/creationix/nvm/master/install.sh -O install_nvm.sh
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
     #curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
     
 
@@ -274,6 +274,11 @@ nvm alias default 18
 
 # install older version of NPM to avoid issue: reify:date-fns: http fetch GET 200 https://registry.npmjs.org/date-fns/-/date-fns-2.29.3.tgz 105523ms (cache miss)
 # npm install -g npm@6.14.17 # Node 14 version # it seems waiting very long also solves it...
+
+
+# additions for Zigbee2MQTT
+npm install --global pnpm
+npm install --global source-map-support
 
 
 echo
