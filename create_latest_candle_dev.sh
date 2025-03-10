@@ -3272,8 +3272,9 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	systemctl disable NetworkManager.service
 	
 	echo "completely removing network manager"
-	
+	resolvconf -u
 	apt purge -y network-manager
+ 	resolvconf -u
     apt purge -y isc-dhcp-client
 	resolvconf -u
  	apt autoremove -y
@@ -3293,6 +3294,8 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	# binary no longer seems available for bookworm...
 	#wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused   
 fi
+
+resolvconf -u
 
 if [ -s /etc/dhcpcd.conf ]; then
 	if cat /etc/dhcpcd.conf | grep -q uap0; then
@@ -3334,6 +3337,8 @@ fi
 if [ -f /home/pi/nohup.out ]; then
     mv /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
+
+resolvconf -u
 
 # clear some caches
 pip cache purge
