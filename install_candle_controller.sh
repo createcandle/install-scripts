@@ -175,7 +175,7 @@ python3.11 --version && python3.11 -m pip install git+https://github.com/createc
 #python3 -m pip install --force-reinstall -v "websocket-client==1.4.2" --trusted-host pypi.org --trusted-host files.pythonhosted.org
 
 
-if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 20 ];
+if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 18 ];
 then
     echo
     echo "NPM could not be found. Installing it now."
@@ -249,8 +249,8 @@ then
     
     #nvm uninstall 18
     #nvm uninstall 18
-    for v in $(nvm_ls 20); do nvm uninstall $v; done
-    nvm install 20
+    for v in $(nvm_ls 18); do nvm uninstall $v; done
+    nvm install 18
 else
     echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
     echo "NPM seems to already be installed." | sudo tee -a $BOOT_DIR/candle_log.txt
@@ -269,8 +269,8 @@ if [ -f ./install_nvm.sh ]; then
     rm ./install_nvm.sh
 fi
 
-nvm use 20
-nvm alias default 20
+nvm use 18
+nvm alias default 18
 
 # install older version of NPM to avoid issue: reify:date-fns: http fetch GET 200 https://registry.npmjs.org/date-fns/-/date-fns-2.29.3.tgz 105523ms (cache miss)
 # npm install -g npm@6.14.17 # Node 14 version # it seems waiting very long also solves it...
