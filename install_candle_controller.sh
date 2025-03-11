@@ -251,6 +251,9 @@ then
     #nvm uninstall 18
     for v in $(nvm_ls 18); do nvm uninstall $v; done
     nvm install 18
+
+ for v in $(nvm_ls 24); do nvm uninstall $v; done
+    nvm install 24
 else
     echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
     echo "NPM seems to already be installed." | sudo tee -a $BOOT_DIR/candle_log.txt
@@ -766,6 +769,17 @@ ln -s "$V18_PATH" node18
 
 
 
+# NODE 24
+V24=$(ls $CANDLE_BASE/.nvm/versions/node | grep v24 | head -n 1)
+echo "V24: $V24"
+V18_PATH="$CANDLE_BASE/.nvm/versions/node/$V24/bin/node"
+echo "Node V24 path: $V24_PATH"
+if [ -L node24 ]; then
+    echo "removing old node24 symlink first"
+    rm node24
+fi
+ln -s "$V18_PATH" node24
+
 
 
 
@@ -1018,10 +1032,19 @@ then
         if [ -d ./zigbee2mqtt ]; then
             chown -R pi:pi ./zigbee2mqtt
             cd ./zigbee2mqtt
+			
             npm install -g typescript; 
             npm i --save-dev @types/node;
-            npm ci
+
+			nvm use 24
+            nvm alias default 24
+   
+            pnpm i --frozen-lockfile
+			pnpm run build
             #npm ci --production
+
+   			nvm use 18
+            nvm alias default 18
         else
             echo "Error, pre-install of z2m failed: no dir"
         fi
