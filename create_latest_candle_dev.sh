@@ -313,13 +313,13 @@ then
             echo
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
-                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
-                printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14000MB\nquit" | parted
+                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 8000MB
+                printf "mkpart\np\next4\n8001MB\n16000MB\nmkpart\np\next4\n16002MB\n26000MB\nquit" | parted
                 #resizepart /dev/mmcblk0 2 12600000
             else
                 echo "creating smaller partitions for update image"
-                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 5000MB
-                printf "mkpart\np\next4\n5001MB\n7500MB\nmkpart\np\next4\n7502MB\n9500MB\nquit" | parted
+                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
+                printf "mkpart\np\next4\n7001MB\n16000MB\nmkpart\np\next4\n16002MB\n26000MB\nquit" | parted
             fi
 
             # Tell OS to rescan
