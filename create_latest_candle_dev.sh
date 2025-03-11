@@ -3254,21 +3254,28 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
    		fi
 		exit 1
  	fi
-
+	
+    resolvconf -u
+ 
 	systemctl stop dnsmasq.service
 	#systemctl enable dnsmasq.service
 	systemctl disable dnsmasq.service
 	resolvconf -u
 
 	apt install -y dhcpcd
- 
+    resolvconf -u
+	
 	echo "attempting switch to dhcpcd"
     systemctl enable dhcpcd.service
+	resolvconf -u
 	systemctl start dhcpcd.service
+    resolvconf -u
 	systemctl restart avahi-daemon.service
+    resolvconf -u
 	systemctl stop NetworkManager.service
  	resolvconf -u
 	systemctl restart avahi-daemon.service
+    resolvconf -u
 	systemctl disable NetworkManager.service
 	
 	echo "completely removing network manager"
