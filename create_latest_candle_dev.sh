@@ -3197,6 +3197,9 @@ fi
 # remember when the update script was last run
 #echo "$(date +%s)" > /home/pi/candle/update_date.txt
 
+# Add exception for Lixada uDMX USB controller
+echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="05dc", GROUP="plugdev", MODE="0660"' > /etc/udev/rules.d/50-usb-perms.rules
+
 # Disable old bootup actions service
 systemctl disable candle_bootup_actions.service
 
