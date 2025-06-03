@@ -971,7 +971,7 @@ then
         echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
             | grep "browser_download_url" \
-            | grep "$ARCHSTRING-v3.11" \
+            | grep "$ARCHSTRING-v3.9" \
             | grep -v ".sha256sum" \
             | cut -d : -f 2,3 \
             | tr -d \" \
