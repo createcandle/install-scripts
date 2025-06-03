@@ -175,7 +175,7 @@ python3.11 --version && python3.11 -m pip install git+https://github.com/createc
 #python3 -m pip install --force-reinstall -v "websocket-client==1.4.2" --trusted-host pypi.org --trusted-host files.pythonhosted.org
 
 
-if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 18 ];
+if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 20 ];
 then
     echo
     echo "NPM could not be found. Installing it now."
@@ -246,11 +246,8 @@ then
     nvm install 12
     
     #nvm install 16
-    
-    #nvm uninstall 18
-    #nvm uninstall 18
-    for v in $(nvm_ls 18); do nvm uninstall $v; done
-    nvm install 18
+    for v in $(nvm_ls 20); do nvm uninstall $v; done
+    nvm install 20
 
  for v in $(nvm_ls 24); do nvm uninstall $v; done
     nvm install 24
@@ -272,8 +269,8 @@ if [ -f ./install_nvm.sh ]; then
     rm ./install_nvm.sh
 fi
 
-nvm use 18
-nvm alias default 18
+nvm use 20
+nvm alias default 20
 
 # install older version of NPM to avoid issue: reify:date-fns: http fetch GET 200 https://registry.npmjs.org/date-fns/-/date-fns-2.29.3.tgz 105523ms (cache miss)
 # npm install -g npm@6.14.17 # Node 14 version # it seems waiting very long also solves it...
@@ -756,29 +753,29 @@ ln -s "$V12_PATH" node12
 #fi
 #ln -s "$V16_PATH" node16
 
-# NODE 18
-V18=$(ls $CANDLE_BASE/.nvm/versions/node | grep v18 | head -n 1)
-echo "V18: $V18"
-V18_PATH="$CANDLE_BASE/.nvm/versions/node/$V18/bin/node"
-echo "Node V18 path: $V18_PATH"
-if [ -L node18 ]; then
-    echo "removing old node18 symlink first"
-    rm node18
+# NODE 20
+V20=$(ls $CANDLE_BASE/.nvm/versions/node | grep v20 | head -n 1)
+echo "V20: $V20"
+V20_PATH="$CANDLE_BASE/.nvm/versions/node/$V20/bin/node"
+echo "Node V20 path: $V20_PATH"
+if [ -L node20 ]; then
+    echo "removing old node20 symlink first"
+    rm node20
 fi
-ln -s "$V18_PATH" node18
+ln -s "$V20_PATH" node20
 
 
 
 # NODE 24
 V24=$(ls $CANDLE_BASE/.nvm/versions/node | grep v24 | head -n 1)
 echo "V24: $V24"
-V18_PATH="$CANDLE_BASE/.nvm/versions/node/$V24/bin/node"
+V24_PATH="$CANDLE_BASE/.nvm/versions/node/$V24/bin/node"
 echo "Node V24 path: $V24_PATH"
 if [ -L node24 ]; then
     echo "removing old node24 symlink first"
     rm node24
 fi
-ln -s "$V18_PATH" node24
+ln -s "$V24_PATH" node24
 
 
 
@@ -807,7 +804,7 @@ then
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
             | grep "browser_download_url" \
             | grep -v ".sha256sum" \
-            | grep "$ARCHSTRING-v3.9" \
+            | grep "$ARCHSTRING-v3.11" \
             | cut -d : -f 2,3 \
             | tr -d \" \
             | sed 's/,*$//' \
@@ -863,7 +860,7 @@ then
     else
         curl -s https://api.github.com/repos/kabbi/zigbee2mqtt-adapter/releases/latest \
         | grep "browser_download_url" \
-        | grep -v "linux-arm64" \
+        | grep -v "linux-arm" \
         | grep -v ".sha256sum" \
         | cut -d : -f 2,3 \
         | tr -d \" \
@@ -894,7 +891,7 @@ then
         echo "$addon"
         curl -s "https://api.github.com/repos/flatsiedatsie/$addon/releases/latest" \
             | grep "browser_download_url" \
-            | grep "$ARCHSTRING-v3.9" \
+            | grep "$ARCHSTRING-v3.11" \
             | grep -v ".sha256sum" \
             | cut -d : -f 2,3 \
             | tr -d \" \
@@ -925,7 +922,7 @@ then
     echo "followers-addon"
     curl -s "https://api.github.com/repos/flatsiedatsie/followers-addon/releases/latest" \
         | grep "browser_download_url" \
-        | grep "$ARCHSTRING-v3.9" \
+        | grep "$ARCHSTRING-v3.11" \
         | grep -v ".sha256sum" \
         | cut -d : -f 2,3 \
         | tr -d \" \
@@ -939,14 +936,14 @@ then
     chown -R pi:pi followers
     mkdir -p "$CANDLE_BASE/.webthings/data/followers"
 
-
+    echo "Candle app store"
     for addon in candleappstore; 
     do
         
         echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
             | grep "browser_download_url" \
-            | grep "$ARCHSTRING-v3.9" \
+            | grep "$ARCHSTRING-v3.11" \
             | grep -v ".sha256sum" \
             | cut -d : -f 2,3 \
             | tr -d \" \
@@ -974,7 +971,7 @@ then
         echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
             | grep "browser_download_url" \
-            | grep "$ARCHSTRING-v3.9" \
+            | grep "$ARCHSTRING-v3.11" \
             | grep -v ".sha256sum" \
             | cut -d : -f 2,3 \
             | tr -d \" \
@@ -1038,13 +1035,21 @@ then
 
 			nvm use 24
             nvm alias default 24
-   
+			
+
+   			npm install --global pnpm
+	  		
             pnpm i --frozen-lockfile
 			pnpm run build
             #npm ci --production
 
-   			nvm use 18
-            nvm alias default 18
+
+   			npm cache clean --force
+			nvm cache clear
+
+	
+   			nvm use 20
+            nvm alias default 20
         else
             echo "Error, pre-install of z2m failed: no dir"
         fi
