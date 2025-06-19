@@ -1356,7 +1356,8 @@ then
  
     echo
     echo "installing Pipewire audio"
-    apt install -y pipewire-alsa pipewire-jack pipewire-pulse wireplumber libspa-0.2-bluetooth pipewire-audio-client-libraries easyeffects software-properties-common --no-install-recommends
+	# software-properties-common
+    apt install -y pipewire-alsa pipewire-jack pipewire-pulse wireplumber libspa-0.2-bluetooth pipewire-audio-client-libraries easyeffects --no-install-recommends
     raspi-config nonint do_audioconf 2
     apt update -y
 
