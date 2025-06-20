@@ -1401,7 +1401,7 @@ then
 
     echo
     echo "installing vlc"
-    apt -y install vlc --no-install-recommends "$reinstall" #--print-uris
+    apt -y install vlc vlc-plugin-pipewire --no-install-recommends "$reinstall" #--print-uris
 
     #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
     #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
