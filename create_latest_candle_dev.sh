@@ -3127,9 +3127,10 @@ systemctl disable apt-daily.timer
 systemctl disable apt-daily-upgrade.timer
 systemctl disable apt-daily-upgrade.service
 
-
-chown pi:pi /home/pi/.webthings/ssl/
-
+mkdir -p /home/pi/.webthings/ssl/
+if [ -e /home/pi/.webthings/ssl/ ]; then
+	chown pi:pi /home/pi/.webthings/ssl/
+fi
 
 # clear some caches
 pip cache purge
