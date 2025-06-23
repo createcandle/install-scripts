@@ -1370,6 +1370,7 @@ then
       cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
 	  ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
       systemctl --user enable pipewire
+	  systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service
 	fi
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
@@ -1448,7 +1449,7 @@ then
     for i in curl arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 \
 	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
  	    cpufrequtils lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
-	    netcat-traditional; do
+	    netcat-traditional nscd; do
             
 		echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
