@@ -2590,7 +2590,7 @@ usermod -a -G tty pi
 
 # Add policy file to disable things like file selection
 mkdir -p /etc/chromium/policies/managed/
-echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": false, "AutoFillEnabled": false, "PasswordManagerEnabled": false, "deleteDataPostSession":false}' > /etc/chromium/policies/managed/candle.json
+echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": true, "AutoFillEnabled": false, "PasswordManagerEnabled": false, "deleteDataPostSession":false}' > /etc/chromium/policies/managed/candle.json
 
 
 #if [ -f /etc/pam.d/sshd ]; then
