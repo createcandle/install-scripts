@@ -1358,9 +1358,13 @@ then
     echo
     echo "installing Pipewire audio"
 	# software-properties-common
-    apt install -y wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries easyeffects --no-install-recommends
+    apt install -y pipewire wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries easyeffects --no-install-recommends
     raspi-config nonint do_audioconf 2
     apt update -y
+
+    mkdir -p /home/pi/.webthings/etc
+	mkdir -p /home/pi/.webthings/etc/pipewire
+    ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
@@ -3120,6 +3124,7 @@ echo "#!/bin/sh" > /usr/lib/apt/apt.systemd.daily
 systemctl disable dpkg-db-backup.timer
 systemctl disable dphys-swapfile
 
+systemctl disable containerd.service
 
 systemctl disable apt-daily.service
 systemctl disable apt-daily.timer
