@@ -39,6 +39,7 @@ set +e # continue on errors
 #SKIP_APT_UPGRADE=yes
 #SKIP_PYTHON=yes
 SKIP_RESPEAKER=yes
+SKIP_RESPEAKER_ALTERNATIVE=yes
 SKIP_BLUEALSA=yes
 #SKIP_CONTROLLER=yes
 #SKIP_DEBUG=yes
@@ -1769,7 +1770,7 @@ fi
 
 
 
-
+# apt install -y pipewire libspa-0.2-bluetooth
 
 
 cd $CANDLE_BASE 
@@ -1918,6 +1919,7 @@ if [ -f /etc/bluetooth/main.conf ]; then
  		
     fi
 fi
+
 
 
 
