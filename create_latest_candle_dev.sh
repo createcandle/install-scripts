@@ -1369,6 +1369,7 @@ then
 	  mkdir -p /home/pi/.webthings/etc/pipewire
       cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
 	  ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
+      systemctl --user enable pipewire
 	fi
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
