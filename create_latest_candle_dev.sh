@@ -1362,9 +1362,14 @@ then
     raspi-config nonint do_audioconf 2
     apt update -y
 
-    mkdir -p /home/pi/.webthings/etc
-	mkdir -p /home/pi/.webthings/etc/pipewire
-    ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
+    
+
+    if [ -e /usr/share/pipewire ]; then
+	  mkdir -p /home/pi/.webthings/etc
+	  mkdir -p /home/pi/.webthings/etc/pipewire
+      cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
+	  ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
+	fi
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
