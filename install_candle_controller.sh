@@ -1041,8 +1041,9 @@ then
 			
 
    			npm install --global pnpm
-	  		
-            pnpm i --frozen-lockfile
+
+	 		#pnpm i --frozen-lockfile
+            pnpm i
 			pnpm run build
             #npm ci --production
 
