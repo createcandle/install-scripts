@@ -2942,10 +2942,16 @@ fi
 
 # Create fix for missing audio firmware
 if [ ! -e /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ]; then
-  ln -s /usr/lib/firmware/brcm/brcmfmac43455-sdio.bin /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin  
-  echo
-  echo "Candle: added symlink for missing audio firmware"
-  echo
+  if [ -e /usr/lib/firmware/brcm/brcmfmac43455-sdio.bin ]; then
+  	ln -s /usr/lib/firmware/brcm/brcmfmac43455-sdio.bin /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin  
+  	echo
+  	echo "Candle: added symlink for missing audio firmware"
+  	echo
+  else
+    echo
+  	echo "Candle: warning, cannot add symlink for missing audio firmware"
+  	echo
+  fi
 fi
 
 
