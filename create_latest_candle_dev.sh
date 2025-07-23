@@ -3419,15 +3419,19 @@ fi
 
 
 
+# add some useful commands to the bash history
+# TODO: Isn't this already handled by prepare_for_disk_image.sh ?
+echo "curl -sSL www.candlesmarthome.com/tools/samba.txt | sudo bash" > /home/pi/.bash_history
+echo "journalctl --boot=0 --priority=0..3" >> /home/pi/.bash_history
+echo "systemctl list-units --failed" >> /home/pi/.bash_history
+echo "sudo systemctl restart webthings-gateway.service" >> /home/pi/.bash_history
+echo "hostname -I" >> /home/pi/.bash_history
+echo "tail -f -n10 ~/.webthings/log/run-app.log" >> /home/pi/.bash_history
+
 
 # DONE!
 echo "$(date) - Candle install script done" >> /home/pi/.webthings/candle.log
 echo "$(date) - Candle install script done" >> $BOOT_DIR/candle_log.txt
-
-
-
-
-
 
 
 
