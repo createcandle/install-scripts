@@ -2436,6 +2436,7 @@ systemctl enable candle_splashscreen_updating.service
 systemctl enable candle_splashscreen_updating180.service
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 # TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon). Then again, can't hurt to have redundancy.
+systemctl enable candle_silence_player.service
 
 # disable old splash screen
 systemctl disable splashscreen.service
