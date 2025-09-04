@@ -1816,7 +1816,56 @@ then
 	#git clone https://github.com/waveshare/WM8960-Audio-HAT
  	git clone https://github.com/ubopod/WM8960-Audio-HAT WM8960-Audio-HAT
 	cd WM8960-Audio-HAT
+
+	# locate currently installed kernels (may be different to running kernel if
+	# it's just been updated)
+	kernels=$(ls /lib/modules)
 	
+	function install_module {
+	  ver="1.0"
+	  # we create a dir with this version to ensure that 'dkms remove' won't delete
+	  # the sources during kernel updates
+	  marker="0.0.0"
+	
+	  src=$1
+	  mod=$2
+	
+	  if [[ -d /var/lib/dkms/$mod/$ver/$marker ]]; then
+	    rmdir /var/lib/dkms/$mod/$ver/$marker
+	  fi
+	
+	  if [[ -e /usr/src/$mod-$ver || -e /var/lib/dkms/$mod/$ver ]]; then
+	    dkms remove --force -m $mod -v $ver --all || true
+	    rm -rf /usr/src/$mod-$ver
+	  fi
+	  mkdir -p /usr/src/$mod-$ver
+	  cp -a $src/* /usr/src/$mod-$ver/
+	  dkms add -m $mod -v $ver
+	  for kernel in $kernels; do
+	    # It works for kernels greater than or equal 6.12
+	    if [ "$(printf '%s\n' "$kernel" "6.12" | sort -V | head -n1)" = "$kernel" ]; then
+	      continue
+	    fi
+	    dkms build "$kernel" -k "$kernel" --kernelsourcedir "/lib/modules/$kernel/build" -m $mod -v $ver &&
+	      dkms install --force "$kernel" -k "$kernel" -m $mod -v $ver
+	  done
+	
+	  mkdir -p /var/lib/dkms/$mod/$ver/$marker
+	}
+	
+	install_module "./" "wm8960-soundcard"
+
+
+
+
+
+
+
+
+
+
+
+ 
 	# install dtbos
 	#cp wm8960-soundcard.dtbo /boot/overlays
 	
@@ -1848,6 +1897,7 @@ then
 	
 	#set service 
 	cp wm8960-soundcard /usr/bin/
+	chmod -x wm8960-soundcard.service
 	cp wm8960-soundcard.service /lib/systemd/system/
 	#systemctl enable  wm8960-soundcard.service 
 	#systemctl start wm8960-soundcard
