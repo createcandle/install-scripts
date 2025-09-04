@@ -1,6 +1,8 @@
 #!/bin/bash
 set +e # continue on errors
 
+export DEBIAN_FRONTEND=noninteractive
+
 #CUTTING_EDGE=yes 
 #CREATE_DISK_IMAGE=yes
 
@@ -717,8 +719,10 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
             fi
         
         
-            # Add RW and RO alias shortcuts to .profile
+            
             if [ -f /home/pi/.profile ]; then
+
+   				# Add RW and RO alias shortcuts to .profile
                 if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
                 then
                     echo "adding ro and rw aliases to /home/pi/.profile"
@@ -726,7 +730,8 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
                     echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
                     echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
                 fi
-				
+
+				# Only start D-Bus if it's not already running
                 if [ $(cat /home/pi/.profile | grep -c "dbus-launch") -eq 0 ];
                 then
                     echo "adding dbus-launch to /home/pi/.profile"
@@ -736,11 +741,6 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 					echo "fi" >> /home/pi/.profile
                 fi
 
-    # Only start D-Bus if it's not already running
-    
-fi
-
- 
             fi
         
         else
@@ -1813,14 +1813,15 @@ then
     # from: https://github.com/HinTak/seeed-voicecard/issues/19#issuecomment-1879387637
 	
 	#download the archive
-	git clone https://github.com/waveshare/WM8960-Audio-HAT
+	#git clone https://github.com/waveshare/WM8960-Audio-HAT
+ 	git clone https://github.com/ubopod/WM8960-Audio-HAT WM8960-Audio-HAT
 	cd WM8960-Audio-HAT
 	
 	# install dtbos
 	#cp wm8960-soundcard.dtbo /boot/overlays
 	
 	
-	#set kernel moduels
+	#set kernel modules
 	grep -q "i2c-dev" /etc/modules || \
 	  echo "i2c-dev" >> /etc/modules  
 	grep -q "snd-soc-wm8960" /etc/modules || \
@@ -1838,7 +1839,7 @@ then
 	  echo "dtparam=i2s=on" >> /boot/firmware/config.txt
 	
 	grep -q "dtoverlay=wm8960-soundcard" /boot/firmware/config.txt || \
-	  echo "dtoverlay=wm8960-soundcard" >> /boot/firmware/config.txt
+	  echo "#dtoverlay=wm8960-soundcard" >> /boot/firmware/config.txt
 	  
 	#install config files
 	mkdir /etc/wm8960-soundcard || true
