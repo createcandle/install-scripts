@@ -348,9 +348,9 @@ then
             touch $BOOT_DIR/candle_has_4th_partition.txt
 
 			e2label /dev/mmcblk0p1 candle_boot
-            e2label /dev/mmcblk0p2 csystem
-            e2label /dev/mmcblk0p3 recovery
-            e2label /dev/mmcblk0p4 cuser
+            e2label /dev/mmcblk0p2 candle_system
+            e2label /dev/mmcblk0p3 candle_recovery
+            e2label /dev/mmcblk0p4 candle_user
 
             systemctl daemon-reload
         else
