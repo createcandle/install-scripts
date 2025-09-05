@@ -322,8 +322,8 @@ then
                 #resizepart /dev/mmcblk0 2 12600000
             else
                 echo "creating smaller partitions for update image"
-                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
-                printf "mkpart\np\next4\n7001MB\n16000MB\nmkpart\np\next4\n16002MB\n26000MB\nquit" | parted
+                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 6000MB
+                printf "mkpart\np\next4\n6001MB\n6500MB\nmkpart\np\next4\n12002MB\n14500MB\nquit" | parted
             fi
 
             # Tell OS to rescan
@@ -347,9 +347,9 @@ then
             chown pi:pi /home/pi/.webthings
             touch $BOOT_DIR/candle_has_4th_partition.txt
             
-            e2label /dev/mmcblk0p2 system
+            e2label /dev/mmcblk0p2 csystem
             e2label /dev/mmcblk0p3 recovery
-            e2label /dev/mmcblk0p4 user
+            e2label /dev/mmcblk0p4 cuser
 
             systemctl daemon-reload
         else
