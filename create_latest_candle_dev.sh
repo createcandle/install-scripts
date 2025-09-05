@@ -34,6 +34,7 @@ export DEBIAN_FRONTEND=noninteractive
 # export SKIP_SPLASH=yes
 # export SKIP_SPLASH=yes
 # export SKIP_BROWSER=yes
+# export BIT32=yes
 
 #SKIP_PARTITIONS=yes
 #TINY_PARTITIONS=yes # used to create smaller partition images, which are used in the new system update process
@@ -1411,11 +1412,18 @@ then
     	echo ""
 
 		apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp25 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-9 libminizip1 --no-install-recommends
+
+		if [ "$BIT32" = no ] || [[ -z "${BIT32}" ]]
+  		then
+			# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
+    		wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    		yes | dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    		rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
+   		else
+	 		apt install -y chromium
+		fi
    
-    	# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
-    	wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
-    	yes | dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
-    	rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    	
     	#apt-get -f install -y
 	    apt --fix-broken -y install
 	 	#  --no-install-recommends
@@ -2095,6 +2103,14 @@ fi
 # sudo update-rc.d gateway-iptables defaults
 
 # TODO: also need to look closer at this: https://github.com/WebThingsIO/gateway/tree/37591f4be3542901255da3c901396f3e9b8a443b/image/etc
+
+
+
+
+
+
+
+
 
 
 
