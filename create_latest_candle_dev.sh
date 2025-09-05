@@ -322,8 +322,8 @@ then
                 #resizepart /dev/mmcblk0 2 12600000
             else
                 echo "creating smaller partitions for update image"
-                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 6000MB
-                printf "mkpart\np\next4\n6001MB\n6500MB\nmkpart\np\next4\n12002MB\n14500MB\nquit" | parted
+                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
+                printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | parted
             fi
 
             # Tell OS to rescan
