@@ -346,7 +346,8 @@ then
             mkdir -p /home/pi/.webthings
             chown pi:pi /home/pi/.webthings
             touch $BOOT_DIR/candle_has_4th_partition.txt
-            
+
+			e2label /dev/mmcblk0p1 candle_boot
             e2label /dev/mmcblk0p2 csystem
             e2label /dev/mmcblk0p3 recovery
             e2label /dev/mmcblk0p4 cuser
@@ -2653,6 +2654,12 @@ if [ -f $BOOT_DIR/config.txt ]; then
 fi
 
 
+if [ -f /lib/systemd/system/rescue.service ]; then
+	sed -i ' 1 s/systemd-sulogin-shell rescue/systemd-sulogin-shell rescue --force/' /lib/systemd/system/rescue.service
+fi
+if [ -f /lib/systemd/system/rescue.service ]; then
+	sed -i ' 1 s/systemd-sulogin-shell emergency/systemd-sulogin-shell emergency --force/' /lib/systemd/system/emergency.service
+fi
 
 
 #mkdir -p /etc/X11/xinit
