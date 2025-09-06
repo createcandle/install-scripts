@@ -744,10 +744,19 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
                 if [ $(cat /home/pi/.profile | grep -c "dbus-launch") -eq 0 ];
                 then
                     echo "adding dbus-launch to /home/pi/.profile"
-                    echo "" >> /home/pi/.profile
-                    echo "if test -z '$DBUS_SESSION_BUS_ADDRESS'; then" >> /home/pi/.profile
-                    echo "  eval `dbus-launch --sh-syntax --exit-with-session`" >> /home/pi/.profile
-					echo "fi" >> /home/pi/.profile
+
+DBUS_CODE=$(cat <<EOF
+if test -z '$DBUS_SESSION_BUS_ADDRESS'; then
+  eval `dbus-launch --sh-syntax --exit-with-session`
+fi
+EOF
+)
+
+  
+                    echo "$DBUS_CODE" >> /home/pi/.profile
+                   	#echo "if test -z '$DBUS_SESSION_BUS_ADDRESS'; then" >> /home/pi/.profile
+                    #echo "  eval `dbus-launch --sh-syntax --exit-with-session`" >> /home/pi/.profile
+					#echo "fi" >> /home/pi/.profile
                 fi
 
             fi
