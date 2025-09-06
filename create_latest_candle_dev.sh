@@ -3031,7 +3031,8 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
             fi
         fi
 
-		
+		rm $BOOT_DIR/fstab3.bak
+		rm $BOOT_DIR/fstab4.bak
 
   		
 
