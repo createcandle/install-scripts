@@ -2181,6 +2181,9 @@ if lsblk | grep -q 'mmcblk0p4'; then
 
         rm recovery.fs.tar.gz
         rm recovery.fs
+
+ 		e2label /dev/mmcblk0p3 candle_recovery
+  
     else
         echo "ERROR, recovery partition file not downloaded"
     
