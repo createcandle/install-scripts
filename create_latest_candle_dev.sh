@@ -433,7 +433,7 @@ apt-get --allow-releaseinfo-change-suite update
 
 
 
-# Save the bits of the initial kernel the boot partition to a file
+# Save the bits of the initial kernel to a file on the boot partition
 if [ "$BIT_TYPE" == 64 ]; then
     echo "creating $BOOT_DIR/candle_64bits.txt"
     echo "creating $BOOT_DIR/candle_64bits.txt" >> /dev/kmsg
@@ -902,7 +902,13 @@ apt update -y
 
 
 
-
+if [ "$BIT32" = no ] || [[ -z "${BIT32}" ]]; then
+	echo "not forcing 32 bit"
+else
+	echo "creating $BOOT_DIR/candle_32bits.txt"
+    echo "creating $BOOT_DIR/candle_32bits.txt" >> /dev/kmsg
+    touch $BOOT_DIR/candle_32bits.txt
+fi
 
 
 # Download splash images
