@@ -347,7 +347,14 @@ then
             chown pi:pi /home/pi/.webthings
             touch $BOOT_DIR/candle_has_4th_partition.txt
 
-			e2label /dev/mmcblk0p1 candle_boot
+
+			# 0x636E646C = cndl
+
+   			#printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | fdisk
+
+   			#gdisk /dev/mmcblk0
+	  
+			# partition 1 label remains bootfs
             e2label /dev/mmcblk0p2 candle_system
             e2label /dev/mmcblk0p3 candle_recovery
             e2label /dev/mmcblk0p4 candle_user
@@ -2951,6 +2958,27 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
         echo "COPYING FSTAB FILE"
         echo
 
+
+		# change the cmdline.txt root identified to use PARTUUID to make it more universal
+  		DEVNODE=$(mountpoint -d /)
+  		PARTNUM=$(echo ${DEVNODE} | cut -d':' -f2)
+		DEV="/dev/$(readlink /sys/dev/block/${DEVNODE} | awk -F/ '{print $(NF-1)}')" 
+		# likely outputs mmcblk0
+		
+		disk_identifier=$(dd if=${DEV} bs=1 count=4 conv=notrunc skip=$((0x1B8)) 2>/dev/null | hexdump -e '"%08x"')
+
+		echo "Disk identifier for PARTUUID: $disk_identifier"
+  
+		if [[ -n ${disk_identifier} && -f /boot/firmware/cmdline.txt ]]; then
+			ROOTPARTNUM=$(mountpoint -d / | cut -d':' -f2)
+			sed -i "s/ root=[^[:space:]]*/ root=PARTUUID=${disk_identifier}-$(printf '%02d' ${ROOTPARTNUM})/" /boot/firmware/cmdline.txt
+   			if [[ -f /boot/firmware/cmdline-candle.txt ]]; then
+   				sed -i "s/ root=[^[:space:]]*/ root=PARTUUID=${disk_identifier}-$(printf '%02d' ${ROOTPARTNUM})/" /boot/firmware/cmdline-candle.txt
+	   		fi
+		fi
+
+  
+
         if lsblk | grep -q mmcblk0p4; 
         then
             echo "copying 4 partition version of fstab"
@@ -2963,6 +2991,14 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
             else
                 echo "new fstab file is same as the old one, not copying it."
             fi
+
+			if [[ -n ${disk_identifier} && -f /etc/fstab ]]; then
+				ROOTPARTNUM=$(mountpoint -d / | cut -d':' -f2)
+				sed -i "s|/dev/mmcblk0p2|/PARTUUID=${disk_identifier}-$(printf '%02d' ${ROOTPARTNUM})/" /etc/fstab
+   				sed -i "s|/dev/mmcblk0p1|/PARTUUID=${disk_identifier}-$(printf '%02d' 1)/" /etc/fstab
+				sed -i "s|/dev/mmcblk0p4|/PARTUUID=${disk_identifier}-$(printf '%02d' 4)/" /etc/fstab
+			fi
+   
         
         else
             echo "copying 3 partition version of fstab"
@@ -2980,6 +3016,12 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
             fi
         fi
 
+		
+
+  		
+
+
+  
     
     else
         echo ""
