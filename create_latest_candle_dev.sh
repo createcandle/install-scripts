@@ -380,7 +380,7 @@ then
     #lsblk
     
 else
-    echo "Partitions seem to already exist (addons dir existed)"
+    echo "Partitions seem to already exist"
     echo "Candle: partitions seem to already exist" >> /dev/kmsg
     echo "$(date) - starting create_latest_candle" >> /home/pi/.webthings/candle.log
     echo "$(date) - starting create_latest_candle" >> $BOOT_DIR/candle_log.txt
