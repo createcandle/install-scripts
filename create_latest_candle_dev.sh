@@ -34,6 +34,7 @@ export DEBIAN_FRONTEND=noninteractive
 # export SKIP_SPLASH=yes
 # export SKIP_BROWSER=yes
 # export BIT32=yes
+# export SKIP_DOCKER=yes
 
 #SKIP_PARTITIONS=yes
 #TINY_PARTITIONS=yes # used to create smaller partition images, which are used in the new system update process
@@ -978,11 +979,17 @@ fi
 
 
 
+if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
+ 	echo "Installing docker"
+    echo "Installing docker" >> /dev/kmsg
+    curl -sSL https://get.docker.com | sh
+	sudo usermod -aG docker pi
+else
+	echo "not installing Docker"
+fi
 
 
 
-curl -sSL https://get.docker.com | sh
-sudo usermod -aG docker pi
 
 
 
@@ -2975,24 +2982,24 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
         echo "COPYING FSTAB FILE"
         echo
 
-
+		
 		# change the cmdline.txt root identified to use PARTUUID to make it more universal
-  		DEVNODE=$(mountpoint -d /)
-  		PARTNUM=$(echo ${DEVNODE} | cut -d':' -f2)
-		DEV="/dev/$(readlink /sys/dev/block/${DEVNODE} | awk -F/ '{print $(NF-1)}')" 
+  		#DEVNODE=$(mountpoint -d /)
+  		#PARTNUM=$(echo ${DEVNODE} | cut -d':' -f2)
+		#DEV="/dev/$(readlink /sys/dev/block/${DEVNODE} | awk -F/ '{print $(NF-1)}')" 
 		# likely outputs mmcblk0
 		
-		disk_identifier=$(dd if=${DEV} bs=1 count=4 conv=notrunc skip=$((0x1B8)) 2>/dev/null | hexdump -e '"%08x"')
+		#disk_identifier=$(dd if=${DEV} bs=1 count=4 conv=notrunc skip=$((0x1B8)) 2>/dev/null | hexdump -e '"%08x"')
 
-		echo "Disk identifier for PARTUUID: $disk_identifier"
+		#echo "Disk identifier for PARTUUID: $disk_identifier"
   
-		if [[ -n ${disk_identifier} && -f /boot/firmware/cmdline.txt ]]; then
-			ROOTPARTNUM=$(mountpoint -d / | cut -d':' -f2)
-			sed -i "s/ root=[^[:space:]]*/ root=PARTUUID=${disk_identifier}-$(printf '%02d' ${ROOTPARTNUM})/" /boot/firmware/cmdline.txt
-   			if [[ -f /boot/firmware/cmdline-candle.txt ]]; then
-   				sed -i "s/ root=[^[:space:]]*/ root=PARTUUID=${disk_identifier}-$(printf '%02d' ${ROOTPARTNUM})/" /boot/firmware/cmdline-candle.txt
-	   		fi
-		fi
+		#if [[ -n ${disk_identifier} && -f /boot/firmware/cmdline.txt ]]; then
+		#	ROOTPARTNUM=$(mountpoint -d / | cut -d':' -f2)
+		#	sed -i "s/ root=[^[:space:]]*/ root=PARTUUID=${disk_identifier}-$(printf '%02d' ${ROOTPARTNUM})/" /boot/firmware/cmdline.txt
+   		#	if [[ -f /boot/firmware/cmdline-candle.txt ]]; then
+   		#		sed -i "s/ root=[^[:space:]]*/ root=PARTUUID=${disk_identifier}-$(printf '%02d' ${ROOTPARTNUM})/" /boot/firmware/cmdline-candle.txt
+	   	#	fi
+		#fi
 
   
 
@@ -3009,12 +3016,12 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
                 echo "new fstab file is same as the old one, not copying it."
             fi
 
-			if [[ -n ${disk_identifier} && -f /etc/fstab ]]; then
-				ROOTPARTNUM=$(mountpoint -d / | cut -d':' -f2)
-				sed -i "s|/dev/mmcblk0p2|/PARTUUID=${disk_identifier}-$(printf '%02d' ${ROOTPARTNUM})/" /etc/fstab
-   				sed -i "s|/dev/mmcblk0p1|/PARTUUID=${disk_identifier}-$(printf '%02d' 1)/" /etc/fstab
-				sed -i "s|/dev/mmcblk0p4|/PARTUUID=${disk_identifier}-$(printf '%02d' 4)/" /etc/fstab
-			fi
+			#if [[ -n ${disk_identifier} && -f /etc/fstab ]]; then
+			#	ROOTPARTNUM=$(mountpoint -d / | cut -d':' -f2)
+			#	sed -i "s|/dev/mmcblk0p2|/PARTUUID=${disk_identifier}-$(printf '%02d' ${ROOTPARTNUM})/" /etc/fstab
+   			#	sed -i "s|/dev/mmcblk0p1|/PARTUUID=${disk_identifier}-$(printf '%02d' 1)/" /etc/fstab
+			#	sed -i "s|/dev/mmcblk0p4|/PARTUUID=${disk_identifier}-$(printf '%02d' 4)/" /etc/fstab
+			#fi
    
         
         else
@@ -3033,8 +3040,8 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
             fi
         fi
 
-		rm $BOOT_DIR/fstab3.bak
-		rm $BOOT_DIR/fstab4.bak
+		#rm $BOOT_DIR/fstab3.bak
+		#rm $BOOT_DIR/fstab4.bak
 
   		
 
