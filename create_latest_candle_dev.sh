@@ -32,7 +32,6 @@ export DEBIAN_FRONTEND=noninteractive
 # export SKIP_DEBUG=yes
 # export SKIP_REBOOT=yes
 # export SKIP_SPLASH=yes
-# export SKIP_SPLASH=yes
 # export SKIP_BROWSER=yes
 # export BIT32=yes
 
