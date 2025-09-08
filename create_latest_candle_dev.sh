@@ -370,6 +370,7 @@ then
     sleep 5
     
     if ls /dev/mmcblk0p4; then
+
         echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
         mount /dev/mmcblk0p4 /home/pi/.webthings
         chown pi:pi /home/pi/.webthings
@@ -385,8 +386,17 @@ else
     echo "Candle: partitions seem to already exist" >> /dev/kmsg
     echo "$(date) - starting create_latest_candle" >> /home/pi/.webthings/candle.log
     echo "$(date) - starting create_latest_candle" >> $BOOT_DIR/candle_log.txt
+
+	
+		
+    fi
 fi
 
+if[ -d /home/pi/.webthings ]; then
+	chown pi:pi /home/pi/.webthings
+else
+
+fi
 
 echo
 
@@ -2248,6 +2258,10 @@ chown pi:pi /home/pi/candle
 mkdir -p /var/run/mosquitto/
 chown mosquitto: /var/run/mosquitto
 chmod 755 /var/run/mosquitto
+
+mkdir -p /var/log/mosquitto
+chown -R pi:pi /var/log/mosquitto
+
 
 # TODO: would this help with mosquitto?
 #addgroup -S -g 1883 mosquitto 2>/dev/null && \
