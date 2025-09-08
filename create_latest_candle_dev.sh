@@ -2477,8 +2477,12 @@ if [ ! -L /etc/timezone ]; then
     echo "removing /etc/timezone file and creating a symlink to /home/pi/.webthings/etc/timezone instead"
     # move timezone file to user partition
     if [ ! -f /home/pi/.webthings/etc/timezone ]; then
-        echo "copying /etc/timezone to /home/pi/.webthings/etc/timezone"
-        cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
+		if [ -f /home/pi/.webthings/etc/timezone ]; then
+        	echo "copying /etc/timezone to /home/pi/.webthings/etc/timezone"
+        	cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
+		 else
+			echo "Europe/Amsterdam" > /home/pi/.webthings/etc/timezone
+   		fi
     fi
     rm /etc/timezone
     ln -s /home/pi/.webthings/etc/timezone /etc/timezone
@@ -2503,8 +2507,12 @@ if [ ! -L /etc/default/locale ]; then
     echo "creating symlink for /etc/default/locale"
     mkdir -p /home/pi/.webthings/etc/default
     if [ ! -f /home/pi/.webthings/etc/default/locale ]; then
-        echo "copying locale file into position"
-        cp /etc/default/locale /home/pi/.webthings/etc/default/locale
+		if [ -f /etc/default/locale ]; then
+   			echo "copying locale file into position"
+        	cp /etc/default/locale /home/pi/.webthings/etc/default/locale
+		else
+			echo "LANG=en_GB.UTF-8" > /home/pi/.webthings/etc/default/locale
+  		fi
     fi
     rm /etc/default/locale
     ln -s /home/pi/.webthings/etc/default/locale /etc/default/locale
