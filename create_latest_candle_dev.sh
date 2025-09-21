@@ -371,6 +371,8 @@ then
     
     if ls /dev/mmcblk0p4; then
 
+		mkdir -p /home/pi/.webthings
+
         echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
         mount /dev/mmcblk0p4 /home/pi/.webthings
         chown pi:pi /home/pi/.webthings
@@ -387,9 +389,6 @@ else
     echo "$(date) - starting create_latest_candle" >> /home/pi/.webthings/candle.log
     echo "$(date) - starting create_latest_candle" >> $BOOT_DIR/candle_log.txt
 
-	
-		
-    fi
 fi
 
 if[ -d /home/pi/.webthings ]; then
