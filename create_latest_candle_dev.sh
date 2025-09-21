@@ -373,8 +373,15 @@ then
 
 		mkdir -p /home/pi/.webthings
 
-        echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
-        mount /dev/mmcblk0p4 /home/pi/.webthings
+		
+
+  		if [ mountpoint -q /home/pi/.webthings ]; then
+		    echo "WARNING, .webthings folder seems to already be a mountpoint"
+ 		else
+			echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
+        	mount /dev/mmcblk0p4 /home/pi/.webthings
+   		fi
+       
         chown pi:pi /home/pi/.webthings
     else
         echo "Error, /dev/mmcblk0p4 was missing. Exiting."
@@ -402,6 +409,11 @@ else
 fi
 
 echo
+echo
+findmnt
+echo
+echo
+
 
 # Clean up any files that may be left over to make sure there is enough space
 if [ -f /zero.fill ]; then
