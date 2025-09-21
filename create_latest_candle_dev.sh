@@ -391,10 +391,12 @@ else
 
 fi
 
-if[ -d /home/pi/.webthings ]; then
+
+if [ -d /home/pi/.webthings ]; then
 	chown pi:pi /home/pi/.webthings
 else
-
+	mkdir -p /home/pi/.webthings
+    chown pi:pi /home/pi/.webthings
 fi
 
 echo
