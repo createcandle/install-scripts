@@ -2542,7 +2542,6 @@ fi
 
 
 
-
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/zcandle.conf
 #chown mosquitto: /home/pi/.webthings/etc/mosquitto/mosquitto.conf
 
