@@ -87,7 +87,7 @@ curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/cr
 
 A 32 bit version can be created. This has a limitation, in that Matter can only run on 64 bit. This command is used to generate Candle on the Microsoft Surface RT:
 ```
-curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh -o create_latest_candle_dev.sh; sudo chmod +x create_latest_candle_dev.sh; sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=no TINY_PARTITIONS=yes SKIP_RO=yes BIT32=yes SKIP_DOCKER=yes SKIP_REBOOT=yes SKIP_BROWSER=yes bash ./create_latest_candle_dev2.sh
+curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev2.sh -o create_latest_candle_dev.sh; sudo chmod +x create_latest_candle_dev.sh; sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=no TINY_PARTITIONS=yes SKIP_RO=yes BIT32=yes SKIP_DOCKER=yes SKIP_REBOOT=yes SKIP_BROWSER=yes bash ./create_latest_candle_dev.sh
 ```
 
 
