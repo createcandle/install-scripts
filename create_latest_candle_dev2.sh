@@ -49,6 +49,8 @@ SKIP_BLUEALSA=yes
 #SKIP_REBOOT=yes
 #SKIP_SPLASH=yes
 #SKIP_BROWSER=yes
+DOWNLOAD_DEB=no
+SKIP_DHCPCD=yes
  
 # SKIP_PARTITIONS=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_PYTHON=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER=yes SKIP_DEBUG=yes SKIP_REBOOT=yes
 
@@ -71,6 +73,8 @@ SKIP_BLUEALSA=yes
 # Upgrade conflicts with:
 # - installing ReSpeaker drivers
 # - installing the new read only mode
+
+
 
 
 
@@ -847,20 +851,21 @@ then
         #wait
         apt-get update --fix-missing -y
         apt --fix-broken install -y
-        if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
-            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-            echo ""
-        fi
+		
+        #if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+        #    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #    echo ""
+        #fi
 
         if [ -d /opt/vc/lib ]; then
             echo "removing left over /opt/vc/lib"
             rm -rf /opt/vc/lib
         fi
         
-        if [ -d /var/lib/dhcpcd5 ]; then
-            echo "removing left over dhcpcd5"
-            rm -rf /var/lib/dhcpcd5  
-        fi
+        #if [ -d /var/lib/dhcpcd5 ]; then
+        #    echo "removing left over dhcpcd5"
+        #    rm -rf /var/lib/dhcpcd5  
+        #fi
         
         
         apt-get update -y
@@ -870,9 +875,9 @@ then
         apt --fix-broken install -y
         apt autoremove -y
 	
- 		if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
-        	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-		fi
+ 		#if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+        #	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+		#fi
         echo
         echo
         echo
@@ -3511,7 +3516,7 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	#TemporaryTimeout = 30
 	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
 
-		if [ -d /etc/NetworkManager/system-connections ]; then
+	if [ -d /etc/NetworkManager/system-connections ]; then
 		rm /etc/NetworkManager/system-connections/*
   		rm -rf /etc/NetworkManager/system-connections/*
 		#cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
@@ -3521,52 +3526,57 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	
 	# binary no longer seems available for bookworm...
 	#wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused   
-fi
 
-resolvconf -u
+	resolvconf -u
 
-if [ -s /etc/dhcpcd.conf ]; then
-	if cat /etc/dhcpcd.conf | grep -q uap0; then
-		echo "uap0 exception added to dhcpcd.conf already"
- 	else
-  		
- 		sed -i 's/^#clientid/clientid/' /etc/dhcpcd.conf
-		sed -i 's/^duid/#duid/' /etc/dhcpcd.conf
-  
-		echo "" >> /etc/dhcpcd.conf
-		echo "# For Candle Hotspot" >> /etc/dhcpcd.conf
-		
-  		echo "interface uap0 " >> /etc/dhcpcd.conf
-  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
-		echo "" >> /etc/dhcpcd.conf
-	    echo "interface uap1 " >> /etc/dhcpcd.conf
-  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
-		echo "" >> /etc/dhcpcd.conf
- 		echo "interface uap2 " >> /etc/dhcpcd.conf
-   		echo "denyinterfaces uap2" >> /etc/dhcpcd.conf
-  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
- 	
+	if [ -s /etc/dhcpcd.conf ]; then
+		if cat /etc/dhcpcd.conf | grep -q uap0; then
+			echo "uap0 exception added to dhcpcd.conf already"
+	 	else
+	  		
+	 		sed -i 's/^#clientid/clientid/' /etc/dhcpcd.conf
+			sed -i 's/^duid/#duid/' /etc/dhcpcd.conf
+	  
+			echo "" >> /etc/dhcpcd.conf
+			echo "# For Candle Hotspot" >> /etc/dhcpcd.conf
+			
+	  		echo "interface uap0 " >> /etc/dhcpcd.conf
+	  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+			echo "" >> /etc/dhcpcd.conf
+		    echo "interface uap1 " >> /etc/dhcpcd.conf
+	  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+			echo "" >> /etc/dhcpcd.conf
+	 		echo "interface uap2 " >> /etc/dhcpcd.conf
+	   		echo "denyinterfaces uap2" >> /etc/dhcpcd.conf
+	  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+	 	
+		fi
+	 	if [ -s /etc/resolvconf/resolv.conf.d/original ]; then 
+			echo "" > /etc/resolvconf/resolv.conf.d/original
+	    fi
+	else
+		echo "ERROR: /etc/dhcpcd.conf is missing"
+	 	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
+		echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> $BOOT_DIR/candle_log.txt
+	
+	 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+	        /bin/ply-image $BOOT_DIR/error.png
+	    fi
+	  
+		exit 1
 	fi
- 	if [ -s /etc/resolvconf/resolv.conf.d/original ]; then 
-		echo "" > /etc/resolvconf/resolv.conf.d/original
-    fi
-else
-	echo "ERROR: /etc/dhcpcd.conf is missing"
- 	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
-	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> $BOOT_DIR/candle_log.txt
 
- 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-        /bin/ply-image $BOOT_DIR/error.png
-    fi
-  
-	exit 1
+
+	resolvconf -u
 fi
+
 
 if [ -f /home/pi/nohup.out ]; then
+    echo "found nohup.out file, moving it to become the candle log"
     mv /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
-resolvconf -u
+
 
 # clear some caches
 pip cache purge
@@ -3582,19 +3592,7 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
     fi
 fi
 
-SDCARD_SIZE=$(blockdev --getsize64 /dev/mmcblk0)
-if [ "$SDCARD_SIZE" -gt "21914983424" ]; then
 
-	
- 	echo "$(date) - Large SD Card, so stopping early" >> /home/pi/.webthings/candle.log
-	
-	# Show installation complete indication image
-	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/splash_updating-5.png ]; then
-		/bin/ply-image $BOOT_DIR/splash_updating-5.png
-	fi
-
-	exit 0
-fi
 
 
 
@@ -3649,6 +3647,18 @@ then
 fi
 
 echo
+
+
+
+#SDCARD_SIZE=$(blockdev --getsize64 /dev/mmcblk0)
+#if [ "$SDCARD_SIZE" -gt "21914983424" ]; then	
+# 	echo "$(date) - Large SD Card, so stopping early" >> /home/pi/.webthings/candle.log
+#	# Show installation complete indication image
+#	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/splash_updating-5.png ]; then
+#		/bin/ply-image $BOOT_DIR/splash_updating-5.png
+#	fi
+#	exit 0
+#fi
 
 
 if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
