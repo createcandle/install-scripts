@@ -35,6 +35,7 @@ export DEBIAN_FRONTEND=noninteractive
 # export SKIP_BROWSER=yes
 # export BIT32=yes
 # export SKIP_DOCKER=yes
+# export SKIP_RO=yes
 
 #SKIP_PARTITIONS=yes
 #TINY_PARTITIONS=yes # used to create smaller partition images, which are used in the new system update process
@@ -49,6 +50,7 @@ SKIP_BLUEALSA=yes
 #SKIP_REBOOT=yes
 #SKIP_SPLASH=yes
 #SKIP_BROWSER=yes
+#export SKIP_RO=yes
 DOWNLOAD_DEB=no
 SKIP_DHCPCD=yes
  
@@ -467,6 +469,10 @@ if [ "$BIT_TYPE" == 64 ]; then
     echo "creating $BOOT_DIR/candle_64bits.txt"
     echo "creating $BOOT_DIR/candle_64bits.txt" >> /dev/kmsg
     touch $BOOT_DIR/candle_64bits.txt
+else
+	echo "creating $BOOT_DIR/candle_32bits.txt"
+    echo "creating $BOOT_DIR/candle_32bits.txt" >> /dev/kmsg
+    touch $BOOT_DIR/candle_32bits.txt
 fi
 
 
@@ -541,17 +547,17 @@ echo ""
 # BOOKWORM SOURCES
 
 # Make sure Bullseye sources are used - this is no longer needed because the "run the install script again" upgrade path is deprecated
-if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt
-    sed -i 's/buster/bookworm/' /etc/apt/sources.list.d/raspi.list
-fi
+#if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
+#    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> /dev/kmsg
+#    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt
+#    sed -i 's/buster/bookworm/' /etc/apt/sources.list.d/raspi.list
+#fi
 
-if cat /etc/apt/sources.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list from buster to bookworm" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt 
-    sed -i 's/buster/bookworm/' /etc/apt/sources.list
-fi
+#if cat /etc/apt/sources.list | grep -q buster; then
+#    echo "changing /etc/apt/sources.list from buster to bookworm" >> /dev/kmsg
+#    echo "changing /etc/apt/sources.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt 
+#    sed -i 's/buster/bookworm/' /etc/apt/sources.list
+#fi
 
 
 
@@ -561,8 +567,8 @@ echo "modifying /etc/apt/sources.list - allowing apt access to source code"
 sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
 
 # Unhold browser
-echo ""
-apt-mark unhold $CHROMIUM_PACKAGE_NAME
+#echo
+#apt-mark unhold $CHROMIUM_PACKAGE_NAME
 
 
 # 64 BIT
@@ -572,16 +578,17 @@ apt-mark unhold $CHROMIUM_PACKAGE_NAME
 
 echo
 echo "doing apt-get update"
-if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
-    apt-get update --allow-releaseinfo-change
-else
-    apt-get update
-fi
+#if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
+#    apt-get update --allow-releaseinfo-change
+#else
+#    apt-get update
+#fi
+apt-get update
 
 echo
 
 if [ "$BIT_TYPE" -eq 64 ]; then
-    echo "Adding support for 32 bit architecture"
+    echo "64 bit, but adding support for 32 bit architecture"
     dpkg --add-architecture armhf
     apt update -y && apt install -y screen:armhf
 fi
@@ -594,121 +601,128 @@ fi
 
 
 
-echo
-echo "Downloading read only script"
-echo
 
-if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
-    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
-    echo "Candle: Downloading cutting edge read-only script" >> $BOOT_DIR/candle_log.txt
-    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh --retry-connrefused 
-    
-else
-    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
-    echo "Candle: Downloading stable read-only script" >> $BOOT_DIR/candle_log.txt
-    curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
-    | grep "tarball_url" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | sed 's/,*$//' \
-    | wget -qi - -O ro-overlay.tar --retry-connrefused 
-
-    if [ -f ro-overlay.tar ]; then
-        
-        if [ -d ./ro-overlay ]; then
-            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
-            rm -rf ./ro-overlay
-        fi
-        echo "unpacking ro-overlay.tar"
-        tar -xf ro-overlay.tar
-        rm ./ro-overlay.tar
-    
-        for directory in createcandle-ro-overlay*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          mv -- "$directory" ./ro-overlay
-        done
-
-        if [ -d ./ro-overlay ]; then
-            echo "ro-overlay folder exists, OK"
-            cp ./ro-overlay/bin/ro-root.sh ./ro-root.sh
-            rm -rf ./ro-overlay
-        else
-            echo "ERROR, ro-overlay folder missing"
-            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
-            echo "Candle: WARNING, ro-overlay folder missing" >> $BOOT_DIR/candle_log.txt
-        fi
-    else
-        echo "Ro-root tar file missing, download failed"
-        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
-        echo "Candle: ERROR, stable read-only tar download failed" >> $BOOT_DIR/candle_log.txt
-        
-        # Show error image
-        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-        then
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-                /bin/ply-image $BOOT_DIR/error.png
-                #sleep 7200
-            fi
-        fi
-
-        exit 1
-        
-    fi
-fi
 
 
 sed -i 's|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/pi/.local/bin"|' /etc/profile
 
 
-# If the file exists, make it executable and move it into place
-if [ -f ./ro-root.sh ]; then
-    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
-        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
-        echo "Candle: ro-root.sh file downloaded OK" >> $BOOT_DIR/candle_log.txt
-        chmod +x ./ro-root.sh
-    
-        # Avoid risky move if possible
-        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
-		    wait
-            echo "ro-root.sh file is different, moving it into place"
-            echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
-            echo "Candle: ro-root.sh file is different, moving it into place" >> $BOOT_DIR/candle_log.txt
-            if [ -f /bin/ro-root.sh ]; then
-                rm /bin/ro-root.sh
-            fi
-            mv -f ./ro-root.sh /bin/ro-root.sh
-            chmod +x /bin/ro-root.sh
-        	
-        else
-            echo "new ro-root.sh file is same as the old one, not moving it"
-            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
-            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> $BOOT_DIR/candle_log.txt
-        fi
-    fi
-else
-    echo "ERROR: failed to download ro-root.sh"
-    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
-    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
-    echo "$(date) - download of read-only overlay script failed" >> $BOOT_DIR/candle_log.txt
-    
-    # Show error image
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-    then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-            /bin/ply-image $BOOT_DIR/error.png
-            #sleep 7200
-        fi
-    fi
-
-    exit 1
-fi
 
 
 # ENABLE READ_ONLY MODE
 
 if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
+	echo
+	echo "Downloading and enabling read only script"
+	echo
+	
+	if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
+	    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
+	    echo "Candle: Downloading cutting edge read-only script" >> $BOOT_DIR/candle_log.txt
+	    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh --retry-connrefused 
+	    
+	else
+	    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
+	    echo "Candle: Downloading stable read-only script" >> $BOOT_DIR/candle_log.txt
+	    curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
+	    | grep "tarball_url" \
+	    | cut -d : -f 2,3 \
+	    | tr -d \" \
+	    | sed 's/,*$//' \
+	    | wget -qi - -O ro-overlay.tar --retry-connrefused 
+	
+	    if [ -f ro-overlay.tar ]; then
+	        
+	        if [ -d ./ro-overlay ]; then
+	            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
+	            rm -rf ./ro-overlay
+	        fi
+	        echo "unpacking ro-overlay.tar"
+	        tar -xf ro-overlay.tar
+	        rm ./ro-overlay.tar
+	    
+	        for directory in createcandle-ro-overlay*; do
+	          [[ -d $directory ]] || continue
+	          echo "Directory: $directory"
+	          mv -- "$directory" ./ro-overlay
+	        done
+	
+	        if [ -d ./ro-overlay ]; then
+	            echo "ro-overlay folder exists, OK"
+	            cp ./ro-overlay/bin/ro-root.sh ./ro-root.sh
+	            rm -rf ./ro-overlay
+	        else
+	            echo "ERROR, ro-overlay folder missing"
+	            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
+	            echo "Candle: WARNING, ro-overlay folder missing" >> $BOOT_DIR/candle_log.txt
+	        fi
+	    else
+	        echo "Ro-root tar file missing, download failed"
+	        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
+	        echo "Candle: ERROR, stable read-only tar download failed" >> $BOOT_DIR/candle_log.txt
+	        
+	        # Show error image
+	        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+	        then
+	            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+	                /bin/ply-image $BOOT_DIR/error.png
+	                #sleep 7200
+	            fi
+	        fi
+	
+	        exit 1
+	        
+	    fi
+	fi
+
+
+	# If the file exists, make it executable and move it into place
+	if [ -f ./ro-root.sh ]; then
+	    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+	        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
+	        echo "Candle: ro-root.sh file downloaded OK" >> $BOOT_DIR/candle_log.txt
+	        chmod +x ./ro-root.sh
+	    
+	        # Avoid risky move if possible
+	        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
+			    wait
+	            echo "ro-root.sh file is different, moving it into place"
+	            echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
+	            echo "Candle: ro-root.sh file is different, moving it into place" >> $BOOT_DIR/candle_log.txt
+	            if [ -f /bin/ro-root.sh ]; then
+	                rm /bin/ro-root.sh
+	            fi
+	            mv -f ./ro-root.sh /bin/ro-root.sh
+	            chmod +x /bin/ro-root.sh
+	        	
+	        else
+	            echo "new ro-root.sh file is same as the old one, not moving it"
+	            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
+	            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> $BOOT_DIR/candle_log.txt
+	        fi
+	    fi
+	else
+	    echo "ERROR: failed to download ro-root.sh"
+	    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
+	    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
+	    echo "$(date) - download of read-only overlay script failed" >> $BOOT_DIR/candle_log.txt
+	    
+	    # Show error image
+	    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+	    then
+	        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+	            /bin/ply-image $BOOT_DIR/error.png
+	            #sleep 7200
+	        fi
+	    fi
+	
+	    exit 1
+	fi
+
+
+
+	
     if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
         if [ -f /bin/ro-root.sh ]; then
             #isInFile4=$(cat $BOOT_DIR/config.txt | grep -c "ramfsaddr")
@@ -891,9 +905,9 @@ then
         wait
         apt-get update --fix-missing -y
         apt --fix-broken install -y
-		if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
-	    	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-        fi
+		#if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+	    #	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #fi
 		echo
         echo
         echo
@@ -1013,9 +1027,13 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
  	echo "Installing docker"
     echo "Installing docker" >> /dev/kmsg
     curl -sSL https://get.docker.com | sh
-	sudo usermod -aG docker pi
+	usermod -aG docker pi
+
+	systemctl disable docker
+	systemctl disable containerd
 else
 	echo "not installing Docker"
+	echo "Not installing docker" >> /dev/kmsg
 fi
 
 
@@ -1297,7 +1315,7 @@ then
         DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
         apt --fix-broken install -y
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
         
         
@@ -1330,14 +1348,14 @@ then
         DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
         apt --fix-broken install -y
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
         
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
         apt --fix-broken install -y
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
 
         apt autoremove -y
@@ -1440,12 +1458,15 @@ then
     
 
     if [ -e /usr/share/pipewire ]; then
-	  mkdir -p /home/pi/.webthings/etc
-	  mkdir -p /home/pi/.webthings/etc/pipewire
-      cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
-	  ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
-      systemctl --user enable pipewire
-	  systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service
+		mkdir -p /home/pi/.config/wireplumber/main.lua.d
+		mkdir -p /home/pi/.config/wireplumber/wireplumber.conf.d
+	
+		mkdir -p /home/pi/.webthings/etc
+		mkdir -p /home/pi/.webthings/etc/pipewire
+	    cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
+		ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
+	    systemctl --user enable pipewire
+		systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service
 	fi
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
@@ -2567,7 +2588,7 @@ systemctl enable candle_early.service
 systemctl enable candle_late.service 
 systemctl enable candle_kiosk.service
 systemctl enable candle_splash_video.service
-systemctl enable candle_every_minute.timer
+#systemctl enable candle_every_minute.timer
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
 systemctl enable candle_reboot.service
@@ -2576,14 +2597,17 @@ systemctl enable candle_splashscreen_updating.service
 systemctl enable candle_splashscreen_updating180.service
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 # TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon). Then again, can't hurt to have redundancy.
-systemctl enable candle_silence_player.service
+#systemctl enable candle_silence_player.service
 
 # disable old splash screen
 systemctl disable splashscreen.service
 
 # enable BlueAlsa services
-systemctl enable bluealsa.service 
-systemctl enable bluealsa-aplay.service 
+if [ "$SKIP_BLUEALSA" = no ] || [ -z "${SKIP_BLUEALSA}" ]
+then
+	systemctl enable bluealsa.service 
+	systemctl enable bluealsa-aplay.service 
+fi
 
 # Webthings Gateway
 systemctl enable webthings-gateway.service
@@ -2607,8 +2631,11 @@ if systemctl list-units --full -all | grep -Fq ModemManager.service; then
 fi
 
 #disable wpa_supplicant service because dhpcpcd is managing it. Otherwise it runs twice.
-systemctl disable wpa_supplicant.service
-systemctl mask wpa_supplicant.service
+
+if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
+	systemctl disable wpa_supplicant.service
+	systemctl mask wpa_supplicant.service
+fi
 
 systemctl disable regenerate_ssh_host_keys.service
 systemctl mask regenerate_ssh_host_keys.service
@@ -2995,7 +3022,7 @@ fi
 # Set to boot from partition2
 if cat $BOOT_DIR/cmdline.txt | grep -q PARTUUID; then
     echo "replacing PARTUUID= in bootcmd.txt with /dev/mmcblk0p2"
-    sed -i ' 1 s|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' $BOOT_DIR/cmdline.txt # should that g be there?
+    sed -i ' 1 s|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' $BOOT_DIR/cmdline.txt
     #sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' $BOOT_DIR/cmdline.txt   
 fi
 
@@ -3329,6 +3356,7 @@ echo "#!/bin/sh" > /usr/lib/apt/apt.systemd.daily
 systemctl disable dpkg-db-backup.timer
 systemctl disable dphys-swapfile
 
+systemctl disable docker.service
 systemctl disable containerd.service
 
 systemctl disable apt-daily.service
