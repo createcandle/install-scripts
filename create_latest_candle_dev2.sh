@@ -1469,6 +1469,12 @@ then
 		systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service
 	fi
 
+	# Disable audio device suspend
+	if [ -f /usr/share/wireplumber/scripts/suspend-node.lua ]; then
+		sed -i 's|if timeout == 0 then|if timeout >= 0 then|g' /usr/share/wireplumber/scripts/suspend-node.lua
+	fi
+	
+
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
 	echo "installing some network applications"
@@ -3636,7 +3642,7 @@ echo "aplay -l && arecord -l" >> /home/pi/.bash_history
 echo "wpctl status" >> /home/pi/.bash_history
 echo "sudo systemctl restart webthings-gateway.service" >> /home/pi/.bash_history
 echo "hostname -I" >> /home/pi/.bash_history
-echo "sudo resolvconf -u" >> /home/pi/.bash_history
+#echo "sudo resolvconf -u" >> /home/pi/.bash_history
 echo "cd /boot/firmware" >> /home/pi/.bash_history
 echo "tail -f -n10 ~/.webthings/log/run-app.log" >> /home/pi/.bash_history
 
