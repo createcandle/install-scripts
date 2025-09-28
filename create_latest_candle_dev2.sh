@@ -2650,7 +2650,7 @@ systemctl mask regenerate_ssh_host_keys.service
 systemctl enable fake-hwclock-save.service
 
 # Hide the login text (it will still be available on tty3 - connect a keyboard to your pi and press CTRl-ALT-F3 to see it)
-#systemctl enable getty@tty3.service
+systemctl enable getty@tty3.service
 #systemctl disable getty@tty1.service
 
 
