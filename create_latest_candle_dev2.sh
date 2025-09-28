@@ -2879,6 +2879,13 @@ if [ ! -f "$BOOT_DIR/splash_updating-0.png" ]; then
 fi
 
 
+if [ -f /etc/xdg/pcmanfm/LXDE-pi/desktop-items-0.conf ] && [ -f /boot/firmware/splash.png ]; then
+	sed -i 's/wallpaper=/usr/share/rpd-wallpaper/fisherman.jpg/wallpaper=/boot/firmware/splash.png' /etc/xdg/pcmanfm/LXDE-pi/desktop-items-0.conf
+	sed -i 's/show_trash=1/show_trash=0' /etc/xdg/pcmanfm/LXDE-pi/desktop-items-0.conf
+	sed -i 's/show_mounts=1/show_mounts=0' /etc/xdg/pcmanfm/LXDE-pi/desktop-items-0.conf
+fi
+
+
 
 
 # CLEANUP
@@ -2996,10 +3003,10 @@ fi
 # Change CUPS printing setting
 
 if [ -f /etc/cups/cups.conf ]; then
-	sed -i ' 1 s/WebInterface Yes/WebInterface No/' /etc/cups/cups.conf
- 	sed -i ' 1 s/LogLevel .*/LogLevel none/' /etc/cups/cups.conf
-	sed -i ' 1 s/MaxLogSize 0/MaxLogSize 1/' /etc/cups/cups.conf
- 	sed -i ' 1 s/ErrorPolicy retry-job/ErrorPolicy abort-job/' /etc/cups/cups.conf
+	sed -i 's/WebInterface Yes/WebInterface No/' /etc/cups/cups.conf
+ 	sed -i 's/LogLevel .*/LogLevel none/' /etc/cups/cups.conf
+	sed -i 's/MaxLogSize 0/MaxLogSize 1/' /etc/cups/cups.conf
+ 	sed -i 's/ErrorPolicy retry-job/ErrorPolicy abort-job/' /etc/cups/cups.conf
     usermod -a -G lpadmin pi
 fi
 
