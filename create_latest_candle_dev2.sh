@@ -1617,6 +1617,8 @@ then
         apt install -y --no-install-recommends "$i"  "$reinstall" #--print-uris
         echo
     done
+
+	
     
     echo
     echo "INSTALLING HOSTAPD AND DNSMASQ"
