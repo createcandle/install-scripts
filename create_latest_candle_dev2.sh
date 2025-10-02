@@ -2503,6 +2503,15 @@ if [ -d /usr/lib/aarch64-linux-gnu ]; then
       echo "creating symlink for  libffi.so.6 -> libffi.so.7"
       ln -s /usr/lib/aarch64-linux-gnu/libffi.so.7 /usr/lib/aarch64-linux-gnu/libffi.so.6
     fi
+  elif [ ! -f /usr/lib/aarch64-linux-gnu/libffi.so.6 ] && [ -f /usr/lib/aarch64-linux-gnu/libffi.so.8 ]; then
+    if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.6 ]; then
+      echo "creating symlink for  libffi.so.6 -> libffi.so.8"
+      ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/aarch64-linux-gnu/libffi.so.6
+    fi
+	if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.7 ]; then
+      echo "creating symlink for  libffi.so.6 -> libffi.so.7"
+      ln -s /usr/lib/aarch64-linux-gnu/libffi.so.7 /usr/lib/aarch64-linux-gnu/libffi.so.6
+    fi
   fi
 fi
 
