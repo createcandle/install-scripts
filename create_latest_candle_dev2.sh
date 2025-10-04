@@ -1688,7 +1688,7 @@ then
     liblivemedia-dev libavcodec59 libswresample3 libffi8 libavformat59 \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7 python3-pip \
-    vlc unclutter;
+    vlc unclutter evtest;
     do
         echo ""
 		
