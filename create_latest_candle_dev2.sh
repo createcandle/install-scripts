@@ -2453,22 +2453,22 @@ if [ ! -f /home/pi/candle/early.sh ]; then
 fi
 
 # CHMOD THE NEW FILES
-chmod +x /home/pi/candle/early.sh
+chmod +x /home/pi/candle/*.sh
 chmod +x /etc/rc.local
-chmod +x /home/pi/candle/reboot_to_recovery.sh
+#chmod +x /home/pi/candle/reboot_to_recovery.sh
 #if [ -f /etc/xdg/openbox/autostart ]; then
 #    chmod +x /etc/xdg/openbox/autostart
 #fi
-chmod +x /home/pi/candle/late.sh
-chmod +x /home/pi/candle/kiosk.sh
-chmod +x /home/pi/candle/splash_video.sh
-chmod +x /home/pi/candle/every_minute.sh
-chmod +x /home/pi/candle/debug.sh
-chmod +x /home/pi/candle/files_check.sh
-chmod +x /home/pi/candle/install_samba.sh
-chmod +x /home/pi/candle/prepare_for_disk_image.sh
-chmod +x /home/pi/candle/unsnap.sh
-chmod +x /home/pi/candle/respeaker_check.sh
+#chmod +x /home/pi/candle/late.sh
+#chmod +x /home/pi/candle/kiosk.sh
+#chmod +x /home/pi/candle/splash_video.sh
+#chmod +x /home/pi/candle/every_minute.sh
+#chmod +x /home/pi/candle/debug.sh
+#chmod +x /home/pi/candle/files_check.sh
+#chmod +x /home/pi/candle/install_samba.sh
+#chmod +x /home/pi/candle/prepare_for_disk_image.sh
+#chmod +x /home/pi/candle/unsnap.sh
+#chmod +x /home/pi/candle/respeaker_check.sh
 
 
 # CHOWN THE NEW FILES
