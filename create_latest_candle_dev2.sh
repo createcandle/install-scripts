@@ -324,12 +324,17 @@ then
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
                 echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 8000MB
-                printf "mkpart\np\next4\n8001MB\n16000MB\nmkpart\np\next4\n16002MB\n26000MB\nquit" | parted
+                printf "mkpart\np\next4\n8546MB\n16546MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | parted --align optimal
+
+				# parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
+				
                 #resizepart /dev/mmcblk0 2 12600000
             else
                 echo "creating smaller partitions for update image"
-                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
-                printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | parted
+                #echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
+                #printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | parted --align optimal
+				echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 6000MB
+                printf "mkpart\np\next4\n6546MB\n12546MB\nmkpart\np\next4\n12548MB\n14500MB\nquit" | parted --align optimal
             fi
 
             # Tell OS to rescan
@@ -606,7 +611,12 @@ fi
 
 sed -i 's|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/pi/.local/bin"|' /etc/profile
 
-
+if [ -f /etc/systemd/logind.conf ] && cat /etc/systemd/logind.conf | grep -q "#HandlePowerKey=" ; then
+	sed -i 's/#HandlePowerKey=.*/HandlePowerKey=ignore/' /etc/systemd/logind.conf
+	sed -i 's/#HandlePowerKeyLongPress=ignore/HandlePowerKeyLongPress=reboot/' /etc/systemd/logind.conf
+	sed -i 's/#IdleAction=ignore/IdleAction=ignore/' /etc/systemd/logind.conf
+	
+fi
 
 
 # ENABLE READ_ONLY MODE
