@@ -366,9 +366,7 @@ then
    			#gdisk /dev/mmcblk0
 	  
 			# partition 1 label remains bootfs
-            e2label /dev/mmcblk0p2 candle_system
-            e2label /dev/mmcblk0p3 candle_recovery
-            e2label /dev/mmcblk0p4 candle_user
+            
 
             systemctl daemon-reload
         else
@@ -381,6 +379,8 @@ then
     sleep 5
     
     if ls /dev/mmcblk0p4; then
+
+		
 
 		mkdir -p /home/pi/.webthings
 
@@ -407,6 +407,12 @@ else
     echo "$(date) - starting create_latest_candle" >> /home/pi/.webthings/candle.log
     echo "$(date) - starting create_latest_candle" >> $BOOT_DIR/candle_log.txt
 
+fi
+
+if ls /dev/mmcblk0p4; then
+	e2label /dev/mmcblk0p2 candle_system
+    e2label /dev/mmcblk0p3 candle_recovery
+    e2label /dev/mmcblk0p4 candle_user
 fi
 
 
