@@ -1524,13 +1524,13 @@ then
     	echo "Candle: installing web browser" >> $BOOT_DIR/candle_log.txt
     	echo ""
 
-		apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp26 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-11 libminizip1 --no-install-recommends
+		apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp26 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-11 libminizip1 libflac* --no-install-recommends
 
 		if [ "$BIT32" = no ] || [[ -z "${BIT32}" ]]
   		then
 			# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
     		wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
-    		yes | dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    		yes | dpkg -i --force-all ungoogled-chromium_112.0.5615.165-1_arm64.deb
     		rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
    		else
 	 		apt install -y chromium
@@ -1717,15 +1717,16 @@ then
     # TODO: removed libffi7 / libffi8 check
     # removed libdbus-glib-1-dev (bluealsa now uses version 2 instead)
     # For bookworm libavcodec58 was changed to libavcodec59, and for trixie it became 61
+	# with trixie libavformat59 became libavformat61
     # removed libgirepository1.0-dev to test if it's still needed
 	# TODO: is policykit-1 still needed?
     for i in \
     git autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
     libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
     arping autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan ufw iptables \
-    liblivemedia-dev libavcodec61 libswresample5 libffi8 libavformat59 \
+    liblivemedia-dev libavcodec61 libswresample5 libffi8 libavformat* \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
-    python3-kms++ python3-prctl libopenblas-dev libopenjp2-7 python3-pip \
+    python3-kms++ python3-prctl libopenblas0 libopenjp2-7 python3-pip \
     vlc unclutter evtest;
     do
         echo ""
