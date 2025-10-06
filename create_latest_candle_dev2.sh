@@ -1585,10 +1585,10 @@ then
 
 	# TODO: is policykit-1 still needed in trixie?
 	# cpufrequtils is not available in trixie
-    for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto sqlite3 libolm3 libffi8 \
+    for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto sqlite3 libolm3 libffi* \
 	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
-	    netcat-traditional nscd; do
+	    netcat-traditional nscd upower; do
             
 		echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
