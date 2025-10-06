@@ -576,9 +576,10 @@ echo ""
 
 
 # Add option to download source code from RaspberryPi server
-echo "modifying /etc/apt/sources.list - allowing apt access to source code"
-sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
-
+#echo "modifying /etc/apt/sources.list - allowing apt access to source code"
+#if [ -f /etc/apt/sources.list.d/raspi.sources ]; then
+#	sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list.d/raspi.sources
+#fi
 # Unhold browser
 #echo
 #apt-mark unhold $CHROMIUM_PACKAGE_NAME
