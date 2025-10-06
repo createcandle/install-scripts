@@ -590,6 +590,10 @@ echo "doing apt-get update"
 #fi
 apt-get update
 
+# remove Firefox and other applications, if they are installed.
+
+apt remove firefox* galculator* geany* thonny* wolfram-engine* oracle-java* scratch* libreoffice* --purge -y
+apt remove bookshelf --purge -y
 echo
 
 if [ "$BIT_TYPE" -eq 64 ]; then
