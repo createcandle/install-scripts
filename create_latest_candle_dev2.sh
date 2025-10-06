@@ -602,6 +602,7 @@ apt-get update
 # remove Firefox and other applications, if they are installed.
 
 apt remove firefox* galculator* geany* thonny* wolfram-engine* oracle-java* scratch* libreoffice* cloud* --purge -y
+apt remove kanshi eatmydata pocketsphinx* raindrop wayvnc cloud-init cloud-guest-utils aspell* autotouch apparmor docutils-common evince* feedbackd* --purge -y
 apt remove bookshelf --purge -y
 echo
 
