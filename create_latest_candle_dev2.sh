@@ -1641,7 +1641,7 @@ then
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
     # Camera support
-    for i in python3-pip python3-libcamera python3-picamera2 python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
+    for i in python3-pip python3-libcamera python3-picamera2 python3-kms++ python3-prctl libopenblas-base libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
@@ -1719,7 +1719,7 @@ then
     arping autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan ufw iptables \
     liblivemedia-dev libavcodec59 libswresample3 libffi8 libavformat59 \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
-    python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7 python3-pip \
+    python3-kms++ python3-prctl libopenblas-base libopenjp2-7 python3-pip \
     vlc unclutter evtest;
     do
         echo ""
