@@ -1524,7 +1524,7 @@ then
     	echo "Candle: installing web browser" >> $BOOT_DIR/candle_log.txt
     	echo ""
 
-		apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp26 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-11 libminizip1 libflac* --no-install-recommends
+		apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp26 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-11 libminizip1 libflac14 --no-install-recommends
 
 		if [ "$BIT32" = no ] || [[ -z "${BIT32}" ]]
   		then
