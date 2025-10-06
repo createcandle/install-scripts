@@ -600,7 +600,7 @@ apt-get update
 
 # remove Firefox and other applications, if they are installed.
 
-apt remove firefox* galculator* geany* thonny* wolfram-engine* oracle-java* scratch* libreoffice* --purge -y
+apt remove firefox* galculator* geany* thonny* wolfram-engine* oracle-java* scratch* libreoffice* cloud* --purge -y
 apt remove bookshelf --purge -y
 echo
 
@@ -1583,7 +1583,7 @@ then
     # libspandsp-dev libgirepository1.0-dev\
 
 	# TODO: is policykit-1 still needed in trixie?
-    for i in curl arping autoconf ffmpeg libswresample3 libtool mosquitto sqlite3 libolm3 libffi8 \
+    for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto sqlite3 libolm3 libffi8 \
 	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
  	    cpufrequtils lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
 	    netcat-traditional nscd; do
@@ -1721,7 +1721,7 @@ then
     git autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
     libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
     arping autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan ufw iptables \
-    liblivemedia-dev libavcodec61 libswresample3 libffi8 libavformat59 \
+    liblivemedia-dev libavcodec61 libswresample5 libffi8 libavformat59 \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-kms++ python3-prctl libopenblas-dev libopenjp2-7 python3-pip \
     vlc unclutter evtest;
@@ -3694,9 +3694,16 @@ if [ -d /usr/share/help ]; then
      rm -rf /usr/share/help/*
 fi
 
+
+
 if [ -d /etc/cloud/ ]; then
 	touch /etc/cloud/cloud-init.disabled
 fi
+
+if [ -f /etc/cloud ]; then
+	rm -rf /etc/cloud
+fi
+
 
 # This is handled by prepare_disk_image
 chmod +x /home/pi/candle/candle_first_run.sh
