@@ -468,9 +468,11 @@ cd $CANDLE_BASE
 
 # Do initial apt update
 echo
-echo "doing apt update and allowing release info change"
-apt-get --allow-releaseinfo-change-suite update 
-
+#echo "doing apt update and allowing release info change"
+#apt-get --allow-releaseinfo-change-suite update
+echo "doing apt update"
+ 
+apt-get update
 
 
 
@@ -3677,6 +3679,20 @@ pip cache purge
 apt-get autoclean
 apt-get autoremove
 apt clean
+
+if [ -d /usr/share/doc ]; then
+     rm -rf /usr/share/doc/*
+fi
+if [ -d /usr/share/man ]; then
+     rm -rf /usr/share/man/*
+fi
+if [ -d /usr/share/help ]; then
+     rm -rf /usr/share/help/*
+fi
+
+if [ -d /etc/cloud/ ]; then
+	touch /etc/cloud/cloud-init.disabled
+fi
 
 # This is handled by prepare_disk_image
 chmod +x /home/pi/candle/candle_first_run.sh
