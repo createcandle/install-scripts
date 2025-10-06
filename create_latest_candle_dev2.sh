@@ -1690,10 +1690,6 @@ then
 	 		apt install -y chromium
 		fi
    
-    	echo "doing apt --fix-broken"
-    	#apt-get -f install -y
-	    apt --fix-broken -y install
-	 	#  --no-install-recommends
     else
     	echo
     	echo "Skipping installation of browser"
