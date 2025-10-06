@@ -372,8 +372,8 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
         echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a $BOOT_DIR/candle_log.txt
         
         if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-                sudo /binif [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then/ply-image $BOOT_DIR/error.png
+            if [ -f /bin/ply-image ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+                sudo /bin/ply-image $BOOT_DIR/error.png
                 sleep 7200
             fi
         
