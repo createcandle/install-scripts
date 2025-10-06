@@ -3011,13 +3011,25 @@ if [ -d /opt/vc/lib ]; then
 fi
 
 
-echo "removing swap"
 
-dphys-swapfile swapoff
-dphys-swapfile uninstall
-update-rc.d dphys-swapfile remove
+
+# bookwork and older versions
+if [ -f /usr/sbin/dphys-swapfile ]; then
+	echo "removing swap"
+	dphys-swapfile swapoff
+	dphys-swapfile uninstall
+	update-rc.d dphys-swapfile remove
+fi
+
+# trixie
+if [ -f /usr/sbin/swapoff ]; then
+	echo "disabling swap"
+	swapoff -a
+	systemctl mask swap.target
+fi
+
 if [ -f /home/pi/.webthings/swap ]; then
-    # TODO: don't remove this if the syetem is low on memory (which is why it's there in the first place)
+    # TODO: don't remove this if the system is low on memory (which is why it's there in the first place)
     swapoff /home/pi/.webthings/swap
     rm /home/pi/.webthings/swap
 fi
