@@ -900,21 +900,25 @@ then
             | tr -d \" \
             | sed 's/,*$//' \
             | wget -qi - -O addon.tgz
-        tar -xf addon.tgz
-        rm addon.tgz
-        
-        rm -rf "$addon"
-        mv package "$addon"
-        chown -R pi:pi "$addon"
-        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
-        #for directory in flatsiedatsie-"$addon"*; do
-        #  [[ -d $directory ]] || continue
-        #  echo "Directory: $directory"
-        #  rm -rf ./"$addon"
-        #  mv -- "$directory" ./$addon
-        #done
-        #chown -R pi:pi $addon
-        #mkdir -p /home/pi/.webthings/data/"$addon"
+		if [ -f addon.tgz ]; then
+	        tar -xf addon.tgz
+	        rm addon.tgz
+	        
+	        rm -rf "$addon"
+	        mv package "$addon"
+	        chown -R pi:pi "$addon"
+	        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+	        #for directory in flatsiedatsie-"$addon"*; do
+	        #  [[ -d $directory ]] || continue
+	        #  echo "Directory: $directory"
+	        #  rm -rf ./"$addon"
+	        #  mv -- "$directory" ./$addon
+	        #done
+	        #chown -R pi:pi $addon
+	        #mkdir -p /home/pi/.webthings/data/"$addon"
+		else
+			echo "Error, did not install addon: $addon"
+		fi
     done
 
 
@@ -931,13 +935,17 @@ then
         | tr -d \" \
         | sed 's/,*$//' \
         | wget -qi - -O addon.tgz
-    tar -xf addon.tgz
-    rm addon.tgz
+	if [ -f addon.tgz ]; then
+    	tar -xf addon.tgz
+   		rm addon.tgz
     
-    rm -rf followers
-    mv package followers
-    chown -R pi:pi followers
-    mkdir -p "$CANDLE_BASE/.webthings/data/followers"
+    	rm -rf followers
+    	mv package followers
+    	chown -R pi:pi followers
+    	mkdir -p "$CANDLE_BASE/.webthings/data/followers"
+	else
+		echo "Error, did not install Followers addon"
+	fi
 
     echo "Candle app store"
     for addon in candleappstore; 
@@ -952,19 +960,23 @@ then
             | tr -d \" \
             | sed 's/,*$//' \
             | wget -qi - -O addon.tgz
-        tar -xf addon.tgz
-        rm addon.tgz
-        
-        #for directory in createcandle-"$addon"*; do
-        #  [[ -d $directory ]] || continue
-        #  echo "Directory: $directory"
-        #  rm -rf ./"$addon"
-        #  mv -- "$directory" ./$addon
-        #done
-        rm -rf "$addon"
-        mv package "$addon"
-        chown -R pi:pi "$addon"
-        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+		if [ -f addon.tgz ]; then
+        	tar -xf addon.tgz
+	        rm addon.tgz
+	        
+	        #for directory in createcandle-"$addon"*; do
+	        #  [[ -d $directory ]] || continue
+	        #  echo "Directory: $directory"
+	        #  rm -rf ./"$addon"
+	        #  mv -- "$directory" ./$addon
+	        #done
+	        rm -rf "$addon"
+	        mv package "$addon"
+	        chown -R pi:pi "$addon"
+	        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+		else
+			echo "Error, did not install addon: $addon"
+		fi
     done
 
     # Install Candle addons
