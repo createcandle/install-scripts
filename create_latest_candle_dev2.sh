@@ -1528,11 +1528,15 @@ then
 
 		if [ "$BIT32" = no ] || [[ -z "${BIT32}" ]]
   		then
+			echo "installing ungoogled_chromium"
+			echo "installing ungoogled_chromium" >> /dev/kmsg
 			# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
     		wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
     		yes | dpkg -i --force-all ungoogled-chromium_112.0.5615.165-1_arm64.deb
     		rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
    		else
+			echo "installing normal chromium"
+			echo "installing normal chromium" >> /dev/kmsg
 	 		apt install -y chromium
 		fi
    
