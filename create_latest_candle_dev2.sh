@@ -1575,7 +1575,9 @@ then
 
     # Debian Bookworm doesn't have libffi7 anymore
     # libspandsp-dev libgirepository1.0-dev\
-    for i in curl arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 \
+
+	# TODO: is policykit-1 still needed in trixie?
+    for i in curl arping autoconf ffmpeg libswresample3 libtool mosquitto sqlite3 libolm3 libffi8 \
 	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
  	    cpufrequtils lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
 	    netcat-traditional nscd; do
@@ -1708,10 +1710,11 @@ then
     # removed libdbus-glib-1-dev (bluealsa now uses version 2 instead)
     # For bookworm libavcodec58 was changed to libavcodec59
     # removed libgirepository1.0-dev to test if it's still needed
+	# TODO: is policykit-1 still needed?
     for i in \
     git autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
     libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
-    arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
+    arping autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan ufw iptables \
     liblivemedia-dev libavcodec59 libswresample3 libffi8 libavformat59 \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7 python3-pip \
