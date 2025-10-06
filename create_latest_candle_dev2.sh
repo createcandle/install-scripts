@@ -1583,9 +1583,10 @@ then
     # libspandsp-dev libgirepository1.0-dev\
 
 	# TODO: is policykit-1 still needed in trixie?
+	# cpufrequtils is not available in trixie
     for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto sqlite3 libolm3 libffi8 \
 	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
- 	    cpufrequtils lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
+ 	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
 	    netcat-traditional nscd; do
             
 		echo "$i"
