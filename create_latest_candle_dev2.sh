@@ -1724,7 +1724,7 @@ then
     git autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
     libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
     arping autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan ufw iptables \
-    liblivemedia-dev libavcodec61 libswresample5 libffi8 libavformat* \
+    liblivemedia-dev libavcodec* libswresample5 libffi8 libavformat* \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-kms++ python3-prctl libopenblas0 libopenjp2-7 python3-pip \
     vlc unclutter evtest;
