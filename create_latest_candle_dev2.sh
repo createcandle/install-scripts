@@ -386,7 +386,7 @@ then
 
 		
 
-  		if [ mountpoint -q /home/pi/.webthings ]; then
+  		if mountpoint /home/pi/.webthings | grep -q "/home/pi/.webthings is a mountpoint" ; then
 		    echo "WARNING, .webthings folder seems to already be a mountpoint"
  		else
 			echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
