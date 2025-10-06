@@ -1046,11 +1046,15 @@ fi
 
 
 if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
- 	echo "Installing docker"
-    echo "Installing docker" >> /dev/kmsg
-    curl -sSL https://get.docker.com | sh
-	usermod -aG docker pi
-
+	if [ ! -f /usr/bin/docker ] ; then
+		echo "Installing docker"
+    	echo "Installing docker" >> /dev/kmsg
+    	curl -sSL https://get.docker.com | sh
+	else
+		echo "Docker seems to already be installed"
+		echo "Docker seems to already be installed" >> /dev/kmsg
+	fi
+ 	usermod -aG docker pi
 	systemctl disable docker
 	systemctl disable containerd
 else
