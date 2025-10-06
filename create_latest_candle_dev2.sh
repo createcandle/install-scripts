@@ -1540,7 +1540,7 @@ then
 	 		apt install -y chromium
 		fi
    
-    	
+    	echo "doing apt --fix-broken"
     	#apt-get -f install -y
 	    apt --fix-broken -y install
 	 	#  --no-install-recommends
@@ -1592,7 +1592,7 @@ then
     for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto sqlite3 libolm3 libffi* \
 	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
-	    netcat-traditional nscd upower; do
+	    netcat-traditional nscd upower evtest; do
             
 		echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
@@ -1731,7 +1731,7 @@ then
     liblivemedia-dev libavcodec61 libswresample5 libffi8 libavformat61 \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-kms++ python3-prctl libopenblas0 libopenjp2-7 python3-pip \
-    vlc unclutter evtest;
+    vlc unclutter;
     do
         echo ""
 		
