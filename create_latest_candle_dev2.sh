@@ -1532,7 +1532,8 @@ then
     #apt update
     #apt install ungoogled-chromium -y
 
-    echo
+
+	echo
     echo "installing build tools"
     for i in autoconf automake build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-pip python3-six; do
@@ -1541,6 +1542,45 @@ then
         apt  -y install "$i"  --no-install-recommends --print-uris "$reinstall"
         echo
     done
+	
+
+	if [ ! -f /usr/bin/python3.11 ]; then
+		echo "Python 3.11 is not already installed. Installing it now."
+		echo "Python 3.11 is not already installed. Installing it now." >> /dev/kmsg
+		
+		apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget -no-install-recommends -y
+
+		wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz
+		if [ -f Python-3.11.9.tgz ]; then
+			tar -xzf Python-3.11.9.tgz
+			rm Python-3.11.9.tgz
+			if [ -d Python-3.11.9 ]; then
+				cd Python-3.11.9/
+				./configure --enable-optimizations
+				make -j$(nproc)
+				make altinstall
+		
+				if [ -f /usr/local/bin/python3.11 ]; then
+					update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.11 1
+					echo "Installation of Python 3.11 complete"
+					echo "Installation of Python 3.11 complete" >> /dev/kmsg
+				else
+					echo "Installation of Python 3.11 failed"
+					echo "Installation of Python 3.11 failed" >> /dev/kmsg
+					exit 1
+				fi
+			else
+				echo "Extraction of Python 3.11 failed"
+				echo "Extraction of Python 3.11 failed" >> /dev/kmsg
+				exit 1
+			fi
+		else
+			echo "Download of Python 3.11 failed"
+			echo "Download of Python 3.11 failed" >> /dev/kmsg
+			exit 1
+		fi
+
+	fi
 
 
     # remove the Candle conf file, just in case it exists from an earlier install attempt
