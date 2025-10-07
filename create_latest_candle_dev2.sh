@@ -1572,6 +1572,8 @@ then
 					echo "Installation of Python 3.11 failed" >> /dev/kmsg
 					exit 1
 				fi
+				cd ..
+				rm -rf Python-3.11.9
 			else
 				echo "Extraction of Python 3.11 failed"
 				echo "Extraction of Python 3.11 failed" >> /dev/kmsg
