@@ -249,8 +249,11 @@ then
     for v in $(nvm_ls 20); do nvm uninstall $v; done
     nvm install 20
 
- for v in $(nvm_ls 24); do nvm uninstall $v; done
+    for v in $(nvm_ls 24); do nvm uninstall $v; done
     nvm install 24
+
+
+
 else
     echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
     echo "NPM seems to already be installed." | sudo tee -a $BOOT_DIR/candle_log.txt
