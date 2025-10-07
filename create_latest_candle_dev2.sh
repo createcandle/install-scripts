@@ -1721,10 +1721,15 @@ then
   		then
 			echo "installing ungoogled_chromium"
 			echo "installing ungoogled_chromium" >> /dev/kmsg
+			
 			# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
-    		wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
-    		yes | dpkg -i --force-all ungoogled-chromium_112.0.5615.165-1_arm64.deb
-    		rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    		#wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    		#yes | dpkg -i --force-all ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    		#rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
+
+			wget -O /usr/bin/chromium https://github.com/ungoogled-software/ungoogled-chromium-portablelinux/releases/download/141.0.7390.54-1/ungoogled-chromium-141.0.7390.54-1-arm64.AppImage
+			chmod +x /usr/bin/chromium
+			
    		else
 			echo "installing normal chromium"
 			echo "installing normal chromium" >> /dev/kmsg
