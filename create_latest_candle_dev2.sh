@@ -335,7 +335,7 @@ then
                 #printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | parted --align optimal
 				#echo yes | parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 6000MB
                 #printf "mkpart\np\next4\n6546MB\n12546MB\nmkpart\np\next4\n12548MB\n14500MB\nquit" | parted --align optimal
-				echo yes | parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 8000MB
+				echo yes | parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 7990MB
                 printf "mkpart\np\next4\n8546MB\n9200MB\nmkpart\np\next4\n9202MB\n14500MB\nquit" | parted --align optimal
             fi
 
