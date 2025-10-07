@@ -2404,7 +2404,7 @@ chown mosquitto: /var/run/mosquitto
 chmod 755 /var/run/mosquitto
 
 mkdir -m 740 -p /var/log/mosquitto
-chown -R pi:pi /var/log/mosquitto
+chown -R mosquitto:mosquitto /var/log/mosquitto
 
 
 # TODO: would this help with mosquitto?
