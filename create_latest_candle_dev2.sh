@@ -1546,7 +1546,7 @@ then
     done
 	
 
-	if [ ! -f /usr/bin/python3.11 ]; then
+	if [ ! -f /usr/local/bin/python3.11 ] && [ ! -f /usr/bin/python3.11 ] ; then
 		echo "Python 3.11 is not already installed. Installing it now."
 		echo "Python 3.11 is not already installed. Installing it now." >> /dev/kmsg
 
