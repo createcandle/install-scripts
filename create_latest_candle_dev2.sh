@@ -1556,7 +1556,7 @@ then
 			rm Python-3.11.9.tgz
 			if [ -d Python-3.11.9 ]; then
 				cd Python-3.11.9/
-				./configure --enable-optimizations
+				./configure --enable-optimizations --enable-loadable-sqlite-extensions
 				make -j$(nproc)
 				make altinstall
 		
