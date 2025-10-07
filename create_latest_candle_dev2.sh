@@ -2403,7 +2403,7 @@ mkdir -p /var/run/mosquitto/
 chown mosquitto: /var/run/mosquitto
 chmod 755 /var/run/mosquitto
 
-mkdir -p /var/log/mosquitto
+mkdir -m 740 -p /var/log/mosquitto
 chown -R pi:pi /var/log/mosquitto
 
 
