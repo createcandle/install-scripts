@@ -3089,7 +3089,7 @@ fi
 # trixie
 if [ -f /usr/sbin/swapoff ]; then
 	echo "disabling swap"
-	swapoff -a
+	swapoff --all
 	systemctl mask swap.target
 fi
 
