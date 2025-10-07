@@ -1727,8 +1727,16 @@ then
     		#yes | dpkg -i --force-all ungoogled-chromium_112.0.5615.165-1_arm64.deb
     		#rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
 
+			if [ -f /usr/bin/chromium ]; then
+				rm /usr/bin/chromium
+			fi
 			wget -O /usr/bin/chromium https://github.com/ungoogled-software/ungoogled-chromium-portablelinux/releases/download/141.0.7390.54-1/ungoogled-chromium-141.0.7390.54-1-arm64.AppImage
-			chmod +x /usr/bin/chromium
+			if [ -f /usr/bin/chromium ]; then
+				chmod +x /usr/bin/chromium
+			else
+				echo "installing ungoogled chromium failed"
+				echo "installing ungoogled chromium failed" >> /dev/kmsg
+			fi
 			
    		else
 			echo "installing normal chromium"
