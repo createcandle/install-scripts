@@ -1549,8 +1549,9 @@ then
 	if [ ! -f /usr/bin/python3.11 ]; then
 		echo "Python 3.11 is not already installed. Installing it now."
 		echo "Python 3.11 is not already installed. Installing it now." >> /dev/kmsg
-		
-		apt install build-essential zlib1g-dev libncurses-dev libgdbm-dev libnss3-dev libsqlite3-dev libssl-dev libreadline-dev libffi-dev wget -no-install-recommends -y
+
+		# libssl-dev libncurses5-dev libsqlite3-dev libreadline-dev libtk8.6 libgdm-dev libdb4o-cil-dev libpcap-dev
+		apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libsqlite3-dev libssl-dev libreadline-dev libffi-dev wget libpcap-dev -no-install-recommends -y
 
 		wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz
 		if [ -f Python-3.11.9.tgz ]; then
