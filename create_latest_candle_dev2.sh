@@ -2475,7 +2475,9 @@ echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 
 mkdir -p /home/pi/.webthings/arduino
 mkdir -p /home/pi/.webthings/arduino/Arduino
+chown -R pi:pi /home/pi/.webthings/arduino/Arduino
 mkdir -p /home/pi/.webthings/arduino/.arduino15
+chown -R pi:pi /home/pi/.webthings/arduino/.arduino15
 
 #cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
 if [ ! -f /home/pi/.webthings/etc/ssh/ssh_config ]; then
@@ -2486,6 +2488,9 @@ fi
 #cp --verbose -r /etc/ssh/sshd_config.d /home/pi/.webthings/etc/ssh/
 mkdir -p /home/pi/.webthings/etc/ssh/ssh_config.d
 mkdir -p /home/pi/.webthings/etc/ssh/sshd_config.d 
+
+mkdir -p /home/pi/.webthings/chromium
+chown -R pi:pi /home/pi/.webthings/chromium
 
 
 # Create "empty" wpa_supplicant config file if it doesn't exist yet
