@@ -1599,6 +1599,11 @@ then
     echo "Candle: installing support packages" >> $BOOT_DIR/candle_log.txt
     echo
 
+
+	apt-get purge --auto-remove ufw
+	apt-get install ufw -y --no-install-recommends
+
+
     # Debian Bookworm doesn't have libffi7 anymore
     # libspandsp-dev libgirepository1.0-dev\
 
