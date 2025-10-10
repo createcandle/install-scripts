@@ -1120,7 +1120,9 @@ else
 fi
 
 
-
+if [ -f $CANDLE_BASE/webthings/gateway/tools/make-self-signed-cert.sh ]; then
+	$CANDLE_BASE/webthings/gateway/tools/make-self-signed-cert.sh
+fi
 
 
 npm config set metrics-registry="https://"
