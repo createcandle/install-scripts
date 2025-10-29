@@ -382,11 +382,16 @@ then
     
     if ls /dev/mmcblk0p4; then
 
-		
+		sleep 1
+		e2label /dev/mmcblk0p2 candle_system
+		sleep 1
+	    e2label /dev/mmcblk0p3 candle_recovery
+		sleep 1
+	    e2label /dev/mmcblk0p4 candle_user
+		sleep 1
+
 
 		mkdir -p /home/pi/.webthings
-
-		
 
   		if mountpoint /home/pi/.webthings | grep -q "/home/pi/.webthings is a mountpoint" ; then
 		    echo "WARNING, .webthings folder seems to already be a mountpoint"
@@ -412,9 +417,13 @@ else
 fi
 
 if ls /dev/mmcblk0p4; then
+	sleep 1
 	e2label /dev/mmcblk0p2 candle_system
+	sleep 1
     e2label /dev/mmcblk0p3 candle_recovery
+	sleep 1
     e2label /dev/mmcblk0p4 candle_user
+	sleep 1
 fi
 
 
