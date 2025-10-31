@@ -2708,8 +2708,12 @@ if [ ! -L /etc/fake-hwclock.data ]; then
         echo "copying /etc/fake-hwclock.data to /home/pi/.webthings/etc/fake-hwclock.data"
         cp --verbose /etc/fake-hwclock.data /home/pi/.webthings/etc/fake-hwclock.data
     fi
-    rm /etc/fake-hwclock.data
-    ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
+	if [ -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
+    	rm /etc/fake-hwclock.data
+    	ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
+	else
+		echo "ERROR, copying fake-hwclock.data has failed"
+	fi
 fi
 
 
