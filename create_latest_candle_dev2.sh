@@ -2510,6 +2510,9 @@ chown -R pi:pi /home/pi/.webthings/arduino/Arduino
 mkdir -p /home/pi/.webthings/arduino/.arduino15
 chown -R pi:pi /home/pi/.webthings/arduino/.arduino15
 
+
+mkdir -p /home/pi/.webthings/etc/
+
 #cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
 if [ ! -f /home/pi/.webthings/etc/ssh/ssh_config ]; then
     cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
@@ -2700,6 +2703,7 @@ fi
 if [ ! -L /etc/fake-hwclock.data ]; then
     echo "removing /etc/fake-hwclock.data file and creating a symlink to /home/pi/.webthings/etc/fake-hwclock.data instead"
     # create fake-hwclock file
+	mkdir -p /home/pi/.webthings/etc/
     if [ ! -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
         echo "copying /etc/fake-hwclock.data to /home/pi/.webthings/etc/fake-hwclock.data"
         cp --verbose /etc/fake-hwclock.data /home/pi/.webthings/etc/fake-hwclock.data
