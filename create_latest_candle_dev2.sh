@@ -1507,8 +1507,10 @@ then
 		mkdir -p /home/pi/.webthings/etc/pipewire
 	    cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
 		ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
-	    systemctl --user enable pipewire
-		systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service
+		#systemctl --user enable pipewire
+		su -c 'systemctl --user enable pipewire' pi
+		#systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service
+		su -c 'systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service' pi
 	fi
 
 	# Disable audio device suspend
