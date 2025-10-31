@@ -1520,10 +1520,23 @@ then
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
 	echo "installing some network applications"
-	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev
+	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev
+	
+
+	echo
+    echo "installing some network applications, but one at a time"
+    for i in dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 dbus-launch libdbus-1-dev libssl-dev; do
+        
+        echo "$i"
+        apt  -y install "$i"  --no-install-recommends --print-uris "$reinstall"
+        echo
+    done
+
+	echo "installing DNSMASQ"
+	apt install -y --no-install-recommends dnsmasq
 	systemctl stop dnsmasq.service
-	#systemctl enable dnsmasq.service
 	systemctl disable dnsmasq.service
+	
 
  	if [ -f /home/pi/nohup.out ]; then
     	cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
