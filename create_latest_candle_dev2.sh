@@ -1517,7 +1517,9 @@ then
 	if [ -f /usr/share/wireplumber/scripts/suspend-node.lua ]; then
 		sed -i 's|if timeout == 0 then|if timeout >= 0 then|g' /usr/share/wireplumber/scripts/suspend-node.lua
 	fi
-	
+	if [ -f /usr/share/wireplumber/scripts/node/suspend-node.lua ]; then
+		sed -i 's|if timeout == 0 then|if timeout >= 0 then|g' /usr/share/wireplumber/scripts/node/suspend-node.lua
+	fi
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
