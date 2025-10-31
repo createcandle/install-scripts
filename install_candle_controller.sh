@@ -891,7 +891,8 @@ then
     
     
     # Install Flatsiedatsie addons
-    
+	cd "$CANDLE_BASE/.webthings/addons"
+	
     for addon in photo-frame internet-radio;
     do
         echo "$addon"
@@ -928,7 +929,9 @@ then
 
     # Install followers
     # separate because tar file name and addon name are not the same (followers / followers-addon)
-    
+
+	cd "$CANDLE_BASE/.webthings/addons"
+	
     echo "followers-addon"
     curl -s "https://api.github.com/repos/flatsiedatsie/followers-addon/releases/latest" \
         | grep "browser_download_url" \
