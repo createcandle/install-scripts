@@ -3714,7 +3714,6 @@ fi
 
 
 echo
-echo "checking/switching to old-school dhcpcd late"
 if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	echo
 	echo "force-installing dhcpcd"
