@@ -500,7 +500,7 @@ else
 fi
 
 # It seems this is no longer installed on Trixie
-apt-get install fake-hwclock ntp -y
+apt-get install fake-hwclock -y --no-install-recommends
 
 if [ -f /usr/sbin/fake-hwclock ]; then
 	/usr/sbin/fake-hwclock save
