@@ -767,9 +767,6 @@ if [ -L node20 ]; then
 fi
 ln -s "$V20_PATH" node20
 
-# also create symlink for node 18, which will point to node 20 (legacy support).
-ln -s "$V20_PATH" node18
-
 
 
 # NODE 24
