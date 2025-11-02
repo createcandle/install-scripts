@@ -615,7 +615,10 @@ apt-get update
 apt remove firefox* galculator* geany* thonny* wolfram-engine* oracle-java* scratch* libreoffice* cloud* --purge -y
 apt remove kanshi eatmydata pocketsphinx* raindrop wayvnc cloud-init cloud-guest-utils aspell* autotouch apparmor docutils-common evince* feedbackd* --purge -y
 apt remove bookshelf --purge -y
+apt remove modemmanager --purge -y 
 echo
+
+systemctl reload
 
 if [ "$BIT_TYPE" -eq 64 ]; then
     echo "64 bit, but adding support for 32 bit architecture"
