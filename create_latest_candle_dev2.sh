@@ -499,6 +499,12 @@ else
     touch $BOOT_DIR/candle_32bits.txt
 fi
 
+# It seems this is no longer installed on Trixie
+apt-get install fake-hwclock -y --no-install-recommends
+
+if [ -f /usr/sbin/fake-hwclock ]; then
+	/usr/sbin/fake-hwclock save
+fi
 
 # Make sure there is a current time
 if [ -f $BOOT_DIR/candle_hardware_clock.txt ]; then
