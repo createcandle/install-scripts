@@ -1625,11 +1625,13 @@ then
     echo "Candle: installing support packages" >> $BOOT_DIR/candle_log.txt
     echo
 
-
-	# This should help with issues where python 3.11 is not supported for UFW otherwise.
+	# Downgrading the default python3 version to 3.11 can create issues.
+	# The lines below might help with issues relating to this change.
+	sudo apt-get install python3-apt --reinstall
 	apt-get purge -y --auto-remove ufw
 	apt-get install ufw -y
 
+	
 
     # Debian Bookworm doesn't have libffi7 anymore
     # libspandsp-dev libgirepository1.0-dev\
