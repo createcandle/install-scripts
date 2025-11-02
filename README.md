@@ -91,6 +91,16 @@ curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createc
 ```
 
 
+For Raspberry OS Trixie, right after flashing the OS, add this little snippet to `firstrun.sh` on the boot partition to avoid partition resize issues:
+
+```
+echo -e "Yes\nYes" | parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 8000MB
+printf "mkpart\np\next4\n8546MB\n16546MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | parted --align optimal
+resize2fs /dev/mmcblk0p2
+printf "y" | mkfs.ext4 /dev/mmcblk0p3
+printf "y" | mkfs.ext4 /dev/mmcblk0p4
+```
+
 
 
 
