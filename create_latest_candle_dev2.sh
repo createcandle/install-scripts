@@ -1626,8 +1626,9 @@ then
     echo
 
 
-	apt-get purge --auto-remove ufw
-	apt-get install ufw -y --no-install-recommends
+	# This should help with issues where python 3.11 is not supported for UFW otherwise.
+	apt-get purge -y --auto-remove ufw
+	apt-get install ufw -y
 
 
     # Debian Bookworm doesn't have libffi7 anymore
