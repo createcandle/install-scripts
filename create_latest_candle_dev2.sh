@@ -1583,7 +1583,8 @@ then
     done
 	
 
-	if [ ! -f /usr/local/bin/python3.11 ] && [ ! -f /usr/bin/python3.11 ] ; then
+	# temporarily disabled
+	if [ ! -f /usr/local/bin/python3.11 ] && [ ! -f /usr/bin/python3.11 ] && [ ! -f /etc/fstab ]; then
 		echo "Python 3.11 is not already installed. Installing it now."
 		echo "Python 3.11 is not already installed. Installing it now." >> /dev/kmsg
 
