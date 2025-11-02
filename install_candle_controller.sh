@@ -870,20 +870,24 @@ then
         | sed 's/,*$//' \
         | wget -qi - -O addon.tgz
     fi
-    tar -xf addon.tgz
-    rm addon.tgz
-    #for directory in kabbi-zigbee2mqtt-adapter*; do
-    #  [[ -d $directory ]] || continue
-    #  echo "Directory: $directory"
-    #  mv -- "$directory" ./zigbee2mqtt-adapter
-    #done
-    #chown -R pi:pi zigbee2mqtt-adapter
-    #mkdir -p /home/pi/.webthings/data/zigbee2mqtt-adapter
-    #rm ./*.tgz
-    rm -rf zigbee2mqtt-adapter
-    mv package zigbee2mqtt-adapter
-    chown -R pi:pi zigbee2mqtt-adapter
-    mkdir -p "$CANDLE_BASE/.webthings/data/zigbee2mqtt-adapter"
+	if [ -f addon.tgz ]; then
+    	tar -xf addon.tgz
+	    rm addon.tgz
+	    #for directory in kabbi-zigbee2mqtt-adapter*; do
+	    #  [[ -d $directory ]] || continue
+	    #  echo "Directory: $directory"
+	    #  mv -- "$directory" ./zigbee2mqtt-adapter
+	    #done
+	    #chown -R pi:pi zigbee2mqtt-adapter
+	    #mkdir -p /home/pi/.webthings/data/zigbee2mqtt-adapter
+	    #rm ./*.tgz
+	    rm -rf zigbee2mqtt-adapter
+	    mv package zigbee2mqtt-adapter
+	    chown -R pi:pi zigbee2mqtt-adapter
+	    mkdir -p "$CANDLE_BASE/.webthings/data/zigbee2mqtt-adapter"
+	else
+		echo "Error, did not install addon: zigbee2mqtt-adapter"
+	fi
     
     
     
