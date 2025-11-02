@@ -2464,10 +2464,11 @@ chown -R mosquitto:mosquitto /var/log/mosquitto
 # Make folders that should be owned by root
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
 mkdir -p /home/pi/.webthings/etc/wpa_supplicant
-#mkdir -p /home/pi/.webthings/etc/NetworkManager/
+
 mkdir -p /home/pi/.webthings/etc/ssh
 
-
+mkdir -p /home/pi/.webthings/etc/NetworkManager/
+cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
 
 #echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
@@ -2804,6 +2805,14 @@ if systemctl list-units --full -all | grep -Fq ModemManager.service; then
     systemctl disable ModemManager.service
     systemctl mask ModemManager.service
 fi
+
+if systemctl list-units --full -all | grep -Fq rpi-eeprom-update.service; then
+	systemctl disable rpi-eeprom-update.service
+fi
+if systemctl list-units --full -all | grep -Fq rpi-eeprom-update.service; then
+	systemctl disable rpi-eeprom-update.service
+fi
+
 
 #disable wpa_supplicant service because dhpcpcd is managing it. Otherwise it runs twice.
 
