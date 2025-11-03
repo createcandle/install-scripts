@@ -197,7 +197,7 @@ fi
 
 
 # OUTPUT SOME INFORMATION
-BIT_TYPE=$(getconf LONG_BIT)
+BITTYPE=$(getconf LONG_BIT)
 
 cd $CANDLE_BASE
 
@@ -208,7 +208,7 @@ echo
 echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
 echo "MODEL        : $(tr -d '\0' < /proc/device-tree/model)"
-echo "BITS         : $BIT_TYPE"
+echo "BITS         : $BITTYPE"
 echo "PATH         : $PATH"
 echo "USER         : $(whoami)"
 
@@ -489,7 +489,7 @@ apt-get update
 
 
 # Save the bits of the initial kernel to a file on the boot partition
-if [ "$BIT_TYPE" == 64 ]; then
+if [ "$BITTYPE" == 64 ]; then
     echo "creating $BOOT_DIR/candle_64bits.txt"
     echo "creating $BOOT_DIR/candle_64bits.txt" >> /dev/kmsg
     touch $BOOT_DIR/candle_64bits.txt
@@ -628,7 +628,7 @@ echo
 
 systemctl reload
 
-if [ "$BIT_TYPE" -eq 64 ]; then
+if [ "$BITTYPE" -eq 64 ]; then
     echo "64 bit, but adding support for 32 bit architecture"
     dpkg --add-architecture armhf
     apt update -y && apt install -y screen:armhf
