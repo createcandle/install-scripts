@@ -4,9 +4,10 @@ set +e
 # This script is part of the Candle disk image creation script, although it can be run stand-alone to only install the controller itself.
 
 BITTYPE=$(getconf LONG_BIT)
-ARCHSTRING="linux-arm64"
-if [ $BITTYPE -ne 64 ] ; then
-    ARCHSTRING="linux-arm"
+ARCHSTRING="linux-arm"
+if [ "$BITTYPE" == 64 ]; then
+#if [ $BITTYPE -ne 64 ] ; then
+    ARCHSTRING="linux-arm64"
 fi
 
 echo "Architecture: $ARCHSTRING"
