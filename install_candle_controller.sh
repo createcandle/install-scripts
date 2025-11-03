@@ -3,9 +3,9 @@ set +e
 
 # This script is part of the Candle disk image creation script, although it can be run stand-alone to only install the controller itself.
 
-BIT_TYPE=$(getconf LONG_BIT)
+BITTYPE=$(getconf LONG_BIT)
 ARCHSTRING="linux-arm64"
-if [ '$BIT_TYPE -ne 64' ]; then
+if [ $BITTYPE -ne 64 ] ; then
     ARCHSTRING="linux-arm"
 fi
 
@@ -14,13 +14,13 @@ echo "Architecture: $ARCHSTRING"
 echo ""
 
 # This script should be run as user pi (not root)
-if ! [ "$EUID" -ne 0 ];
+if ! [ "$EUID" -ne 0 ] ;
 then
   echo "Please do not run as root (do not use sudo)"
   exit 1
 fi
 
-if [ ! -s /etc/resolv.conf ]; then
+if [ ! -s /etc/resolv.conf ] ; then
     # no nameserver
     echo "no nameserver, aborting"
     echo "Candle: No nameserver, aborting" | sudo tee -a /dev/kmsg
