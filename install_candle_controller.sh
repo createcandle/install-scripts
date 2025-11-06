@@ -54,7 +54,7 @@ fi
 
 echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
-echo "BITS         : $BIT_TYPE"
+echo "BITS         : $BITTYPE"
 echo "USER         : $(whoami)"
 echo "PATH         : $PATH"
 echo "CANDLE_BASE  : $CANDLE_BASE"
@@ -853,7 +853,7 @@ then
     # Install Zigbee2MQTT
     
     echo "zigbee2mqtt-adapter"
-    if [ $BIT_TYPE == 64 ]; then
+    if [ $BITTYPE == 64 ] ; then
         curl -s https://api.github.com/repos/kabbi/zigbee2mqtt-adapter/releases/latest \
         | grep "browser_download_url" \
         | grep "linux-arm64" \
