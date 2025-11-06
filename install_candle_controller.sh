@@ -853,7 +853,7 @@ then
     # Install Zigbee2MQTT
     
     echo "zigbee2mqtt-adapter"
-    if [ $BIT_TYPE -eq 64 ]; then
+    if [ $BIT_TYPE == 64 ]; then
         curl -s https://api.github.com/repos/kabbi/zigbee2mqtt-adapter/releases/latest \
         | grep "browser_download_url" \
         | grep "linux-arm64" \
