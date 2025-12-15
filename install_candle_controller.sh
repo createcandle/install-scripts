@@ -543,10 +543,12 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	pwd
 	git submodule init
 	git submodule update
-	npm ci
+	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes ci
 	node generate-version.js && node generate-types.js && npx tsc -p .
 	
-    # attempt to fix "ECONNRESET" issue
+	cd ../..
+    
+	# attempt to fix "ECONNRESET" issue
     #npm config set registry http://registry.npmjs.org/
     
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
