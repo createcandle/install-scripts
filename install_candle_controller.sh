@@ -531,13 +531,19 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	# Manually install the gateway-addon-node module so that it supports sending the origin of a message
 	mkdir -p node_modules
 	cd node_modules
+	if [ -d gateway-addon-node ]; then
+		rm -rf gateway-addon-node
+	fi
+	if [ -d gateway-addon ]; then
+		rm -rf gateway-addon
+	fi
 	git clone https://github.com/createcandle/gateway-addon-node
 	mv gateway-addon-node gateway-addon
 	cd gateway-addon
 	pwd
 	git submodule init
 	git submodule update
-	npm i
+	npm ci
 	node generate-version.js && node generate-types.js && npx tsc -p .
 	
     # attempt to fix "ECONNRESET" issue
