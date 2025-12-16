@@ -546,8 +546,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --save
 	node generate-version.js && node generate-types.js && npx tsc -p .
 	ls
-	echo "does gateway-addon/lib exist?"
-	ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib
+	echo "does gateway-addon/lib exist immediately after?"
+	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
 	#cd ../..
 	cd "$CANDLE_BASE/webthings/gateway2"
     
@@ -621,12 +621,12 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     fi
 
 	echo "does gateway-addon/lib exist?"
-	ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib/index.js
-    
+	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib/index.js
+ 
+	#&& [ -f "$CANDLE_BASE/webthings/gateway2/node_modules/gateway-addon/lib/index.js" ] \	
     if [ -f "$CANDLE_BASE/webthings/gateway2/build/app.js" ] \
     && [ -f "$CANDLE_BASE/webthings/gateway2/build/static/index.html" ] \
     && [ -d "$CANDLE_BASE/webthings/gateway2/node_modules" ] \
-	&& [ -f "$CANDLE_BASE/webthings/gateway2/node_modules/gateway-addon/lib/index.js" ] \
     && [ -d "$CANDLE_BASE/webthings/gateway2/build/static/bundle" ];
     then
 
@@ -710,7 +710,7 @@ fi
 
 
 echo "does gateway-addon/lib exist even later?"
-ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib/index.js
+ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib/index.js
 
 # TODO: maybe do another sanity check and restore a backup if need be?
 
