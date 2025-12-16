@@ -543,7 +543,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	pwd
 	git submodule init
 	git submodule update
-	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes ci
+	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --save
 	node generate-version.js && node generate-types.js && npx tsc -p .
 	
 	#cd ../..
