@@ -545,7 +545,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	git submodule update
 	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --save
 	node generate-version.js && node generate-types.js && npx tsc -p .
-	
+	ls
 	#cd ../..
 	cd "$CANDLE_BASE/webthings/gateway2"
     
