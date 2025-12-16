@@ -35,6 +35,7 @@ export DEBIAN_FRONTEND=noninteractive
 # export SKIP_BROWSER=yes
 # export BIT32=yes
 # export SKIP_DOCKER=yes
+# export SKIP_RO=yes
 
 #SKIP_PARTITIONS=yes
 #TINY_PARTITIONS=yes # used to create smaller partition images, which are used in the new system update process
@@ -49,6 +50,9 @@ SKIP_BLUEALSA=yes
 #SKIP_REBOOT=yes
 #SKIP_SPLASH=yes
 #SKIP_BROWSER=yes
+#export SKIP_RO=yes
+DOWNLOAD_DEB=no
+SKIP_DHCPCD=yes
  
 # SKIP_PARTITIONS=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_PYTHON=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER=yes SKIP_DEBUG=yes SKIP_REBOOT=yes
 
@@ -71,6 +75,8 @@ SKIP_BLUEALSA=yes
 # Upgrade conflicts with:
 # - installing ReSpeaker drivers
 # - installing the new read only mode
+
+
 
 
 
@@ -191,7 +197,7 @@ fi
 
 
 # OUTPUT SOME INFORMATION
-BIT_TYPE=$(getconf LONG_BIT)
+BITTYPE=$(getconf LONG_BIT)
 
 cd $CANDLE_BASE
 
@@ -202,7 +208,7 @@ echo
 echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
 echo "MODEL        : $(tr -d '\0' < /proc/device-tree/model)"
-echo "BITS         : $BIT_TYPE"
+echo "BITS         : $BITTYPE"
 echo "PATH         : $PATH"
 echo "USER         : $(whoami)"
 
@@ -317,13 +323,20 @@ then
             echo
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
-                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 8000MB
-                printf "mkpart\np\next4\n8001MB\n16000MB\nmkpart\np\next4\n16002MB\n26000MB\nquit" | parted
+                echo -e "Yes\nYes" | /usr/sbin/parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 8000MB
+                printf "mkpart\np\next4\n8546MB\n16546MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted --align optimal
+
+				# parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
+				
                 #resizepart /dev/mmcblk0 2 12600000
             else
                 echo "creating smaller partitions for update image"
-                echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
-                printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | parted
+                #echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
+                #printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | parted --align optimal
+				#echo yes | parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 6000MB
+                #printf "mkpart\np\next4\n6546MB\n12546MB\nmkpart\np\next4\n12548MB\n14500MB\nquit" | parted --align optimal
+				echo -e "Yes\nYes" | /usr/sbin/parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 7990MB
+                printf "mkpart\np\next4\n8546MB\n9200MB\nmkpart\np\next4\n9202MB\n14500MB\nquit" | /usr/sbin/parted --align optimal
             fi
 
             # Tell OS to rescan
@@ -355,9 +368,7 @@ then
    			#gdisk /dev/mmcblk0
 	  
 			# partition 1 label remains bootfs
-            e2label /dev/mmcblk0p2 candle_system
-            e2label /dev/mmcblk0p3 candle_recovery
-            e2label /dev/mmcblk0p4 candle_user
+            
 
             systemctl daemon-reload
         else
@@ -371,11 +382,18 @@ then
     
     if ls /dev/mmcblk0p4; then
 
+		sleep 1
+		e2label /dev/mmcblk0p2 candle_system
+		sleep 1
+	    e2label /dev/mmcblk0p3 candle_recovery
+		sleep 1
+	    e2label /dev/mmcblk0p4 candle_user
+		sleep 1
+
+
 		mkdir -p /home/pi/.webthings
 
-		
-
-  		if [ mountpoint -q /home/pi/.webthings ]; then
+  		if mountpoint /home/pi/.webthings | grep -q "/home/pi/.webthings is a mountpoint" ; then
 		    echo "WARNING, .webthings folder seems to already be a mountpoint"
  		else
 			echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
@@ -396,6 +414,16 @@ else
     echo "$(date) - starting create_latest_candle" >> /home/pi/.webthings/candle.log
     echo "$(date) - starting create_latest_candle" >> $BOOT_DIR/candle_log.txt
 
+fi
+
+if ls /dev/mmcblk0p4; then
+	sleep 1
+	e2label /dev/mmcblk0p2 candle_system
+	sleep 1
+    e2label /dev/mmcblk0p3 candle_recovery
+	sleep 1
+    e2label /dev/mmcblk0p4 candle_user
+	sleep 1
 fi
 
 
@@ -451,20 +479,32 @@ cd $CANDLE_BASE
 
 # Do initial apt update
 echo
-echo "doing apt update and allowing release info change"
-apt-get --allow-releaseinfo-change-suite update 
-
+#echo "doing apt update and allowing release info change"
+#apt-get --allow-releaseinfo-change-suite update
+echo "doing apt update"
+ 
+apt-get update
 
 
 
 
 # Save the bits of the initial kernel to a file on the boot partition
-if [ "$BIT_TYPE" == 64 ]; then
+if [ "$BITTYPE" == 64 ]; then
     echo "creating $BOOT_DIR/candle_64bits.txt"
     echo "creating $BOOT_DIR/candle_64bits.txt" >> /dev/kmsg
     touch $BOOT_DIR/candle_64bits.txt
+else
+	echo "creating $BOOT_DIR/candle_32bits.txt"
+    echo "creating $BOOT_DIR/candle_32bits.txt" >> /dev/kmsg
+    touch $BOOT_DIR/candle_32bits.txt
 fi
 
+# It seems this is no longer installed on Trixie
+apt-get install fake-hwclock -y --no-install-recommends
+
+if [ -f /usr/sbin/fake-hwclock ]; then
+	/usr/sbin/fake-hwclock save
+fi
 
 # Make sure there is a current time
 if [ -f $BOOT_DIR/candle_hardware_clock.txt ]; then
@@ -537,28 +577,29 @@ echo ""
 # BOOKWORM SOURCES
 
 # Make sure Bullseye sources are used - this is no longer needed because the "run the install script again" upgrade path is deprecated
-if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt
-    sed -i 's/buster/bookworm/' /etc/apt/sources.list.d/raspi.list
-fi
+#if cat /etc/apt/sources.list.d/raspi.list | grep -q buster; then
+#    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> /dev/kmsg
+#    echo "changing /etc/apt/sources.list.d/raspi.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt
+#    sed -i 's/buster/bookworm/' /etc/apt/sources.list.d/raspi.list
+#fi
 
-if cat /etc/apt/sources.list | grep -q buster; then
-    echo "changing /etc/apt/sources.list from buster to bookworm" >> /dev/kmsg
-    echo "changing /etc/apt/sources.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt 
-    sed -i 's/buster/bookworm/' /etc/apt/sources.list
-fi
+#if cat /etc/apt/sources.list | grep -q buster; then
+#    echo "changing /etc/apt/sources.list from buster to bookworm" >> /dev/kmsg
+#    echo "changing /etc/apt/sources.list from buster to bookworm" >> $BOOT_DIR/candle_log.txt 
+#    sed -i 's/buster/bookworm/' /etc/apt/sources.list
+#fi
 
 
 
 
 # Add option to download source code from RaspberryPi server
-echo "modifying /etc/apt/sources.list - allowing apt access to source code"
-sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list
-
+#echo "modifying /etc/apt/sources.list - allowing apt access to source code"
+#if [ -f /etc/apt/sources.list.d/raspi.sources ]; then
+#	sed -i 's/#deb-src/deb-src/' /etc/apt/sources.list.d/raspi.sources
+#fi
 # Unhold browser
-echo ""
-apt-mark unhold $CHROMIUM_PACKAGE_NAME
+#echo
+#apt-mark unhold $CHROMIUM_PACKAGE_NAME
 
 
 # 64 BIT
@@ -568,16 +609,27 @@ apt-mark unhold $CHROMIUM_PACKAGE_NAME
 
 echo
 echo "doing apt-get update"
-if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
-    apt-get update --allow-releaseinfo-change
-else
-    apt-get update
-fi
+#if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
+#    apt-get update --allow-releaseinfo-change
+#else
+#    apt-get update
+#fi
+apt-get update
 
+# remove Firefox and other applications, if they are installed.
+
+apt remove firefox* galculator* geany* thonny* wolfram-engine* oracle-java* scratch* libreoffice* cloud* --purge -y
+apt remove kanshi eatmydata pocketsphinx* raindrop wayvnc cloud-init cloud-guest-utils aspell* autotouch apparmor docutils-common evince* feedbackd* --purge -y
+apt remove bookshelf --purge -y
+
+# in theory removing ModemManager could prevent issues with zigbee2Mqtt. For now it's just being completely disabled.
+#apt remove modemmanager --purge -y 
 echo
 
-if [ "$BIT_TYPE" -eq 64 ]; then
-    echo "Adding support for 32 bit architecture"
+systemctl reload
+
+if [ "$BITTYPE" -eq 64 ]; then
+    echo "64 bit, but adding support for 32 bit architecture"
     dpkg --add-architecture armhf
     apt update -y && apt install -y screen:armhf
 fi
@@ -590,114 +642,16 @@ fi
 
 
 
-echo
-echo "Downloading read only script"
-echo
 
-if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
-    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
-    echo "Candle: Downloading cutting edge read-only script" >> $BOOT_DIR/candle_log.txt
-    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh --retry-connrefused 
-    
-else
-    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
-    echo "Candle: Downloading stable read-only script" >> $BOOT_DIR/candle_log.txt
-    curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
-    | grep "tarball_url" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | sed 's/,*$//' \
-    | wget -qi - -O ro-overlay.tar --retry-connrefused 
-
-    if [ -f ro-overlay.tar ]; then
-        
-        if [ -d ./ro-overlay ]; then
-            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
-            rm -rf ./ro-overlay
-        fi
-        echo "unpacking ro-overlay.tar"
-        tar -xf ro-overlay.tar
-        rm ./ro-overlay.tar
-    
-        for directory in createcandle-ro-overlay*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          mv -- "$directory" ./ro-overlay
-        done
-
-        if [ -d ./ro-overlay ]; then
-            echo "ro-overlay folder exists, OK"
-            cp ./ro-overlay/bin/ro-root.sh ./ro-root.sh
-            rm -rf ./ro-overlay
-        else
-            echo "ERROR, ro-overlay folder missing"
-            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
-            echo "Candle: WARNING, ro-overlay folder missing" >> $BOOT_DIR/candle_log.txt
-        fi
-    else
-        echo "Ro-root tar file missing, download failed"
-        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
-        echo "Candle: ERROR, stable read-only tar download failed" >> $BOOT_DIR/candle_log.txt
-        
-        # Show error image
-        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-        then
-            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-                /bin/ply-image $BOOT_DIR/error.png
-                #sleep 7200
-            fi
-        fi
-
-        exit 1
-        
-    fi
-fi
 
 
 sed -i 's|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/pi/.local/bin"|' /etc/profile
 
-
-# If the file exists, make it executable and move it into place
-if [ -f ./ro-root.sh ]; then
-    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
-        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
-        echo "Candle: ro-root.sh file downloaded OK" >> $BOOT_DIR/candle_log.txt
-        chmod +x ./ro-root.sh
-    
-        # Avoid risky move if possible
-        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
-		    wait
-            echo "ro-root.sh file is different, moving it into place"
-            echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
-            echo "Candle: ro-root.sh file is different, moving it into place" >> $BOOT_DIR/candle_log.txt
-            if [ -f /bin/ro-root.sh ]; then
-                rm /bin/ro-root.sh
-            fi
-            mv -f ./ro-root.sh /bin/ro-root.sh
-            chmod +x /bin/ro-root.sh
-        	
-        else
-            echo "new ro-root.sh file is same as the old one, not moving it"
-            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
-            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> $BOOT_DIR/candle_log.txt
-        fi
-    fi
-else
-    echo "ERROR: failed to download ro-root.sh"
-    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
-    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
-    echo "$(date) - download of read-only overlay script failed" >> $BOOT_DIR/candle_log.txt
-    
-    # Show error image
-    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-    then
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-            /bin/ply-image $BOOT_DIR/error.png
-            #sleep 7200
-        fi
-    fi
-
-    exit 1
+if [ -f /etc/systemd/logind.conf ] && cat /etc/systemd/logind.conf | grep -q "#HandlePowerKey=" ; then
+	sed -i 's/#HandlePowerKey=.*/HandlePowerKey=ignore/' /etc/systemd/logind.conf
+	sed -i 's/#HandlePowerKeyLongPress=ignore/HandlePowerKeyLongPress=reboot/' /etc/systemd/logind.conf
+	sed -i 's/#IdleAction=ignore/IdleAction=ignore/' /etc/systemd/logind.conf
+	
 fi
 
 
@@ -705,6 +659,116 @@ fi
 
 if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
+	echo
+	echo "Downloading and enabling read only script"
+	echo
+	
+	if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
+	    echo "Candle: Downloading cutting edge read-only script" >> /dev/kmsg
+	    echo "Candle: Downloading cutting edge read-only script" >> $BOOT_DIR/candle_log.txt
+	    wget https://raw.githubusercontent.com/createcandle/ro-overlay/main/bin/ro-root.sh -O ./ro-root.sh --retry-connrefused 
+	    
+	else
+	    echo "Candle: Downloading stable read-only script" >> /dev/kmsg
+	    echo "Candle: Downloading stable read-only script" >> $BOOT_DIR/candle_log.txt
+	    curl -s https://api.github.com/repos/createcandle/ro-overlay/releases/latest \
+	    | grep "tarball_url" \
+	    | cut -d : -f 2,3 \
+	    | tr -d \" \
+	    | sed 's/,*$//' \
+	    | wget -qi - -O ro-overlay.tar --retry-connrefused 
+	
+	    if [ -f ro-overlay.tar ]; then
+	        
+	        if [ -d ./ro-overlay ]; then
+	            echo "WARNING. Somehow detected old ro-overlay folder. Removing it first."
+	            rm -rf ./ro-overlay
+	        fi
+	        echo "unpacking ro-overlay.tar"
+	        tar -xf ro-overlay.tar
+	        rm ./ro-overlay.tar
+	    
+	        for directory in createcandle-ro-overlay*; do
+	          [[ -d $directory ]] || continue
+	          echo "Directory: $directory"
+	          mv -- "$directory" ./ro-overlay
+	        done
+	
+	        if [ -d ./ro-overlay ]; then
+	            echo "ro-overlay folder exists, OK"
+	            cp ./ro-overlay/bin/ro-root.sh ./ro-root.sh
+	            rm -rf ./ro-overlay
+	        else
+	            echo "ERROR, ro-overlay folder missing"
+	            echo "Candle: WARNING, ro-overlay folder missing" >> /dev/kmsg
+	            echo "Candle: WARNING, ro-overlay folder missing" >> $BOOT_DIR/candle_log.txt
+	        fi
+	    else
+	        echo "Ro-root tar file missing, download failed"
+	        echo "Candle: ERROR, stable read-only tar download failed" >> /dev/kmsg
+	        echo "Candle: ERROR, stable read-only tar download failed" >> $BOOT_DIR/candle_log.txt
+	        
+	        # Show error image
+	        if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+	        then
+	            if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+	                /bin/ply-image $BOOT_DIR/error.png
+	                #sleep 7200
+	            fi
+	        fi
+	
+	        exit 1
+	        
+	    fi
+	fi
+
+
+	# If the file exists, make it executable and move it into place
+	if [ -f ./ro-root.sh ]; then
+	    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+	        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
+	        echo "Candle: ro-root.sh file downloaded OK" >> $BOOT_DIR/candle_log.txt
+	        chmod +x ./ro-root.sh
+	    
+	        # Avoid risky move if possible
+	        if ! diff -q ./ro-root.sh /bin/ro-root.sh &>/dev/null; then
+			    wait
+	            echo "ro-root.sh file is different, moving it into place"
+	            echo "Candle: ro-root.sh file is different, moving it into place" >> /dev/kmsg
+	            echo "Candle: ro-root.sh file is different, moving it into place" >> $BOOT_DIR/candle_log.txt
+	            if [ -f /bin/ro-root.sh ]; then
+	                rm /bin/ro-root.sh
+	            fi
+	            mv -f ./ro-root.sh /bin/ro-root.sh
+	            chmod +x /bin/ro-root.sh
+	        	
+	        else
+	            echo "new ro-root.sh file is same as the old one, not moving it"
+	            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> /dev/kmsg
+	            echo "Candle: downloaded ro-root.sh file is same as the old one, not moving it" >> $BOOT_DIR/candle_log.txt
+	        fi
+	    fi
+	else
+	    echo "ERROR: failed to download ro-root.sh"
+	    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
+	    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
+	    echo "$(date) - download of read-only overlay script failed" >> $BOOT_DIR/candle_log.txt
+	    
+	    # Show error image
+	    if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
+	    then
+	        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+	            /bin/ply-image $BOOT_DIR/error.png
+	            #sleep 7200
+	        fi
+	    fi
+	
+	    exit 1
+	fi
+
+
+
+	
     if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
         if [ -f /bin/ro-root.sh ]; then
             #isInFile4=$(cat $BOOT_DIR/config.txt | grep -c "ramfsaddr")
@@ -847,20 +911,21 @@ then
         #wait
         apt-get update --fix-missing -y
         apt --fix-broken install -y
-        if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
-            sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-            echo ""
-        fi
+		
+        #if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+        #    sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #    echo ""
+        #fi
 
         if [ -d /opt/vc/lib ]; then
             echo "removing left over /opt/vc/lib"
             rm -rf /opt/vc/lib
         fi
         
-        if [ -d /var/lib/dhcpcd5 ]; then
-            echo "removing left over dhcpcd5"
-            rm -rf /var/lib/dhcpcd5  
-        fi
+        #if [ -d /var/lib/dhcpcd5 ]; then
+        #    echo "removing left over dhcpcd5"
+        #    rm -rf /var/lib/dhcpcd5  
+        #fi
         
         
         apt-get update -y
@@ -870,9 +935,9 @@ then
         apt --fix-broken install -y
         apt autoremove -y
 	
- 		if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
-        	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-		fi
+ 		#if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+        #	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+		#fi
         echo
         echo
         echo
@@ -886,9 +951,9 @@ then
         wait
         apt-get update --fix-missing -y
         apt --fix-broken install -y
-		if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
-	    	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
-        fi
+		#if [ -f /etc/systemd/system/dhcpcd.service.d/wait.conf ]; then
+	    #	sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #fi
 		echo
         echo
         echo
@@ -1005,12 +1070,23 @@ fi
 
 
 if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
- 	echo "Installing docker"
+	echo "Installing docker"
     echo "Installing docker" >> /dev/kmsg
-    curl -sSL https://get.docker.com | sh
-	sudo usermod -aG docker pi
+	#if [ ! -f /usr/bin/docker ] ; then
+	#	echo "Installing docker"
+    #	echo "Installing docker" >> /dev/kmsg
+    #	curl -sSL https://get.docker.com | sh
+	#else
+	#	echo "Docker seems to already be installed"
+	#	echo "Docker seems to already be installed" >> /dev/kmsg
+	#fi
+ 	#usermod -aG docker pi
+	#systemctl disable docker
+	apt install -y --no-install-recommends containerd
+	systemctl disable containerd.service
 else
 	echo "not installing Docker"
+	echo "Not installing docker" >> /dev/kmsg
 fi
 
 
@@ -1292,7 +1368,7 @@ then
         DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
         apt --fix-broken install -y
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
         
         
@@ -1325,14 +1401,14 @@ then
         DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
         apt --fix-broken install -y
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
         
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt upgrade -y
         wait
         apt --fix-broken install -y
-        sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
+        #sed -i 's|/usr/lib/dhcpcd5/dhcpcd|/usr/sbin/dhcpcd|g' /etc/systemd/system/dhcpcd.service.d/wait.conf # Fix potential issue with dhcpdp on Bullseye
         echo ""
 
         apt autoremove -y
@@ -1435,71 +1511,68 @@ then
     
 
     if [ -e /usr/share/pipewire ]; then
-	  mkdir -p /home/pi/.webthings/etc
-	  mkdir -p /home/pi/.webthings/etc/pipewire
-      cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
-	  ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
-      systemctl --user enable pipewire
-	  systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service
+		mkdir -p /home/pi/.config/wireplumber/main.lua.d
+		mkdir -p /home/pi/.config/wireplumber/wireplumber.conf.d
+	
+		mkdir -p /home/pi/.webthings/etc
+		mkdir -p /home/pi/.webthings/etc/pipewire
+	    cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
+		ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
+		#systemctl --user enable pipewire
+		su -c 'systemctl --user enable pipewire' pi
+		#systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service
+		su -c 'systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service' pi
+	fi
+
+	# Disable audio device suspend
+	if [ -f /usr/share/wireplumber/scripts/suspend-node.lua ]; then
+		sed -i 's|if timeout == 0 then|if timeout >= 0 then|g' /usr/share/wireplumber/scripts/suspend-node.lua
+	fi
+	if [ -f /usr/share/wireplumber/scripts/node/suspend-node.lua ]; then
+		sed -i 's|if timeout == 0 then|if timeout >= 0 then|g' /usr/share/wireplumber/scripts/node/suspend-node.lua
 	fi
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
 	echo "installing some network applications"
-	apt install -y --no-install-recommends dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables
+	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev
+	
+
+	echo
+    echo "installing some network applications, but one at a time"
+    for i in dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev; do
+        
+        echo "$i"
+        apt  -y install "$i"  --no-install-recommends --print-uris "$reinstall"
+        echo
+    done
+
+	echo "installing DNSMASQ"
+	apt install -y --no-install-recommends dnsmasq
 	systemctl stop dnsmasq.service
-	#systemctl enable dnsmasq.service
 	systemctl disable dnsmasq.service
+	
 
  	if [ -f /home/pi/nohup.out ]; then
     	cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 	fi
 
-    # Install browser
-	if [ "$SKIP_BROWSER" = no ] || [[ -z "${SKIP_BROWSER}" ]]; 
-	then
-
-        echo ""
-    	echo "installing web browser"
-    	echo "Candle: installing web browser" >> /dev/kmsg
-    	echo "Candle: installing web browser" >> $BOOT_DIR/candle_log.txt
-    	echo ""
-
-		apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp25 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-9 libminizip1 --no-install-recommends
-
-		if [ "$BIT32" = no ] || [[ -z "${BIT32}" ]]
-  		then
-			# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
-    		wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
-    		yes | dpkg -i ungoogled-chromium_112.0.5615.165-1_arm64.deb
-    		rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
-   		else
-	 		apt install -y chromium
-		fi
-   
-    	
-    	#apt-get -f install -y
-	    apt --fix-broken -y install
-	 	#  --no-install-recommends
-    else
-    	echo
-    	echo "Skipping installation of browser"
-    	echo
-    fi
+    
 
     
 
 
     echo
     echo "installing vlc"
-    apt -y install vlc vlc-plugin-pipewire --no-install-recommends "$reinstall" #--print-uris
+    apt -y install v4l-utils vlc vlc-plugin-pipewire --no-install-recommends "$reinstall" #--print-uris
 
     #echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
     #curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Bullseye/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
     #apt update
     #apt install ungoogled-chromium -y
 
-    echo
+
+	echo
     echo "installing build tools"
     for i in autoconf automake build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
         libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-pip python3-six; do
@@ -1508,6 +1581,49 @@ then
         apt  -y install "$i"  --no-install-recommends --print-uris "$reinstall"
         echo
     done
+	
+
+	# temporarily disabled
+	if [ ! -f /usr/local/bin/python3.11 ] && [ ! -f /usr/bin/python3.11 ] && [ ! -f /etc/fstab ]; then
+		echo "Python 3.11 is not already installed. Installing it now."
+		echo "Python 3.11 is not already installed. Installing it now." >> /dev/kmsg
+
+		# libssl-dev libncurses5-dev libsqlite3-dev libreadline-dev libtk8.6 libgdm-dev libdb4o-cil-dev libpcap-dev
+		apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libsqlite3-dev libssl-dev libreadline-dev libffi-dev wget libpcap-dev --no-install-recommends -y
+
+		wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz
+		if [ -f Python-3.11.9.tgz ]; then
+			tar -xzf Python-3.11.9.tgz
+			rm Python-3.11.9.tgz
+			if [ -d Python-3.11.9 ]; then
+				cd Python-3.11.9/
+				./configure --enable-optimizations --enable-loadable-sqlite-extensions
+				make -j$(nproc)
+				make altinstall
+		
+				if [ -f /usr/local/bin/python3.11 ]; then
+					update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.11 1
+					echo "Installation of Python 3.11 complete"
+					echo "Installation of Python 3.11 complete" >> /dev/kmsg
+				else
+					echo "Installation of Python 3.11 failed"
+					echo "Installation of Python 3.11 failed" >> /dev/kmsg
+					exit 1
+				fi
+				cd ..
+				rm -rf Python-3.11.9
+			else
+				echo "Extraction of Python 3.11 failed"
+				echo "Extraction of Python 3.11 failed" >> /dev/kmsg
+				exit 1
+			fi
+		else
+			echo "Download of Python 3.11 failed"
+			echo "Download of Python 3.11 failed" >> /dev/kmsg
+			exit 1
+		fi
+
+	fi
 
 
     # remove the Candle conf file, just in case it exists from an earlier install attempt
@@ -1521,12 +1637,23 @@ then
     echo "Candle: installing support packages" >> $BOOT_DIR/candle_log.txt
     echo
 
+	# Downgrading the default python3 version to 3.11 can create issues.
+	# The lines below might help with issues relating to this change.
+	sudo apt-get install python3-apt --reinstall
+	apt-get purge -y --auto-remove ufw
+	apt-get install ufw -y
+
+	
+
     # Debian Bookworm doesn't have libffi7 anymore
     # libspandsp-dev libgirepository1.0-dev\
-    for i in curl arping autoconf ffmpeg libswresample3 libtool mosquitto policykit-1 sqlite3 libolm3 libffi8 \
+
+	# TODO: is policykit-1 still needed in trixie?
+	# cpufrequtils is not available in trixie
+    for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto sqlite3 libolm3 libffi* \
 	    nbtscan ufw iptables liblivemedia-dev libcamera-apps libcamera-tools avahi-utils jq i2c-tools cups \
- 	    cpufrequtils lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
-	    netcat-traditional nscd; do
+ 	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
+	    netcat-traditional nscd upower evtest; do
             
 		echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
@@ -1544,6 +1671,13 @@ then
     fi
 
 
+	echo
+    echo "installing Vulkan drivers"
+    echo
+	apt -y --no-install-recommends install mesa-vulkan-drivers mesa-utils vulkan-tools 
+	
+	
+
     # This essentially turns it into a desktop pi
     #apt install raspberrypi-ui-mods
 
@@ -1560,8 +1694,10 @@ then
 	#    apt install -y --no-install-recommends rtkit xsettingsd xinput xserver-xorg x11-xserver-utils xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
 	
 	#    apt install -y --no-install-recommends xsettingsd xinput xserver-xorg x11-xserver-utils xinit wmctrl xdotool feh fbi unclutter lsb-release xfonts-base xfonts-75dpi xfonts-100dpi edid-decode libinput-tools libxcb-dpms0 xbacklight xserver-xorg-input-libinput xserver-xorg-input-mtrack
-    apt install -y --no-install-recommends xserver-xorg-core x11-xserver-utils xauth xinit xinput xserver-xorg-input-evdev feh edid-decode unclutter xdotool xfonts-base fonts-noto-color-emoji fonts-symbola mesa-vulkan-drivers
+    apt install -y --no-install-recommends xserver-xorg-core x11-xserver-utils xauth xinit xinput xserver-xorg-input-evdev feh edid-decode unclutter dbus-x11 xdotool xfonts-base fonts-noto-color-emoji fonts-symbola onboard
 
+	# For Onboard virtual keyboard
+	apt install at-spi2-core -y
 
  
 
@@ -1578,13 +1714,15 @@ then
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
     # Camera support
-    for i in python3-pip python3-libcamera python3-picamera2 python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7; do
+    for i in python3-pip python3-libcamera python3-picamera2 python3-kms++ python3-prctl libopenblas-dev libopenjp2-7; do
         echo "$i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
         apt install -y --no-install-recommends "$i"  "$reinstall" #--print-uris
         echo
     done
+
+	
     
     echo
     echo "INSTALLING HOSTAPD AND DNSMASQ"
@@ -1617,6 +1755,56 @@ then
     apt autoremove -y
     
     wait
+
+
+
+	# Install browser
+	if [ "$SKIP_BROWSER" = no ] || [[ -z "${SKIP_BROWSER}" ]]; 
+	then
+
+        echo ""
+    	echo "installing web browser"
+    	echo "Candle: installing web browser" >> /dev/kmsg
+    	echo "Candle: installing web browser" >> $BOOT_DIR/candle_log.txt
+    	echo ""
+
+		apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp26 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-11 libminizip1 libflac14 --no-install-recommends
+
+		if [ "$BIT32" = no ] || [[ -z "${BIT32}" ]]
+  		then
+			echo "installing ungoogled_chromium"
+			echo "installing ungoogled_chromium" >> /dev/kmsg
+			
+			# from https://software.opensuse.org//download.html?project=home%3Aungoogled_chromium&package=ungoogled-chromium
+    		#wget https://ftp.gwdg.de/pub/opensuse/repositories/home%3A/ungoogled_chromium/Debian_Sid/arm64/ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    		#yes | dpkg -i --force-all ungoogled-chromium_112.0.5615.165-1_arm64.deb
+    		#rm ungoogled-chromium_112.0.5615.165-1_arm64.deb
+
+			if [ -f /usr/bin/chromium ]; then
+				rm /usr/bin/chromium
+			fi
+			wget -O /usr/bin/chromium https://github.com/ungoogled-software/ungoogled-chromium-portablelinux/releases/download/141.0.7390.54-1/ungoogled-chromium-141.0.7390.54-1-arm64.AppImage
+			if [ -f /usr/bin/chromium ]; then
+				chmod +x /usr/bin/chromium
+			else
+				echo "installing ungoogled chromium failed"
+				echo "installing ungoogled chromium failed" >> /dev/kmsg
+			fi
+			
+   		else
+			echo "installing normal chromium"
+			echo "installing normal chromium" >> /dev/kmsg
+	 		apt install -y chromium
+		fi
+   
+    else
+    	echo
+    	echo "Skipping installation of browser"
+    	echo
+    fi
+
+
+	
 	
     # Check if the binaries eactually exist
     for i in \
@@ -1645,15 +1833,17 @@ then
     wait
     # TODO: removed libffi7 / libffi8 check
     # removed libdbus-glib-1-dev (bluealsa now uses version 2 instead)
-    # For bookworm libavcodec58 was changed to libavcodec59
+    # For bookworm libavcodec58 was changed to libavcodec59, and for trixie it became 61
+	# with trixie libavformat59 became libavformat61
     # removed libgirepository1.0-dev to test if it's still needed
+	# TODO: is policykit-1 still needed?
     for i in \
     git autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
     libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
-    arping autoconf ffmpeg libtool mosquitto policykit-1 sqlite3 libolm3 nbtscan ufw iptables \
-    liblivemedia-dev libavcodec59 libswresample3 libffi8 libavformat59 \
+    arping autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan ufw iptables \
+    liblivemedia-dev libavcodec61 libswresample5 libffi8 libavformat61 \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
-    python3-kms++ python3-prctl libatlas-base-dev libopenjp2-7 python3-pip \
+    python3-kms++ python3-prctl libopenblas0 libopenjp2-7 python3-pip \
     vlc unclutter;
     do
         echo ""
@@ -1700,6 +1890,11 @@ then
     echo "--"
 
 fi
+
+
+
+
+
 
 
 sleep 5
@@ -1817,9 +2012,10 @@ fi
 sudo -u pi python3 -m pip install --upgrade pip
 
 # python3-iffr doesn't exist? so removed, replaced by python3-cffi
-apt install -y --no-install-recommends python3-dbus python3-cffi python3-gpiozero python3-pil python3-wheel python3-requests python3-distro python3-certifi python3-urllib3 python3-colorzero python3-chardet python3-libevdev python3-numpy python3-bluetooth
+apt install -y --no-install-recommends python3-dbus python3-cffi python3-gpiozero python3-pil python3-wheel python3-requests python3-distro python3-certifi python3-urllib3 python3-colorzero python3-chardet python3-libevdev python3-numpy python3-bluetooth python3-pillow
 sudo -u pi pip3 uninstall -y adapt-parser || true
 sudo -u pi pip3 install pycryptodomex --break-system-packages
+sudo -u pi pip3 install pillow --break-system-packages
 
 #sudo -u pi pip3 install --break-system-packages git+https://github.com/pybluez/pybluez.git#egg=pybluez
 sudo -u pi pip3 install --break-system-packages git+https://github.com/pybluez/pybluez.git#egg=pybluez 
@@ -2274,8 +2470,8 @@ mkdir -p /var/run/mosquitto/
 chown mosquitto: /var/run/mosquitto
 chmod 755 /var/run/mosquitto
 
-mkdir -p /var/log/mosquitto
-chown -R pi:pi /var/log/mosquitto
+mkdir -m 740 -p /var/log/mosquitto
+chown -R mosquitto:mosquitto /var/log/mosquitto
 
 
 # TODO: would this help with mosquitto?
@@ -2285,10 +2481,11 @@ chown -R pi:pi /var/log/mosquitto
 # Make folders that should be owned by root
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
 mkdir -p /home/pi/.webthings/etc/wpa_supplicant
-#mkdir -p /home/pi/.webthings/etc/NetworkManager/
+
 mkdir -p /home/pi/.webthings/etc/ssh
 
-
+mkdir -p /home/pi/.webthings/etc/NetworkManager/
+cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
 
 #echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
@@ -2328,7 +2525,12 @@ echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 
 mkdir -p /home/pi/.webthings/arduino
 mkdir -p /home/pi/.webthings/arduino/Arduino
+chown -R pi:pi /home/pi/.webthings/arduino/Arduino
 mkdir -p /home/pi/.webthings/arduino/.arduino15
+chown -R pi:pi /home/pi/.webthings/arduino/.arduino15
+
+
+mkdir -p /home/pi/.webthings/etc/
 
 #cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
 if [ ! -f /home/pi/.webthings/etc/ssh/ssh_config ]; then
@@ -2340,6 +2542,12 @@ fi
 mkdir -p /home/pi/.webthings/etc/ssh/ssh_config.d
 mkdir -p /home/pi/.webthings/etc/ssh/sshd_config.d 
 
+mkdir -p /home/pi/.webthings/chromium
+chown -R pi:pi /home/pi/.webthings/chromium
+
+
+mkdir -p /home/pi/.webthings/data
+mkdir -p /home/pi/.webthings/data/dashboard
 
 # Create "empty" wpa_supplicant config file if it doesn't exist yet
 if [ ! -f /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf ]; then
@@ -2419,22 +2627,22 @@ if [ ! -f /home/pi/candle/early.sh ]; then
 fi
 
 # CHMOD THE NEW FILES
-chmod +x /home/pi/candle/early.sh
+chmod +x /home/pi/candle/*.sh
 chmod +x /etc/rc.local
-chmod +x /home/pi/candle/reboot_to_recovery.sh
+#chmod +x /home/pi/candle/reboot_to_recovery.sh
 #if [ -f /etc/xdg/openbox/autostart ]; then
 #    chmod +x /etc/xdg/openbox/autostart
 #fi
-chmod +x /home/pi/candle/late.sh
-chmod +x /home/pi/candle/kiosk.sh
-chmod +x /home/pi/candle/splash_video.sh
-chmod +x /home/pi/candle/every_minute.sh
-chmod +x /home/pi/candle/debug.sh
-chmod +x /home/pi/candle/files_check.sh
-chmod +x /home/pi/candle/install_samba.sh
-chmod +x /home/pi/candle/prepare_for_disk_image.sh
-chmod +x /home/pi/candle/unsnap.sh
-chmod +x /home/pi/candle/respeaker_check.sh
+#chmod +x /home/pi/candle/late.sh
+#chmod +x /home/pi/candle/kiosk.sh
+#chmod +x /home/pi/candle/splash_video.sh
+#chmod +x /home/pi/candle/every_minute.sh
+#chmod +x /home/pi/candle/debug.sh
+#chmod +x /home/pi/candle/files_check.sh
+#chmod +x /home/pi/candle/install_samba.sh
+#chmod +x /home/pi/candle/prepare_for_disk_image.sh
+#chmod +x /home/pi/candle/unsnap.sh
+#chmod +x /home/pi/candle/respeaker_check.sh
 
 
 # CHOWN THE NEW FILES
@@ -2468,6 +2676,15 @@ fi
 if [ -d /usr/lib/aarch64-linux-gnu ]; then
   if [ ! -f /usr/lib/aarch64-linux-gnu/libffi.so.6 ] && [ -f /usr/lib/aarch64-linux-gnu/libffi.so.7 ]; then
     if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.6 ]; then
+      echo "creating symlink for  libffi.so.6 -> libffi.so.7"
+      ln -s /usr/lib/aarch64-linux-gnu/libffi.so.7 /usr/lib/aarch64-linux-gnu/libffi.so.6
+    fi
+  elif [ ! -f /usr/lib/aarch64-linux-gnu/libffi.so.6 ] && [ -f /usr/lib/aarch64-linux-gnu/libffi.so.8 ]; then
+    if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.6 ]; then
+      echo "creating symlink for  libffi.so.6 -> libffi.so.8"
+      ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/aarch64-linux-gnu/libffi.so.6
+    fi
+	if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.7 ]; then
       echo "creating symlink for  libffi.so.6 -> libffi.so.7"
       ln -s /usr/lib/aarch64-linux-gnu/libffi.so.7 /usr/lib/aarch64-linux-gnu/libffi.so.6
     fi
@@ -2508,12 +2725,17 @@ fi
 if [ ! -L /etc/fake-hwclock.data ]; then
     echo "removing /etc/fake-hwclock.data file and creating a symlink to /home/pi/.webthings/etc/fake-hwclock.data instead"
     # create fake-hwclock file
+	mkdir -p /home/pi/.webthings/etc/
     if [ ! -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
         echo "copying /etc/fake-hwclock.data to /home/pi/.webthings/etc/fake-hwclock.data"
         cp --verbose /etc/fake-hwclock.data /home/pi/.webthings/etc/fake-hwclock.data
     fi
-    rm /etc/fake-hwclock.data
-    ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
+	if [ -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
+        rm /etc/fake-hwclock.data
+        ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
+	else
+        echo "ERROR, copying fake-hwclock.data has failed"
+	fi
 fi
 
 
@@ -2532,7 +2754,6 @@ if [ ! -L /etc/default/locale ]; then
     rm /etc/default/locale
     ln -s /home/pi/.webthings/etc/default/locale /etc/default/locale
 fi
-
 
 
 
@@ -2563,7 +2784,7 @@ systemctl enable candle_early.service
 systemctl enable candle_late.service 
 systemctl enable candle_kiosk.service
 systemctl enable candle_splash_video.service
-systemctl enable candle_every_minute.timer
+#systemctl enable candle_every_minute.timer
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
 systemctl enable candle_reboot.service
@@ -2572,14 +2793,17 @@ systemctl enable candle_splashscreen_updating.service
 systemctl enable candle_splashscreen_updating180.service
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 # TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon). Then again, can't hurt to have redundancy.
-systemctl enable candle_silence_player.service
+#systemctl enable candle_silence_player.service
 
 # disable old splash screen
 systemctl disable splashscreen.service
 
 # enable BlueAlsa services
-systemctl enable bluealsa.service 
-systemctl enable bluealsa-aplay.service 
+if [ "$SKIP_BLUEALSA" = no ] || [ -z "${SKIP_BLUEALSA}" ]
+then
+	systemctl enable bluealsa.service 
+	systemctl enable bluealsa-aplay.service 
+fi
 
 # Webthings Gateway
 systemctl enable webthings-gateway.service
@@ -2602,9 +2826,20 @@ if systemctl list-units --full -all | grep -Fq ModemManager.service; then
     systemctl mask ModemManager.service
 fi
 
+if systemctl list-units --full -all | grep -Fq rpi-eeprom-update.service; then
+	systemctl disable rpi-eeprom-update.service
+fi
+if systemctl list-units --full -all | grep -Fq rpi-eeprom-update.service; then
+	systemctl disable rpi-eeprom-update.service
+fi
+
+
 #disable wpa_supplicant service because dhpcpcd is managing it. Otherwise it runs twice.
-systemctl disable wpa_supplicant.service
-systemctl mask wpa_supplicant.service
+
+if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
+	systemctl disable wpa_supplicant.service
+	systemctl mask wpa_supplicant.service
+fi
 
 systemctl disable regenerate_ssh_host_keys.service
 systemctl mask regenerate_ssh_host_keys.service
@@ -2614,7 +2849,15 @@ systemctl enable fake-hwclock-save.service
 
 # Hide the login text (it will still be available on tty3 - connect a keyboard to your pi and press CTRl-ALT-F3 to see it)
 systemctl enable getty@tty3.service
-systemctl disable getty@tty1.service
+#systemctl disable getty@tty1.service
+
+
+
+
+if [ -f /etc/xdg/labwc/rc.xml ]; then
+    
+	sed -i 's/mouseEmulation="no"/mouseEmulation="yes"/' /etc/xdg/labwc/rc.xml
+fi
 
 
 if [ -f /home/pi/candle/ready.sh ]; then
@@ -2834,6 +3077,13 @@ if [ ! -f "$BOOT_DIR/splash_updating-0.png" ]; then
 fi
 
 
+if [ -f /etc/xdg/pcmanfm/LXDE-pi/desktop-items-0.conf ] && [ -f /boot/firmware/splash.png ]; then
+	sed -i 's/wallpaper=/usr/share/rpd-wallpaper/fisherman.jpg/wallpaper=/boot/firmware/splash.png' /etc/xdg/pcmanfm/LXDE-pi/desktop-items-0.conf
+	sed -i 's/show_trash=1/show_trash=0' /etc/xdg/pcmanfm/LXDE-pi/desktop-items-0.conf
+	sed -i 's/show_mounts=1/show_mounts=0' /etc/xdg/pcmanfm/LXDE-pi/desktop-items-0.conf
+fi
+
+
 
 
 # CLEANUP
@@ -2900,13 +3150,25 @@ if [ -d /opt/vc/lib ]; then
 fi
 
 
-echo "removing swap"
 
-dphys-swapfile swapoff
-dphys-swapfile uninstall
-update-rc.d dphys-swapfile remove
+
+# bookwork and older versions
+if [ -f /usr/sbin/dphys-swapfile ]; then
+	echo "removing swap"
+	dphys-swapfile swapoff
+	dphys-swapfile uninstall
+	update-rc.d dphys-swapfile remove
+fi
+
+# trixie
+if [ -f /usr/sbin/swapoff ]; then
+	echo "disabling swap"
+	swapoff --all
+	systemctl mask swap.target
+fi
+
 if [ -f /home/pi/.webthings/swap ]; then
-    # TODO: don't remove this if the syetem is low on memory (which is why it's there in the first place)
+    # TODO: don't remove this if the system is low on memory (which is why it's there in the first place)
     swapoff /home/pi/.webthings/swap
     rm /home/pi/.webthings/swap
 fi
@@ -2951,10 +3213,10 @@ fi
 # Change CUPS printing setting
 
 if [ -f /etc/cups/cups.conf ]; then
-	sed -i ' 1 s/WebInterface Yes/WebInterface No/' /etc/cups/cups.conf
- 	sed -i ' 1 s/LogLevel .*/LogLevel none/' /etc/cups/cups.conf
-	sed -i ' 1 s/MaxLogSize 0/MaxLogSize 1/' /etc/cups/cups.conf
- 	sed -i ' 1 s/ErrorPolicy retry-job/ErrorPolicy abort-job/' /etc/cups/cups.conf
+	sed -i 's/WebInterface Yes/WebInterface No/' /etc/cups/cups.conf
+ 	sed -i 's/LogLevel .*/LogLevel none/' /etc/cups/cups.conf
+	sed -i 's/MaxLogSize 0/MaxLogSize 1/' /etc/cups/cups.conf
+ 	sed -i 's/ErrorPolicy retry-job/ErrorPolicy abort-job/' /etc/cups/cups.conf
     usermod -a -G lpadmin pi
 fi
 
@@ -2991,7 +3253,7 @@ fi
 # Set to boot from partition2
 if cat $BOOT_DIR/cmdline.txt | grep -q PARTUUID; then
     echo "replacing PARTUUID= in bootcmd.txt with /dev/mmcblk0p2"
-    sed -i ' 1 s|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' $BOOT_DIR/cmdline.txt # should that g be there?
+    sed -i ' 1 s|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' $BOOT_DIR/cmdline.txt
     #sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' $BOOT_DIR/cmdline.txt   
 fi
 
@@ -3325,6 +3587,7 @@ echo "#!/bin/sh" > /usr/lib/apt/apt.systemd.daily
 systemctl disable dpkg-db-backup.timer
 systemctl disable dphys-swapfile
 
+systemctl disable docker.service
 systemctl disable containerd.service
 
 systemctl disable apt-daily.service
@@ -3456,7 +3719,6 @@ fi
 
 
 echo
-echo "checking/switching to old-school dhcpcd late"
 if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	echo
 	echo "force-installing dhcpcd"
@@ -3511,7 +3773,7 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	#TemporaryTimeout = 30
 	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
 
-		if [ -d /etc/NetworkManager/system-connections ]; then
+	if [ -d /etc/NetworkManager/system-connections ]; then
 		rm /etc/NetworkManager/system-connections/*
   		rm -rf /etc/NetworkManager/system-connections/*
 		#cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
@@ -3521,58 +3783,84 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	
 	# binary no longer seems available for bookworm...
 	#wget https://www.candlesmarthome.com/tools/dhcpcd.tar.xz --retry-connrefused   
-fi
 
-resolvconf -u
+	resolvconf -u
 
-if [ -s /etc/dhcpcd.conf ]; then
-	if cat /etc/dhcpcd.conf | grep -q uap0; then
-		echo "uap0 exception added to dhcpcd.conf already"
- 	else
-  		
- 		sed -i 's/^#clientid/clientid/' /etc/dhcpcd.conf
-		sed -i 's/^duid/#duid/' /etc/dhcpcd.conf
-  
-		echo "" >> /etc/dhcpcd.conf
-		echo "# For Candle Hotspot" >> /etc/dhcpcd.conf
-		
-  		echo "interface uap0 " >> /etc/dhcpcd.conf
-  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
-		echo "" >> /etc/dhcpcd.conf
-	    echo "interface uap1 " >> /etc/dhcpcd.conf
-  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
-		echo "" >> /etc/dhcpcd.conf
- 		echo "interface uap2 " >> /etc/dhcpcd.conf
-   		echo "denyinterfaces uap2" >> /etc/dhcpcd.conf
-  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
- 	
+	if [ -s /etc/dhcpcd.conf ]; then
+		if cat /etc/dhcpcd.conf | grep -q uap0; then
+			echo "uap0 exception added to dhcpcd.conf already"
+	 	else
+	  		
+	 		sed -i 's/^#clientid/clientid/' /etc/dhcpcd.conf
+			sed -i 's/^duid/#duid/' /etc/dhcpcd.conf
+	  
+			echo "" >> /etc/dhcpcd.conf
+			echo "# For Candle Hotspot" >> /etc/dhcpcd.conf
+			
+	  		echo "interface uap0 " >> /etc/dhcpcd.conf
+	  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+			echo "" >> /etc/dhcpcd.conf
+		    echo "interface uap1 " >> /etc/dhcpcd.conf
+	  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+			echo "" >> /etc/dhcpcd.conf
+	 		echo "interface uap2 " >> /etc/dhcpcd.conf
+	   		echo "denyinterfaces uap2" >> /etc/dhcpcd.conf
+	  		echo "nohook wpa_supplicant" >> /etc/dhcpcd.conf
+	 	
+		fi
+	 	if [ -s /etc/resolvconf/resolv.conf.d/original ]; then 
+			echo "" > /etc/resolvconf/resolv.conf.d/original
+	    fi
+	else
+		echo "ERROR: /etc/dhcpcd.conf is missing"
+	 	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
+		echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> $BOOT_DIR/candle_log.txt
+	
+	 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+	        /bin/ply-image $BOOT_DIR/error.png
+	    fi
+	  
+		exit 1
 	fi
- 	if [ -s /etc/resolvconf/resolv.conf.d/original ]; then 
-		echo "" > /etc/resolvconf/resolv.conf.d/original
-    fi
-else
-	echo "ERROR: /etc/dhcpcd.conf is missing"
- 	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> /dev/kmsg
-	echo "Candle ERROR: /etc/dhcpcd.conf is missing" >> $BOOT_DIR/candle_log.txt
 
- 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-        /bin/ply-image $BOOT_DIR/error.png
-    fi
-  
-	exit 1
+
+	resolvconf -u
 fi
+
 
 if [ -f /home/pi/nohup.out ]; then
+    echo "found nohup.out file, moving it to become the candle log"
     mv /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
-resolvconf -u
+
 
 # clear some caches
 pip cache purge
 apt-get autoclean
 apt-get autoremove
 apt clean
+
+if [ -d /usr/share/doc ]; then
+     rm -rf /usr/share/doc/*
+fi
+if [ -d /usr/share/man ]; then
+     rm -rf /usr/share/man/*
+fi
+if [ -d /usr/share/help ]; then
+     rm -rf /usr/share/help/*
+fi
+
+
+
+if [ -d /etc/cloud/ ]; then
+	touch /etc/cloud/cloud-init.disabled
+fi
+
+if [ -f /etc/cloud ]; then
+	rm -rf /etc/cloud
+fi
+
 
 # This is handled by prepare_disk_image
 chmod +x /home/pi/candle/candle_first_run.sh
@@ -3582,38 +3870,7 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
     fi
 fi
 
-SDCARD_SIZE=$(blockdev --getsize64 /dev/mmcblk0)
-if [ "$SDCARD_SIZE" -gt "21914983424" ]; then
 
-	
- 	echo "$(date) - Large SD Card, so stopping early" >> /home/pi/.webthings/candle.log
-	
-	# Show installation complete indication image
-	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/splash_updating-5.png ]; then
-		/bin/ply-image $BOOT_DIR/splash_updating-5.png
-	fi
-
-	exit 0
-fi
-
-
-
-# add some useful commands to the bash history
-# TODO: Isn't this already handled by prepare_for_disk_image.sh ?
-echo "curl -sSL www.candlesmarthome.com/tools/samba.txt | sudo bash" > /home/pi/.bash_history
-echo "sudo fsck -n -f" >> /home/pi/.bash_history
-echo "journalctl --boot=0 --priority=0..3" >> /home/pi/.bash_history
-echo "systemctl list-units --failed" >> /home/pi/.bash_history
-echo "sudo service --status-all" >> /home/pi/.bash_history
-echo "avahi-browse -p -l -a -r -k -t" >> /home/pi/.bash_history
-echo "cat /sys/class/drm/card0/*HDMI*/status" >> /home/pi/.bash_history
-echo "aplay -l && arecord -l" >> /home/pi/.bash_history
-echo "wpctl status" >> /home/pi/.bash_history
-echo "sudo systemctl restart webthings-gateway.service" >> /home/pi/.bash_history
-echo "hostname -I" >> /home/pi/.bash_history
-echo "sudo resolvconf -u" >> /home/pi/.bash_history
-echo "cd /boot/firmware" >> /home/pi/.bash_history
-echo "tail -f -n10 ~/.webthings/log/run-app.log" >> /home/pi/.bash_history
 
 
 # DONE!
@@ -3651,6 +3908,18 @@ fi
 echo
 
 
+
+#SDCARD_SIZE=$(blockdev --getsize64 /dev/mmcblk0)
+#if [ "$SDCARD_SIZE" -gt "21914983424" ]; then	
+# 	echo "$(date) - Large SD Card, so stopping early" >> /home/pi/.webthings/candle.log
+#	# Show installation complete indication image
+#	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/splash_updating-5.png ]; then
+#		/bin/ply-image $BOOT_DIR/splash_updating-5.png
+#	fi
+#	exit 0
+#fi
+
+
 if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
     
     if [[ -n "${CREATE_DISK_IMAGE}" ]] || [ "$CREATE_DISK_IMAGE" = yes ]; 
@@ -3659,6 +3928,7 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
         echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
         chmod +x /home/pi/candle/prepare_for_disk_image.sh 
         /home/pi/candle/prepare_for_disk_image.sh 
+		
         exit 0
   
     else
