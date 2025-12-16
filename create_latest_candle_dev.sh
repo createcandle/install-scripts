@@ -2616,7 +2616,8 @@ fi
 #fi
 
 
-
+mkdir -p /home/pi/.webthings/data
+chown -R pi:pi /home/pi/.webthings/data
 
 mkdir -p /home/pi/.webthings/uploads
 chown -R pi:pi /home/pi/.webthings/uploads
