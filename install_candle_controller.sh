@@ -585,6 +585,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     cp -rL static build/static
     find build -name '*.ts' -delete
 
+	echo "does gateway-addon/lib still exist?"
+	ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib
  
     echo ""
     echo "Compiling typescript. this will take a while..."
@@ -618,24 +620,27 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
         NODE_OPTIONS="--max-old-space-size=2048" npx --yes webpack
     fi
 
+	echo "does gateway-addon/lib exist?"
+	ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib/index.js
     
     if [ -f "$CANDLE_BASE/webthings/gateway2/build/app.js" ] \
     && [ -f "$CANDLE_BASE/webthings/gateway2/build/static/index.html" ] \
     && [ -d "$CANDLE_BASE/webthings/gateway2/node_modules" ] \
+	&& [ -f "$CANDLE_BASE/webthings/gateway2/node_modules/gateway-addon/lib/index.js" ] \
     && [ -d "$CANDLE_BASE/webthings/gateway2/build/static/bundle" ];
     then
 
-      # remove now unnecessary node modules
-      npm_config_yes=true npm prune --omit=dev -y --force-yes
+      	# remove now unnecessary node modules
+      	npm_config_yes=true npm prune --omit=dev -y --force-yes
 
-      echo "creating .post_upgrade_complete file"
-      touch .post_upgrade_complete
-      echo "$(date +%s)" > update_date.txt
-      #echo "Controller installation seems ok"
-      echo "Controller installation seems ok, at $(pwd)"
-      echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
+      	echo "creating .post_upgrade_complete file"
+      	touch .post_upgrade_complete
+      	echo "$(date +%s)" > update_date.txt
+      	#echo "Controller installation seems ok"
+      	echo "Controller installation seems ok, at $(pwd)"
+      	echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
 
-      echo
+		echo
 	    echo "New controller was created at $(pwd)"
 	    echo
 	    # Move the freshly created gateway into position
@@ -695,7 +700,7 @@ echo "Candle: Linking gateway addon" | sudo tee -a $BOOT_DIR/candle_log.txt
 if [ -d "$CANDLE_BASE/webthings/gateway/node_modules/gateway-addon" ];
 then
     cd "$CANDLE_BASE/webthings/gateway/node_modules/gateway-addon"
-    npm link
+    #npm link
     cd "$CANDLE_BASE"
 else
     echo "ERROR, $CANDLE_BASE/webthings/gateway/node_modules/gateway-addon was missing"
@@ -704,7 +709,8 @@ else
 fi
 
 
-
+echo "does gateway-addon/lib exist even later?"
+ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib/index.js
 
 # TODO: maybe do another sanity check and restore a backup if need be?
 
