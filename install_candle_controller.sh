@@ -546,7 +546,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes ci
 	node generate-version.js && node generate-types.js && npx tsc -p .
 	
-	cd ../..
+	#cd ../..
+	cd "$CANDLE_BASE/webthings/gateway2"
     
 	# attempt to fix "ECONNRESET" issue
     #npm config set registry http://registry.npmjs.org/
