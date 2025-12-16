@@ -2546,6 +2546,9 @@ mkdir -p /home/pi/.webthings/chromium
 chown -R pi:pi /home/pi/.webthings/chromium
 
 
+mkdir -p /home/pi/.webthings/data
+mkdir -p /home/pi/.webthings/data/dashboard
+
 # Create "empty" wpa_supplicant config file if it doesn't exist yet
 if [ ! -f /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf ]; then
     echo "Creating redirected wpa_supplicant file"
