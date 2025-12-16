@@ -2443,17 +2443,15 @@ systemctl stop triggerhappy.service
 cd "$CANDLE_BASE"
 
 # Make folders that should be owned by Pi user
-mkdir /home/pi/Arduino
-chown pi:pi /home/pi/Arduino
+mkdir -p /home/pi/Arduino
+chown -R pi:pi /home/pi/Arduino
 
 mkdir /home/pi/.arduino15
 chown pi:pi /home/pi/.arduino15
 
 mkdir -p /home/pi/.webthings/arduino/.arduino15
 mkdir -p /home/pi/.webthings/arduino/Arduino
-
-chown pi:pi /home/pi/.webthings/arduino/.arduino15
-chown pi:pi /home/pi/.webthings/arduino/Arduino
+chown -R pi:pi /home/pi/.webthings/arduino
 
 touch /home/pi/.webthings/candle.log
 chown pi:pi /home/pi/.webthings/candle.log
