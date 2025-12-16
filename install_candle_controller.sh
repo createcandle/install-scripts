@@ -546,6 +546,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --save
 	node generate-version.js && node generate-types.js && npx tsc -p .
 	ls
+	echo "does gateway-addon/lib exist?"
+	ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib
 	#cd ../..
 	cd "$CANDLE_BASE/webthings/gateway2"
     
