@@ -585,8 +585,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     cp -rL static build/static
     find build -name '*.ts' -delete
 
-	echo "does gateway-addon/lib still exist?"
-	ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib
+	echo "does gateway-addon/lib still exist just before compiling typescript and running webpack?"
+	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
  
     echo ""
     echo "Compiling typescript. this will take a while..."
