@@ -528,31 +528,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     
     echo "Do not worry about the errors you will see with optipng and jpegtran"
 
-	# Manually install the gateway-addon-node module so that it supports sending the origin of a message
-	mkdir -p node_modules
-	cd node_modules
-	if [ -d gateway-addon-node ]; then
-		rm -rf gateway-addon-node
-	fi
-	if [ -d gateway-addon ]; then
-		rm -rf gateway-addon
-	fi
-	git clone https://github.com/createcandle/gateway-addon-node
-	mv gateway-addon-node gateway-addon
-	cd gateway-addon
-	pwd
-	git submodule init
-	git submodule update
-	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --save
-	node generate-version.js && node generate-types.js && npx tsc -p .
-	ls
-	echo "does gateway-addon/lib exist immediately after?"
-	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
-	#cd ../..
-	cd "$CANDLE_BASE/webthings/gateway2"
-    
-	# attempt to fix "ECONNRESET" issue
-    #npm config set registry http://registry.npmjs.org/
+	
     
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
     CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes ci
@@ -585,6 +561,35 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     cp -rL static build/static
     find build -name '*.ts' -delete
 
+
+
+	# Manually install the gateway-addon-node module so that it supports sending the origin of a message
+	mkdir -p node_modules
+	cd node_modules
+	if [ -d gateway-addon-node ]; then
+		rm -rf gateway-addon-node
+	fi
+	if [ -d gateway-addon ]; then
+		rm -rf gateway-addon
+	fi
+	git clone https://github.com/createcandle/gateway-addon-node
+	mv gateway-addon-node gateway-addon
+	cd gateway-addon
+	pwd
+	git submodule init
+	git submodule update
+	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --save
+	node generate-version.js && node generate-types.js && npx tsc -p .
+	ls
+	echo "does gateway-addon/lib exist immediately after?"
+	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
+	#cd ../..
+	cd "$CANDLE_BASE/webthings/gateway2"
+    
+	# attempt to fix "ECONNRESET" issue
+    #npm config set registry http://registry.npmjs.org/
+
+	
 	echo "does gateway-addon/lib still exist just before compiling typescript and running webpack?"
 	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
  
@@ -620,7 +625,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
         NODE_OPTIONS="--max-old-space-size=2048" npx --yes webpack
     fi
 
-	echo "does gateway-addon/lib exist?"
+	echo "does gateway-addon/lib exist after webpack?"
 	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib/index.js
  
 	#&& [ -f "$CANDLE_BASE/webthings/gateway2/node_modules/gateway-addon/lib/index.js" ] \	
