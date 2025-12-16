@@ -1021,7 +1021,8 @@ then
     
     for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface scenes dashboard; 
     do
-        echo "$addon"
+        echo ""
+		echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
             | grep "browser_download_url" \
             | grep "$ARCHSTRING-v3.9" \
@@ -1039,6 +1040,7 @@ then
         #  rm -rf ./"$addon"
         #  mv -- "$directory" ./$addon
         #done
+		ls package
         rm -rf "$addon"
         mv package "$addon"
         chown -R pi:pi "$addon"
