@@ -574,6 +574,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	fi
 	git clone https://github.com/createcandle/gateway-addon-node
 	mv gateway-addon-node gateway-addon
+	cp gateway-addon /home/pi/.nvm/versions/node/v20.19.6/lib/node_modules/
 	cd gateway-addon
 	pwd
 	git submodule init
@@ -584,14 +585,15 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	echo "does gateway-addon/lib exist immediately after?"
 	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
 	#cd ../..
+	npm link
 	cd "$CANDLE_BASE/webthings/gateway2"
     
 	# attempt to fix "ECONNRESET" issue
     #npm config set registry http://registry.npmjs.org/
 
 	
-	echo "does gateway-addon/lib still exist just before compiling typescript and running webpack?"
-	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
+	#echo "does gateway-addon/lib still exist just before compiling typescript and running webpack?"
+	#ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
  
     echo ""
     echo "Compiling typescript. this will take a while..."
