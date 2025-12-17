@@ -1156,14 +1156,14 @@ cd "$CANDLE_BASE"
 
 
 mkdir -p "$CANDLE_BASE/.webthings/config"
-chown -R pi:pi "$CANDLE_BASE/.webthings/config"
+#chown -R pi:pi "$CANDLE_BASE/.webthings/config"
 if [ ! -f "$CANDLE_BASE/.webthings/config/db.sqlite3" ];
 then
     echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a /dev/kmsg
     echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a $BOOT_DIR/candle_log.txt
     if [ -f "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3" ]; then
         cp "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3" "$CANDLE_BASE/.webthings/config/db.sqlite3"
-        chown pi:pi "$CANDLE_BASE/.webthings/config/db.sqlite3"
+        #chown pi:pi "$CANDLE_BASE/.webthings/config/db.sqlite3"
     else
         echo "ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing"
         echo "Candle: ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /dev/kmsg
@@ -1176,21 +1176,14 @@ else
 fi
 
 mkdir -p "$CANDLE_BASE/.webthings/data/dashboard"
-chown -R pi:pi "$CANDLE_BASE/.webthings/data"
+#chown -R pi:pi "$CANDLE_BASE/.webthings/data"
 if [ ! -f "$CANDLE_BASE/.webthings/data/dashboard/persistence.json" ] && [ -f "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" ];
 then
     echo "Candle: copying initial dashboard persistence file from dashboard addon" | sudo tee -a /dev/kmsg
     echo "Candle: copying initial dashboard persistence file from dashboard addon" | sudo tee -a $BOOT_DIR/candle_log.txt
-    if [ -f "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3" ]; then
-        cp "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
-        chown pi:pi "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
-    else
-        echo "ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing"
-        echo "Candle: ERROR, $CANDLE_BASE/.webthings/addons/dashboard/persistence.json was missing" | sudo tee -a /dev/kmsg
-        echo "Candle: ERROR, $CANDLE_BASE/.webthings/addons/dashboard/persistence.json was missing" | sudo tee -a $BOOT_DIR/candle_log.txt
-    fi
+    cp "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
 else
-    echo "warning, not copying dashboard persistence.json since a persistence file already exists"
+    echo "warning, not copying dashboard persistence.json since a dashboard persistence file already exists"
     echo "Candle: dashboard persistence file already existed, not replacing it" | sudo tee -a /dev/kmsg
     echo "Candle: dashboard persistence file already existed, not replacing it" | sudo tee -a $BOOT_DIR/candle_log.txt
 fi
