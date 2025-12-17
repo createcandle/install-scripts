@@ -1026,7 +1026,7 @@ then
 
     # Install Candle addons
     
-    for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface scenes dashboard; 
+    for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface dashboard scenes; 
     do
         echo ""
 		echo "$addon"
@@ -1038,20 +1038,25 @@ then
             | tr -d \" \
             | sed 's/,*$//' \
             | wget -qi - -O addon.tgz
-        tar -xf addon.tgz
-        rm addon.tgz
+		if [ -f addon.tgz ]; then
+			tar -xf addon.tgz
+	        rm addon.tgz
+	        
+	        #for directory in createcandle-"$addon"*; do
+	        #  [[ -d $directory ]] || continue
+	        #  echo "Directory: $directory"
+	        #  rm -rf ./"$addon"
+	        #  mv -- "$directory" ./$addon
+	        #done
+			ls package
+	        rm -rf "$addon"
+	        mv package "$addon"
+	        chown -R pi:pi "$addon"
+	        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+		else
+			echo "addon.tgz is missing, failed to download: $ARCHSTRING-v3.9 for $addon"
+		fi
         
-        #for directory in createcandle-"$addon"*; do
-        #  [[ -d $directory ]] || continue
-        #  echo "Directory: $directory"
-        #  rm -rf ./"$addon"
-        #  mv -- "$directory" ./$addon
-        #done
-		ls package
-        rm -rf "$addon"
-        mv package "$addon"
-        chown -R pi:pi "$addon"
-        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
     done
     
     rm ./*.tgz
