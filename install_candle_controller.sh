@@ -1061,7 +1061,12 @@ then
     
     rm ./*.tgz
 
-	if [ -d  mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+	if [ -f "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" ] && [ ! -f "$CANDLE_BASE/.webthings/data/dashboard/persistence.json" ]; then
+		mkdir -p "$CANDLE_BASE/.webthings/data/dashboard"
+		cp "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
+		chown -R pi:pi "$CANDLE_BASE/.webthings/data"
+	fi
+	
 
 fi
 
