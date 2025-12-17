@@ -531,7 +531,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	
     
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
-    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes ci
+    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --production
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
 
 
@@ -574,7 +574,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	fi
 	git clone https://github.com/createcandle/gateway-addon-node
 	mv gateway-addon-node gateway-addon
-	cp gateway-addon /home/pi/.nvm/versions/node/v20.19.6/lib/node_modules/
+	#cp gateway-addon /home/pi/.nvm/versions/node/v20.19.6/lib/node_modules/
 	cd gateway-addon
 	pwd
 	git submodule init
