@@ -2614,11 +2614,15 @@ fi
 #fi
 
 
-mkdir -p /home/pi/.webthings/data
-chown -R pi:pi /home/pi/.webthings/data
+mkdir -p $CANDLE_BASE/.webthings/data
+chown -R pi:pi $CANDLE_BASE/.webthings/data
 
-mkdir -p /home/pi/.webthings/uploads
-chown -R pi:pi /home/pi/.webthings/uploads
+mkdir -p $CANDLE_BASE/.webthings/uploads
+chown -R pi:pi $CANDLE_BASE/.webthings/uploads
+
+mkdir -p $CANDLE_BASE/.webthings/config
+echo "{}" > $CANDLE_BASE/.webthings/config/local.json
+chown -R pi:pi $CANDLE_BASE/.webthings/config
 
 if [ ! -f /home/pi/candle/early.sh ]; then
     echo "ERROR, early.sh is missing?"
