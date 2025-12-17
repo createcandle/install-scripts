@@ -1655,7 +1655,7 @@ then
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
 	    netcat-traditional nscd upower evtest; do
             
-		echo "$i"
+		echo "Candle: installing $i"
         echo "Candle: installing $i" >> /dev/kmsg
         echo "Candle: installing $i" >> $BOOT_DIR/candle_log.txt
         apt -y install "$i" --no-install-recommends --print-uris "$reinstall" 
