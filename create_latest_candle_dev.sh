@@ -1537,7 +1537,9 @@ then
 	echo "installing some network applications"
 	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev
 	
-
+	echo "removing dnsmasq-base"
+	apt remove dnsmasq-base -y
+	
 	echo
     echo "installing some network applications, but one at a time"
     for i in dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev; do
