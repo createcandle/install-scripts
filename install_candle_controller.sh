@@ -1103,13 +1103,12 @@ then
         if [ -d ./zigbee2mqtt ]; then
             chown -R pi:pi ./zigbee2mqtt
             cd ./zigbee2mqtt
-			
-            npm install -g typescript; 
-            npm i --save-dev @types/node;
 
 			nvm use 24
             nvm alias default 24
 			
+            npm install -g typescript; 
+            npm i --save-dev @types/node;
 
    			npm install --global pnpm
 
