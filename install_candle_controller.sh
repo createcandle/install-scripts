@@ -717,7 +717,7 @@ fi
 
 
 echo "does gateway-addon/lib exist even later?"
-ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib/index.js
+ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib/index.js
 
 # TODO: maybe do another sanity check and restore a backup if need be?
 
