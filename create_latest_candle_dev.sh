@@ -2855,7 +2855,8 @@ systemctl enable getty@tty3.service
 #systemctl disable getty@tty1.service
 
 # allow the hotspot network on uap0 to start automatically
-touch /boot/firmware/candle_hotspot.txt
+echo "smarthome" > /boot/firmware/candle_hotspot.txt
+
 
 
 if [ -f /etc/xdg/labwc/rc.xml ]; then
