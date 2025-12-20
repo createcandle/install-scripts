@@ -1107,8 +1107,8 @@ then
 			nvm use 24
             nvm alias default 24
 			
-            npm install -g typescript; 
-            npm i --save-dev @types/node;
+            npm install -g typescript
+            npm i --save-dev @types/node
 
    			npm install --global pnpm
 
@@ -1122,7 +1122,7 @@ then
 
 
    			npm cache clean --force
-			nvm cache clear
+			nvm cache clear --force
 
 	
    			nvm use 20
