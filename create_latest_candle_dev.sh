@@ -1736,12 +1736,12 @@ then
     systemctl stop dnsmasq.service
     
 
-    #echo "installing hostapd"
-    #apt install -y hostapd "$reinstall" #--print-uris 
-    #systemctl unmask hostapd.service
-    #systemctl disable hostapd.service
-    #systemctl stop hostapd.service
-    #echo "hostapd installed"
+    echo "installing hostapd"
+    apt install -y hostapd "$reinstall" #--print-uris 
+    systemctl unmask hostapd.service
+    systemctl disable hostapd.service
+    systemctl stop hostapd.service
+    echo "hostapd installed"
 
 	
     echo
