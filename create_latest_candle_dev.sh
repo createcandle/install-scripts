@@ -1727,26 +1727,23 @@ then
 	
     
     echo
-    echo "INSTALLING HOSTAPD AND DNSMASQ"
-    echo "Candle: installing hostapd and dnsmasq" >> /dev/kmsg
-    echo "Candle: installing hostapd and dnsmasq" >> $BOOT_DIR/candle_log.txt
+    echo "INSTALLING DNSMASQ"
+    echo "Candle: installing dnsmasq" >> /dev/kmsg
+    echo "Candle: installing dnsmasq" >> $BOOT_DIR/candle_log.txt
 
     apt install -y dnsmasq "$reinstall" #--print-uris
     systemctl disable dnsmasq.service
     systemctl stop dnsmasq.service
     
 
-    echo "installing hostapd"
-    apt install -y hostapd "$reinstall" #--print-uris 
-    systemctl unmask hostapd.service
-    systemctl disable hostapd.service
-    systemctl stop hostapd.service
+    #echo "installing hostapd"
+    #apt install -y hostapd "$reinstall" #--print-uris 
+    #systemctl unmask hostapd.service
+    #systemctl disable hostapd.service
+    #systemctl stop hostapd.service
+    #echo "hostapd installed"
 
-
- 	
-
- 
-    echo "hostapd installed"
+	
     echo
     echo "apt: doing fix-missing and autoremove"
     # Try to fix anything that may have gone wrong
