@@ -1106,18 +1106,20 @@ then
 
 			nvm use 24
             nvm alias default 24
-			
+
+			# install node v24 version of typescript globally
             npm install -g typescript
-            npm i --save-dev @types/node
+            #npm i --save-dev @types/node
 
-   			npm install --global pnpm
-
+   			#npm install --global pnpm
+			
+			pnpm install --frozen-lockfile
 			
 
 	 		#pnpm i --frozen-lockfile
-            npm i
+            #npm i
 			#npm install sqlite3 --build-from-source
-			npm run build
+			#npm run build
             #npm ci --production
 
 
