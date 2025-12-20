@@ -3105,6 +3105,10 @@ export NVM_DIR="/home/pi/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 npm cache clean --force # already done in install_candle_controller script
 
+if [ -f /boot/firmware/user-data ]; then
+	rm /boot/firmware/user-data
+fi
+
 echo "Clearing Apt leftovers"
 apt clean -y
 apt-get clean -y
