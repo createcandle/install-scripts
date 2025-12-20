@@ -1043,21 +1043,21 @@ then
 			tar -xf addon.tgz
 	        rm addon.tgz
 	        
-	        #for directory in createcandle-"$addon"*; do
-	        #  [[ -d $directory ]] || continue
-	        #  echo "Directory: $directory"
-	        #  rm -rf ./"$addon"
-	        #  mv -- "$directory" ./$addon
-	        #done
 			ls package
-	        rm -rf "$addon"
-	        mv package "$addon"
-	        chown -R pi:pi "$addon"
-	        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+			if [ -d package ]; then
+	        	#rm -rf "$addon"
+	        	mv package "$CANDLE_BASE/.webthings/addons/$addon"
+	        	#chown -R pi:pi "$addon"
+	        	mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+			else
+				echo "error, no package dir for addon: $addon"
+			fi
 		else
 			echo "addon.tgz is missing, failed to download: $ARCHSTRING-v3.9 for $addon"
 		fi
-        
+
+		sync 
+		
     done
     
     rm ./*.tgz
