@@ -1038,7 +1038,8 @@ then
             | tr -d \" \
             | sed 's/,*$//' \
             | wget -qi - -O addon.tgz
-		if [ -f addon.tgz ]; then
+			
+        if [ -f addon.tgz ]; then
 			tar -xf addon.tgz
 	        rm addon.tgz
 	        
