@@ -2788,6 +2788,7 @@ systemctl enable candle_kiosk.service
 systemctl enable candle_hotspot.service
 systemctl enable candle_splash_video.service
 #systemctl enable candle_every_minute.timer
+systemctl enable candle_every_few_seconds.timer
 systemctl enable candle_splashscreen.service
 systemctl enable candle_splashscreen180.service
 systemctl enable candle_reboot.service
