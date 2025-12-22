@@ -15,8 +15,8 @@ https://www.candlesmarthome.com/download
 ## Creating the Candle Raspberry Pi disk image
 For this you will need:
 - A Raspberry pi with at least 2Gb of memory
-- An internet router with a free network cable
-- A micro SD card of at least 16Gb
+- An internet router providing internet acess, preferably connected to via a network cable
+- A micro SD card of at least 32Gb
 - An internet connected computer that can read/write the SD card
 
 1. Install Raspberry Pi Imager software on a computer with an SD card reader.
@@ -31,25 +31,28 @@ https://www.raspberrypi.com/software/
 
 5. Make sure there is no other "candle.local" device on the network already, since after a reboot the Raspberry Pi's hostname will change to `candle.local` (if it isn't called that already). You must also plug a network cable into the Raspberry Pi to avoid download issues.
 
-6. Now insert the SD card into the Raspberry Pi, power it up, wait a minute.
+6. Take out the SD card briefly, then plug it back into your compoter. A new disk drive should appear. On it, find the `cmdline.txt` file, and edit it. Remove the word 'resize', and save the file. The SD card is now ready.
 
-7. log into it via ssh using the username and hostname you entered earlier. E.g.:
+7. Next, insert the SD card into the Raspberry Pi, power it up, wait a minute.
+
+8. log into it via from your laptop via ssh using the username and hostname you entered earlier. E.g.:
 ```
 ssh pi@candle.local
 ```
 
-8. Once logged in via SSH, you can download and run the script to create the disk image.
-```
-curl -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle.sh | sudo bash
-```
+9. Once logged in via SSH, you can download and run the script to create the disk image. You can find some versions listed below.
 
-NOTE: If the script detects that a bootloader or kernel update is available (which is very likely), then it will install these first and reboot the system. You can then log back in and run the install command again.
+NOTE: If the script detects that a bootloader or kernel update is available, then it will install these first and might reboot the system. If it does so, then you'll have to og back in and run the install command again.
 
-9. The script will easily take more than an hour to run on a Raspberry Pi 3b. When it is complete it will shut down the Raspberry Pi (assuming there are no errors).
+10. The script will easily take more than an hour to run on a Raspberry Pi 3b. When it is complete it will shut down the Raspberry Pi (assuming there are no errors).
 
-13. When you see the message that it is shutting down, wait 15 seconds until the shutdown is complete. Then take out the SD card and insert it back into your laptop again to turn it into a disk image file. On windows you can use the free version of Win32 Disk Imager for this. Make sure to check the box to only read the partitions. Name the file to be extracted something like `Candle_2.0.0.img` (depending on the intended version).
+11. When you see the message that it is shutting down, wait 15 seconds until the shutdown is complete. 
 
-14. Once you have the .img file, zip that file to `Candle_2.0.0.img.zip` (again accounting for the desired version number). It should shrink down to less than 1.5Gb in size.
+You now have a Candle controller. 
+
+12. To get an image file, take out the SD card and insert it back into your laptop again to turn it into a disk image file. On windows you can use the free version of Win32 Disk Imager for this. Make sure to check the box to only read the partitions. Name the file to be extracted something like `Candle_2.0.0.img` (depending on the intended version).
+
+13. Once you have the .img file, zip that file to `Candle_2.0.0.img.zip` (again accounting for the desired version number). It should shrink down to less than 1.5Gb in size.
 
 .
 
