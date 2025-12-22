@@ -3027,6 +3027,12 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": true, "AutoFil
 echo
 
 
+# NETWORK MANAGER
+
+# If a network cable is connected, only use that connection's DNS server(s)
+nmcli connection modify 'Wired connection 1' ipv4.dns-priority -100
+
+
 
 
 # TODO:
