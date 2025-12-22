@@ -1109,7 +1109,7 @@ then
             nvm alias default 24
 
 			# install node v24 version of typescript globally
-            npm install -g typescript
+            npm install -g typescript pnpm
             #npm i --save-dev @types/node
 
    			#npm install --global pnpm
