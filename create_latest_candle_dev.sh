@@ -3030,7 +3030,7 @@ echo
 # NETWORK MANAGER
 
 # If a network cable is connected, only use that connection's DNS server(s)
-nmcli connection modify 'Wired connection 1' ipv4.dns-priority -100
+nmcli connection modify 'Wired connection 1' ipv4.dns-priority -100 ipv6.dns-priority -100
 
 
 
