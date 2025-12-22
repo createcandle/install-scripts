@@ -1809,6 +1809,7 @@ then
     for i in \
         hostapd \
         dnsmasq \
+		dnsutils \
         mosquitto \
         ffmpeg \
         arping \
