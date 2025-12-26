@@ -1814,7 +1814,6 @@ then
 	
     # Check if the binaries eactually exist
     for i in \
-        hostapd \
         dnsmasq \
 		dnsutils \
         mosquitto \
@@ -3599,7 +3598,7 @@ if [ -f /etc/asound.conf ]; then
 fi
 
 chmod +x /home/pi/.webthings/etc/wpa_supplicant/*.sh
-sudo systemctl disable hostapd.service 
+#sudo systemctl disable hostapd.service 
 
 # remove cron files
 rm /etc/cron.daily/apt-compat
