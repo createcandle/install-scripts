@@ -6,6 +6,13 @@ export DEBIAN_FRONTEND=noninteractive
 #CUTTING_EDGE=yes 
 #CREATE_DISK_IMAGE=yes
 
+if [[ "$(uname)" == "Linux" ]]; then 
+	echo "OK, running on Linux"; 
+else
+	echo "\n\nTHIS SCRIPT IS DESIGNED TO RUN ON LINUX! \n\nABORTING!"; 
+	exit 1
+fi
+
 
 # CANDLE INSTALL AND UPDATE SCRIPT
 
