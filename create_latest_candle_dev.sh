@@ -330,8 +330,8 @@ then
             echo
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
-                echo -e "Yes\nYes" | /usr/sbin/parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 8000MB
-                printf "mkpart\np\next4\n8746MB\n16546MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted --align optimal
+                echo -e "Yes\nYes" | /usr/sbin/parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 8200MB
+                printf "mkpart\np\next4\n8946MB\n16546MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted --align optimal
 
 				# parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
 				
