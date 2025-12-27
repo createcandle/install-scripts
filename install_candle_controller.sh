@@ -545,7 +545,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     #npm run build
 
-	npm_config_yes=true npx --yes install -D typescript --force-yes
+	npm_config_yes=true yes "y" | npx --yes install -D typescript --force-yes
     #npx update-browserslist-db@latest -y --force-yes
        
     
@@ -554,7 +554,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
  	yes "y" | npm --yes install -D webpack --force-yes
     
     
-	yes "y" | npm --yes install -D typescript --force-yes
+	#yes "y" | npm --yes install -D typescript --force-yes
 
 	echo ""
 	echo "typescript should now be installed"
