@@ -366,7 +366,9 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     chown pi:pi "$CANDLE_BASE/webthings"
     cd "$CANDLE_BASE/webthings"
     
-    git clone -b add-property-set-value-origin --depth 1 https://github.com/createcandle/candle-controller.git
+    #git clone -b add-property-set-value-origin --depth 1 https://github.com/createcandle/candle-controller.git
+	git clone --depth 1 https://github.com/createcandle/candle-controller.git
+	
     if [ -d ./candle-controller ]; then
         echo "Cutting edge controller download succeeded" | sudo tee -a /dev/kmsg
         echo "Cutting edge controller download succeeded" | sudo tee -a $BOOT_DIR/candle_log.txt
