@@ -34,6 +34,8 @@ if lsblk | grep -q $BOOT_DIR/firmware; then
     BOOT_DIR="$BOOT_DIR/firmware"
 fi
 
+sudo touch $BOOT_DIR/candle_cutting_edge.txt
+
 # It should in theory be possible to install this in any directory, not just /home/pi (untested)
 CANDLE_BASE='.'
 if [ -d /home/pi ]; then
@@ -421,7 +423,7 @@ else
                     rm -rf "$CANDLE_BASE/webthings/gateway"
                 fi
                 echo "moving extracted gateway dir into place"
-                mv "$CANDLE_BASE/downloaded_controller/webthings/gateway $CANDLE_BASE/webthings/gateway"
+                mv $CANDLE_BASE/downloaded_controller/webthings/gateway $CANDLE_BASE/webthings/gateway
             else
                 echo "extraction did not go as planned"    
             fi
