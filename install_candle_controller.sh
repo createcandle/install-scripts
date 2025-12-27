@@ -17,8 +17,8 @@ echo ""
 # This script should be run as user pi (not root)
 if ! [ "$EUID" -ne 0 ] ;
 then
-  echo "Please do not run as root (do not use sudo)"
-  exit 1
+	echo "Please do not run as root (do not use sudo)"
+	exit 1
 fi
 
 if [ ! -s /etc/resolv.conf ] ; then
@@ -545,7 +545,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     #npm run build
 
-	npm_config_=true npx --yes install -D typescript --force-yes
+	npm_config_yes=true npx --yes install -D typescript --force-yes
     #npx update-browserslist-db@latest -y --force-yes
        
     
@@ -589,9 +589,16 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	echo "does gateway-addon/lib exist immediately after?"
 	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
 	#cd ../..
+	cd ..
 	npm link
 	cd "$CANDLE_BASE/webthings/gateway2"
-    
+
+	echo "Installing typescript globally"
+	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes install -g typescript --save-dev --force-yes
+
+	echo "Typescript version:"
+	tsc --version
+	
 	# attempt to fix "ECONNRESET" issue
     #npm config set registry http://registry.npmjs.org/
 
