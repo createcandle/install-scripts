@@ -2807,6 +2807,13 @@ systemctl enable candle_hostname_fix.service # ugly solution, might not even be 
 # TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon). Then again, can't hurt to have redundancy.
 #systemctl enable candle_silence_player.service
 
+# Disable timers that are useless on a read-only filesystem
+systemctl disable dpkg-db-backup.timer
+systemctl disable apt-daily.timer
+systemctl disable apt-daily-upgrade.timer
+systemctl man-db.timer
+
+
 # disable old splash screen
 systemctl disable splashscreen.service
 
