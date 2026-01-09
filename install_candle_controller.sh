@@ -535,7 +535,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	
     
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
-    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --production
+    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --omit=dev
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
 
 
@@ -545,7 +545,9 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     #npm run build
 
+	#npm_config_yes=true npx --yes install -D typescript --force-yes
 	npm_config_yes=true yes "y" | npx --yes install -D typescript --force-yes
+	
     #npx update-browserslist-db@latest -y --force-yes
        
     
@@ -594,7 +596,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	cd "$CANDLE_BASE/webthings/gateway2"
 
 	echo "Installing typescript globally"
-	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes install -g typescript --save-dev --force-yes
+	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes install -g typescript --save-dev --force-yes 
 
 	echo "Typescript version:"
 	tsc --version
