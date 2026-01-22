@@ -1039,7 +1039,7 @@ then
 
     # Install Candle addons
     
-    for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface dashboard scenes hotspot; 
+    for addon in candle-theme tutorial bluetoothpairing privacy-manager webinterface dashboard scenes hotspot energyuse; 
     do
         echo ""
 		echo "$addon"
