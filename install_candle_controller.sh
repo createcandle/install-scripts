@@ -1078,6 +1078,10 @@ then
 	if [ -f "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" ] && [ ! -f "$CANDLE_BASE/.webthings/data/dashboard/persistence.json" ]; then
 		mkdir -p "$CANDLE_BASE/.webthings/data/dashboard"
 		cp "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
+		echo "dashboard/persistence.json:"
+		echo
+		cat "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
+		echo
 		chown -R pi:pi "$CANDLE_BASE/.webthings/data"
 	fi
 	
