@@ -3595,6 +3595,7 @@ fi
 
 # Some final insurance
 chown pi:pi /home/pi/*
+chown pi:pi /home/pi/.webthings/candle.log
 chown -R pi:pi /home/pi/candle/*
 
 #rm -rf python311
