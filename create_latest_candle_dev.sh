@@ -1093,8 +1093,20 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	systemctl stop containerd.service
 	systemctl disable containerd.service
 	mkdir -p /home/pi/.webthings/containerd
+	mkdir -p /home/pi/.webthings/containerd/usr
+	mkdir -p /home/pi/.webthings/containerd/etc
+	mkdir -p /home/pi/.webthings/containerd/opt
+	mkdir -p /home/pi/.webthings/containerd/run
 	chown -R root:root /home/pi/.webthings/containerd
 	
+	sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
+
+	wget https://github.com/containerd/nerdctl/releases/download/v2.2.1/nerdctl-2.2.1-linux-arm64.tar.gz
+	tar xf nerdctl-2.2.1-linux-arm64.tar.gz -C /usr/local/bin
+	
+	chown -R root:root /home/pi/.webthings/containerd
+
+	# no longer needed, as config.toml has been added to configuration_files
 	sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
 
 	containerd-rootless-setuptool.sh install
