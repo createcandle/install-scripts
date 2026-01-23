@@ -1089,12 +1089,17 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	#fi
  	#usermod -aG docker pi
 	#systemctl disable docker
-	apt install -y --no-install-recommends containerd
+	apt install -y --no-install-recommends containerd rootlesskit
+	systemctl stop containerd.service
 	systemctl disable containerd.service
 	mkdir -p /home/pi/.webthings/containerd
 	chown -R root:root /home/pi/.webthings/containerd
 	
 	sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
+
+	containerd-rootless-setuptool.sh install
+	systemctl stop containerd.service
+	systemctl disable containerd.service
 	 
 	
 else
