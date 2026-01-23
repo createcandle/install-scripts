@@ -3930,8 +3930,9 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
     fi
 fi
 
-
-
+if [ -f /home/pi/.webthings/candle_original_version.txt ]; then
+	chmod -x /home/pi/.webthings/candle_original_version.txt
+fi
 
 # DONE!
 echo "$(date) - Candle install script done" >> /home/pi/.webthings/candle.log
