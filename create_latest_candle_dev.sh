@@ -1119,7 +1119,7 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	#sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
 
 	wget https://github.com/containerd/nerdctl/releases/download/v2.2.1/nerdctl-2.2.1-linux-arm64.tar.gz
-	tar xf nerd
+	tar xf nerdctl-2.2.1-linux-arm64.tar.gz -C /usr/local/bin
 	sshpass -p 'smarthome' ssh pi@localhost "containerd-rootless-setuptool.sh install"
 	systemctl stop containerd.service
 	systemctl disable containerd.service
