@@ -1089,7 +1089,9 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	#fi
  	#usermod -aG docker pi
 	#systemctl disable docker
-	apt install -y --no-install-recommends containerd rootlesskit
+	apt install -y --no-install-recommends containerd
+	apt install -y rootlesskit
+	
 	systemctl stop containerd.service
 	systemctl disable containerd.service
 	mkdir -p /home/pi/.webthings/containerd
@@ -1109,7 +1111,7 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	# no longer needed, as config.toml has been added to configuration_files
 	sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
 
-	containerd-rootless-setuptool.sh install
+	sudo su pi -c "containerd-rootless-setuptool.sh install"
 	systemctl stop containerd.service
 	systemctl disable containerd.service
 	 
