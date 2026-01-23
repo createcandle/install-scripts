@@ -1089,7 +1089,7 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	#fi
  	#usermod -aG docker pi
 	#systemctl disable docker
-	apt install -y --no-install-recommends containerd
+	apt install -y --no-install-recommends containerd systemd-container
 	apt install -y rootlesskit
 	
 	systemctl stop containerd.service
