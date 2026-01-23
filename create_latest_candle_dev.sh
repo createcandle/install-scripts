@@ -1095,28 +1095,37 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	systemctl stop containerd.service
 	systemctl disable containerd.service
 	mkdir -p /home/pi/.webthings/containerd
+	if [ -d /var/lib/containerd ]; then
+		cp -R /var/lib/containerd /home/pi/.webthings/containerd
+	fi
 	mkdir -p /home/pi/.webthings/containerd/usr
+	mkdir -p /home/pi/.webthings/containerd/usr/lib/cni
 	mkdir -p /home/pi/.webthings/containerd/etc
+	mkdir -p /home/pi/.webthings/containerd/etc/cni
+	mkdir -p /home/pi/.webthings/containerd/etc/nri/conf.d
+	mkdir -p /home/pi/.webthings/containerd/etc/containerd/ocicrypt
 	mkdir -p /home/pi/.webthings/containerd/opt
+	mkdir -p /home/pi/.webthings/containerd/opt/containerd
+	mkdir -p /home/pi/.webthings/containerd/opt/nri/plugins
 	mkdir -p /home/pi/.webthings/containerd/run
+	mkdir -p /home/pi/.webthings/containerd/var/run/nri
 	chown -R root:root /home/pi/.webthings/containerd
+
 	
-	sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
+
+	
+	
+	# no longer needed, as config.toml has been added to configuration_files
+	#sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
 
 	wget https://github.com/containerd/nerdctl/releases/download/v2.2.1/nerdctl-2.2.1-linux-arm64.tar.gz
-	tar xf nerdctl-2.2.1-linux-arm64.tar.gz -C /usr/local/bin
-	rm nerdctl*
-	
-	chown -R root:root /home/pi/.webthings/containerd
-
-	# no longer needed, as config.toml has been added to configuration_files
-	sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
-
-	#sudo su pi -c "containerd-rootless-setuptool.sh install"
+	tar xf nerd
 	sshpass -p 'smarthome' ssh pi@localhost "containerd-rootless-setuptool.sh install"
 	systemctl stop containerd.service
 	systemctl disable containerd.service
-	 
+
+	chown -R root:root /home/pi/.webthings/containerd
+	rm nerdctl*
 	
 else
 	echo "not installing Docker"
