@@ -1074,7 +1074,7 @@ fi
 
 
 
-
+apt install sshpass -y
 
 if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	echo "Installing docker"
@@ -1090,7 +1090,7 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
  	#usermod -aG docker pi
 	#systemctl disable docker
 	apt install -y --no-install-recommends containerd systemd-container
-	apt install -y rootlesskit
+	apt install -y rootlesskit slirp4netns
 	
 	systemctl stop containerd.service
 	systemctl disable containerd.service
@@ -1111,7 +1111,8 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	# no longer needed, as config.toml has been added to configuration_files
 	sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
 
-	sudo su pi -c "containerd-rootless-setuptool.sh install"
+	#sudo su pi -c "containerd-rootless-setuptool.sh install"
+	sshpass -p 'smarthome' ssh pi@localhost "containerd-rootless-setuptool.sh install"
 	systemctl stop containerd.service
 	systemctl disable containerd.service
 	 
