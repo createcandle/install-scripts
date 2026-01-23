@@ -1091,6 +1091,11 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	#systemctl disable docker
 	apt install -y --no-install-recommends containerd
 	systemctl disable containerd.service
+	mkdir -p /home/pi/.webthings/containerd
+	
+	sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
+	 
+	
 else
 	echo "not installing Docker"
 	echo "Not installing docker" >> /dev/kmsg
