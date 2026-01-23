@@ -1105,6 +1105,7 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 
 	wget https://github.com/containerd/nerdctl/releases/download/v2.2.1/nerdctl-2.2.1-linux-arm64.tar.gz
 	tar xf nerdctl-2.2.1-linux-arm64.tar.gz -C /usr/local/bin
+	rm nerdctl*
 	
 	chown -R root:root /home/pi/.webthings/containerd
 
