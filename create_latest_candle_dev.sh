@@ -1551,6 +1551,8 @@ then
     raspi-config nonint do_audioconf 2
     apt update -y
 
+	# add user to rtkit (realtime) group for  pipewire 
+	usermod -aG rtkit pi
     
 
     if [ -e /usr/share/pipewire ]; then
