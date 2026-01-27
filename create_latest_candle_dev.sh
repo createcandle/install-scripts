@@ -1686,9 +1686,9 @@ then
 
 	# Downgrading the default python3 version to 3.11 can create issues.
 	# The lines below might help with issues relating to this change.
-	sudo apt-get install python3-apt --reinstall
-	apt-get purge -y --auto-remove ufw
-	apt-get install ufw -y
+	#sudo apt-get install python3-apt --reinstall
+	#apt-get purge -y --auto-remove ufw
+	#apt-get install ufw -y
 
 	
 
@@ -1698,7 +1698,7 @@ then
 	# TODO: is policykit-1 still needed in trixie?
 	# cpufrequtils is not available in trixie
     for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto sqlite3 libolm3 libffi* \
-	    nbtscan ufw iptables liblivemedia-dev rpicam-apps libcamera-tools avahi-utils jq i2c-tools cups \
+	    nbtscan iptables liblivemedia-dev rpicam-apps libcamera-tools avahi-utils jq i2c-tools cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
 	    netcat-traditional nscd upower evtest; do
             
@@ -1857,7 +1857,6 @@ then
         mosquitto \
         ffmpeg \
         arping \
-        ufw \
         sqlite3 \
         nbtscan \
         unclutter \
@@ -1884,7 +1883,7 @@ then
     for i in \
     git autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
     libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
-    arping autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan ufw iptables \
+    arping autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan iptables \
     liblivemedia-dev libavcodec61 libswresample5 libffi8 libavformat61 \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-kms++ python3-prctl libopenblas0 libopenjp2-7 python3-pip \
