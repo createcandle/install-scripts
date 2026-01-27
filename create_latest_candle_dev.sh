@@ -1578,7 +1578,7 @@ then
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
 	echo "installing some network applications"
-	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev
+	apt install -y --no-install-recommends iwd dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev
 	
 	#echo "removing dnsmasq-base"
 	#apt remove dnsmasq-base -y
