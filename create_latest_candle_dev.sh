@@ -1548,7 +1548,7 @@ then
     echo "installing Pipewire audio"
 	# software-properties-common
 	apt install -y rtkit
-    apt install -y pipewire wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries easyeffects portaudio19-dev --no-install-recommends
+    apt install -y pipewire wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries pipewire-libcamera easyeffects portaudio19-dev --no-install-recommends
     raspi-config nonint do_audioconf 2
     apt update -y
 
