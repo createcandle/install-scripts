@@ -170,9 +170,9 @@ echo "candle: installing python gateway addon" | sudo tee -a $BOOT_DIR/candle_lo
 python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 
 # Install the gateway addon for Python 3.11 too, if Python 3.11 exists
-if [ -f /usr/bin/python3.11 ]; then
-    python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --trusted-host pypi.org --trusted-host files.pythonhosted.org
-fi
+#if [ -f /usr/bin/python3.11 ]; then
+#    python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --trusted-host pypi.org --trusted-host files.pythonhosted.org
+#fi
 
 
 # install newer version of Python websocket client
