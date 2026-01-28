@@ -1698,10 +1698,11 @@ then
 
 	# TODO: is policykit-1 still needed in trixie?
 	# cpufrequtils is not available in trixie
-    for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto sqlite3 libolm3 libffi* \
+	# jan 2026: removed nscd
+    for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto mosquitto-clients sqlite3 \
 	    nbtscan iptables liblivemedia-dev rpicam-apps libcamera-tools avahi-utils jq i2c-tools cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
-	    netcat-traditional nscd upower evtest; do
+	    netcat-traditional upower libolm3 libffi* evtest; do
             
 		echo "Candle: installing $i"
         echo "Candle: installing $i" >> /dev/kmsg
