@@ -3221,6 +3221,7 @@ fi
 
 
 
+# SWAP FILE
 
 # bookwork and older versions
 if [ -f /usr/sbin/dphys-swapfile ]; then
@@ -3236,6 +3237,9 @@ if [ -f /usr/sbin/swapoff ]; then
 	swapoff --all
 	systemctl mask swap.target
 fi
+
+sysctl -w vm.swappiness=0
+
 
 if [ -f /home/pi/.webthings/swap ]; then
     # TODO: don't remove this if the system is low on memory (which is why it's there in the first place)
