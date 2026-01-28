@@ -3928,7 +3928,7 @@ if [ -d /usr/share/help ]; then
      rm -rf /usr/share/help/*
 fi
 
-
+touch /var/log/lastlog
 
 if [ -d /etc/cloud/ ]; then
 	touch /etc/cloud/cloud-init.disabled
