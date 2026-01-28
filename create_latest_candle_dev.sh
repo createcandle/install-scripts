@@ -1548,7 +1548,7 @@ then
     echo "installing Pipewire audio"
 	# software-properties-common
 	apt install -y rtkit
-    apt install -y pipewire wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries pipewire-libcamera easyeffects portaudio19-dev --no-install-recommends
+    apt install -y pipewire wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries pipewire-libcamera libcamera-ipa easyeffects portaudio19-dev --no-install-recommends
     raspi-config nonint do_audioconf 2
     apt update -y
 
@@ -3089,6 +3089,36 @@ nmcli connection modify 'Wired connection 1' ipv4.dns-priority -100 ipv6.dns-pri
 
 
 
+# Create an alias for 'mlan0' wifi to 'wlan0' if needed
+if ip link show | grep -q "mlan0:" ; then
+        echo "hotspot.sh: spotted mlan0"
+        if ! ip link show | grep -q "uap0:" ; then
+                echo "uap0 does not exist yet"
+                /sbin/iw dev mlan0 interface add uap0 type __ap
+				iw dev uap0 set power_save off
+				sleep 1
+        fi
+        
+elif ip link show | grep -q "wlan0:" ; then
+        echo "wlan0 exists"
+        if ! ip link show | grep -q "uap0:" ; then
+                echo "uap0 does not exist yet"
+                /sbin/iw dev wlan0 interface add uap0 type __ap
+				iw dev uap0 set power_save off
+				sleep 1
+				
+        fi
+fi
+
+rfkill unblock all
+
+apt install -y --no-install-recommends iwd
+
+systemctl stop wpa_supplicant.service
+apt remove wpasupplicant -y
+apt autoremove -y
+
+systemctl enable iwd.service
 
 # TODO:
 
