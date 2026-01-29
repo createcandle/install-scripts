@@ -2517,7 +2517,6 @@ chmod 755 /var/run/mosquitto
 mkdir -m 740 -p /var/log/mosquitto
 chown -R mosquitto:mosquitto /var/log/mosquitto
 
-
 # TODO: would this help with mosquitto?
 #addgroup -S -g 1883 mosquitto 2>/dev/null && \
 #adduser -S -u 1883 -D -H -h /var/empty -s /sbin/nologin -G mosquitto -g mosquitto mosquitto 2>/dev/null && \
@@ -2700,7 +2699,10 @@ chown -R pi:pi /home/pi/candle
 chown -R pi:pi /home/pi/.config
 
 chown -R pi:pi /home/pi/.webthings/etc/mosquitto
-chmod 0700 /home/pi/.webthings/etc/mosquitto/mosquitto_users
+#chmod 0700 /home/pi/.webthings/etc/mosquitto/mosquitto_users
+
+chown pi:pi /home/pi/.webthings/etc/mosquitto/mosquitto_users
+chmod u=rw,g=,o= /home/pi/.webthings/etc/mosquitto/mosquitto_users
 
 chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
