@@ -1582,7 +1582,7 @@ then
 
 	echo "installing some network applications"
 	# install  iwd? Next to wpa_supplicant?
-	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev
+	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap
 	
 	#echo "removing dnsmasq-base"
 	#apt remove dnsmasq-base -y
