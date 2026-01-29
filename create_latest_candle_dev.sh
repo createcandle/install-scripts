@@ -483,7 +483,8 @@ sleep 3
 cd $CANDLE_BASE
 
 # mandb is not needed, so this effectvely nullifies it
-sudo ln --backup --symbolic --verbose $(which true) $(which mandb)
+rm /var/lib/man-db/auto-update
+ln --backup --symbolic --verbose $(which true) $(which mandb)
 
 
 # Do initial apt update
