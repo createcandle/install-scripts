@@ -1227,6 +1227,8 @@ fi
 npm cache clean --force
 nvm cache clear
 
+pip cache purge
+
 echo
 #echo "sub-script that installs the Candle controller is done. Returning to the main install script."
 echo "Candle: Returning to the main install script." | sudo tee -a /dev/kmsg
