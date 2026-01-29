@@ -1720,6 +1720,8 @@ then
         apt -y --reinstall install mosquitto  
     fi
 
+	systemctl stop mosquitto.service
+
 
 	echo
     echo "installing Vulkan drivers"
@@ -2698,15 +2700,11 @@ chown pi:pi /home/pi/*
 chown -R pi:pi /home/pi/candle
 chown -R pi:pi /home/pi/.config
 
-chown -R pi:pi /home/pi/.webthings/etc/mosquitto
-#chmod 0700 /home/pi/.webthings/etc/mosquitto/mosquitto_users
-if [ ! -d /home/pi/.webthings/etc/mosquitto/pass ]; then
-	echo "ERROR, /home/pi/.webthings/etc/mosquitto/pass directory did not exist"
-	mkdir -p /home/pi/.webthings/etc/mosquitto/pass
-fi
-
-chown -R mosquitto:mosquitto /home/pi/.webthings/etc/mosquitto/pass
-chmod u=rw,g=,o= /home/pi/.webthings/etc/mosquitto/pass/mosquitto_users
+# Mosquitto
+mkdir -p /etc/mosquitto/pass
+mkdir -p /home/pi/.webthings/etc/mosquitto
+chown -R mosquitto:mosquitto /home/pi/.webthings/etc/mosquitto
+chmod u=rw,g=,o= /home/pi/.webthings/etc/mosquitto/mosquitto_users
 
 chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
