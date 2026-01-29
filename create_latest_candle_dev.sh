@@ -2702,9 +2702,14 @@ chown -R pi:pi /home/pi/.config
 
 # Mosquitto
 mkdir -p /etc/mosquitto/pass
-mkdir -p /home/pi/.webthings/etc/mosquitto
+mkdir -p /home/pi/.webthings/etc/mosquitto/pass
 chown -R mosquitto:mosquitto /home/pi/.webthings/etc/mosquitto
-chmod u=rw,g=,o= /home/pi/.webthings/etc/mosquitto/mosquitto_users
+#chmod u=rw,g=,o= /home/pi/.webthings/etc/mosquitto/pass/mosquitto_users
+if [ -f /home/pi/.webthings/etc/mosquitto/pass/mosquitto_users ]; then
+	chmod 0400 /home/pi/.webthings/etc/mosquitto/pass/mosquitto_users
+else
+	echo "Error, mosquitto password file is missing"
+fi
 
 chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
