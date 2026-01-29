@@ -1703,7 +1703,7 @@ then
     for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto mosquitto-clients sqlite3 \
 	    nbtscan iptables liblivemedia-dev rpicam-apps libcamera-tools avahi-utils jq i2c-tools cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
-	    netcat-traditional upower libolm3 libffi* evtest; do
+	    netcat-traditional upower libolm3 libffi* evtest faketime; do
             
 		echo "Candle: installing $i"
         echo "Candle: installing $i" >> /dev/kmsg
@@ -1815,7 +1815,7 @@ then
     	echo "Candle: installing web browser" >> $BOOT_DIR/candle_log.txt
     	echo ""
 
-		apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp26 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-11 libminizip1 libflac14 --no-install-recommends
+		#apt install -y libxslt1.1 libxdamage1 libxcomposite1 libjsoncpp26 libatspi2.0-0 libatk1.0-0 libatk-bridge2.0-0 libre2-11 libminizip1 libflac14 --no-install-recommends
 
 		if [ "$BIT32" = no ] || [[ -z "${BIT32}" ]]
   		then
