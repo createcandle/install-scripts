@@ -482,6 +482,8 @@ fi
 sleep 3
 cd $CANDLE_BASE
 
+# mandb is not needed, so this effectvely nullifies it
+sudo ln --backup --symbolic --verbose $(which true) $(which mandb)
 
 
 # Do initial apt update
@@ -3163,6 +3165,10 @@ systemctl start iwd.service
 
 
 
+
+# rigorously remove some systemd services
+rm /usr/lib/systemd/system/man-db.timer
+rm /usr/lib/systemd/system/man-db.service
 
 
 
