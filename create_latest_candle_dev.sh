@@ -3115,10 +3115,12 @@ rfkill unblock all
 apt install -y --no-install-recommends iwd
 
 systemctl stop wpa_supplicant.service
+systemctl disable wpa_supplicant.service
 apt remove wpasupplicant -y
 apt autoremove -y
 
 systemctl enable iwd.service
+systemctl start iwd.service
 
 # TODO:
 
@@ -3708,8 +3710,13 @@ if [ -e /home/pi/.webthings/ssl/ ]; then
 	chown pi:pi /home/pi/.webthings/ssl/
 fi
 
+
+
 # clear some caches
 pip cache purge
+
+
+
 
 
 
