@@ -2700,9 +2700,13 @@ chown -R pi:pi /home/pi/.config
 
 chown -R pi:pi /home/pi/.webthings/etc/mosquitto
 #chmod 0700 /home/pi/.webthings/etc/mosquitto/mosquitto_users
+if [ ! -d /home/pi/.webthings/etc/mosquitto/pass ]; then
+	echo "ERROR, /home/pi/.webthings/etc/mosquitto/pass directory did not exist"
+	mkdir -p /home/pi/.webthings/etc/mosquitto/pass
+fi
 
-chown pi:pi /home/pi/.webthings/etc/mosquitto/mosquitto_users
-chmod u=rw,g=,o= /home/pi/.webthings/etc/mosquitto/mosquitto_users
+chown -R mosquitto:mosquitto /home/pi/.webthings/etc/mosquitto/pass
+chmod u=rw,g=,o= /home/pi/.webthings/etc/mosquitto/pass/mosquitto_users
 
 chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
 chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
