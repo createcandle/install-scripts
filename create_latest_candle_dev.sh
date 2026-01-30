@@ -1613,7 +1613,7 @@ then
 	echo "installing DNSMASQ"
 	apt install -y --no-install-recommends dnsmasq
 	systemctl stop dnsmasq.service
-	#systemctl disable dnsmasq.service
+	systemctl disable dnsmasq.service
 	
 
  	if [ -f /home/pi/nohup.out ]; then
