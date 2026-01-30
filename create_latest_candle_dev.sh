@@ -1566,6 +1566,7 @@ then
 	# set bluetooth to experimental dbus support
 	#Experimental = false
 	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
+	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
 	
 	
 
