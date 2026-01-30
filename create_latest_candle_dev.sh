@@ -399,6 +399,7 @@ then
 
 
 		mkdir -p /home/pi/.webthings
+		
 
   		if mountpoint /home/pi/.webthings | grep -q "/home/pi/.webthings is a mountpoint" ; then
 		    echo "WARNING, .webthings folder seems to already be a mountpoint"
@@ -408,6 +409,7 @@ then
    		fi
        
         chown pi:pi /home/pi/.webthings
+		touch /home/pi/.webthings/candle.log
     else
         echo "Error, /dev/mmcblk0p4 was missing. Exiting."
         exit
@@ -418,6 +420,9 @@ then
 else
     echo "Partitions seem to already exist"
     echo "Candle: partitions seem to already exist" >> /dev/kmsg
+	if [ ! -f /home/pi/.webthings/candle.log ]; then
+		touch /home/pi/.webthings/candle.log
+	fi
     echo "$(date) - starting create_latest_candle" >> /home/pi/.webthings/candle.log
     echo "$(date) - starting create_latest_candle" >> $BOOT_DIR/candle_log.txt
 
