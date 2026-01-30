@@ -3198,8 +3198,8 @@ if ip link show | grep -q "uap0:"; then
 	fi
 	
 	ip link set dev uap0 address "$ZEROMAC"
-	ip link set dev uap0 address 192.168.12.1
-	ip -6 addr add fd00:12::1/8 dev uap0
+	#ip link set dev uap0 address 192.168.12.1
+	#ip -6 addr add fd00:12::1/8 dev uap0
 	
 fi
 
