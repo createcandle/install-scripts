@@ -1562,7 +1562,12 @@ then
 
 	# add user to rtkit (realtime) group for  pipewire 
 	usermod -aG rtkit pi
-    
+
+	# set bluetooth to experimental dbus support
+	#Experimental = false
+	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
+	
+	
 
     if [ -e /usr/share/pipewire ]; then
 		mkdir -p /home/pi/.config/wireplumber/main.lua.d
@@ -2942,7 +2947,6 @@ echo "smarthome" > /boot/firmware/candle_hotspot_password.txt
 
 
 if [ -f /etc/xdg/labwc/rc.xml ]; then
-    
 	sed -i 's/mouseEmulation="no"/mouseEmulation="yes"/' /etc/xdg/labwc/rc.xml
 fi
 
