@@ -3187,6 +3187,23 @@ elif ip link show | grep -q "wlan0:" ; then
         fi
 fi
 
+
+#if ip link show | grep "uap0:" | grep -q "state UP"; then
+if ip link show | grep -q "uap0:"; then
+	MAC=$(nmcli device show wlan0 | grep HWADDR | awk '{print $2}')
+	if [[ $MAC =~ 0$ ]]; then
+    	ZEROMAC=${MAC%?}1
+	else
+		ZEROMAC=${MAC%?}0
+	fi
+	
+	
+	ip link set dev uap0 address "$ZEROMAC"
+	ip link set dev uap0 address 192.168.12.1
+	ip -6 addr add fd00:12::1/8 dev uap0
+	
+fi
+
 #rfkill unblock all
 
 apt install -y --no-install-recommends iwd
