@@ -3212,7 +3212,7 @@ systemctl stop wpa_supplicant.service
 systemctl disable wpa_supplicant.service
 #apt remove wpasupplicant -y
 
-
+sleep 1
 systemctl enable iwd.service
 systemctl start iwd.service
 
