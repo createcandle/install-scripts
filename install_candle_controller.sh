@@ -980,14 +980,14 @@ then
 
 
 
-	# Python 3.13 addons
+	# Python 3.11 addons
     for addon in privacy-manager; 
     do
         echo ""
 		echo "$addon"
         curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
             | grep "browser_download_url" \
-            | grep "$ARCHSTRING-v3.13" \
+            | grep "$ARCHSTRING-v3.11" \
             | grep -v ".sha256sum" \
             | cut -d : -f 2,3 \
             | tr -d \" \
@@ -1008,7 +1008,7 @@ then
 				echo "error, no package dir for addon: $addon"
 			fi
 		else
-			echo "addon.tgz is missing, failed to download: $ARCHSTRING-v3.13 for $addon"
+			echo "addon.tgz is missing, failed to download: $ARCHSTRING-v3.11 for $addon"
 		fi
 
 		sync 
