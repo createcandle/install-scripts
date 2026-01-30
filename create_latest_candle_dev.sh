@@ -2862,8 +2862,16 @@ systemctl enable candle_hostname_fix.service # ugly solution, might not even be 
 # Disable timers that are useless on a read-only filesystem
 systemctl disable dpkg-db-backup.timer
 systemctl disable apt-daily.timer
+systemctl mask apt-daily.timer
+systemctl disable apt-daily.service
+systemctl mask apt-daily.service
 systemctl disable apt-daily-upgrade.timer
-systemctl man-db.timer
+systemctl mask apt-daily-upgrade.timer
+systemctl disable apt-daily-upgrade.service
+systemctl mask apt-daily-upgrade.service
+systemctl disable man-db.timer
+systemctl mask man-db.timer
+
 
 
 # disable old splash screen
