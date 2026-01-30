@@ -3197,7 +3197,6 @@ if ip link show | grep -q "uap0:"; then
 		ZEROMAC=${MAC%?}0
 	fi
 	
-	
 	ip link set dev uap0 address "$ZEROMAC"
 	ip link set dev uap0 address 192.168.12.1
 	ip -6 addr add fd00:12::1/8 dev uap0
@@ -3205,6 +3204,7 @@ if ip link show | grep -q "uap0:"; then
 fi
 
 #rfkill unblock all
+
 
 apt install -y --no-install-recommends iwd
 
@@ -3216,6 +3216,8 @@ systemctl disable wpa_supplicant.service
 systemctl enable iwd.service
 systemctl start iwd.service
 
+sleep 1
+nmcli radio wifi on
 # TODO:
 
 # ~/.config/configstore/update-notifier-npm.json <- set output to true
