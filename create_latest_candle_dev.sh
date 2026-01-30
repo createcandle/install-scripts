@@ -3165,47 +3165,6 @@ echo
 nmcli connection modify 'Wired connection 1' ipv4.dns-priority -100 ipv6.dns-priority -100
 
 
-
-# Create an alias for 'mlan0' wifi to 'wlan0' if needed
-if ip link show | grep -q "mlan0:" ; then
-        echo "hotspot.sh: spotted mlan0"
-        if ! ip link show | grep -q "uap0:" ; then
-                echo "uap0 does not exist yet"
-                /sbin/iw dev mlan0 interface add uap0 type __ap
-				iw dev uap0 set power_save off
-				sleep 1
-        fi
-        
-elif ip link show | grep -q "wlan0:" ; then
-        echo "wlan0 exists"
-        if ! ip link show | grep -q "uap0:" ; then
-                echo "uap0 does not exist yet"
-                /sbin/iw dev wlan0 interface add uap0 type __ap
-				iw dev uap0 set power_save off
-				sleep 1
-				
-        fi
-fi
-
-
-#if ip link show | grep "uap0:" | grep -q "state UP"; then
-if ip link show | grep -q "uap0:"; then
-	MAC=$(nmcli device show wlan0 | grep HWADDR | awk '{print $2}')
-	if [[ $MAC =~ 0$ ]]; then
-    	ZEROMAC=${MAC%?}1
-	else
-		ZEROMAC=${MAC%?}0
-	fi
-	
-	ip link set dev uap0 address "$ZEROMAC"
-	#ip link set dev uap0 address 192.168.12.1
-	#ip -6 addr add fd00:12::1/8 dev uap0
-	
-fi
-
-#rfkill unblock all
-
-
 apt install -y --no-install-recommends iwd
 
 systemctl stop wpa_supplicant.service
