@@ -3122,6 +3122,23 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": true, "AutoFil
 
 
 
+echo
+echo "Installing support for USB tethering with iPhones"
+
+mkdir -p ~/build
+git clone https://github.com/createcandle/raspi-libimobiledevice.git
+
+./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh
+
+rm -rf ~/build
+rm -rf ./raspi-libimobiledevice
+
+
+
+
+
+
+
 
 echo
 
@@ -3154,7 +3171,7 @@ elif ip link show | grep -q "wlan0:" ; then
         fi
 fi
 
-rfkill unblock all
+#rfkill unblock all
 
 apt install -y --no-install-recommends iwd
 
