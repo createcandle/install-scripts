@@ -3141,7 +3141,18 @@ rm -rf ./raspi-libimobiledevice
 
 
 
+echo
+echo "Installing support for Miracast"
+apt install -y cmake libglib2.0-dev libudev-dev libsystemd-dev libreadline-dev check libtool
 
+
+git clone https://github.com/albfan/miraclecast.git
+
+mkdir -p ./miraclecast/build
+cd ./miraclecast/build
+cmake -DCMAKE_INSTALL_PREFIX=/usr .. 
+make
+cd -
 
 
 
@@ -3182,8 +3193,8 @@ apt install -y --no-install-recommends iwd
 
 systemctl stop wpa_supplicant.service
 systemctl disable wpa_supplicant.service
-apt remove wpasupplicant -y
-apt autoremove -y
+#apt remove wpasupplicant -y
+
 
 systemctl enable iwd.service
 systemctl start iwd.service
@@ -4018,6 +4029,8 @@ if [ -f /home/pi/nohup.out ]; then
 fi
 
 
+
+apt autoremove -y
 
 # clear some caches
 pip cache purge
