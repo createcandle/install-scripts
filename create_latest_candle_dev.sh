@@ -4046,7 +4046,7 @@ fi
 
 rfkill unblock all
 sudo systemctl enable wpa_supplicant
-
+nmcli radio wifi on
 
 apt autoremove -y
 
