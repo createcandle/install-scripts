@@ -3607,6 +3607,7 @@ if [ ! -e /usr/lib/firmware/brcm/brcmfmac43455-sdio.raspberrypi,4-model-b.bin ];
 fi
 
 
+nmcli connection modify "netplan-eth0" connection.id "Wired connection"
 
 
 if [ -f /home/pi/nohup.out ]; then
