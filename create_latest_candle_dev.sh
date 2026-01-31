@@ -4042,6 +4042,8 @@ if [ -f /home/pi/nohup.out ]; then
 fi
 
 
+rfkill unblock all
+
 
 apt autoremove -y
 
