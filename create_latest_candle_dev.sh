@@ -641,7 +641,8 @@ apt remove bookshelf --purge -y
 #apt remove modemmanager --purge -y 
 echo
 
-systemctl reload
+#systemctl daemon-reload
+
 
 if [ "$BITTYPE" -eq 64 ]; then
     echo "64 bit, but adding support for 32 bit architecture"
@@ -3128,16 +3129,16 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": true, "AutoFil
 
 
 
-echo
-echo "Installing support for USB tethering with iPhones"
+#echo
+#echo "Installing support for USB tethering with iPhones"
 
-mkdir -p ~/build
-git clone https://github.com/createcandle/raspi-libimobiledevice.git
+#mkdir -p ~/build
+#git clone https://github.com/createcandle/raspi-libimobiledevice.git
 
-./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh
+#./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh
 
-rm -rf ~/build
-rm -rf ./raspi-libimobiledevice
+#rm -rf ~/build
+#rm -rf ./raspi-libimobiledevice
 
 
 
