@@ -3109,8 +3109,7 @@ echo "- Creating xwrapper.config file"
 echo "allowed_users=anybody" > /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 
-# give Pi user rights to TTY
-usermod -a -G tty pi
+
 
 
 
@@ -3201,11 +3200,23 @@ rm /usr/lib/systemd/system/man-db.service
 
 
 # Add main user to some groups
-
+echo "adding user to groups"
+usermod -a -G tty pi
 usermod -a -G bluetooth pi
-usermod -a -G avahi pi
 usermod -a -G mosquitto pi
-usermod -a -G lpadmin pi
+
+if cat /etc/group | grep -q avahi; then
+	echo "adding user to avahi (mDNS) group"
+	usermod -a -G avahi pi
+fi
+if cat /etc/group | grep -q lpadmin; then
+	echo "adding user to lpadmin (printers) group"
+	usermod -a -G lpadmin pi
+fi
+if cat /etc/group | grep -q voice; then
+	echo "adding user to voice group"
+	usermod -a -G voice pi
+fi
 
 # CREATE INITIAL BACKUPS
 
