@@ -3911,7 +3911,15 @@ if [ -d /home/pi/configuration-files ]; then
 fi
 
 
-
+if [ -d /var/log/apt ]; then
+	rm /var/log/apt/*
+fi
+if [ -d /var/log/cups ]; then
+	rm /var/log/cups/*
+fi
+if [ -d /var/log/mosquitto ]; then
+	rm /var/log/mosquitto/*
+fi
 
 echo
 if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
