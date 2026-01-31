@@ -4048,6 +4048,13 @@ rfkill unblock all
 sudo systemctl enable wpa_supplicant
 nmcli radio wifi on
 
+/sbin/iw dev wlan0 interface add uap0 type __ap
+sleep 1
+#ip address add 192.168.12.1/24 dev uap0
+#ifconfig uap0 192.168.12.1 netmask 255.255.255.0
+
+nmcli | cat
+
 apt autoremove -y
 
 # clear some caches
