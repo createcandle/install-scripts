@@ -3921,6 +3921,11 @@ if [ -d /var/log/mosquitto ]; then
 	rm /var/log/mosquitto/*
 fi
 
+if [ -f /var/log/alternatives.log ]; then
+	rm /var/log/alternatives.log
+fi
+ln -s /dev/null /var/log/alternatives.log 
+
 echo
 if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	echo
