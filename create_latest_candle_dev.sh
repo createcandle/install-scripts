@@ -2363,6 +2363,8 @@ then
     #usermod -a -G audio bluealsa 
     #usermod -a -G audio bluealsa-aplay
 
+	
+
     echo "Cloning bluez-alsa.git"
  
     # compile and install BlueAlsa with legaly safe codes and built-in audio mixing
@@ -3198,9 +3200,12 @@ rm /usr/lib/systemd/system/man-db.service
 
 
 
+# Add main user to some groups
 
-
-
+usermod -a -G bluetooth pi
+usermod -a -G avahi pi
+usermod -a -G mosquitto pi
+usermod -a -G lpadmin pi
 
 # CREATE INITIAL BACKUPS
 
