@@ -4045,6 +4045,7 @@ fi
 
 
 rfkill unblock all
+sudo systemctl enable wpa_supplicant
 
 
 apt autoremove -y
