@@ -3171,18 +3171,18 @@ nmcli connection modify 'Wired connection' ipv4.dns-priority -100 ipv6.dns-prior
 #"part1 part2" | cut -d " " -f 2
 
 
-apt install -y --no-install-recommends iwd
+#apt install -y --no-install-recommends iwd
 
-systemctl stop wpa_supplicant.service
-systemctl disable wpa_supplicant.service
+#systemctl stop wpa_supplicant.service
+#systemctl disable wpa_supplicant.service
 #apt remove wpasupplicant -y
 
-sleep 1
-systemctl enable iwd.service
-systemctl start iwd.service
+#sleep 1
+#systemctl enable iwd.service
+#systemctl start iwd.service
 
-sleep 1
-nmcli radio wifi on
+#sleep 1
+#nmcli radio wifi on
 # TODO:
 
 # ~/.config/configstore/update-notifier-npm.json <- set output to true
