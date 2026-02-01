@@ -4067,8 +4067,19 @@ nmcli radio wifi on
 
 /sbin/iw dev wlan0 interface add uap0 type __ap
 sleep 1
+wpa_cli interface wlan0
+wpa_cli -i wlan0
+if [ -f rm /var/run/wpa_supplicant/uap0 ]; then
+	rm rm /var/run/wpa_supplicant/uap0
+fi
+echo "Which interface has wpa_cli selected? Should be wlan0:"
+wpa_cli list_network
+
+
 #ip address add 192.168.12.1/24 dev uap0
 #ifconfig uap0 192.168.12.1 netmask 255.255.255.0
+
+
 
 nmcli c s | cat
 
