@@ -4044,7 +4044,11 @@ if [ -f /home/pi/nohup.out ]; then
     mv /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
+echo "initial wifi country code was:"
+iw reg get
 
+echo "Setting it to NL, and making sure WiFi is up by default"
+iw reg set NL
 rfkill unblock all
 sudo systemctl enable wpa_supplicant
 nmcli radio wifi on
