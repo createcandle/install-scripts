@@ -4068,7 +4068,6 @@ nmcli radio wifi on
 /sbin/iw dev wlan0 interface add uap0 type __ap
 sleep 1
 wpa_cli interface wlan0
-wpa_cli -i wlan0
 if [ -f rm /var/run/wpa_supplicant/uap0 ]; then
 	rm rm /var/run/wpa_supplicant/uap0
 fi
