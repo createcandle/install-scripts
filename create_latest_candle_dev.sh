@@ -3172,6 +3172,13 @@ nmcli connection modify "$OLD_ETHERNET_NAME" connection.id "Wired connection"
 echo "Was the eth0 interface succesfully changed to the name 'Wired connection'?"
 nmcli c s
 
+
+
+
+
+
+#nmcli device set uap0 managed false
+
 # If a network cable is connected, only use that connection's DNS server(s)
 
 #"part1 part2" | cut -d " " -f 2
