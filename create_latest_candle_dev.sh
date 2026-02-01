@@ -4074,7 +4074,7 @@ if [ -f rm /var/run/wpa_supplicant/uap0 ]; then
 fi
 echo "Which interface has wpa_cli selected? Should be wlan0:"
 wpa_cli list_network
-
+wpa_cli interface wlan0
 
 #ip address add 192.168.12.1/24 dev uap0
 #ifconfig uap0 192.168.12.1 netmask 255.255.255.0
