@@ -4113,6 +4113,16 @@ if [ -f /etc/cloud ]; then
 	rm -rf /etc/cloud
 fi
 
+if [ -f /boot/firmware/meta-data ] ; then
+	rm /boot/firmware/meta-data
+fi
+if [ -f /boot/firmware/network-config ] ; then
+	rm /boot/firmware/network-config
+fi
+if [ -f /boot/firmware/user-data ] ; then
+	rm /boot/firmware/user-data
+fi
+
 
 # This is handled by prepare_disk_image
 chmod +x /home/pi/candle/candle_first_run.sh
