@@ -3132,6 +3132,7 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": true, "AutoFil
 #echo
 #echo "Installing support for USB tethering with iPhones"
 
+#apt install -y libcurl4-openssl-dev
 #mkdir -p ~/build
 #git clone https://github.com/createcandle/raspi-libimobiledevice.git
 
@@ -3140,6 +3141,7 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": true, "AutoFil
 #rm -rf ~/build
 #rm -rf ./raspi-libimobiledevice
 
+#apt remove -y libcurl4-openssl-dev
 
 
 
@@ -4068,7 +4070,9 @@ sleep 1
 #ip address add 192.168.12.1/24 dev uap0
 #ifconfig uap0 192.168.12.1 netmask 255.255.255.0
 
-nmcli | cat
+nmcli c s | cat
+
+nmcli general status | cat
 
 apt autoremove -y
 
