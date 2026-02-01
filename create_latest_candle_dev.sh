@@ -3166,11 +3166,14 @@ echo
 # Change the name of the ethernet connection to "Wired connection"
 OLD_ETHERNET_NAME=$(nmcli c s | grep eth0 | cut -d " " -f 1 | tr -d '\n')
 echo "Old ethernet name was: $OLD_ETHERNET_NAME"
+nmcli connection modify "$OLD_ETHERNET_NAME" ipv4.dns-priority -100 ipv6.dns-priority -100
 nmcli connection modify "$OLD_ETHERNET_NAME" connection.id "Wired connection"
 
+echo "Was the eth0 interface succesfully changed to the name 'Wired connection'?"
+nmcli c s
 
 # If a network cable is connected, only use that connection's DNS server(s)
-nmcli connection modify 'Wired connection' ipv4.dns-priority -100 ipv6.dns-priority -100
+
 #"part1 part2" | cut -d " " -f 2
 
 
