@@ -3129,17 +3129,17 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": true, "AutoFil
 
 
 
-#echo
-#echo "Installing support for USB tethering with iPhones"
+echo
+echo "Installing support for USB tethering with iPhones"
 
-#apt install -y libcurl4-openssl-dev
-#mkdir -p ~/build
-#git clone https://github.com/createcandle/raspi-libimobiledevice.git
+apt install -y libcurl4-openssl-dev
+mkdir -p ~/build
+git clone https://github.com/createcandle/raspi-libimobiledevice.git
 
-#./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh
+./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh
 
-#rm -rf ~/build
-#rm -rf ./raspi-libimobiledevice
+rm -rf ~/build
+rm -rf ./raspi-libimobiledevice
 
 #apt remove -y libcurl4-openssl-dev
 
@@ -3169,6 +3169,7 @@ echo
 OLD_ETHERNET_NAME=$(nmcli c s | grep eth0 | cut -d " " -f 1 | tr -d '\n')
 echo "Old ethernet name was: $OLD_ETHERNET_NAME"
 nmcli connection modify "$OLD_ETHERNET_NAME" ipv4.dns-priority -100 ipv6.dns-priority -100
+nmcli connection modify "$OLD_ETHERNET_NAME" ipv4.route-metric -10 ipv6.route-metric -10
 nmcli connection modify "$OLD_ETHERNET_NAME" connection.id "Wired connection"
 
 echo "Was the eth0 interface succesfully changed to the name 'Wired connection'?"
