@@ -2993,10 +2993,13 @@ fi
 
 # If nMap is installed, mode it's scripts into the user partition
 
-if [ -d /usr/share/nmap/scripts/ ]; then
+if [ -d /usr/share/nmap ]; then
+
+	mv /usr/share/nmap /home/pi/.webthings/etc/
 	mkdir -p /home/pi/.webthings/etc/nmap/scripts
-	mv /usr/share/nmap/scripts/* /home/pi/.webthings/etc/nmap/scripts/
+	#mv /usr/share/nmap/scripts/* /home/pi/.webthings/etc/nmap/scripts/
 	chown -R pi:pi /home/pi/.webthings/etc/nmap/scripts
+	ls -s /usr/share/nmap /home/pi/.webthings/etc/nmap
 fi
 
 
