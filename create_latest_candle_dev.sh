@@ -1597,14 +1597,14 @@ then
 
 	echo "installing some network applications"
 	# switching from wpa_supplicant to iwd (to improve hotspot security) is done later
-	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd
+	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit
 	
 	#echo "removing dnsmasq-base"
 	#apt remove dnsmasq-base -y
 	
 	echo
     echo "installing some network applications, but one at a time"
-    for i in dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev; do
+    for i in dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit; do
         
         echo "$i"
         apt  -y install "$i"  --no-install-recommends --print-uris "$reinstall"
