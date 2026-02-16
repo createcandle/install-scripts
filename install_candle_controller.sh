@@ -1082,7 +1082,7 @@ then
 
     # Install Candle addons
     
-    for addon in candle-theme tutorial bluetoothpairing webinterface dashboard scenes hotspot energyuse; 
+    for addon in candle-theme tutorial bluetoothpairing webinterface dashboard scenes hotspot energyuse networkscanner; 
     do
         echo ""
 		echo "$addon"
