@@ -2123,7 +2123,18 @@ fi
 
 
 cd $CANDLE_BASE 
- 
+
+echo "INSTALLING RESPEAKER KERNEL MODULE"
+echo "But not enabling it"
+
+git clone https://github.com/Seeed-Studio/seeed-linux-dtoverlays.git  
+cd seeed-linux-dtoverlays/  
+make overlays/rpi/respeaker-2mic-v2_0-overlay.dtbo  
+cp overlays/rpi/respeaker-2mic-v2_0-overlay.dtbo /boot/firmware/overlays/respeaker-2mic-v2_0.dtbo
+
+cd $CANDLE_BASE 
+rm -rf seeed-linux-dtoverlays
+
 # install alternative WM8960 drivers
 if [ "$SKIP_RESPEAKER_ALTERNATIVE" = no ] || [[ -z "${SKIP_RESPEAKER_ALTERNATIVE}" ]]
 then
