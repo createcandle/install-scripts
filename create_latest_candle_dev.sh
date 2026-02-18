@@ -1716,7 +1716,7 @@ then
 	# cpufrequtils is not available in trixie
 	# jan 2026: removed nscd
     for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto mosquitto-clients sqlite3 \
-	    nbtscan iptables liblivemedia-dev rpicam-apps libcamera-tools avahi-utils jq i2c-tools cups \
+	    nbtscan iptables liblivemedia-dev rpicam-apps avahi-utils jq i2c-tools cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
 	    netcat-traditional upower libolm3 libffi* evtest faketime; do
             
