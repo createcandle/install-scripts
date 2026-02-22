@@ -1120,13 +1120,13 @@ then
 
 	if [ -f "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" ] && [ ! -f "$CANDLE_BASE/.webthings/data/dashboard/persistence.json" ]; then
 		mkdir -p "$CANDLE_BASE/.webthings/data/dashboard"
-		echo "before: orignal in addons/dashboard/persistence.json:"
-		cat "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json"
+		#echo "before: orignal in addons/dashboard/persistence.json:"
+		#cat "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json"
 		cp "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
-		echo "after: copy in data/dashboard/persistence.json:"
-		echo
-		cat "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
-		echo
+		#echo "after: copy in data/dashboard/persistence.json:"
+		#echo
+		#cat "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
+		#echo
 		chown -R pi:pi "$CANDLE_BASE/.webthings/data"
 	fi
 	
