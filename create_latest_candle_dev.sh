@@ -3772,6 +3772,9 @@ chmod -R 755 arduino
 cd $CANDLE_BASE/
 
 
+chown pi:pi /home/pi/.bash_history
+chown pi:pi /home/pi/.webthings/etc/asoundrc
+
 #
 #  ADDITIONAL CLEANUP
 #
