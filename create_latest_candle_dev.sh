@@ -631,9 +631,17 @@ apt-get update
 
 # remove Firefox and other applications, if they are installed.
 
-apt remove firefox* galculator* geany* thonny* wolfram-engine* oracle-java* scratch* libreoffice* cloud* netplan* --purge -y 1> /dev/null
-apt remove kanshi eatmydata pocketsphinx* raindrop wayvnc cloud-init cloud-guest-utils aspell* autotouch apparmor* docutils-common evince* feedbackd* --purge -y 1> /dev/null
-apt remove bookshelf --purge -y 1> /dev/null
+echo "removing first batch"
+apt remove firefox* galculator* geany* thonny* wolfram-engine* oracle-java* scratch* libreoffice* cloud* netplan* --purge -y 
+#1> /dev/null
+echo "removing second batch"
+apt remove kanshi eatmydata pocketsphinx* raindrop wayvnc cloud-init cloud-guest-utils aspell* autotouch apparmor* docutils-common evince* feedbackd* --purge -y 
+#1> /dev/null
+echo "removing third batch"
+apt remove bookshelf --purge -y 
+#1> /dev/null
+
+apt install 
 
 # in theory removing ModemManager could prevent issues with zigbee2Mqtt. For now it's just being completely disabled.
 #apt remove modemmanager --purge -y 
