@@ -3151,7 +3151,7 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": true, "AutoFil
 
 
 echo
-echo "Installing support for USB tethering with iPhones"
+echo "Installing support for iPhone USB tethering"
 
 apt install -y libcurl4-openssl-dev
 mkdir -p ~/build
@@ -3185,6 +3185,13 @@ echo
 
 
 # NETWORK MANAGER
+if [ ! -f /usr/bin/nmcli ]; then
+	echo ""
+	echo "ERROR, NMCLI IS MISSING"
+	echo ""
+	exit 1
+fi
+
 
 # Change the name of the ethernet connection to "Wired connection"
 OLD_ETHERNET_NAME=$(nmcli c s | grep eth0 | cut -d " " -f 1 | tr -d '\n')
@@ -3236,8 +3243,8 @@ nmcli c s
 
 # rigorously remove some systemd services
 rm /usr/lib/systemd/system/man-db.timer
-rm /usr/lib/systemd/system/man-db.service
-
+#rm /usr/lib/systemd/system/man-db.service
+systemctl disable man-db.service
 
 
 
