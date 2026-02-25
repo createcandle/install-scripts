@@ -47,7 +47,7 @@ fi
 #SKIP_PARTITIONS=yes
 #TINY_PARTITIONS=yes # used to create smaller partition images, which are used in the new system update process
 #SKIP_APT_INSTALL=yes
-SKIP_APT_UPGRADE=yes
+#SKIP_APT_UPGRADE=yes
 #SKIP_PYTHON=yes
 SKIP_RESPEAKER=yes
 SKIP_RESPEAKER_ALTERNATIVE=yes
