@@ -2887,9 +2887,11 @@ systemctl enable candle_hostname_fix.service # ugly solution, might not even be 
 #systemctl enable candle_silence_player.service
 
 # NetworkManager should be managing wpa_supplicant
+echo "disabling wpa_supplicant.service"
 systemctl disable wpa_supplicant.service
 
 # Disable timers that are useless on a read-only filesystem
+echo "disabling services that make no sense on a read only FS"
 systemctl disable dpkg-db-backup.timer
 systemctl disable apt-daily.timer
 systemctl mask apt-daily.timer
