@@ -47,7 +47,7 @@ fi
 #SKIP_PARTITIONS=yes
 #TINY_PARTITIONS=yes # used to create smaller partition images, which are used in the new system update process
 #SKIP_APT_INSTALL=yes
-#SKIP_APT_UPGRADE=yes
+SKIP_APT_UPGRADE=yes
 #SKIP_PYTHON=yes
 SKIP_RESPEAKER=yes
 SKIP_RESPEAKER_ALTERNATIVE=yes
@@ -634,7 +634,7 @@ apt-get update
 # remove Firefox and other applications, if they are installed.
 
 apt remove firefox* galculator* geany* thonny* wolfram-engine* oracle-java* scratch* libreoffice* cloud* netplan* --purge -y 1> /dev/null
-apt remove kanshi eatmydata pocketsphinx* raindrop wayvnc cloud-init cloud-guest-utils aspell* autotouch apparmor docutils-common evince* feedbackd* --purge -y 1> /dev/null
+apt remove kanshi eatmydata pocketsphinx* raindrop wayvnc cloud-init cloud-guest-utils aspell* autotouch apparmor* docutils-common evince* feedbackd* --purge -y 1> /dev/null
 apt remove bookshelf --purge -y 1> /dev/null
 
 # in theory removing ModemManager could prevent issues with zigbee2Mqtt. For now it's just being completely disabled.
@@ -669,6 +669,8 @@ if [ -f /etc/systemd/logind.conf ] && cat /etc/systemd/logind.conf | grep -q "#H
 	sed -i 's/#IdleAction=ignore/IdleAction=ignore/' /etc/systemd/logind.conf
 	
 fi
+
+loginctl enable-linger
 
 
 # ENABLE READ_ONLY MODE
