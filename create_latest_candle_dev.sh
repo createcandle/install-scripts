@@ -4088,14 +4088,14 @@ iw reg get
 echo "Setting it to NL, and making sure WiFi is up by default"
 iw reg set NL
 rfkill unblock all
-sudo systemctl enable wpa_supplicant
+systemctl disable wpa_supplicant
 nmcli radio wifi on
 
 /sbin/iw dev wlan0 interface add uap0 type __ap
 sleep 1
 wpa_cli interface wlan0
-if [ -f rm /var/run/wpa_supplicant/uap0 ]; then
-	rm rm /var/run/wpa_supplicant/uap0
+if [ -f /var/run/wpa_supplicant/uap0 ]; then
+	rm /var/run/wpa_supplicant/uap0
 fi
 echo "Which interface has wpa_cli selected? Should be wlan0:"
 wpa_cli list_network
