@@ -3771,7 +3771,7 @@ chown -R pi:pi arduino
 chmod -R 755 arduino
 cd $CANDLE_BASE/
 
-
+touch /home/pi/.bash_history
 chown pi:pi /home/pi/.bash_history
 chown pi:pi /home/pi/.webthings/etc/asoundrc
 
