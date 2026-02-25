@@ -3775,8 +3775,9 @@ cd $CANDLE_BASE/
 chown pi:pi /home/pi/.bash_history
 chown pi:pi /home/pi/.webthings/etc/asoundrc
 
-chmod +x /etc/profile.d/ensure_dbus.sh
-
+if [ -f /etc/profile.d/ensure_dbus.sh ]; then
+  chmod +x /etc/profile.d/ensure_dbus.sh
+fi
 #
 #  ADDITIONAL CLEANUP
 #
