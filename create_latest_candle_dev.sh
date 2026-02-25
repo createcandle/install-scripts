@@ -103,19 +103,17 @@ else
 fi
 
 
-BOOKWORM=0
 CHROMIUM_PACKAGE_NAME="chromium"
 BOOT_DIR="/boot"
 if lsblk | grep -q /boot/firmware; then
     echo "firmware partition is mounted at /boot/firmware"
     BOOT_DIR="/boot/firmware"
     #CHROMIUM_PACKAGE_NAME="chromium"
-    BOOKWORM=1
 fi
 
 reinstall=""
 
-
+cp "./$scriptname" "$BOOT_DIR/$scriptname.txt"
 
 echo "" >> $BOOT_DIR/candle_log.txt
 echo "Candle: starting update - $(date) - $scriptname" >> /dev/kmsg
