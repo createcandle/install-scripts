@@ -512,8 +512,15 @@ else
     touch $BOOT_DIR/candle_32bits.txt
 fi
 
+# fix a bug in alsa.
+if [ -f /usr/lib/udev/rules.d/90-alsa-restore.rules ]; then
+	sed '26s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules > /usr/lib/udev/rules.d/90-alsa-restore.rules
+fi
+
 # It seems this is no longer installed on Trixie
-apt-get install fake-hwclock -y --no-install-recommends
+apt-get install fake-hwclock rtkit -y --no-install-recommends
+
+
 
 if [ -f /usr/sbin/fake-hwclock ]; then
 	/usr/sbin/fake-hwclock save
@@ -3813,7 +3820,8 @@ if [ -f /home/pi/ro-root.sh ]; then
 fi
 
 #sed '2s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules
-sed '26s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules > /usr/lib/udev/rules.d/90-alsa-restore.rules
+# moved to earlier in the script
+#sed '26s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules > /usr/lib/udev/rules.d/90-alsa-restore.rules
 
 
 # Some final insurance
