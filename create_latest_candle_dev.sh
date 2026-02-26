@@ -4210,15 +4210,15 @@ then
     echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
     echo
 
+	/home/pi/candle/debug.sh > $BOOT_DIR/debug.txt
+	
     if [ -f $BOOT_DIR/candle_first_run_complete.txt ]; then
         /home/pi/candle/debug.sh > $BOOT_DIR/debug.txt
 
         echo "" >> $BOOT_DIR/debug.txt
-        echo "THIS OUTPUT WAS CREATED BY THE SYSTEM UPDATE PROCESS" >> $BOOT_DIR/debug.txt
+        echo "THIS DEBUG OUTPUT WAS CREATED AT THE END OF THE DISK IMAGE CREATION PROCESS" >> $BOOT_DIR/debug.txt
         cat $BOOT_DIR/debug.txt
         echo "Candle: DONE. Debug output placed in $BOOT_DIR/debug.txt" >> /dev/kmsg
-    else
-        /home/pi/candle/debug.sh
     fi
 
     echo
