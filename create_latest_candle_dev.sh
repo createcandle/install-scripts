@@ -3848,6 +3848,7 @@ if [ -e /home/pi/.webthings/ssl/ ]; then
 	chown pi:pi /home/pi/.webthings/ssl/
 fi
 
+systemctl disable apparmor.service 
 
 
 # clear some caches
