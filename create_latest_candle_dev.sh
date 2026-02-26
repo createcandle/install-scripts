@@ -2922,6 +2922,7 @@ systemctl enable candle_hostname_fix.service # ugly solution, might not even be 
 
 # NetworkManager should be managing wpa_supplicant
 echo "disabling wpa_supplicant.service"
+systemctl stop wpa_supplicant.service
 systemctl disable wpa_supplicant.service
 
 # Disable timers that are useless on a read-only filesystem
@@ -4139,14 +4140,23 @@ iw reg get
 
 echo "Setting it to NL, and making sure WiFi is up by default"
 iw reg set NL
+
+# NetworkManager should be managing wpa_supplicant
+echo "disabling wpa_supplicant.service"
+systemctl stop wpa_supplicant.service
+systemctl disable wpa_supplicant.service
+
 rfkill unblock all
-systemctl disable wpa_supplicant
-nmcli radio wifi on
+
+
 
 /sbin/iw dev wlan0 interface add uap0 type __ap
 sleep 1
+nmcli dev set wlan0 managed no
+nmcli radio wifi on
 wpa_cli interface wlan0
 if [ -f /var/run/wpa_supplicant/uap0 ]; then
+    echo "Had to delete wpa_supplicant/uap0"
 	rm /var/run/wpa_supplicant/uap0
 fi
 echo "Which interface has wpa_cli selected? Should be wlan0:"
