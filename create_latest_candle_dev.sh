@@ -490,6 +490,11 @@ cd $CANDLE_BASE
 #ln --backup --symbolic --verbose $(which true) $(which mandb)
 
 
+echo "[main]" > /var/lib/NetworkManager/NetworkManager.state
+echo "NetworkingEnabled=true" >> /var/lib/NetworkManager/NetworkManager.state
+echo "WirelessEnabled=true" >> /var/lib/NetworkManager/NetworkManager.state
+echo "WWANEnabled=false" >> /var/lib/NetworkManager/NetworkManager.state
+
 # Do initial apt update
 echo
 #echo "doing apt update and allowing release info change"
