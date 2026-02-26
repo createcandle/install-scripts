@@ -4181,6 +4181,11 @@ if [ -d /etc/netplan ] ; then
 	rm -rf /etc/netplan
 fi
 
+if [ -d /home/pi/.pnpm-store ]; then
+	rm -rf /home/pi/.pnpm-store
+fi
+
+
 
 # This is handled by prepare_disk_image
 chmod +x /home/pi/candle/candle_first_run.sh
