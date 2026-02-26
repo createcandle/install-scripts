@@ -859,7 +859,9 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 DBUS_CODE=$(cat <<EOF
 if test -z '$DBUS_SESSION_BUS_ADDRESS'; then
   if [ -f /usr/bin/dbus-launch ]; then
-    eval `dbus-launch --sh-syntax --exit-with-session`
+    echo "calling dbus-launch"
+    eval "dbus-launch --sh-syntax --exit-with-session"
+	echo "DBUS_SESSION_BUS_ADDRESS after dbus-launch: $DBUS_SESSION_BUS_ADDRESS"
   fi
 fi
 EOF
