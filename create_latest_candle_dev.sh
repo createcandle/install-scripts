@@ -3257,7 +3257,9 @@ rm /usr/lib/systemd/system/man-db.timer
 #rm /usr/lib/systemd/system/man-db.service
 systemctl disable man-db.service
 
-
+systemctl disable dpkg-db-backup.timer
+systemctl mask dpkg-db-backup.timer
+systemctl disable dpkg-db-backup.service
 
 # Add main user to some groups
 echo "adding user to groups"
@@ -3747,7 +3749,7 @@ then
     
     else
         echo "Error, install_candle_controller.sh was missing. Should not be possible."
-	echo "Error, install_candle_controller.sh was missing." >> $BOOT_DIR/candle_log.txt
+		echo "Error, install_candle_controller.sh was missing." >> $BOOT_DIR/candle_log.txt
     fi
     
     
@@ -3810,6 +3812,9 @@ if [ -f /home/pi/ro-root.sh ]; then
     rm /home/pi/ro-root.sh
 fi
 
+#sed '2s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules
+sed '26s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules
+
 
 # Some final insurance
 chown pi:pi /home/pi/*
@@ -3836,6 +3841,7 @@ echo "#!/bin/sh" > /usr/lib/apt/apt.systemd.daily
 
 #rm -rf /var/backups/*
 systemctl disable dpkg-db-backup.timer
+systemctl mask dpkg-db-backup.timer
 systemctl disable dphys-swapfile
 
 systemctl disable docker.service
@@ -3843,8 +3849,10 @@ systemctl disable containerd.service
 
 systemctl disable apt-daily.service
 systemctl disable apt-daily.timer
+systemctl mask apt-daily.timer
 
 systemctl disable apt-daily-upgrade.timer
+systemctl mask apt-daily-upgrade.timer
 systemctl disable apt-daily-upgrade.service
 
 mkdir -p /home/pi/.webthings/ssl/
