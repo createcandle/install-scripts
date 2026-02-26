@@ -1725,7 +1725,8 @@ then
 	# TODO: is policykit-1 still needed in trixie?
 	# cpufrequtils is not available in trixie
 	# jan 2026: removed nscd
-    for i in curl arping autoconf ffmpeg libswresample5 libtool mosquitto mosquitto-clients sqlite3 \
+	# arping , for usb-gadget mode it seems iputils-arping is dependency instead
+    for i in curl autoconf ffmpeg libswresample5 libtool mosquitto mosquitto-clients sqlite3 \
 	    nbtscan iptables liblivemedia-dev rpicam-apps avahi-utils jq i2c-tools cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
 	    netcat-traditional upower libolm3 libffi* evtest faketime; do
@@ -1881,12 +1882,12 @@ then
 	
 	
     # Check if the binaries eactually exist
+	# arping \
     for i in \
         dnsmasq \
 		dnsutils \
         mosquitto \
         ffmpeg \
-        arping \
         sqlite3 \
         nbtscan \
         unclutter \
@@ -3205,7 +3206,7 @@ fi
 OLD_ETHERNET_NAME=$(nmcli c s | grep eth0 | cut -d " " -f 1 | tr -d '\n')
 echo "Old ethernet name was: $OLD_ETHERNET_NAME"
 nmcli connection modify "$OLD_ETHERNET_NAME" ipv4.dns-priority -100 ipv6.dns-priority -100
-nmcli connection modify "$OLD_ETHERNET_NAME" ipv4.route-metric -10 ipv6.route-metric -10
+nmcli connection modify "$OLD_ETHERNET_NAME" ipv4.route-metric -1 ipv6.route-metric -1
 nmcli connection modify "$OLD_ETHERNET_NAME" connection.id "Wired connection"
 
 echo "Was the eth0 interface succesfully changed to the name 'Wired connection'?"
