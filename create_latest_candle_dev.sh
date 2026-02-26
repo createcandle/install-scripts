@@ -3813,7 +3813,7 @@ if [ -f /home/pi/ro-root.sh ]; then
 fi
 
 #sed '2s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules
-sed '26s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules
+sed '26s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules > /usr/lib/udev/rules.d/90-alsa-restore.rules
 
 
 # Some final insurance
