@@ -4133,7 +4133,7 @@ wpa_cli interface wlan0
 #ifconfig uap0 192.168.12.1 netmask 255.255.255.0
 
 
-rpi-usb-gadget on
+#rpi-usb-gadget on
 
 nmcli c s | cat
 
