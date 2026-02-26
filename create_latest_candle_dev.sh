@@ -4152,7 +4152,7 @@ rfkill unblock all
 
 /sbin/iw dev wlan0 interface add uap0 type __ap
 sleep 1
-nmcli dev set wlan0 managed no
+nmcli dev set uap0 managed no
 nmcli radio wifi on
 wpa_cli interface wlan0
 if [ -f /var/run/wpa_supplicant/uap0 ]; then
