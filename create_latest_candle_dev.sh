@@ -517,6 +517,17 @@ if [ -f /usr/lib/udev/rules.d/90-alsa-restore.rules ]; then
 	sed '26s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules > /usr/lib/udev/rules.d/90-alsa-restore.rules
 fi
 
+echo "quickly stopping cloud-init"
+systemctl stop cloud-init-hotplugd.socket
+systemctl disable cloud-init-hotplugd.socket
+
+systemctl stop cloud-init-local.service
+systemctl disable cloud-init-local.service
+
+systemctl stop cloud-init-network.service
+systemctl disable cloud-init-network.service
+
+
 # It seems this is no longer installed on Trixie
 apt-get install fake-hwclock rtkit -y --no-install-recommends
 
