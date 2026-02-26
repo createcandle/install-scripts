@@ -861,44 +861,6 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
         
             fi
         
-        
-            
-            if [ -f /home/pi/.profile ]; then
-
-   				# Add RW and RO alias shortcuts to .profile
-                if [ $(cat /home/pi/.profile | grep -c "alias rw=") -eq 0 ];
-                then
-                    echo "adding ro and rw aliases to /home/pi/.profile"
-                    echo "" >> /home/pi/.profile
-                    echo "alias ro='sudo mount -o remount,ro /ro'" >> /home/pi/.profile
-                    echo "alias rw='sudo mount -o remount,rw /ro'" >> /home/pi/.profile
-                fi
-
-				# Only start D-Bus if it's not already running
-                if [ $(cat /home/pi/.profile | grep -c "dbus-launch") -eq 0 ];
-                then
-                    echo "adding dbus-launch to /home/pi/.profile"
-
-DBUS_CODE=$(cat <<EOF
-if test -z '$DBUS_SESSION_BUS_ADDRESS'; then
-  if [ -f /usr/bin/dbus-launch ]; then
-    echo "calling dbus-launch"
-    eval "dbus-launch --sh-syntax --exit-with-session"
-	echo "DBUS_SESSION_BUS_ADDRESS after dbus-launch: $DBUS_SESSION_BUS_ADDRESS"
-  fi
-fi
-EOF
-)
-
-  
-                    echo "$DBUS_CODE" >> /home/pi/.profile
-                   	#echo "if test -z '$DBUS_SESSION_BUS_ADDRESS'; then" >> /home/pi/.profile
-                    #echo "  eval `dbus-launch --sh-syntax --exit-with-session`" >> /home/pi/.profile
-					#echo "fi" >> /home/pi/.profile
-                fi
-
-            fi
-        
         else
             echo "ERROR, /bin/ro-root.sh is missing, not even attempting to further install read-only mode"
         fi
