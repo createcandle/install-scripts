@@ -1906,7 +1906,7 @@ then
     liblivemedia-dev libavcodec61 libswresample5 libffi8 libavformat61 \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-kms++ python3-prctl libopenblas0 libopenjp2-7 python3-pip \
-    vlc unclutter;
+    vlc unclutter dkms;
     do
         echo ""
 		
@@ -2126,13 +2126,46 @@ cd $CANDLE_BASE
 echo "INSTALLING RESPEAKER KERNEL MODULE"
 echo "But not enabling it"
 
-git clone https://github.com/Seeed-Studio/seeed-linux-dtoverlays.git  
-cd seeed-linux-dtoverlays/  
-make overlays/rpi/respeaker-2mic-v2_0-overlay.dtbo  
-cp overlays/rpi/respeaker-2mic-v2_0-overlay.dtbo /boot/firmware/overlays/respeaker-2mic-v2_0.dtbo
+#https://forum.seeedstudio.com/t/pi-zero-2w-seeed-studio-2-mic-hat-driver-issue-with-debian-trixie/294118/10
 
-cd $CANDLE_BASE 
-rm -rf seeed-linux-dtoverlays
+git clone https://github.com/Seeed-Studio/seeed-linux-dtoverlays.git
+if [ -d seeed-linux-dtoverlays ]; then
+	
+	cd seeed-linux-dtoverlays
+	
+	git clone https://github.com/HinTak/seeed-voicecard.git
+
+	if [ -d seeed-voicecard ]; then
+
+		apt install -y --no-install-recommends dkms libasound2-plugins
+	
+		mkdir -p /var/lib/dkms/seeed-voicecard/0.3/0.0.0
+		mkdir -p /etc/voicecard
+		
+		make overlays/rpi/respeaker-2mic-v1_0-overlay.dtbo
+		cp overlays/rpi/respeaker-2mic-v1_0-overlay.dtbo /boot/firmware/overlays/respeaker-2mic-v1_0.dtbo
+		
+		make overlays/rpi/respeaker-2mic-v2_0-overlay.dtbo
+		cp overlays/rpi/respeaker-2mic-v2_0-overlay.dtbo /boot/firmware/overlays/respeaker-2mic-v2_0.dtbo
+	
+		cp ./seeed-voicecard/*.conf /etc/voicecard
+		cp ./seeed-voicecard/*.state /etc/voicecard
+
+		cp ./seeed-voicecard/seeed-voicecard /usr/bin/
+
+		grep -q "^snd-soc-seeed-voicecard$" /etc/modules || echo "snd-soc-seeed-voicecard" >> /etc/modules
+		grep -q "^snd-soc-wm8960$" /etc/modules || echo "snd-soc-wm8960" >> /etc/modules
+	
+	fi
+
+	
+	
+	cd $CANDLE_BASE 
+	rm -rf seeed-linux-dtoverlays
+else
+	echo "ERROR, repeaker drivers failed to download"
+	exit 1
+fi
 
 # install alternative WM8960 drivers
 if [ "$SKIP_RESPEAKER_ALTERNATIVE" = no ] || [[ -z "${SKIP_RESPEAKER_ALTERNATIVE}" ]]
@@ -2879,6 +2912,7 @@ systemctl enable candle_reboot.service
 systemctl enable candle_reboot180.service
 systemctl enable candle_splashscreen_updating.service
 systemctl enable candle_splashscreen_updating180.service
+systemctl enable respeaker.service
 systemctl enable candle_hostname_fix.service # ugly solution, might not even be necessary anymore? Nope, tested, still needed.
 # TODO: the candle_early script also seems to apply the hostname fix (and restart avahi-daemon). Then again, can't hurt to have redundancy.
 #systemctl enable candle_silence_player.service
@@ -2931,16 +2965,17 @@ systemctl disable man-db.timer
 
 # disable modemManager
 if systemctl list-units --full -all | grep -Fq ModemManager.service; then
+	systemctl stop ModemManager.service
     systemctl disable ModemManager.service
-    systemctl mask ModemManager.service
+    
 fi
 
 if systemctl list-units --full -all | grep -Fq rpi-eeprom-update.service; then
 	systemctl disable rpi-eeprom-update.service
 fi
-if systemctl list-units --full -all | grep -Fq rpi-eeprom-update.service; then
-	systemctl disable rpi-eeprom-update.service
-fi
+#if systemctl list-units --full -all | grep -Fq rpi-eeprom-update.service; then
+#	systemctl disable rpi-eeprom-update.service
+#fi
 
 
 #disable wpa_supplicant service because dhpcpcd is managing it. Otherwise it runs twice.
