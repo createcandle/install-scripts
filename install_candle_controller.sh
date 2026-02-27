@@ -1287,6 +1287,13 @@ else
     echo "Candle: dashboard persistence file already existed, not replacing it" | sudo tee -a $BOOT_DIR/candle_log.txt
 fi
 
+mkdir -p "$CANDLE_BASE/.webthings/uploads"
+if [ -f "$CANDLE_BASE/.webthings/addons/scenes/images/menu-icon.svg" ] ; then
+	cp "$CANDLE_BASE/.webthings/addons/scenes/images/menu-icon.svg" "$CANDLE_BASE/.webthings/uploads/NIrzLM.svg"
+fi
+
+
+
 
 if [ -f $CANDLE_BASE/webthings/gateway/tools/make-self-signed-cert.sh ]; then
 	$CANDLE_BASE/webthings/gateway/tools/make-self-signed-cert.sh
