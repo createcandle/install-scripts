@@ -1290,6 +1290,7 @@ fi
 mkdir -p "$CANDLE_BASE/.webthings/uploads"
 if [ -f "$CANDLE_BASE/.webthings/addons/scenes/images/menu-icon.svg" ] ; then
 	cp "$CANDLE_BASE/.webthings/addons/scenes/images/menu-icon.svg" "$CANDLE_BASE/.webthings/uploads/NIrzLM.svg"
+	chown pi:pi /home/pi/.webthings/uploads/NIrzLM.svg
 fi
 
 
