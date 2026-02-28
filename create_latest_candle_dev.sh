@@ -3302,6 +3302,11 @@ if cat /etc/group | grep -q voice; then
 	usermod -a -G voice pi
 fi
 
+if [ -f /etc/cups/cupsd.conf ] ; then
+	echo "disabling cups web interface"
+	sed -i 's/WebInterface Yes/WebInterface No' /etc/cups/cupsd.conf
+fi
+
 # CREATE INITIAL BACKUPS
 
 cd $CANDLE_BASE
