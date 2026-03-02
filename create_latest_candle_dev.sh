@@ -1717,7 +1717,7 @@ then
     for i in curl autoconf ffmpeg libswresample5 libtool mosquitto mosquitto-clients sqlite3 \
 	    nbtscan iptables liblivemedia-dev rpicam-apps avahi-utils jq i2c-tools cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
-	    netcat-traditional upower libolm3 libffi* evtest faketime; do
+	    netcat-traditional upower libolm3 libffi* evtest faketime rpi-usb-gadget; do
             
 		echo "Candle: installing $i"
         echo "Candle: installing $i" >> /dev/kmsg
@@ -1899,10 +1899,11 @@ then
 	# with trixie libavformat59 became libavformat61
     # removed libgirepository1.0-dev to test if it's still needed
 	# TODO: is policykit-1 still needed?
+	# Arping removed, for rpi-usb-gadget mode
     for i in \
     git autoconf build-essential curl libbluetooth-dev libboost-python-dev libboost-thread-dev libffi-dev \
     libglib2.0-dev libpng-dev libcap2-bin libudev-dev libusb-1.0-0-dev pkg-config lsof python3-six \
-    arping autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan iptables \
+    autoconf ffmpeg libtool mosquitto sqlite3 libolm3 nbtscan iptables \
     liblivemedia-dev libavcodec61 libswresample5 libffi8 libavformat61 \
     libasound2-dev libsbc-dev libmp3lame-dev libspandsp-dev \
     python3-kms++ python3-prctl libopenblas0 libopenjp2-7 python3-pip \
