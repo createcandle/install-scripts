@@ -1556,8 +1556,9 @@ then
     raspi-config nonint do_audioconf 2
     apt update -y
 
-	# add user to rtkit (realtime) group for  pipewire 
+	# add user to rtkit (realtime) group for pipewire 
 	usermod -aG rtkit pi
+	usermod -aG pipewire pi
 
 	# set bluetooth to experimental dbus support
 	#Experimental = false
