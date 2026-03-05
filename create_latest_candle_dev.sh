@@ -1566,6 +1566,7 @@ then
 	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
 
 	mkdir -p ~/.webthings/etc/bluetooth
+	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
 	
 	
 
