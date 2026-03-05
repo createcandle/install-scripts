@@ -1562,12 +1562,13 @@ then
 
 	# set bluetooth to experimental dbus support
 	#Experimental = false
+	
+	mkdir -p ~/.webthings/etc/bluetooth
+	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
+
 	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
 	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
 
-	mkdir -p ~/.webthings/etc/bluetooth
-	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
-	
 	
 
     if [ -e /usr/share/pipewire ]; then
