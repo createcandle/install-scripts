@@ -1552,7 +1552,7 @@ then
     echo "installing Pipewire audio"
 	# software-properties-common
 	apt install -y rtkit
-    apt install -y pipewire pipewire-bin wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries pipewire-libcamera libcamera-ipa easyeffects portaudio19-dev --no-install-recommends
+    apt install -y pipewire pipewire-bin wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries pipewire-libcamera libcamera-ipa easyeffects portaudio19-dev bluez bluez-tools --no-install-recommends
     raspi-config nonint do_audioconf 2
     apt update -y
 
@@ -1564,6 +1564,8 @@ then
 	#Experimental = false
 	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
 	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
+
+	mkdir -p ~/.webthings/etc/bluetooth
 	
 	
 
