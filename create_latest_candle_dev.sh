@@ -1718,7 +1718,7 @@ then
     for i in curl autoconf ffmpeg libswresample5 libtool mosquitto mosquitto-clients sqlite3 \
 	    nbtscan iptables liblivemedia-dev rpicam-apps avahi-utils jq i2c-tools cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
-	    netcat-traditional upower libolm3 libffi* evtest faketime rpi-usb-gadget; do
+	    netcat-traditional upower libolm3 libffi* evtest faketime rpi-usb-gadget smem; do
             
 		echo "Candle: installing $i"
         echo "Candle: installing $i" >> /dev/kmsg
@@ -1780,6 +1780,10 @@ then
     
     #apt-get install --no-install-recommends xserver-xorg x11-xserver-utils xserver-xorg-legacy xinit openbox wmctrl xdotool feh fbi unclutter lsb-release xfonts-base libinput-tools nbtscan -y
 
+	echo
+    echo "installing camera support"
+    echo
+	
     # Camera support
     for i in python3-pip python3-libcamera python3-picamera2 python3-kms++ python3-prctl libopenblas-dev libopenjp2-7; do
         echo "$i"
