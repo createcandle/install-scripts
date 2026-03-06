@@ -4079,6 +4079,10 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	systemctl restart avahi-daemon.service
     resolvconf -u
 	systemctl disable NetworkManager.service
+
+
+
+
 	
 	echo "completely removing network manager"
 	resolvconf -u
@@ -4183,12 +4187,16 @@ wpa_cli interface wlan0
 #ip address add 192.168.12.1/24 dev uap0
 #ifconfig uap0 192.168.12.1 netmask 255.255.255.0
 
+systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
 
 #rpi-usb-gadget on
 
 nmcli c s | cat
 
 nmcli general status | cat
+
+
 
 apt autoremove -y
 
