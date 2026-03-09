@@ -3857,6 +3857,8 @@ fi
 #sed '26s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules > /usr/lib/udev/rules.d/90-alsa-restore.rules
 
 
+mkdir -p /home/pi/.webthings/etc/nmap
+
 # Some final insurance
 chown pi:pi /home/pi/*
 chown pi:pi /home/pi/.webthings/candle.log
