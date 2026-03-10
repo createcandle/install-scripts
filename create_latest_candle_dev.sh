@@ -1606,7 +1606,10 @@ then
 	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit rpi-usb-gadget iproute2 socat
 
 	# some more apps
-	apt install -y --no-install-recommends tree
+	apt install -y --no-install-recommends tree ipset
+	
+	# For Thread / Matter
+	apt install -y --no-install-recommends ipset
 	
 	#echo "removing dnsmasq-base"
 	#apt remove dnsmasq-base -y
