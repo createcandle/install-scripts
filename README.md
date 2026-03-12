@@ -94,10 +94,13 @@ curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createc
 ```
 
 
-Extracting the disk image from an SD card. In this example the SD card is at /dev/disk4, but it could be a different address!
+### Creating the disk image from an SD card
+
+MAC OS
+Note: in this example the SD card is at /dev/disk4, but it could be a different address!
 
 ```
-# Find the /dev address of the SD card
+# Find the actual /dev/ address of the SD card
 diskutil list
 
 # Then make sure the SD card is not mounted:
