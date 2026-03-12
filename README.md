@@ -94,17 +94,19 @@ curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createc
 ```
 
 
-For Raspberry OS Trixie, right after flashing the OS, add this little snippet to `firstrun.sh` on the boot partition to avoid partition resize issues:
+Extracting the disk image from an SD card. In this example the SD card is at /dev/disk4, but it could be a different address!
 
 ```
-echo -e "Yes\nYes" | parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 8000MB
-printf "mkpart\np\next4\n8546MB\n16546MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | parted --align optimal
-resize2fs /dev/mmcblk0p2
-printf "y" | mkfs.ext4 /dev/mmcblk0p3
-printf "y" | mkfs.ext4 /dev/mmcblk0p4
+# Find the /dev address of the SD card
+diskutil list
+
+# Then make sure the SD card is not mounted:
+sudo diskutil unmountDisk /dev/disk4
+
+# Finally, clone to SD card straight into a zipped disk image
+sudo dd conv=sparse if=/dev/disk4 bs=2048 | gzip -c > Candle_64bit_3.0.0.img.zip
+
 ```
-
-
 
 
 .
@@ -138,6 +140,12 @@ https://github.com/createcandle/configuration-files/blob/a11fcef2a77c59a2d38a5b8
 .
 
 .
+
+
+
+
+
+
 
 ### Live update script (deprecated)
 With the latest versions of Candle it's now possible to fully update the controller even when read-only protection is enabled, with out needing a reboot first. This is experimental, so use at your own risk. It automatically detects if your controller is compatible. We prefer to just disable read-only first through a reboot.
