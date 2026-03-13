@@ -1609,7 +1609,8 @@ then
 	apt install -y --no-install-recommends tree
 	
 	# For Thread / Matter 
-	apt install -y --no-install-recommends ipset tio pi-bluetooth
+	apt install -y --no-install-recommends ipset tio bluez bluez-utils pi-bluetooth 
+	
 	
 	#echo "removing dnsmasq-base"
 	#apt remove dnsmasq-base -y
