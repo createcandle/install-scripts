@@ -1240,8 +1240,15 @@ else
     echo "$(date) $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a $BOOT_DIR/candle_log.txt
 fi
 
+mkdir -p "$CANDLE_BASE/backups"
 if [ -d "$CANDLE_BASE/.webthings/addons/candleappstore" ]; then
-	cp -r  "$CANDLE_BASE/.webthings/addons/candleappstore" "$CANDLE_BASE/candleappstore_bak" 
+	cp -r  "$CANDLE_BASE/.webthings/addons/candleappstore" "$CANDLE_BASE/backups/candleappstore" 
+fi
+if [ -d "$CANDLE_BASE/.webthings/addons/power-settings" ]; then
+	cp -r  "$CANDLE_BASE/.webthings/addons/power-settings" "$CANDLE_BASE/backups/power-settings" 
+fi
+if [ -f "$CANDLE_BASE/.webthings/config/db.sqlite3" ]; then
+	cp -r  "$CANDLE_BASE/.webthings/config/db.sqlite3" "$CANDLE_BASE/backups/db.sqlite3" 
 fi
 
 #cd /home/pi/webthings/gateway
