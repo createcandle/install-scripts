@@ -977,39 +977,39 @@ then
 		fi
     done
 
-if [ -f /boot/firmware/candle_ssh.txt ]; then
-	for addon in seashell;
-	do
-		echo "$addon"
-		curl -s "https://api.github.com/repos/flatsiedatsie/$addon/releases/latest" \
-			| grep "browser_download_url" \
-			| grep "$ARCHSTRING-v3.9" \
-			| grep -v ".sha256sum" \
-			| cut -d : -f 2,3 \
-			| tr -d \" \
-			| sed 's/,*$//' \
-			| wget -qi - -O addon.tgz
-		if [ -f addon.tgz ]; then
-			tar -xf addon.tgz
-			rm addon.tgz
-			
-			rm -rf "$addon"
-			mv package "$addon"
-			chown -R pi:pi "$addon"
-			mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
-			#for directory in flatsiedatsie-"$addon"*; do
-			#  [[ -d $directory ]] || continue
-			#  echo "Directory: $directory"
-			#  rm -rf ./"$addon"
-			#  mv -- "$directory" ./$addon
-			#done
-			#chown -R pi:pi $addon
-			#mkdir -p /home/pi/.webthings/data/"$addon"
-		else
-			echo "Error, did not install addon: $addon"
-		fi
-	done
-fi
+	if [ -f /boot/firmware/candle_ssh.txt ]; then
+		for addon in seashell;
+		do
+			echo "$addon"
+			curl -s "https://api.github.com/repos/flatsiedatsie/$addon/releases/latest" \
+				| grep "browser_download_url" \
+				| grep "$ARCHSTRING-v3.9" \
+				| grep -v ".sha256sum" \
+				| cut -d : -f 2,3 \
+				| tr -d \" \
+				| sed 's/,*$//' \
+				| wget -qi - -O addon.tgz
+			if [ -f addon.tgz ]; then
+				tar -xf addon.tgz
+				rm addon.tgz
+				
+				rm -rf "$addon"
+				mv package "$addon"
+				chown -R pi:pi "$addon"
+				mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+				#for directory in flatsiedatsie-"$addon"*; do
+				#  [[ -d $directory ]] || continue
+				#  echo "Directory: $directory"
+				#  rm -rf ./"$addon"
+				#  mv -- "$directory" ./$addon
+				#done
+				#chown -R pi:pi $addon
+				#mkdir -p /home/pi/.webthings/data/"$addon"
+			else
+				echo "Error, did not install addon: $addon"
+			fi
+		done
+	fi
 
 
 	# Python 3.11 addons
@@ -1240,9 +1240,9 @@ else
     echo "$(date) $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a $BOOT_DIR/candle_log.txt
 fi
 
-
-
-
+if [ -d "$CANDLE_BASE/.webthings/addons/candleappstore" ]; then
+	cp -r  "$CANDLE_BASE/.webthings/addons/candleappstore" "$CANDLE_BASE/candleappstore_bak" 
+fi
 
 #cd /home/pi/webthings/gateway
 #timeout 10 npm run run-only
