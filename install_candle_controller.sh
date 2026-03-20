@@ -1240,23 +1240,29 @@ else
     echo "$(date) $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a $BOOT_DIR/candle_log.txt
 fi
 
-mkdir -p "$CANDLE_BASE/backups/addons"
-mkdir -p "$CANDLE_BASE/backups/config"
-mkdir -p "$CANDLE_BASE/backups/data"
-mkdir -p "$CANDLE_BASE/backups/log"
-mkdir -p "$CANDLE_BASE/backups/ssl"
+mkdir -p "$CANDLE_BASE/.webthings/backups/addons"
+mkdir -p "$CANDLE_BASE/.webthings/backups/data"
+mkdir -p "$CANDLE_BASE/.webthings/backups/config"
+mkdir -p "$CANDLE_BASE/.webthings/backups/log"
+mkdir -p "$CANDLE_BASE/.webthings/backups/ssl"
+
+mkdir -p "$CANDLE_BASE/safe_mode/addons"
+mkdir -p "$CANDLE_BASE/safe_mode/data/candleappstore"
+mkdir -p "$CANDLE_BASE/safe_mode/data/power-settings"
+mkdir -p "$CANDLE_BASE/safe_mode/data/candle-theme"
+mkdir -p "$CANDLE_BASE/safe_mode/config"
 
 if [ -d "$CANDLE_BASE/.webthings/addons/candleappstore" ]; then
-	cp -r  "$CANDLE_BASE/.webthings/addons/candleappstore" "$CANDLE_BASE/.webthings/backups/addons/candleappstore" 
+	cp -r  "$CANDLE_BASE/.webthings/addons/candleappstore" "$CANDLE_BASE/safe_mode/addons/candleappstore" 
 fi
 if [ -d "$CANDLE_BASE/.webthings/addons/power-settings" ]; then
-	cp -r  "$CANDLE_BASE/.webthings/addons/power-settings" "$CANDLE_BASE/.webthings/backups/addons/power-settings" 
+	cp -r  "$CANDLE_BASE/.webthings/addons/power-settings" "$CANDLE_BASE/safe_mode/addons/power-settings" 
 fi
 if [ -d "$CANDLE_BASE/.webthings/addons/candle-theme" ]; then
-	cp -r  "$CANDLE_BASE/.webthings/addons/candle-theme" "$CANDLE_BASE/.webthings/backups/addons/candle-theme" 
+	cp -r  "$CANDLE_BASE/.webthings/addons/candle-theme" "$CANDLE_BASE/safe_mode/addons/candle-theme" 
 fi
 if [ -f "$CANDLE_BASE/.webthings/config/db.sqlite3" ]; then
-	cp -r  "$CANDLE_BASE/.webthings/config/db.sqlite3" "$CANDLE_BASE/.webthings/backups/config/db.sqlite3" 
+	cp -r  "$CANDLE_BASE/.webthings/config/db.sqlite3" "$CANDLE_BASE/safe_mode/config/db.sqlite3" 
 fi
 
 #cd /home/pi/webthings/gateway
