@@ -3803,28 +3803,6 @@ then
 
 	
 
-	# Set Candle as the hostname
-	if [ ! -e /home/pi/.webthings/etc/hostname ]
-	then
-	    echo "candle" > /etc/hostname
-	    echo "candle" > /home/pi/.webthings/etc/hostname
-	    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-	    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
-	else
-	    echo "/home/pi/.webthings/etc/hostname already existed"
-	    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-	    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
-	fi
-	
-	
-	# Create hosts file and its symlink
-	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
-	    echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-	    echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
-	fi
-
-	
-
 elif [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 	cd $CANDLE_BASE
 	
@@ -3838,29 +3816,6 @@ elif [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 
         cd $CANDLE_BASE
     fi
-
-
-
-	# Set Candle as the hostname
-	if [ ! -e /home/pi/.webthings/etc/hostname ]
-	then
-	    echo "gateway" > /etc/hostname
-	    echo "gateway" > /home/pi/.webthings/etc/hostname
-	    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-	    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
-	else
-	    echo "/home/pi/.webthings/etc/hostname already existed"
-	    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-	    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
-	fi
-	
-	
-	# Create hosts file and its symlink
-	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
-	    echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-	    echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	gateway\n' > /home/pi/.webthings/etc/hosts
-	fi
-
 	
 fi
 
@@ -3919,6 +3874,31 @@ fi
 #sed '2s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules
 # moved to earlier in the script
 #sed '26s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules > /usr/lib/udev/rules.d/90-alsa-restore.rules
+
+
+
+# Set Candle as the hostname
+if [ ! -e /home/pi/.webthings/etc/hostname ]
+then
+	echo "candle" > /etc/hostname
+	echo "candle" > /home/pi/.webthings/etc/hostname
+	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
+	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
+else
+	echo "/home/pi/.webthings/etc/hostname already existed"
+	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
+	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
+fi
+
+
+# Create hosts file and its symlink
+if [ ! -f /home/pi/.webthings/etc/hosts ]; then
+	echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
+	echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
+fi
+
+
+
 
 
 mkdir -p /home/pi/.webthings/etc/nmap
