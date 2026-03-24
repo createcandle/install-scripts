@@ -163,6 +163,10 @@ curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createc
 ```
 
 
+### Experimental script to install the Webthings Gateway instead of the Candle Controller
+```
+curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createcandle/install-scripts/main/create_latest_candle_dev.sh -o create_latest_candle_dev.sh; sudo chmod +x create_latest_candle_dev.sh; sudo CUTTING_EDGE=yes CREATE_DISK_IMAGE=yes SKIP_CONTROLLER=yes SKIP_WEBTHINGS_GATEWAY=no bash ./create_latest_candle_dev.sh
+```
 
 
 
