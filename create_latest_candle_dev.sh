@@ -3811,13 +3811,12 @@ then
         chown pi:pi /home/pi/controller_backup.tar
     fi
 
-elif [[ -z "${SKIP_WEBTHINGS_GATEWAY}" ]] || [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; 
-then
+elif [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 	cd $CANDLE_BASE
 	
 	wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_webthings_gatewy.sh -O ./install_webthings_gateway.sh --retry-connrefused 
 	# Check if the install_candle_controller.sh file now exists
-    if [ -f install_webthings_gateway.sh ]; then
+    if [ -f ./install_webthings_gateway.sh ]; then
         chmod +x ./install_webthings_gateway.sh
         sudo -u pi ./install_webthings_gateway.sh
         wait
