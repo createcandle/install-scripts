@@ -1091,6 +1091,8 @@ then
   rm "$CANDLE_BASE/.npm/anonymous-cli-metrics.json"
 fi
 
+ln -s /home/pi/webthings/gateway/run-app.sh /home/pi/webthings/gateway/candle_controller.sh
+
 npm cache clean --force
 nvm cache clear
 
