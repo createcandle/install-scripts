@@ -338,6 +338,7 @@ then
 				
                 #resizepart /dev/mmcblk0 2 12600000
             else
+				# Squeeze into 16GB
                 echo "creating smaller partitions for update image"
                 #echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
                 #printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | parted --align optimal
