@@ -94,9 +94,8 @@ curl -H 'Cache-Control: no-cache' -sSl https://raw.githubusercontent.com/createc
 ```
 
 
-### Creating the disk image from an SD card
+### Creating the disk image from an SD card on Mac OS
 
-MAC OS
 Note: in this example the SD card is at /dev/disk4, but it could be a different address!
 
 ```
@@ -110,6 +109,31 @@ sudo diskutil unmountDisk /dev/disk4
 sudo dd conv=sparse if=/dev/disk4 bs=2048 | gzip -c > Candle_64bit_3.0.0.img.zip
 
 ```
+
+If that results in an error, then you can try saving this as a bash script an running it with sudo:
+```
+#!/bin/bash
+
+#All this below is because sometimes using dd with conv=sparse results in an error
+
+BLOCKSIZE=$(diskutil info /dev/disk4 | grep 'Device Block Size' | awk '{print $4}')
+echo "BLOCKSIZE: $BLOCKSIZE  (likely 512)"
+
+PARTITION_START=$(sudo fdisk /dev/disk4  | awk '$1 == "4:" { print $11 }')
+echo "PARTITION_START $PARTITION_START  (should be a large number)"
+
+PARTITION_SIZE=$(sudo fdisk /dev/disk4  | awk '$1 == "4:" { print $13 }')
+PARTITION_SIZE=$(echo $PARTITION_SIZE | sed 's/[^0-9]*//g' )
+echo "PARTITION_SIZE: $PARTITION_SIZE  (should also be a large number)"
+
+LAST_BLOCK=$(($PARTITION_START + $PARTITION_SIZE))
+#LAST_BLOCK=$(($LAST_BLOCK + 10))
+echo "LAST_BLOCK: $LAST_BLOCK  (dd will read this many blocks into a file before stopping)"
+
+dd iflag=fullblock if=/dev/disk4 bs=$BLOCKSIZE count=$LAST_BLOCK | gzip -c > Candle_64bit_3.0.0.img.zip
+
+```
+
 
 
 .
