@@ -3345,6 +3345,11 @@ cd $CANDLE_BASE
 #fi
 
 
+if [ ! -f /home/pi/webthings/gateway/run-app.sh ] && [ -f /home/pi/webthings/gateway/candle_controller.sh ]; then
+	ln -s /home/pi/webthings/gateway/candle_controller.sh /home/pi/webthings/gateway/run-app.sh
+fi
+
+
 
 
 # Download some more splash screens
