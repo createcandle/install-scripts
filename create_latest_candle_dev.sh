@@ -328,7 +328,7 @@ then
             echo
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
-                echo -e "Yes\nYes" | /usr/sbin/parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 8200MB
+                echo -e "Yes\nYes" | /usr/sbin/parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 8700MB
 				echo ""
 				echo "resized partition 2"
                 printf "mkpart\np\next4\n8746MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted --align optimal
@@ -3349,6 +3349,9 @@ if [ ! -f /home/pi/webthings/gateway/run-app.sh ] && [ -f /home/pi/webthings/gat
 	ln -s /home/pi/webthings/gateway/candle_controller.sh /home/pi/webthings/gateway/run-app.sh
 fi
 
+if [ ! -f /home/pi/webthings/gateway/candle_controller.sh ] && [ -f /home/pi/webthings/gateway/run-app.sh ]; then
+	ln -s /home/pi/webthings/gateway/run-app.sh /home/pi/webthings/gateway/candle_controller.sh
+fi
 
 
 
@@ -3524,26 +3527,6 @@ fi
 
 
 
-
-# Set Candle as the hostname
-if [ ! -e /home/pi/.webthings/etc/hostname ]
-then
-    echo "candle" > /etc/hostname
-    echo "candle" > /home/pi/.webthings/etc/hostname
-    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
-else
-    echo "/home/pi/.webthings/etc/hostname already existed"
-    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
-fi
-
-
-# Create hosts file and its symlink
-if [ ! -f /home/pi/.webthings/etc/hosts ]; then
-    echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-    echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
-fi
 
 if [ ! -L /etc/hosts ]; then
     echo "removing /etc/hosts and creating a symlink to /home/pi/.webthings/etc/hosts instead"
@@ -3816,6 +3799,31 @@ then
         chown pi:pi /home/pi/controller_backup.tar
     fi
 
+
+	
+
+	# Set Candle as the hostname
+	if [ ! -e /home/pi/.webthings/etc/hostname ]
+	then
+	    echo "candle" > /etc/hostname
+	    echo "candle" > /home/pi/.webthings/etc/hostname
+	    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
+	    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
+	else
+	    echo "/home/pi/.webthings/etc/hostname already existed"
+	    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
+	    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
+	fi
+	
+	
+	# Create hosts file and its symlink
+	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
+	    echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
+	    echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
+	fi
+
+	
+
 elif [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 	cd $CANDLE_BASE
 	
@@ -3829,6 +3837,30 @@ elif [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 
         cd $CANDLE_BASE
     fi
+
+
+
+	# Set Candle as the hostname
+	if [ ! -e /home/pi/.webthings/etc/hostname ]
+	then
+	    echo "gateway" > /etc/hostname
+	    echo "gateway" > /home/pi/.webthings/etc/hostname
+	    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
+	    echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
+	else
+	    echo "/home/pi/.webthings/etc/hostname already existed"
+	    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
+	    echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
+	fi
+	
+	
+	# Create hosts file and its symlink
+	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
+	    echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
+	    echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	gateway\n' > /home/pi/.webthings/etc/hosts
+	fi
+
+	
 fi
 
 
@@ -4392,7 +4424,7 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
         echo
         echo "MOSTLY DONE"
         echo
-        echo "To finalise enter this command:"
+        echo "To finalize enter this command:"
         echo "sudo /home/pi/prepare_for_disk_image.sh"
         echo
         echo "Once that script is done the pi will shut down and can be imaged."
