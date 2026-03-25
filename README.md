@@ -116,6 +116,8 @@ If that results in an error, then you can try saving this as a bash script an ru
 
 #All this below is because sometimes using dd with conv=sparse results in an error
 
+diskutil unmountDisk /dev/disk4
+
 BLOCKSIZE=$(diskutil info /dev/disk4 | grep 'Device Block Size' | awk '{print $4}')
 echo "BLOCKSIZE: $BLOCKSIZE  (likely 512)"
 
