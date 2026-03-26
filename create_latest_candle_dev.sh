@@ -515,10 +515,13 @@ if [ "$BITTYPE" == 64 ]; then
     echo "creating $BOOT_DIR/candle_64bits.txt"
     echo "creating $BOOT_DIR/candle_64bits.txt" >> /dev/kmsg
     touch $BOOT_DIR/candle_64bits.txt
+	touch /candle_64bits.txt
+	
 else
 	echo "creating $BOOT_DIR/candle_32bits.txt"
     echo "creating $BOOT_DIR/candle_32bits.txt" >> /dev/kmsg
     touch $BOOT_DIR/candle_32bits.txt
+	touch /candle_32bits.txt
 fi
 
 # fix a bug in alsa.
