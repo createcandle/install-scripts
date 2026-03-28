@@ -1631,7 +1631,7 @@ then
 	
 	echo
     echo "installing some network applications, but one at a time"
-    for i in dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit; do
+    for i in dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit bridge-utils; do
         
         echo "$i"
         apt  -y install "$i"  --no-install-recommends --print-uris "$reinstall"
