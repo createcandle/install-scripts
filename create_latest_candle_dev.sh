@@ -1609,6 +1609,12 @@ then
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
+	systemctl --user enable pipewire.socket
+	systemctl --user enable pipewire-pulse.socket
+	systemctl --user enable wireplumber.service 
+	systemctl --user enable pipewire.service 
+
+
 	echo "installing some network applications"
 	# switching from wpa_supplicant to iwd (to improve hotspot security) is done later
 	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit rpi-usb-gadget iproute2 socat
