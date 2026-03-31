@@ -1557,6 +1557,21 @@ then
     echo "Candle: installing git" >> $BOOT_DIR/candle_log.txt
     echo
     apt -y install git --no-install-recommends "$reinstall" 
+
+
+	echo
+    echo "Enabling experimental bluetooth features"
+	# enable bluetooth experimental dbus support
+	
+	mkdir -p ~/.webthings/etc/bluetooth
+	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
+
+	sed -i 's/[General]/[General]\nAutoEnable=true/' /etc/bluetooth/main.conf
+
+	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
+	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
+	
+
 	
  
     echo
@@ -1570,20 +1585,6 @@ then
 	# add user to rtkit (realtime) group for pipewire 
 	usermod -aG rtkit pi
 	usermod -aG pipewire pi
-
-	# set bluetooth to experimental dbus support
-	#Experimental = false
-	
-	mkdir -p ~/.webthings/etc/bluetooth
-	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
-
-	sed -i 's/[General]/[General]\nAutoEnable=true/' /etc/bluetooth/main.conf
-
-	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
-	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
-
-	
-	
 
     if [ -e /usr/share/pipewire ]; then
 		mkdir -p /home/pi/.config/wireplumber/main.lua.d
