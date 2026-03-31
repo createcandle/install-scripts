@@ -1610,6 +1610,7 @@ then
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
+	export XDG_RUNTIME_DIR="/run/user/1000"
 	systemctl --user unmask pipewire.socket
 	systemctl --user unmask pipewire-pulse.socket
 	systemctl --user unmask wireplumber.service 
@@ -1619,7 +1620,7 @@ then
 	systemctl --user enable pipewire-pulse.socket
 	systemctl --user enable wireplumber.service 
 	systemctl --user enable pipewire.service 
-
+	export XDG_RUNTIME_DIR="/run/user/$UID"
 
 	echo "installing some network applications"
 	# switching from wpa_supplicant to iwd (to improve hotspot security) is done later
