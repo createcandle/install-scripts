@@ -4265,6 +4265,11 @@ if [ -f /var/run/wpa_supplicant/uap0 ]; then
     echo "Had to delete wpa_supplicant/uap0"
 	rm /var/run/wpa_supplicant/uap0
 fi
+
+# ADD AN EMPTY BRIDGE FOR MATTER SEGMENTATION
+nmcli connection add type bridge ifname virbr con-name CandleBridge -- ipv4.method disabled ipv6.method disabled
+
+
 echo "Which interface has wpa_cli selected? Should be wlan0:"
 wpa_cli list_network
 wpa_cli interface wlan0
