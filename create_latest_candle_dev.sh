@@ -3920,6 +3920,9 @@ touch /home/pi/.bash_history
 chown pi:pi /home/pi/.bash_history
 chown pi:pi /home/pi/.webthings/etc/asoundrc
 
+touch /home/pi/.webthings/candle.log
+chown pi:pi /home/pi/.webthings/candle.log
+
 if [ -f /etc/profile.d/ensure_dbus.sh ]; then
   chmod +x /etc/profile.d/ensure_dbus.sh
 fi
