@@ -3841,6 +3841,10 @@ then
 	else
 		echo "3.0.0" > /candle_version.txt
 	fi
+
+	if [ ! -f $BOOT_DIR/candle_original_version.txt ]; then	
+		cp /candle_version.txt $BOOT_DIR/candle_original_version.txt
+	fi
 	
 
 elif [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
@@ -3848,6 +3852,7 @@ elif [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 
 	echo "2.0.0" > /webthings_gateway_version.txt
 	echo "2.0.0" > $BOOT_DIR/webthings_gateway_version.txt
+	echo "2.0.0" > $BOOT_DIR/webthings_gateway_original_version.txt
 	
 	wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_webthings_gateway.sh -O ./install_webthings_gateway.sh --retry-connrefused 
 	# Check if the install_candle_controller.sh file now exists
