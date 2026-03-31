@@ -1609,6 +1609,11 @@ then
 
  	apt install -y pipewire-plugin-libcamera --no-install-recommends
 
+	systemctl --user unmask pipewire.socket
+	systemctl --user unmask pipewire-pulse.socket
+	systemctl --user unmask wireplumber.service 
+	systemctl --user unmask pipewire.service 
+
 	systemctl --user enable pipewire.socket
 	systemctl --user enable pipewire-pulse.socket
 	systemctl --user enable wireplumber.service 
