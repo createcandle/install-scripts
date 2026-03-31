@@ -3838,7 +3838,7 @@ then
 
 	if [ -f $BOOT_DIR/candle_version.txt ]; then
 		cp $BOOT_DIR/candle_version.txt /candle_version.txt
-	else:
+	else
 		echo "3.0.0" > /candle_version.txt
 	fi
 	
