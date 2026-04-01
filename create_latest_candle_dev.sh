@@ -4284,10 +4284,10 @@ fi
 # ADD A BRIDGE FOR MATTER SEGMENTATION
 #nmcli connection add type bridge ifname virbr con-name CandleBridge -- ipv4.method disabled ipv6.method disabled
 nmcli connection add type bridge ifname virbr con-name CandleBridge -- ipv4.method disabled ipv6.method disabled connection.autoconnect yes stp no
-nmcli con add type dummy ifname virdummy0 con-name 'CandleDummy0';
-nmcli con add type dummy ifname virdummy0 master CandleBridge connection.autoconnect yes;
-nmcli con add type dummy ifname virdummy1 con-name 'CandleDummy1';
-nmcli con add type dummy ifname virdummy1 master CandleBridge connection.autoconnect yes;
+#nmcli con add type dummy ifname virdummy0 con-name 'CandleDummy0';
+#nmcli con add type dummy ifname virdummy0 master CandleBridge connection.autoconnect yes;
+#nmcli con add type dummy ifname virdummy1 con-name 'CandleDummy1';
+#nmcli con add type dummy ifname virdummy1 master CandleBridge connection.autoconnect yes;
 
 nmcli con mod CandleBridge ipv4.addresses "192.168.12.1/24"
 nmcli con mod CandleBridge ipv4.gateway "192.168.12.1" 
