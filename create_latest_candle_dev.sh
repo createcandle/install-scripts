@@ -4293,6 +4293,7 @@ nmcli con mod CandleBridge ipv4.addresses "192.168.12.1/24"
 nmcli con mod CandleBridge ipv4.gateway "192.168.12.1" 
 nmcli con mod CandleBridge ipv4.dns "192.168.12.1" ipv4.dns-priority 1000
 nmcli con mod CandleBridge ipv4.never-default true
+nmcli con mod CandleBridge ipv4.method manual
 
 nmcli con mod CandleBridge ipv6.gateway 'fd00:12::1' 
 nmcli con mod CandleBridge ipv6.dns 'fd00:12::1' ipv6.dns-priority 1000
