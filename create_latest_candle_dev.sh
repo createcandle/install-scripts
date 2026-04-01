@@ -4281,13 +4281,22 @@ if [ -f /var/run/wpa_supplicant/uap0 ]; then
 	rm /var/run/wpa_supplicant/uap0
 fi
 
-# ADD AN EMPTY BRIDGE FOR MATTER SEGMENTATION
+# ADD A BRIDGE FOR MATTER SEGMENTATION
 #nmcli connection add type bridge ifname virbr con-name CandleBridge -- ipv4.method disabled ipv6.method disabled
 nmcli connection add type bridge ifname virbr con-name CandleBridge -- ipv4.method disabled ipv6.method disabled connection.autoconnect yes stp no
 nmcli con add type dummy ifname virdummy0 con-name 'CandleDummy0';
 nmcli con add type dummy ifname virdummy0 master CandleBridge connection.autoconnect yes;
 nmcli con add type dummy ifname virdummy1 con-name 'CandleDummy1';
 nmcli con add type dummy ifname virdummy1 master CandleBridge connection.autoconnect yes;
+
+nmcli con mod CandleBridge ipv4.addresses "192.168.12.1/24"
+nmcli con mod CandleBridge ipv4.gateway "192.168.12.1" 
+nmcli con mod CandleBridge ipv4.dns "192.168.12.1" ipv4.dns-priority 1000
+nmcli con mod CandleBridge ipv4.never-default true
+
+nmcli con mod CandleBridge ipv6.gateway 'fd00:12::1' 
+nmcli con mod CandleBridge ipv6.dns 'fd00:12::1' ipv6.dns-priority 1000
+nmcli con mod CandleBridge ipv6.never-default true
 
 echo "Which interface has wpa_cli selected? Should be wlan0:"
 wpa_cli list_network
