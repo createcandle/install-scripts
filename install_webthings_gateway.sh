@@ -97,7 +97,7 @@ python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#
 #python3 -m pip install --force-reinstall -v "websocket-client==1.4.2" --trusted-host pypi.org --trusted-host files.pythonhosted.org
 
 
-if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 20 ];
+if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_version)" != 24 ];
 then
     echo
     echo "NPM could not be found. Installing it now."
@@ -167,12 +167,12 @@ then
     for v in $(nvm_ls 12); do nvm uninstall $v; done
     nvm install 12
     
-    #nvm install 16
-    for v in $(nvm_ls 20); do nvm uninstall $v; done
-    nvm install 20
+    #nvm install 20
+    for v in $(nvm_ls ); do nvm uninstall $v; done
+    nvm install 20 --lts
 
     for v in $(nvm_ls 24); do nvm uninstall $v; done
-    nvm install 24
+    nvm install 24 --lts
 
 
 
@@ -194,8 +194,8 @@ if [ -f ./install_nvm.sh ]; then
     rm ./install_nvm.sh
 fi
 
-nvm use 20
-nvm alias default 20
+nvm use 24
+nvm alias default 24
 
 # install older version of NPM to avoid issue: reify:date-fns: http fetch GET 200 https://registry.npmjs.org/date-fns/-/date-fns-2.29.3.tgz 105523ms (cache miss)
 # npm install -g npm@6.14.17 # Node 14 version # it seems waiting very long also solves it...
@@ -1004,8 +1004,8 @@ then
 			nvm cache clear --force
 
 	
-   			nvm use 20
-            nvm alias default 20
+   			nvm use 24
+            nvm alias default 24
         else
             echo "Error, pre-install of z2m failed: no dir"
         fi
