@@ -80,6 +80,8 @@ cd "$CANDLE_BASE" || exit
 if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     CUTTING_EDGE=yes
 fi
+CUTTING_EDGE=yes
+
 
 if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
 then
