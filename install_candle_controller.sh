@@ -1175,61 +1175,73 @@ then
     
     if [ ! -d "$CANDLE_BASE/.webthings/data/zigbee2mqtt-adapter/zigbee2mqtt" ];
     then
-        cd "$CANDLE_BASE/.webthings/data/zigbee2mqtt-adapter"
-    
-        echo
+
+		echo 
         echo "pre-installing Zigbee2MQTT"
         echo
-        curl -s "https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest" \
-        | grep "tarball_url" \
-        | cut -d : -f 2,3 \
-        | tr -d \" \
-        | sed 's/,*$//' \
-        | wget -qi - -O z2m.tgz
-        echo "unpacking z2m.tgz"
-        tar -xf z2m.tgz
-        rm z2m.tgz
+		
+		cd "$CANDLE_BASE/.webthings/data/zigbee2mqtt-adapter"
+		
+		if [ -f "$CANDLE_BASE/.webthings/addons/zigbee2mqtt-adapter/z2m.tar.gz" ]; then
+			cp "$CANDLE_BASE/.webthings/addons/zigbee2mqtt-adapter/z2m.tar.gz" ./z2m.tgz
+		else
+			curl -s "https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest" \
+	        | grep "tarball_url" \
+	        | cut -d : -f 2,3 \
+	        | tr -d \" \
+	        | sed 's/,*$//' \
+	        | wget -qi - -O z2m.tgz
+		fi
 
-        for directory in Koenkk-zigbee2mqtt*; do
-          [[ -d $directory ]] || continue
-          echo "Directory: $directory"
-          rm -rf ./zigbee2mqtt
-          mv -- "$directory" ./zigbee2mqtt
-        done
-    
-        if [ -d ./zigbee2mqtt ]; then
-            chown -R pi:pi ./zigbee2mqtt
-            cd ./zigbee2mqtt
-
-			nvm use 24
-            nvm alias default 24
-
-			# install node v24 version of typescript globally
-            npm install -g typescript pnpm
-            #npm i --save-dev @types/node
-
-   			#npm install --global pnpm
-			
-			pnpm install --frozen-lockfile
-			
-
-	 		#pnpm i --frozen-lockfile
-            #npm i
-			#npm install sqlite3 --build-from-source
-			#npm run build
-            #npm ci --production
-
-
-   			npm cache clean --force
-			nvm cache clear --force
-
+        if [ -f z2m.tgz ]; then
+			echo "unpacking z2m.tgz"
+	        tar -xf z2m.tgz
+	        rm z2m.tgz
 	
-   			nvm use 24
-            nvm alias default 24
-        else
-            echo "Error, pre-install of z2m failed: no dir"
-        fi
-        #https://api.github.com/repos/Koenkk/zigbee2mqtt/releases/latest
+	        for directory in Koenkk-zigbee2mqtt*; do
+	          [[ -d $directory ]] || continue
+	          echo "Directory: $directory"
+			  # this check is silly
+			  if [ -d ./zigbee2mqtt ]; then
+	          	rm -rf ./zigbee2mqtt
+			  fi
+	          mv -- "$directory" ./zigbee2mqtt
+	        done
+	    
+	        if [ -d ./zigbee2mqtt ]; then
+	            chown -R pi:pi ./zigbee2mqtt
+	            cd ./zigbee2mqtt
+	
+				nvm use 24
+	            nvm alias default 24
+	
+				# install node v24 version of typescript globally
+	            npm install -g typescript pnpm
+	            #npm i --save-dev @types/node
+	
+	   			#npm install --global pnpm
+				
+				pnpm install --frozen-lockfile
+				
+	
+		 		#pnpm i --frozen-lockfile
+	            #npm i
+				#npm install sqlite3 --build-from-source
+				#npm run build
+	            #npm ci --production
+	
+	
+	   			npm cache clean --force
+				nvm cache clear --force
+	
+	   			nvm use 24
+	            nvm alias default 24
+	        else
+	            echo "Error, pre-install of z2m failed: no dir"
+	        fi
+		else
+			echo "Error, pre-install of z2m failed: no tar file to unpack"
+		fi
     
         cd "$CANDLE_BASE"
     else
