@@ -3746,14 +3746,30 @@ fi
 #
 
 
+# Set files that indicate versions
+if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
+	cd $CANDLE_BASE
 
-    
+	echo "2.0.0" > /webthings_gateway_version.txt
+	echo "2.0.0" > $BOOT_DIR/webthings_gateway_version.txt
+	echo "2.0.0" > $BOOT_DIR/webthings_gateway_original_version.txt
+
+else
+	if [ -f $BOOT_DIR/candle_version.txt ]; then
+		cp $BOOT_DIR/candle_version.txt /candle_version.txt
+	else
+		echo "3.0.0" > /candle_version.txt
+	fi
+	if [ ! -f $BOOT_DIR/candle_original_version.txt ]; then	
+		cp /candle_version.txt $BOOT_DIR/candle_original_version.txt
+	fi
+fi
     
 
 if [[ -z "${SKIP_CONTROLLER}" ]] || [ "$SKIP_CONTROLLER" = no ]
 then
     echo
-    
+
     if [ -f install_candle_controller.sh ]; then
         chmod +x ./install_candle_controller.sh
         sudo -u pi ./install_candle_controller.sh
@@ -3815,58 +3831,13 @@ then
     if [ -f /home/pi/controller_backup.tar ]; then
         chown pi:pi /home/pi/controller_backup.tar
     fi
-
-	# Set Candle as the hostname
-	if [ ! -e /home/pi/.webthings/etc/hostname ]
-	then
-		echo "candle" > /etc/hostname
-		echo "candle" > /home/pi/.webthings/etc/hostname
-		echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-		echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
-	else
-		echo "/home/pi/.webthings/etc/hostname already existed"
-		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
-	fi
-
-
-	# Create hosts file and its symlink
-	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
-		echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-		echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
-	fi
-
-	if [ -f $BOOT_DIR/candle_version.txt ]; then
-		cp $BOOT_DIR/candle_version.txt /candle_version.txt
-	else
-		echo "3.0.0" > /candle_version.txt
-	fi
-
-	if [ ! -f $BOOT_DIR/candle_original_version.txt ]; then	
-		cp /candle_version.txt $BOOT_DIR/candle_original_version.txt
-	fi
 	
+fi
 
-elif [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
+if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 	cd $CANDLE_BASE
 
-	echo "2.0.0" > /webthings_gateway_version.txt
-	echo "2.0.0" > $BOOT_DIR/webthings_gateway_version.txt
-	echo "2.0.0" > $BOOT_DIR/webthings_gateway_original_version.txt
-	
-	wget https://raw.githubusercontent.com/createcandle/install-scripts/main/install_webthings_gateway.sh -O ./install_webthings_gateway.sh --retry-connrefused 
-	# Check if the install_candle_controller.sh file now exists
-    if [ -f ./install_webthings_gateway.sh ]; then
-        chmod +x ./install_webthings_gateway.sh
-        sudo -u pi ./install_webthings_gateway.sh
-        wait
-        rm ./install_webthings_gateway.sh
-
-        cd $CANDLE_BASE
-    fi
-
-	
-	# Set Candle as the hostname
+	# Set gateway as the hostname
 	if [ ! -e /home/pi/.webthings/etc/hostname ]
 	then
 		echo "gateway" > /etc/hostname
@@ -3878,15 +3849,33 @@ elif [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
 		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
 	fi
-
-
 	# Create hosts file and its symlink
 	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
 		echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
 		echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	gateway\n' > /home/pi/.webthings/etc/hosts
 	fi
-	
+
+else
+
+	# Set candle as the hostname
+	if [ ! -e /home/pi/.webthings/etc/hostname ]
+	then
+		echo "candle" > /etc/hostname
+		echo "candle" > /home/pi/.webthings/etc/hostname
+		echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
+		echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
+	else
+		echo "/home/pi/.webthings/etc/hostname already existed"
+		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
+		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
+	fi
+	# Create hosts file and its symlink
+	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
+		echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
+		echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
+	fi
 fi
+
 
 
 
