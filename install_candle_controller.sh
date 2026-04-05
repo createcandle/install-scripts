@@ -44,6 +44,11 @@ else
     CANDLE_BASE="$(pwd)"
 fi
 
+WEBTHINGS_GATEWAY="no"
+if [ -f $BOOT_DIR/webthings_gateway_version.txt ]; then
+	WEBTHINGS_GATEWAY="yes"
+fi
+
 #Make sure .webthings dir exists
 mkdir -p $CANDLE_BASE/.webthings
 
@@ -60,14 +65,15 @@ echo "BITS         : $BITTYPE"
 echo "USER         : $(whoami)"
 echo "PATH         : $PATH"
 echo "CANDLE_BASE  : $CANDLE_BASE"
+echo "WEBTHINGS_G  : $WEBTHINGS_GATEWAY"
 scriptname=$(basename "$0")
 echo "NAME         : $scriptname"
 
-if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
-echo "Cutting edge : yes"
-else
-echo "Cutting edge : no"
-fi
+#if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
+#echo "Cutting edge : yes"
+#else
+#echo "Cutting edge : no"
+#fi
 
 echo
 echo
@@ -81,90 +87,6 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     CUTTING_EDGE=yes
 fi
 CUTTING_EDGE=yes
-
-
-if [ "$CUTTING_EDGE" = no ] || [[ -z "${CUTTING_EDGE}" ]];
-then
-    echo "no environment indication to go cutting edge"
-    
-    if [ ! -f "$CANDLE_BASE/latest_stable_controller.tar.txt" ] && [ ! -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
-    
-        echo "Candle: Starting download of stable controller tar"
-        echo "Candle: Starting download of stable controller tar. Takes a while." | sudo tee -a /dev/kmsg
-        echo "Candle: Starting download of stable controller tar" | sudo tee -a $BOOT_DIR/candle_log.txt
-        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O "$CANDLE_BASE/latest_stable_controller.tar"
-        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O "$CANDLE_BASE/latest_stable_controller.tar.txt"
-    
-        if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ] && [ -f "$CANDLE_BASE/latest_stable_controller.tar.tx"t ]; then
-        
-            echo "controller tar & md5 downloaded OK"
-            echo "Candle: controller tar & md5 downloaded OK" | sudo tee -a /dev/kmsg
-            echo "Candle: controller tar & md5 downloaded OK"| sudo tee -a $BOOT_DIR/candle_log.txt
-        
-            if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat $CANDLE_BASE/latest_stable_controller.tar.txt)" ]; then
-                echo "MD5 checksum of latest_stable_controller.tar matched"
-            
-                chown pi:pi "$CANDLE_BASE/latest_stable_controller.tar"
-            
-                if [ -f "$CANDLE_BASE/controller_backup_fresh.tar" ]; then
-                    rm "$CANDLE_BASE/controller_backup_fresh.tar"
-                fi
-            
-            else
-                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?"
-                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" | sudo tee -a /dev/kmsg
-                echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?"| sudo tee -a $BOOT_DIR/candle_log.txt
-            
-                if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
-                    rm "$CANDLE_BASE/latest_stable_controller.tar"
-                fi
-                if [ -f "$CANDLE_BASE/latest_stable_controller.tar.txt" ]; then
-                    rm "$CANDLE_BASE/latest_stable_controller.tar.txt"
-                fi
-            
-                # Show error image
-                if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-                then
-                    if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-                        /bin/ply-image $BOOT_DIR/error.png
-                        #sleep 7200
-                    fi
-                fi
-
-                #exit 1
-            fi
-        
-        else
-            echo "Candle: download of stable controller tar or md5 failed. Aborting."
-            echo "Candle: Error, download of stable controller tar or md5 failed. Aborting." | sudo tee -a /dev/kmsg
-            echo "$(date) - download of stable controller tar or md5 failed. Aborting." | sudo tee -a $BOOT_DIR/candle_log.txt
-        
-            if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
-                rm "$CANDLE_BASE/latest_stable_controller.tar"
-            fi
-            if [ -f "$CANDLE_BASE/latest_stable_controller.tar.txt" ]; then
-                rm "$CANDLE_BASE/latest_stable_controller.tar.txt"
-            fi
-        
-            # Show error image
-            if [ "$scriptname" = "bootup_actions.sh" ] || [ "$scriptname" = "bootup_actions_failed.sh" ] || [ "$scriptname" = "post_bootup_actions.sh" ] || [ "$scriptname" = "post_bootup_actions_failed.sh" ];
-            then
-                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-                    /bin/ply-image $BOOT_DIR/error.png
-                    #sleep 7200
-                fi
-            fi
-
-            # exit 1
-        fi
-    else
-        echo "latest_stable_controller.tar already downloaded"
-    fi
-    
-fi
-
-
-
 
 
 echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
@@ -251,7 +173,7 @@ then
     for v in $(nvm_ls 12); do nvm uninstall $v; done
     nvm install 12 --lts
     
-    #nvm install 16
+    nvm install 20
     for v in $(nvm_ls 20); do nvm uninstall $v; done
     nvm install 20 --lts
 
@@ -371,7 +293,16 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     cd "$CANDLE_BASE/webthings"
     
     #git clone -b add-property-set-value-origin --depth 1 https://github.com/createcandle/candle-controller.git
-	git clone --depth 1 https://github.com/createcandle/candle-controller.git
+	
+	if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
+		echo "Candle: downloading Candle Controller from Github"
+		git clone --depth 1 https://github.com/createcandle/candle-controller.git
+	else
+		echo "Candle: downloading Webthings Gateway from Github"
+		git clone --depth 1 https://github.com/webthingsIO/gateway.git candle-controller
+	fi
+
+	
 	
     if [ -d ./candle-controller ]; then
         echo "Cutting edge controller download succeeded" | sudo tee -a /dev/kmsg
@@ -393,107 +324,6 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     fi
     
     
-# Stable controller. Now simply downloads the entire folder and puts it into place.
-else
-
-    if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
-        
-        echo "Will extract latest_stable_controller.tar"
-        
-        cd "$CANDLE_BASE"
-        
-        if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
-            rm -rf "$CANDLE_BASE/webthings/gateway2"
-        fi
-
-        availMem=$(df -P "/dev/mmcblk0p2" | awk 'END{print $4}')
-        if [ "$availMem" -gt "1000000" ]; 
-        then
-            echo "Candle: Doing safe unpack of latest_stable_controller.tar"
-            echo "Candle: Doing safe unpack of latest_stable_controller.tar" | sudo tee -a /dev/kmsg
-            echo "Doing safe unpack of latest_stable_controller.tar" | sudo tee -a $BOOT_DIR/candle_log.txt
-            mkdir -p "$CANDLE_BASE/downloaded_controller"
-            rm -rf "$CANDLE_BASE/downloaded_controller/*"
-            echo "extracting"
-            tar -xf latest_stable_controller.tar -C "$CANDLE_BASE/downloaded_controller"
-            
-            ls "$CANDLE_BASE/downloaded_controller"
-            
-            if [ -f "$CANDLE_BASE/downloaded_controller/webthings/gateway/.post_upgrade_complete" ]; then
-                echo "extraction worked fine"
-                if [ -d "$CANDLE_BASE/webthings/gateway" ]; then
-                    rm -rf "$CANDLE_BASE/webthings/gateway"
-                fi
-                echo "moving extracted gateway dir into place"
-                mv $CANDLE_BASE/downloaded_controller/webthings/gateway $CANDLE_BASE/webthings/gateway
-            else
-                echo "extraction did not go as planned"    
-            fi
-            
-            echo "removing extracted files"
-            rm -rf "$CANDLE_BASE/downloaded_controller"
-            
-        else
-            # more risky move because of low disk space
-            echo "Candle: Low disk space, doing direct unpack of latest_stable_controller.tar" | sudo tee -a /dev/kmsg
-            echo "Low disk space, doing direct unpack of latest_stable_controller.tar" | sudo tee -a $BOOT_DIR/candle_log.txt
-            
-            if [ -d "$CANDLE_BASE/webthings" ]; then
-                sudo rm -rf "$CANDLE_BASE/webthings"
-            fi
-            tar -xf latest_stable_controller.tar
-        fi
-        
-    else
-        
-        echo "Stable, but latest_stable_controller.tar missing. Attempting build." | sudo tee -a /dev/kmsg
-        echo "Stable, but latest_stable_controller.tar missing. Attempting build." | sudo tee -a $BOOT_DIR/candle_log.txt
-        
-        mkdir -p "$CANDLE_BASE/webthings"
-        chown pi:pi "$CANDLE_BASE/webthings"
-        cd "$CANDLE_BASE/webthings"
-        
-        curl -s https://api.github.com/repos/createcandle/candle-controller/releases/latest \
-        | grep "tarball_url" \
-        | cut -d : -f 2,3 \
-        | tr -d \" \
-        | sed 's/,*$//' \
-        | wget -qi - -O candle-controller-git.tar
-
-        if [ -f candle-controller-git.tar ]; then
-            echo "Stable Github Candle Controller release download succeeded" | sudo tee -a /dev/kmsg
-            echo "Stable Github Candle Controller release download succeeded" | sudo tee -a $BOOT_DIR/candle_log.txt
-            tar -xf candle-controller-git.tar
-            rm candle-controller-git.tar
-    
-            
-            for directory in createcandle-candle-controller*; do
-              [[ -d $directory ]] || continue
-              echo "Directory: $directory"
-              rm -rf ./gateway2
-              mv -f "$directory" ./gateway2
-            done
-    
-            #mv ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
-            echo
-            echo "PWD: $(pwd)"
-            echo "ls $CANDLE_BASE/webthings/gateway2:"
-            ls "$CANDLE_BASE/webthings/gateway2"
-        else
-            echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a /dev/kmsg
-            echo "ERROR, downloading latest stable release of candle-controller source dir from Github failed" | sudo tee -a $BOOT_DIR/candle_log.txt
-        
-            if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
-                if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-                    sudo /bin/ply-image $BOOT_DIR/error.png
-                    sleep 7200
-                fi
-        
-                exit 1
-            fi
-            
-        fi
-    fi
 
 fi
 
@@ -840,7 +670,7 @@ cd "$CANDLE_BASE"
 
 
 echo
-echo "INSTALLING CANDLE ADDONS"
+echo "INSTALLING ADDONS"
 echo
 
 mkdir -p "$CANDLE_BASE/.webthings/addons"
@@ -1149,7 +979,47 @@ then
 		sync 
 		
     done
-    
+
+	if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
+
+		for addon in tutorial; do
+	        echo ""
+			echo "$addon"
+	        curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
+	            | grep "browser_download_url" \
+	            | grep "$ARCHSTRING-v3.9" \
+	            | grep -v ".sha256sum" \
+	            | cut -d : -f 2,3 \
+	            | tr -d \" \
+	            | sed 's/,*$//' \
+	            | wget -qi - -O addon.tgz
+				
+	        if [ -f addon.tgz ]; then
+				tar -xf addon.tgz
+		        rm addon.tgz
+		        
+				ls package
+				if [ -d package ]; then
+		        	#rm -rf "$addon"
+		        	mv package "$CANDLE_BASE/.webthings/addons/$addon"
+		        	#chown -R pi:pi "$addon"
+		        	mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+				else
+					echo "error, no package dir for addon: $addon"
+				fi
+			else
+				echo "addon.tgz is missing, failed to download: $ARCHSTRING-v3.9 for $addon"
+			fi
+	
+			sync 
+			
+	    done
+	else
+		echo "Skipping installation of Tutorial addon for Webthings Gateway"
+	fi
+
+
+	
     rm ./*.tgz
 
 	if [ -f "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" ] && [ ! -f "$CANDLE_BASE/.webthings/data/dashboard/persistence.json" ]; then
@@ -1330,7 +1200,7 @@ fi
 
 
 
-
+# should be overwritten on first-run
 if [ -f $CANDLE_BASE/webthings/gateway/tools/make-self-signed-cert.sh ]; then
 	$CANDLE_BASE/webthings/gateway/tools/make-self-signed-cert.sh
 fi
