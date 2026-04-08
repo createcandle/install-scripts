@@ -356,7 +356,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
     # CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
-    npm --yes install typescript --save-dev --force-yes # TODO: check if this is now in package.json already
+    npm --yes install typescript --save-dev  # TODO: check if this is now in package.json already
 
     # npm install
     echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
@@ -377,18 +377,18 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     #npm run build
 
-	#npm_config_yes=true npx --yes install -D typescript --force-yes
-	npm_config_yes=true yes "y" | npx --yes install -D typescript --force-yes --omit=dev
+	#npm_config_yes=true npx --yes install -D typescript
+	npm_config_yes=true yes "y" | npx --yes install -D typescript --omit=dev
 	
-    #npx update-browserslist-db@latest -y --force-yes
+    #npx update-browserslist-db@latest --yes
        
     
 	npm_config_yes=true 
- 	yes "y" | npm --yes install -D webpack-cli --force-yes
- 	yes "y" | npm --yes install -D webpack --force-yes
+ 	yes "y" | npm --yes install -D webpack-cli 
+ 	yes "y" | npm --yes install -D webpack
     
     
-	#yes "y" | npm --yes install -D typescript --force-yes
+	#yes "y" | npm --yes install -D typescript
 
 	echo ""
 	echo "typescript should now be installed"
@@ -428,7 +428,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	cd "$CANDLE_BASE/webthings/gateway2"
 
 	echo "Installing typescript globally"
-	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes install -g typescript --save-dev --force-yes 
+	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes install -g typescript --save-dev
 
 	echo "Typescript version:"
 	tsc --version
@@ -483,7 +483,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     then
 
       	# remove now unnecessary node modules
-      	npm_config_yes=true npm prune --omit=dev -y --force-yes
+      	npm_config_yes=true npm prune --omit=dev --yes
 
       	echo "creating .post_upgrade_complete file"
       	touch .post_upgrade_complete
