@@ -60,6 +60,7 @@ SKIP_BLUEALSA=yes
 #export SKIP_RO=yes
 DOWNLOAD_DEB=no
 SKIP_DHCPCD=yes
+#CONFIGURATION_FILES_BRANCH=branch_name_here
  
 # SKIP_PARTITIONS=yes SKIP_APT_INSTALL=yes SKIP_APT_UPGRADE=yes SKIP_PYTHON=yes SKIP_RESPEAKER=yes SKIP_BLUEALSA=yes SKIP_CONTROLLER=yes SKIP_DEBUG=yes SKIP_REBOOT=yes
 
@@ -1169,7 +1170,16 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     echo "Candle: Starting download of cutting edge configuration files"
     echo "Candle: Starting download of cutting edge configuration files" >> /dev/kmsg
     echo "Candle: Starting download of cutting edge configuration files" >> $BOOT_DIR/candle_log.txt
-    git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+	if [[ -z "$CONFIGURATION_FILES_BRANCH" ]]; then
+		echo "cloning main configuration-files branch"
+		git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+	else
+		echo ""
+		echo "cloning a specific branch of the configuration-files repo: $$CONFIGURATION_FILES_BRANCH"
+		echo ""
+		git clone --branch "$CONFIGURATION_FILES_BRANCH" --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+	fi
+    
     if [ -d /home/pi/configuration-files ]; then
         rm /home/pi/configuration-files/LICENSE
         rm /home/pi/configuration-files/README.md
