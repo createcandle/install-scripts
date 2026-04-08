@@ -378,7 +378,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     #npm run build
 
 	#npm_config_yes=true npx --yes install -D typescript
-	npm_config_yes=true yes "y" | npx --yes install -D typescript --omit=dev
+	npm_config_yes=true yes "y" | npx --yes --force-yes install -D typescript --omit=dev
 	
     #npx update-browserslist-db@latest --yes
        
@@ -444,7 +444,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     echo "Compiling typescript. this will take a while..."
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
     echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a $BOOT_DIR/candle_log.txt
-    yes "y" | npx tsc -p . 
+    yes "y" | npx --force-yes tsc -p . 
     echo "(it probably found some errors, don't worry about those)"
     echo ""
 
@@ -458,18 +458,18 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     if [ "$totalk" -lt 600000 ]
     then
         echo "very low memory, --max-old-space-size=496"
-        NODE_OPTIONS="--max-old-space-size=496" npx --yes webpack
+        NODE_OPTIONS="--max-old-space-size=496" npx --yes --force-yes webpack
     elif [ "$totalk" -lt 1200000 ]
     then
         echo "low memory, --max-old-space-size=750"
-        NODE_OPTIONS="--max-old-space-size=750" npx --yes webpack
+        NODE_OPTIONS="--max-old-space-size=750" npx --yes --force-yes webpack
     elif [ "$totalk" -lt 2200000 ]
     then
         echo "normal memory, --max-old-space-size=1024"
-        NODE_OPTIONS="--max-old-space-size=1024" npx --yes webpack
+        NODE_OPTIONS="--max-old-space-size=1024" npx --yes --force-yes webpack
     else
         echo "big memory, --max-old-space-size=2048"
-        NODE_OPTIONS="--max-old-space-size=2048" npx --yes webpack
+        NODE_OPTIONS="--max-old-space-size=2048" npx --yes --force-yes webpack
     fi
 
 	echo "does gateway-addon/lib exist after webpack?"
