@@ -3289,7 +3289,10 @@ echo "Was the eth0 interface succesfully changed to the name 'Wired connection'?
 nmcli c s
 
 
-
+if ip link show | grep -q "wlan0:" ; then
+	echo "Disabling WiFI power save"
+	/sbin/iw dev wlan0 set power_save off
+fi
 
 
 
