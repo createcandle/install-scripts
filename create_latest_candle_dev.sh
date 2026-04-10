@@ -1573,9 +1573,23 @@ then
     echo "Enabling experimental bluetooth features"
 	# enable bluetooth experimental dbus support
 	
-	sed -i 's/\[General\]/\[General\]\nAutoEnable=true/' /etc/bluetooth/main.conf
+	#sed -i 's/\[General\]/\[General\]\nAutoEnable=true/' /etc/bluetooth/main.conf
+
+	# allow automatic reconnecting to audio devices
+	sed -i 's/#ReconnectUUIDs=/ReconnectUUIDs=0000110d-0000-1000-8000-00805f9b34fb,0000110e-0000-1000-8000-00805f9b34fb,/' /etc/bluetooth/main.conf
+
+	
+	sed -i 's/#Name = BlueZ/Name = Candle/' /etc/bluetooth/main.conf
+	sed -i 's/#JustWorksRepairing = never/JustWorksRepairing = always/' /etc/bluetooth/main.conf
+	sed -i 's/#FastConnectable = false/FastConnectable = true/' /etc/bluetooth/main.conf
+	sed -i 's/#DiscoverableTimeout = 0/DiscoverableTimeout = 0/' /etc/bluetooth/main.conf
+	sed -i 's/#AutoEnable=true/AutoEnable=true/' /etc/bluetooth/main.conf
 	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
 	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
+	sed -i 's/#RemoteNameRequestRetryDelay = 300/RemoteNameRequestRetryDelay = 30/' /etc/bluetooth/main.conf
+	sed -i 's/#EnableAdvMonInterleaveScan=/EnableAdvMonInterleaveScan=0/' /etc/bluetooth/main.conf
+	
+	
 
 	mkdir -p ~/.webthings/etc/bluetooth
 	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
