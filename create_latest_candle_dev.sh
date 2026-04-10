@@ -1634,7 +1634,7 @@ then
 
 	echo "installing some network applications"
 	# switching from wpa_supplicant to iwd (to improve hotspot security) is done later
-	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit rpi-usb-gadget iproute2 socat
+	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit rpi-usb-gadget iproute2 socat wireguard
 
 	# some more apps
 	apt install -y --no-install-recommends tree
@@ -1648,7 +1648,7 @@ then
 	
 	echo
     echo "installing some network applications, but one at a time"
-    for i in dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit bridge-utils; do
+    for i in dns-root-data dnsmasq libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit bridge-utils iproute2 socat wireguard; do
         
         echo "$i"
         apt  -y install "$i"  --no-install-recommends --print-uris "$reinstall"
