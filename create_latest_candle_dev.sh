@@ -1573,15 +1573,12 @@ then
     echo "Enabling experimental bluetooth features"
 	# enable bluetooth experimental dbus support
 	
-	mkdir -p ~/.webthings/etc/bluetooth
-	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
-
 	sed -i 's/\[General\]/\[General\]\nAutoEnable=true/' /etc/bluetooth/main.conf
-
 	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
 	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
-	
 
+	mkdir -p ~/.webthings/etc/bluetooth
+	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
 	
  
     echo
@@ -1605,6 +1602,8 @@ then
 	    cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
 		ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
 		#systemctl --user enable pipewire
+
+		# TODO: It seems these commands no not work:
 		su -c 'systemctl --user enable pipewire' pi
 		#systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service
 		su -c 'systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service' pi
