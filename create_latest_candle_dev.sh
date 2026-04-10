@@ -1576,7 +1576,7 @@ then
 	mkdir -p ~/.webthings/etc/bluetooth
 	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
 
-	sed -i 's/[General]/[General]\nAutoEnable=true/' /etc/bluetooth/main.conf
+	sed -i 's/\[General\]/\[General\]\nAutoEnable=true/' /etc/bluetooth/main.conf
 
 	sed -i 's/#Experimental = false/Experimental = true/' /etc/bluetooth/main.conf
 	sed -i 's/#KernelExperimental = false/KernelExperimental = true/' /etc/bluetooth/main.conf
