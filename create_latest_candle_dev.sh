@@ -1600,7 +1600,7 @@ then
 	# software-properties-common
 	apt install -y rtkit
     apt install -y pipewire pipewire-bin wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries pipewire-libcamera libcamera-ipa easyeffects portaudio19-dev bluez bluez-tools gstreamer1.0-pipewire --no-install-recommends
-    raspi-config nonint do_audioconf 2
+    #raspi-config nonint do_audioconf 2
     apt update -y
 
 	# add user to rtkit (realtime) group for pipewire 
@@ -2158,7 +2158,7 @@ sudo -u pi pip3 install --upgrade ssh-import-id --break-system-packages
 
 
 # RASPI CONFIG
-#echo "Set Raspi-config I2C, SPI, Camera"
+#echo "Set  I2C, SPI, Camera"
 
 if [ -d /sys/kernel/config/device-tree ]
 then
@@ -4507,11 +4507,11 @@ fi
 
 
 # If developer mode is active during a system update, then the system will permanently have SSH enabled
-if [ ! -f $BOOT_DIR/developer.txt ]; then
+#if [ ! -f $BOOT_DIR/developer.txt ]; then
     # Disable SSH access
     #systemctl disable ssh.service
-    raspi-config nonint do_ssh 1 # 0 is enable, 1 is disable
-fi
+#    raspi-config nonint do_ssh 1 # 0 is enable, 1 is disable
+#fi
 
 
 # Here it's possible to also ask the script to not reboot.
