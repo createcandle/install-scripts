@@ -394,10 +394,10 @@ then
             lsblk
             
             echo ""
-            resize2fs "/dev/$MMC_BASE\p2"
+            resize2fs "/dev/$MMC_BASE"p2
             
-            printf "y" | mkfs.ext4 "/dev/$MMC_BASE\p3"
-            printf "y" | mkfs.ext4 "/dev/$MMC_BASE\p4"
+            printf "y" | mkfs.ext4 "/dev/$MMC_BASE"p3
+            printf "y" | mkfs.ext4 "/dev/$MMC_BASE"p4
             mkdir -p $CANDLE_BASE/.webthings
             chown pi:pi $CANDLE_BASE/.webthings
             touch $BOOT_DIR/candle_has_4th_partition.txt
@@ -422,14 +422,14 @@ then
     
     sleep 5
     
-    if ls "/dev/$MMC_BASE\p4"; then
+    if ls "/dev/$MMC_BASE"p4; then
 
 		sleep 1
-		e2label "/dev/$MMC_BASE\p2" candle_system
+		e2label "/dev/$MMC_BASE"p2 candle_system
 		sleep 1
-	    e2label "/dev/$MMC_BASE\p3" candle_recovery
+	    e2label "/dev/$MMC_BASE"p3 candle_recovery
 		sleep 1
-	    e2label "/dev/$MMC_BASE\p4" candle_user
+	    e2label "/dev/$MMC_BASE"p4 candle_user
 		sleep 1
 
 
@@ -439,8 +439,8 @@ then
   		if mountpoint /home/pi/.webthings | grep -q "/home/pi/.webthings is a mountpoint" ; then
 		    echo "WARNING, .webthings folder seems to already be a mountpoint"
  		else
-			echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
-        	mount "/dev/$MMC_BASE\p4" /home/pi/.webthings
+			echo "Mounting /dev/$MMC_BASE p4 to /home/pi/.webthings"
+        	mount "/dev/$MMC_BASE"p4 /home/pi/.webthings
    		fi
        
         chown pi:pi /home/pi/.webthings
@@ -465,11 +465,11 @@ fi
 
 if ls /dev/mmcblk0p4; then
 	sleep 1
-	e2label "/dev/$MMC_BASE\p2" candle_system
+	e2label "/dev/$MMC_BASE"p2 candle_system
 	sleep 1
-    e2label "/dev/$MMC_BASE\p3" candle_recovery
+    e2label "/dev/$MMC_BASE"p3 candle_recovery
 	sleep 1
-    e2label "/dev/$MMC_BASE\p4" candle_user
+    e2label "/dev/$MMC_BASE"p4 candle_user
 	sleep 1
 fi
 
