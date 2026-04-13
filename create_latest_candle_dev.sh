@@ -94,6 +94,18 @@ if [ "$EUID" -ne 0 ]; then
 	exit
 fi
 
+if id pi | grep -q 'no such user'; then
+	echo "Attempting to create user pi"
+	adduser pi
+	groupadd pi
+	usermod -a -G adm,tty,dialout,voice,cdrom,sudo,audio,video,plugdev,users,netdev,input pi
+	usermod -a -G render pi
+	usermod -a -G games spi
+	usermod -a -G games i2c
+	usermod -a -G games gpio
+fi
+
+
 scriptname=$(basename "$0")
 
 # Not used in this script yet, currently /home/pi is still hardcoded
@@ -102,9 +114,17 @@ if [ -d /home/pi ]; then
 else
     CANDLE_BASE="$(pwd)"
 fi
+echo "CANDLE_BASE dir path: $CANDLE_BASE"
 
 
 CHROMIUM_PACKAGE_NAME="chromium"
+if [ ! -d /boot ]; then
+	echo ""
+	echo "WARNING, had to create /boot directory"
+	echo ""
+	mkdir /boot
+fi
+
 BOOT_DIR="/boot"
 if lsblk | grep -q /boot/firmware; then
     echo "firmware partition is mounted at /boot/firmware"
@@ -211,13 +231,13 @@ echo
 echo "CREATING CANDLE"
 echo
 
+echo "USER         : $(whoami)"
 echo "DATE         : $(date)"
 echo "IP ADDRESS   : $(hostname -I)"
 echo "MODEL        : $(tr -d '\0' < /proc/device-tree/model)"
 echo "BITS         : $BITTYPE"
+echo "PWD          : $(pwd)"
 echo "PATH         : $PATH"
-echo "USER         : $(whoami)"
-
 echo "SCRIPT NAME  : $scriptname"
 
 if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
@@ -310,7 +330,7 @@ fi
 
 # CREATE PARTITIONS
 
-if [ ! -d /home/pi/.webthings/addons ] && [[ -z "${SKIP_PARTITIONS}" ]]; 
+if [ ! -d $CANDLE_BASE/.webthings/addons ] && [[ -z "${SKIP_PARTITIONS}" ]]; 
 then
     
     #if [ -f /dev/mmcblk0p4 ]; then
@@ -366,8 +386,8 @@ then
             
             printf "y" | mkfs.ext4 /dev/mmcblk0p3
             printf "y" | mkfs.ext4 /dev/mmcblk0p4
-            mkdir -p /home/pi/.webthings
-            chown pi:pi /home/pi/.webthings
+            mkdir -p $CANDLE_BASE/.webthings
+            chown pi:pi $CANDLE_BASE/.webthings
             touch $BOOT_DIR/candle_has_4th_partition.txt
 
 
