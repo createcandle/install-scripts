@@ -330,17 +330,29 @@ fi
 
 # CREATE PARTITIONS
 
+MMC_BASE="mmcblk0"
+if lsblk | grep -q 'mmcblk0'; then
+	echo "OK, using mmcblk0"
+else
+	if lsblk | grep -q 'mmcblk1'; then
+		echo "UNEXPECTEDLY no mmcblk0 spotted, but did spot mmcblk1. Using that instead."
+		MMC_BASE="mmcblk1"
+	else
+		exit 1
+	fi
+fi
+
 if [ ! -d $CANDLE_BASE/.webthings/addons ] && [[ -z "${SKIP_PARTITIONS}" ]]; 
 then
     
     #if [ -f /dev/mmcblk0p4 ]; then
-    if lsblk | grep -q 'mmcblk0p3'; then
+    if lsblk | grep -q "$MMC_BASEp3"; then
         echo
         echo "partitions already created:"
     else
         #if ls /dev/mmcblk0p2; then
         #if [ -f /dev/mmcblk0p2 ]; then
-        if lsblk | grep -q 'mmcblk0p2'; then
+        if lsblk | grep -q "$MMC_BASEp2"; then
             
             echo
             echo "CREATING PARTITIONS"
@@ -349,7 +361,7 @@ then
             echo
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
-                echo -e "Yes\nYes" | /usr/sbin/parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 8450MB
+                echo -e "Yes\nYes" | /usr/sbin/parted "/dev/$MMC_BASE" ---pretend-input-tty --align optimal resizepart 2 8450MB
 				echo ""
 				echo "resized partition 2"
                 printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted --align optimal
@@ -365,7 +377,7 @@ then
                 #printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | parted --align optimal
 				#echo yes | parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 6000MB
                 #printf "mkpart\np\next4\n6546MB\n12546MB\nmkpart\np\next4\n12548MB\n14500MB\nquit" | parted --align optimal
-				echo -e "Yes\nYes" | /usr/sbin/parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 7990MB
+				echo -e "Yes\nYes" | /usr/sbin/parted "/dev/$MMC_BASE" ---pretend-input-tty --align optimal resizepart 2 7990MB
                 printf "mkpart\np\next4\n8546MB\n9200MB\nmkpart\np\next4\n9202MB\n14500MB\nquit" | /usr/sbin/parted --align optimal
             fi
 
@@ -382,10 +394,10 @@ then
             lsblk
             
             echo ""
-            resize2fs /dev/mmcblk0p2
+            resize2fs "/dev/$MMC_BASEp2"
             
-            printf "y" | mkfs.ext4 /dev/mmcblk0p3
-            printf "y" | mkfs.ext4 /dev/mmcblk0p4
+            printf "y" | mkfs.ext4 "/dev/$MMC_BASEp3"
+            printf "y" | mkfs.ext4 "/dev/$MMC_BASEp4"
             mkdir -p $CANDLE_BASE/.webthings
             chown pi:pi $CANDLE_BASE/.webthings
             touch $BOOT_DIR/candle_has_4th_partition.txt
@@ -410,14 +422,14 @@ then
     
     sleep 5
     
-    if ls /dev/mmcblk0p4; then
+    if ls "/dev/$MMC_BASEp4"; then
 
 		sleep 1
-		e2label /dev/mmcblk0p2 candle_system
+		e2label "/dev/$MMC_BASEp2" candle_system
 		sleep 1
-	    e2label /dev/mmcblk0p3 candle_recovery
+	    e2label "/dev/$MMC_BASEp3" candle_recovery
 		sleep 1
-	    e2label /dev/mmcblk0p4 candle_user
+	    e2label "/dev/$MMC_BASEp4" candle_user
 		sleep 1
 
 
@@ -428,7 +440,7 @@ then
 		    echo "WARNING, .webthings folder seems to already be a mountpoint"
  		else
 			echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
-        	mount /dev/mmcblk0p4 /home/pi/.webthings
+        	mount "/dev/$MMC_BASEp4" /home/pi/.webthings
    		fi
        
         chown pi:pi /home/pi/.webthings
@@ -453,11 +465,11 @@ fi
 
 if ls /dev/mmcblk0p4; then
 	sleep 1
-	e2label /dev/mmcblk0p2 candle_system
+	e2label "/dev/$MMC_BASEp2" candle_system
 	sleep 1
-    e2label /dev/mmcblk0p3 candle_recovery
+    e2label "/dev/$MMC_BASEp3" candle_recovery
 	sleep 1
-    e2label /dev/mmcblk0p4 candle_user
+    e2label "/dev/$MMC_BASEp4" candle_user
 	sleep 1
 fi
 
@@ -798,7 +810,7 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
 	# If the file exists, make it executable and move it into place
 	if [ -f ./ro-root.sh ]; then
-	    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+	    if [ -n "$(lsblk | grep $MMC_BASEp3)" ] || [ -n "$(lsblk | grep $MMC_BASEp4)" ]; then
 	        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
 	        echo "Candle: ro-root.sh file downloaded OK" >> $BOOT_DIR/candle_log.txt
 	        chmod +x ./ro-root.sh
@@ -842,7 +854,7 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
 
 	
-    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+    if [ -n "$(lsblk | grep $MMC_BASEp3)" ] || [ -n "$(lsblk | grep $MMC_BASEp4)" ]; then
         if [ -f /bin/ro-root.sh ]; then
             #isInFile4=$(cat $BOOT_DIR/config.txt | grep -c "ramfsaddr")
             if [ $(cat $BOOT_DIR/config.txt | grep -c ramfsaddr) -eq 0 ];
@@ -2588,7 +2600,7 @@ if lsblk | grep -q 'mmcblk0p4'; then
             echo "Copying recovery partition data"
             echo "Copying recovery partition data" >> /dev/kmsg
             echo "Copying recovery partition data" >> $BOOT_DIR/candle_log.txt
-            dd if=recovery.fs of=/dev/mmcblk0p3 bs=1M
+            dd if=recovery.fs "of=/dev/$MMC_BASEp3" bs=1M
 
             #if [ -n "$(lsblk | grep loop0p2)" ] && [ -n "$(lsblk | grep mmcblk0p3)" ]; then 
             #fi
@@ -2601,7 +2613,7 @@ if lsblk | grep -q 'mmcblk0p4'; then
         rm recovery.fs.tar.gz
         rm recovery.fs
 
- 		e2label /dev/mmcblk0p3 candle_recovery
+ 		e2label "/dev$MMC_BASEp3" candle_recovery
   
     else
         echo "ERROR, recovery partition file not downloaded"
@@ -3601,12 +3613,12 @@ fi
 # Set to boot from partition2
 if cat $BOOT_DIR/cmdline.txt | grep -q PARTUUID; then
     echo "replacing PARTUUID= in bootcmd.txt with /dev/mmcblk0p2"
-    sed -i ' 1 s|root=PARTUUID=.* |root=/dev/mmcblk0p2 |g' $BOOT_DIR/cmdline.txt
+    sed -i " 1 s|root=PARTUUID=.* |root=/dev/$MMC_BASEp2 |g" $BOOT_DIR/cmdline.txt
     #sed -i ' 1 s/.*/& quiet plymouth.ignore-serial-consoles splash logo.nologo vt.global_cursor_default=0/' $BOOT_DIR/cmdline.txt   
 fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
-if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+if [ -n "$(lsblk | grep $MMC_BASEp3)" ] || [ -n "$(lsblk | grep $MMC_BASEp4)" ]; then
 
     if [ -f $BOOT_DIR/fstab3.bak ] \
     && [ -f $BOOT_DIR/fstab4.bak ]; then
@@ -3650,7 +3662,7 @@ if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; the
 
   
 
-        if lsblk | grep -q mmcblk0p4; 
+        if lsblk | grep -q "$MMC_BASEp4"; 
         then
             echo "copying 4 partition version of fstab"
             echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
@@ -4064,7 +4076,7 @@ pip cache purge
 
 
 if [ -f $BOOT_DIR/cmdline-candle.txt ]; then
-    if [ -n "$(lsblk | grep mmcblk0p3)" ] || [ -n "$(lsblk | grep mmcblk0p4)" ]; then
+    if [ -n "$(lsblk | grep $MMC_BASEp3)" ] || [ -n "$(lsblk | grep $MMC_BASEp4)" ]; then
         echo "copying default Candle cmdline.txt into place"
         rm $BOOT_DIR/cmdline.txt
         cp $BOOT_DIR/cmdline-candle.txt $BOOT_DIR/cmdline.txt
