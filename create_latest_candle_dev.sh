@@ -346,13 +346,13 @@ if [ ! -d $CANDLE_BASE/.webthings/addons ] && [[ -z "${SKIP_PARTITIONS}" ]];
 then
     
     #if [ -f /dev/mmcblk0p4 ]; then
-    if lsblk | grep -q "$MMC_BASEp3"; then
+    if lsblk | grep -q "$MMC_BASE\p3"; then
         echo
         echo "partitions already created:"
     else
         #if ls /dev/mmcblk0p2; then
         #if [ -f /dev/mmcblk0p2 ]; then
-        if lsblk | grep -q "$MMC_BASEp2"; then
+        if lsblk | grep -q "$MMC_BASE\p2"; then
             
             echo
             echo "CREATING PARTITIONS"
@@ -364,7 +364,7 @@ then
                 echo -e "Yes\nYes" | /usr/sbin/parted "/dev/$MMC_BASE" ---pretend-input-tty --align optimal resizepart 2 8450MB
 				echo ""
 				echo "resized partition 2"
-                printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted --align optimal
+                printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				echo ""
 				echo "added partition 3 and 4"
 				# parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
@@ -378,7 +378,7 @@ then
 				#echo yes | parted /dev/mmcblk0 ---pretend-input-tty --align optimal resizepart 2 6000MB
                 #printf "mkpart\np\next4\n6546MB\n12546MB\nmkpart\np\next4\n12548MB\n14500MB\nquit" | parted --align optimal
 				echo -e "Yes\nYes" | /usr/sbin/parted "/dev/$MMC_BASE" ---pretend-input-tty --align optimal resizepart 2 7990MB
-                printf "mkpart\np\next4\n8546MB\n9200MB\nmkpart\np\next4\n9202MB\n14500MB\nquit" | /usr/sbin/parted --align optimal
+                printf "mkpart\np\next4\n8546MB\n9200MB\nmkpart\np\next4\n9202MB\n14500MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
             fi
 
             # Tell OS to rescan
@@ -394,10 +394,10 @@ then
             lsblk
             
             echo ""
-            resize2fs "/dev/$MMC_BASEp2"
+            resize2fs "/dev/$MMC_BASE\p2"
             
-            printf "y" | mkfs.ext4 "/dev/$MMC_BASEp3"
-            printf "y" | mkfs.ext4 "/dev/$MMC_BASEp4"
+            printf "y" | mkfs.ext4 "/dev/$MMC_BASE\p3"
+            printf "y" | mkfs.ext4 "/dev/$MMC_BASE\p4"
             mkdir -p $CANDLE_BASE/.webthings
             chown pi:pi $CANDLE_BASE/.webthings
             touch $BOOT_DIR/candle_has_4th_partition.txt
@@ -422,14 +422,14 @@ then
     
     sleep 5
     
-    if ls "/dev/$MMC_BASEp4"; then
+    if ls "/dev/$MMC_BASE\p4"; then
 
 		sleep 1
-		e2label "/dev/$MMC_BASEp2" candle_system
+		e2label "/dev/$MMC_BASE\p2" candle_system
 		sleep 1
-	    e2label "/dev/$MMC_BASEp3" candle_recovery
+	    e2label "/dev/$MMC_BASE\p3" candle_recovery
 		sleep 1
-	    e2label "/dev/$MMC_BASEp4" candle_user
+	    e2label "/dev/$MMC_BASE\p4" candle_user
 		sleep 1
 
 
@@ -440,7 +440,7 @@ then
 		    echo "WARNING, .webthings folder seems to already be a mountpoint"
  		else
 			echo "Mounting /dev/mmcblk0p4 to /home/pi/.webthings"
-        	mount "/dev/$MMC_BASEp4" /home/pi/.webthings
+        	mount "/dev/$MMC_BASE\p4" /home/pi/.webthings
    		fi
        
         chown pi:pi /home/pi/.webthings
@@ -465,11 +465,11 @@ fi
 
 if ls /dev/mmcblk0p4; then
 	sleep 1
-	e2label "/dev/$MMC_BASEp2" candle_system
+	e2label "/dev/$MMC_BASE\p2" candle_system
 	sleep 1
-    e2label "/dev/$MMC_BASEp3" candle_recovery
+    e2label "/dev/$MMC_BASE\p3" candle_recovery
 	sleep 1
-    e2label "/dev/$MMC_BASEp4" candle_user
+    e2label "/dev/$MMC_BASE\p4" candle_user
 	sleep 1
 fi
 
