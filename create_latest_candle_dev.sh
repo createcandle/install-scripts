@@ -429,9 +429,9 @@ then
 				#sgdisk -n "4:$P4START:$P4END" "/dev/$MMC_BASE"
 
 				
-				parted -s --align optimal "/dev/$MMC_BASE" -- mkpart primary ext4 "$P3START"s "$P3END"s
-				sleep 1
-				parted -s --align optimal "/dev/$MMC_BASE" -- mkpart primary ext4 "$P4START"s "$P4END"s
+				parted -s --align optimal "/dev/$MMC_BASE" -- mkpart primary ext4 "$P3START"s "$P3END"s mkpart primary ext4 "$P4START"s "$P4END"s
+				#sleep 1
+				#parted -s --align optimal "/dev/$MMC_BASE" -- mkpart primary ext4 "$P4START"s "$P4END"s
 				#parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
 				
 				
@@ -489,6 +489,9 @@ then
             
             printf "y" | mkfs.ext4 "/dev/$MMC_BASE"p3
             printf "y" | mkfs.ext4 "/dev/$MMC_BASE"p4
+
+			partprobe
+			
             mkdir -p $CANDLE_BASE/.webthings
             chown pi:pi $CANDLE_BASE/.webthings
             touch $BOOT_DIR/candle_has_4th_partition.txt
@@ -504,6 +507,7 @@ then
             
 
             systemctl daemon-reload
+			
         else
             echo
             echo "Partition 2 was missing. Inside chroot?"
