@@ -375,6 +375,12 @@ then
 			gdisk -l "/dev/$MMC_BASE"
 			echo ""
 			echo ""
+			echo "parted -l before:"
+			parted -l "/dev/$MMC_BASE"
+			echo ""
+			echo ""
+			
+			
 			
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
