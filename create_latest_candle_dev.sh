@@ -430,6 +430,7 @@ then
 
 				
 				parted -s --align optimal "/dev/$MMC_BASE" -- mkpart primary ext4 "$P3START"s "$P3END"s
+				sleep 1
 				parted -s --align optimal "/dev/$MMC_BASE" -- mkpart primary ext4 "$P4START"s "$P4END"s
 				#parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
 				
@@ -444,7 +445,7 @@ then
                 #printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				echo ""
 				echo "added partition 3 and 4"
-				sleep 5
+				sleep 2
 
 				
 				#echo "$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" 4 --no-reread --force # --lock
@@ -456,7 +457,7 @@ then
 				#sleep 5
 				# parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
 
-				partprobe
+				#partprobe
 				
                 #resizepart /dev/mmcblk0 2 12600000
 				
