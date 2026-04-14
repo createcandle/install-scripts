@@ -414,10 +414,15 @@ then
 				echo "P4START   : $P4START"
 				echo "P4END     : $P4END"
 
-				sgdisk -n "3:$P3START:$P3END" "/dev/$MMC_BASE"
-				sleep 5
-				sgdisk -n "4:$P4START:$P4END" "/dev/$MMC_BASE"
+				#sgdisk -n "3:$P3START:$P3END" "/dev/$MMC_BASE"
+				#sleep 5
+				#sgdisk -n "4:$P4START:$P4END" "/dev/$MMC_BASE"
 
+				
+				parted -s --align optimal /dev/sda -- mkpart primary ext4 "$P3START"s "$P2SECTORS"s
+				parted -s --align optimal /dev/sda -- mkpart primary ext4 "$P4START"s 10GB
+				#parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
+				
 				
 				#echo 'type=83' | sfdisk /dev/mmcblk0
 				#echo "$P3START,$P2SECTORS,83;\n$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" 3 --no-reread --force #--no-reread # --lock
