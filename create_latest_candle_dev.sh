@@ -401,8 +401,12 @@ then
 				echo "P4START   : $P4START"
 				
 				#echo 'type=83' | sfdisk /dev/mmcblk0
-				echo "$P3START,$P2SECTORS,83;\n$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" 3 --no-reread --force #--no-reread # --lock
-								
+				#echo "$P3START,$P2SECTORS,83;\n$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" 3 --no-reread --force #--no-reread # --lock
+				sfdisk "/dev/$MMC_BASE" 3 --force << EOF
+$P3START,$P2SECTORS,83;
+$P4START,$P2SECTORS,83;
+EOF
+
                 #printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				echo ""
 				echo "added partition 3 and 4"
