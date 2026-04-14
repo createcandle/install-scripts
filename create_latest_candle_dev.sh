@@ -364,14 +364,35 @@ then
                 echo -e "Yes\nYes" | /usr/sbin/parted "/dev/$MMC_BASE" ---pretend-input-tty --align optimal resizepart 2 8450MB
 				echo ""
 				echo "resized partition 2"
-                printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
+				
+				P2SECTORS=$(fdisk -l /dev/mmcblk0 | grep "$MMC_BASE\p2" | cut -d " " -f 10)
+				P2END=$(fdisk -l /dev/mmcblk0 | grep "$MMC_BASE\p2" | cut -d " " -f 10)
+				P3START=$(($P2END+1))
+				P4START=$(($P3START + $P2SECTORS + 1))
+				
+				echo "P2SECTORS : $P2SECTORS"
+				echo "P2END     : $P2END"
+				echo "P3START   : $P3START"
+				echo "P4START   : $P4START"
+				
+				#echo 'type=83' | sfdisk /dev/mmcblk0
+				echo "$P3START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE"
+								
+                #printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				echo ""
-				echo "added partition 3 and 4"
+				echo "added partition 3"
+
+				echo "$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE"
+
+				#printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
+				#printf "mkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
+				echo ""
+				echo "added partition 4"
 				# parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
 				
                 #resizepart /dev/mmcblk0 2 12600000
             else
-				# Squeeze into 16GB
+				# Squeeze into 16GB, but lose AB updating
                 echo "creating smaller partitions for update image"
                 #echo yes | parted /dev/mmcblk0 ---pretend-input-tty resizepart 2 7000MB
                 #printf "mkpart\np\next4\n7001MB\n7500MB\nmkpart\np\next4\n7502MB\n14500MB\nquit" | parted --align optimal
