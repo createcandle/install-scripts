@@ -116,8 +116,12 @@ else
 fi
 echo "CANDLE_BASE dir path: $CANDLE_BASE"
 
+echo "ls /boot/firmware/ ?:"
+ls /boot/firmware/
+echo ""
 
-CHROMIUM_PACKAGE_NAME="chromium"
+#CHROMIUM_PACKAGE_NAME="chromium"
+
 if [ ! -d /boot ]; then
 	echo ""
 	echo "WARNING, had to create /boot directory"
