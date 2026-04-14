@@ -400,13 +400,14 @@ then
                 #printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				echo ""
 				echo "added partition 3"
-
+				sleep 5
 				echo "$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" 4 --force #--no-reread #--lock
 
 				#printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				#printf "mkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				echo ""
 				echo "added partition 4"
+				sleep 5
 				# parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
 				
                 #resizepart /dev/mmcblk0 2 12600000
