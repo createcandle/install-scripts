@@ -371,7 +371,6 @@ then
 			lsblk
 			echo ""
 			echo ""
-			echo "gdisk -l before:"
 			#gdisk -l "/dev/$MMC_BASE"
 			#echo ""
 			#echo ""
@@ -404,7 +403,7 @@ then
 				fi
 				P3START=$(($P2END + 1))
 				P3END=$(($P3START + $P2SECTORS))
-				P4START=$(($P3START + $P2SECTORS))
+				P4START=$(($P3END + 1))
 				P4END=$(($P4START + $P2SECTORS))
 
 			
