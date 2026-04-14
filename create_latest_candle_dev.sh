@@ -365,24 +365,33 @@ then
 				echo ""
 				echo "resized partition 2"
 				
-				P2SECTORS=$(fdisk -l /dev/mmcblk0 | grep "$MMC_BASE\p2" | cut -d " " -f 10)
-				P2END=$(fdisk -l /dev/mmcblk0 | grep "$MMC_BASE\p2" | cut -d " " -f 10)
+				P2SECTORS=$(fdisk -l /dev/mmcblk0 | grep "$MMC_BASE\p2" | awk '{print $4}')
+				P2END=$(fdisk -l /dev/mmcblk0 | grep "$MMC_BASE\p2" | awk '{print $3}')
+				if [[ $P2SECTORS =~ ^[0-9]+$ ]]; then 
+					echo "P2SECTORS : $P2SECTORS"
+				else 
+					echo "partition creation: failed to get sectors count!";
+					exit 1
+				fi
+				if [[ $P2SECTORS =~ ^[0-9]+$ ]]; then 
+					echo "P2END     : $P2END"
+				else 
+					echo "partition creation: failed to get end of partition!";
+					exit 1
+				fi
 				P3START=$(($P2END+1))
 				P4START=$(($P3START + $P2SECTORS + 1))
-				
-				echo "P2SECTORS : $P2SECTORS"
-				echo "P2END     : $P2END"
 				echo "P3START   : $P3START"
 				echo "P4START   : $P4START"
 				
 				#echo 'type=83' | sfdisk /dev/mmcblk0
-				echo "$P3START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" --lock
+				echo "$P3START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" --force #--no-reread #--lock
 								
                 #printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				echo ""
 				echo "added partition 3"
 
-				echo "$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" --lock
+				echo "$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" --force #--no-reread #--lock
 
 				#printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				#printf "mkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
@@ -391,6 +400,7 @@ then
 				# parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
 				
                 #resizepart /dev/mmcblk0 2 12600000
+				
             else
 				# Squeeze into 16GB, but lose AB updating
                 echo "creating smaller partitions for update image"
