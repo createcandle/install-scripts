@@ -383,28 +383,38 @@ then
 			
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
-                echo -e "Yes\nYes" | /usr/sbin/parted "/dev/$MMC_BASE" ---pretend-input-tty --align optimal resizepart 2 8450MB
+				DESIRED_SECTORS=15360000 # 7500 * 2048
+
+
+				P2START=$(fdisk -l "/dev/$MMC_BASE" | grep "$MMC_BASE\p2" | awk '{print $4}')
+				P2END=$(($P2START + $DESIRED_SECTORS))
+				
+                echo -e "Yes\nYes" | /usr/sbin/parted "/dev/$MMC_BASE" ---pretend-input-tty --align optimal resizepart 2 "$P2END"s #8450MB
 				echo ""
 				echo "resized partition 2"
+
+				# 15.360.000
+
 				
 				P2SECTORS=$(fdisk -l "/dev/$MMC_BASE" | grep "$MMC_BASE\p2" | awk '{print $4}')
 				P2END=$(fdisk -l "/dev/$MMC_BASE" | grep "$MMC_BASE\p2" | awk '{print $3}')
 				if [[ $P2SECTORS =~ ^[0-9]+$ ]]; then 
-					echo "P2SECTORS : $P2SECTORS"
+					echo "P2SECTORS : $P2SECTORS (should be $DESIRED_SECTORS)"
 				else 
 					echo "partition creation: failed to get sectors count!";
 					exit 1
 				fi
-				if [[ $P2SECTORS =~ ^[0-9]+$ ]]; then 
+				if [[ $P2END =~ ^[0-9]+$ ]]; then 
 					echo "P2END     : $P2END"
 				else 
-					echo "partition creation: failed to get end of partition!";
+					echo "partition creation: failed to get end of second partition!";
 					exit 1
 				fi
+				
 				P3START=$(($P2END + 1))
-				P3END=$(($P3START + $P2SECTORS))
+				P3END=$(($P3START + $DESIRED_SECTORS))
 				P4START=$(($P3END + 1))
-				P4END=$(($P4START + $P2SECTORS))
+				P4END=$(($P4START + $DESIRED_SECTORS))
 
 			
 				
