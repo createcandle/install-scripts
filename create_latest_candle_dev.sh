@@ -383,7 +383,7 @@ then
 			
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
-				DESIRED_SECTORS=15360000 # 7500 * 2048
+				DESIRED_SECTORS=15359999 # 7500 * 2048
 
 
 				P2START=$(fdisk -l "/dev/$MMC_BASE" | grep "$MMC_BASE\p2" | awk '{print $2}')
