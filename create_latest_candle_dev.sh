@@ -409,6 +409,8 @@ then
 				echo "added partition 4"
 				sleep 5
 				# parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
+
+				partprobe
 				
                 #resizepart /dev/mmcblk0 2 12600000
 				
