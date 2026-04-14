@@ -367,6 +367,12 @@ then
             echo "Candle: creating partitions" >> $BOOT_DIR/candle_log.txt
             echo
 
+			echo "lsblk before:"
+			lsblk
+			echo ""
+			echo ""
+
+
 			
 			
             if [[ -z "${TINY_PARTITIONS}" ]]; then
