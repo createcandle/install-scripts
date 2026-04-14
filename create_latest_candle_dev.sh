@@ -402,17 +402,29 @@ then
 					echo "partition creation: failed to get end of partition!";
 					exit 1
 				fi
-				P3START=$(($P2END+1))
+				P3START=$(($P2END + 1))
+				P3END=$(($P3START + $P2SECTORS))
 				P4START=$(($P3START + $P2SECTORS))
+				P4END=$(($P4START + $P2SECTORS))
+
+			
+				
 				echo "P3START   : $P3START"
+				echo "P3END     : $P3END"
 				echo "P4START   : $P4START"
+				echo "P4END     : $P4END"
+
+				sgdisk -n "3:$P3START:$P3END" "/dev/$MMC_BASE"
+				sleep 5
+				sgdisk -n "4:$P4START:$P4END" "/dev/$MMC_BASE"
+
 				
 				#echo 'type=83' | sfdisk /dev/mmcblk0
 				#echo "$P3START,$P2SECTORS,83;\n$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" 3 --no-reread --force #--no-reread # --lock
-				sfdisk "/dev/$MMC_BASE" 3 --force << EOF
-$P3START,$P2SECTORS,83;
-$P4START,$P2SECTORS,83;
-EOF
+#				sfdisk "/dev/$MMC_BASE" 3 --force << EOF
+#$P3START,$P2SECTORS,83;
+#$P4START,$P2SECTORS,83;
+#EOF
 
                 #printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				echo ""
