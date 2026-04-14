@@ -419,8 +419,8 @@ then
 				#sgdisk -n "4:$P4START:$P4END" "/dev/$MMC_BASE"
 
 				
-				parted -s --align optimal /dev/sda -- mkpart primary ext4 "$P3START"s "$P2SECTORS"s
-				parted -s --align optimal /dev/sda -- mkpart primary ext4 "$P4START"s 10GB
+				parted -s --align optimal "/dev/$MMC_BASE" -- mkpart primary ext4 "$P3START"s "$P2SECTORS"s
+				parted -s --align optimal "/dev/$MMC_BASE" -- mkpart primary ext4 "$P4START"s 10GB
 				#parted -s --align optimal /dev/sda -- mklabel gpt mkpart primary 4MiB 1 50% mkpart primary 4MiB 50% 100% set 1 boot
 				
 				
