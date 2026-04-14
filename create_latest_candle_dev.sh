@@ -386,9 +386,10 @@ then
 				DESIRED_SECTORS=15360000 # 7500 * 2048
 
 
-				P2START=$(fdisk -l "/dev/$MMC_BASE" | grep "$MMC_BASE\p2" | awk '{print $4}')
+				P2START=$(fdisk -l "/dev/$MMC_BASE" | grep "$MMC_BASE\p2" | awk '{print $2}')
+				echo "P2START   : $P2START"
 				P2END=$(($P2START + $DESIRED_SECTORS))
-				
+				echo "DESIRED P2END : $P2END"
                 echo -e "Yes\nYes" | /usr/sbin/parted "/dev/$MMC_BASE" ---pretend-input-tty --align optimal resizepart 2 "$P2END"s #8450MB
 				echo ""
 				echo "resized partition 2"
@@ -422,7 +423,7 @@ then
 				echo "P3END     : $P3END"
 				echo "P4START   : $P4START"
 				echo "P4END     : $P4END"
-
+				
 				#sgdisk -n "3:$P3START:$P3END" "/dev/$MMC_BASE"
 				#sleep 5
 				#sgdisk -n "4:$P4START:$P4END" "/dev/$MMC_BASE"
