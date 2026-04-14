@@ -371,9 +371,10 @@ then
 			lsblk
 			echo ""
 			echo ""
-
-
-			
+			echo "gdisk -l before:"
+			gdisk -l "/dev/$MMC_BASE"
+			echo ""
+			echo ""
 			
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
