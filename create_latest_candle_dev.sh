@@ -381,8 +381,8 @@ then
 				echo ""
 				echo "resized partition 2"
 				
-				P2SECTORS=$(fdisk -l /dev/mmcblk0 | grep "$MMC_BASE\p2" | awk '{print $4}')
-				P2END=$(fdisk -l /dev/mmcblk0 | grep "$MMC_BASE\p2" | awk '{print $3}')
+				P2SECTORS=$(fdisk -l "/dev/$MMC_BASE" | grep "$MMC_BASE\p2" | awk '{print $4}')
+				P2END=$(fdisk -l "/dev/$MMC_BASE" | grep "$MMC_BASE\p2" | awk '{print $3}')
 				if [[ $P2SECTORS =~ ^[0-9]+$ ]]; then 
 					echo "P2SECTORS : $P2SECTORS"
 				else 
