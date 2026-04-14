@@ -2682,7 +2682,7 @@ if lsblk | grep -q 'mmcblk0p4'; then
     echo "Downloading the recovery partition" >> /dev/kmsg
     echo "Downloading the recovery partition" >> $BOOT_DIR/candle_log.txt
     
-    wget https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz --retry-connrefused 
+    #wget https://www.candlesmarthome.com/img/recovery/recovery.fs.tar.gz -O recovery.fs.tar.gz --retry-connrefused 
 
     if [ -f recovery.fs.tar.gz ]; then
         echo "untarring the recovery partition"
@@ -2711,15 +2711,15 @@ if lsblk | grep -q 'mmcblk0p4'; then
  		e2label "/dev$MMC_BASEp3" candle_recovery
   
     else
-        echo "ERROR, recovery partition file not downloaded"
+        echo "recovery partition file not downloaded"
     
         # Show error image
-        if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-            /bin/ply-image $BOOT_DIR/error.png
-            #sleep 7200
-        fi
+        #if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+        #    /bin/ply-image $BOOT_DIR/error.png
+        #    #sleep 7200
+        #fi
         
-        exit 1
+        #exit 1
     fi
 fi
 
