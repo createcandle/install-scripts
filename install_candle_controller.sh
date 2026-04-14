@@ -844,6 +844,10 @@ then
 	fi
 
 
+
+	
+
+	
 	# Python 3.11 addons
     for addon in privacy-manager; 
     do
@@ -878,7 +882,46 @@ then
 		sync 
 		
     done
-    
+
+
+	# Python 3.13 addons
+    for addon in bluetoothpairing; 
+    do
+        echo ""
+		echo "$addon"
+        curl -s "https://api.github.com/repos/createcandle/$addon/releases/latest" \
+            | grep "browser_download_url" \
+            | grep "$ARCHSTRING-v3.13" \
+            | grep -v ".sha256sum" \
+            | cut -d : -f 2,3 \
+            | tr -d \" \
+            | sed 's/,*$//' \
+            | wget -qi - -O addon.tgz
+			
+        if [ -f addon.tgz ]; then
+			tar -xf addon.tgz
+	        rm addon.tgz
+	        
+			ls package
+			if [ -d package ]; then
+	        	#rm -rf "$addon"
+	        	mv package "$CANDLE_BASE/.webthings/addons/$addon"
+	        	#chown -R pi:pi "$addon"
+	        	mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
+			else
+				echo "error, no package dir for addon: $addon"
+			fi
+		else
+			echo "addon.tgz is missing, failed to download: $ARCHSTRING-v3.13 for $addon"
+		fi
+
+		sync 
+		
+    done
+
+
+
+	
     rm ./*.tgz
 
 
@@ -946,7 +989,7 @@ then
 
     # Install Candle addons
     
-    for addon in candle-theme tutorial bluetoothpairing webinterface dashboard scenes hotspot energyuse networkscanner; 
+    for addon in candle-theme tutorial webinterface dashboard scenes hotspot energyuse networkscanner; 
     do
         echo ""
 		echo "$addon"
