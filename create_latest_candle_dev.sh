@@ -353,12 +353,18 @@ then
         #if ls /dev/mmcblk0p2; then
         #if [ -f /dev/mmcblk0p2 ]; then
         if lsblk | grep -q "$MMC_BASE\p2"; then
-            
+
+			echo "turning of swap"
+			swapoff -a
+			
             echo
             echo "CREATING PARTITIONS"
             echo "Candle: creating partitions" >> /dev/kmsg
             echo "Candle: creating partitions" >> $BOOT_DIR/candle_log.txt
             echo
+
+			
+			
             if [[ -z "${TINY_PARTITIONS}" ]]; then
                 echo "normal partition size"
                 echo -e "Yes\nYes" | /usr/sbin/parted "/dev/$MMC_BASE" ---pretend-input-tty --align optimal resizepart 2 8450MB
