@@ -376,13 +376,13 @@ then
 				echo "P4START   : $P4START"
 				
 				#echo 'type=83' | sfdisk /dev/mmcblk0
-				echo "$P3START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE"
+				echo "$P3START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" --lock
 								
                 #printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				echo ""
 				echo "added partition 3"
 
-				echo "$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE"
+				echo "$P4START,$P2SECTORS,83;" | sfdisk "/dev/$MMC_BASE" --lock
 
 				#printf "mkpart\np\next4\n8451MB\n16545MB\nmkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
 				#printf "mkpart\np\next4\n16548MB\n26000MB\nquit" | /usr/sbin/parted "/dev/$MMC_BASE" --align optimal
