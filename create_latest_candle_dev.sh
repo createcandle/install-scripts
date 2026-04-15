@@ -905,7 +905,7 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
 	# If the file exists, make it executable and move it into place
 	if [ -f ./ro-root.sh ]; then
-	    if [ -n "$(lsblk | grep $MMC_BASEp3)" ] || [ -n "$(lsblk | grep $MMC_BASEp4)" ]; then
+	    if [ -n "$(lsblk | grep $MMC_BASE\p3)" ] || [ -n "$(lsblk | grep $MMC_BASE\p4)" ]; then
 	        echo "Candle: ro-root.sh file downloaded OK" >> /dev/kmsg
 	        echo "Candle: ro-root.sh file downloaded OK" >> $BOOT_DIR/candle_log.txt
 	        chmod +x ./ro-root.sh
@@ -949,7 +949,7 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 
 
 	
-    if [ -n "$(lsblk | grep $MMC_BASEp3)" ] || [ -n "$(lsblk | grep $MMC_BASEp4)" ]; then
+    if [ -n "$(lsblk | grep $MMC_BASE\p3)" ] || [ -n "$(lsblk | grep $MMC_BASE\p4)" ]; then
         if [ -f /bin/ro-root.sh ]; then
             #isInFile4=$(cat $BOOT_DIR/config.txt | grep -c "ramfsaddr")
             if [ $(cat $BOOT_DIR/config.txt | grep -c ramfsaddr) -eq 0 ];
@@ -3713,7 +3713,7 @@ if cat $BOOT_DIR/cmdline.txt | grep -q PARTUUID; then
 fi
 
 # Copying the fstab file is the last thing to do since it could render the system inaccessible if the mountpoints it needs are not available
-if [ -n "$(lsblk | grep $MMC_BASEp3)" ] || [ -n "$(lsblk | grep $MMC_BASEp4)" ]; then
+if [ -n "$(lsblk | grep $MMC_BASE\p3)" ] || [ -n "$(lsblk | grep $MMC_BASE\p4)" ]; then
 
     if [ -f $BOOT_DIR/fstab3.bak ] \
     && [ -f $BOOT_DIR/fstab4.bak ]; then
@@ -4171,7 +4171,7 @@ pip cache purge
 
 
 if [ -f $BOOT_DIR/cmdline-candle.txt ]; then
-    if [ -n "$(lsblk | grep $MMC_BASEp3)" ] || [ -n "$(lsblk | grep $MMC_BASEp4)" ]; then
+    if [ -n "$(lsblk | grep $MMC_BASE\p3)" ] || [ -n "$(lsblk | grep $MMC_BASE\p4)" ]; then
         echo "copying default Candle cmdline.txt into place"
         rm $BOOT_DIR/cmdline.txt
         cp $BOOT_DIR/cmdline-candle.txt $BOOT_DIR/cmdline.txt
