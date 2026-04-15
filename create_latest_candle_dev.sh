@@ -3499,7 +3499,7 @@ fi
 
 if [ -f /etc/cups/cupsd.conf ] ; then
 	echo "disabling cups web interface"
-	sed -i 's/WebInterface Yes/WebInterface No' /etc/cups/cupsd.conf
+	sed -i 's/WebInterface Yes/WebInterface No/' /etc/cups/cupsd.conf
 fi
 
 # CREATE INITIAL BACKUPS
