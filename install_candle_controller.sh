@@ -356,7 +356,9 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
     # CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
-    npm --yes install typescript --save-dev  # TODO: check if this is now in package.json already
+    
+	#TODO: experimentalal: disabled this
+	#npm --yes install typescript --save-dev --no-optional # TODO: check if this is now in package.json already
 
     # npm install
     echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
@@ -367,7 +369,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	
     
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
-    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --omit=dev
+    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --omit=dev --no-optional
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
 
 
@@ -376,16 +378,16 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     #echo "Compiling Typescript and running Webpack" | sudo tee -a /dev/kmsg
 
     #npm run build
-
+	npm_config_yes=true 
 	#npm_config_yes=true npx --yes install -D typescript
-	npm_config_yes=true yes "y" | npx --yes --force-yes install -D typescript --omit=dev
-	
+	#npm_config_yes=true yes "y" | npx --yes --force-yes install -D typescript --omit=dev
+	npm_config_yes=true yes "y" | npx --yes --force-yes install -D typescript webpack webpack-cli --omit=dev
     #npx update-browserslist-db@latest --yes
        
     
-	npm_config_yes=true 
- 	yes "y" | npm --yes install -D webpack-cli 
- 	yes "y" | npm --yes install -D webpack
+	
+ 	#yes "y" | npm --yes install -D webpack-cli 
+ 	#yes "y" | npm --yes install -D webpack
     
     
 	#yes "y" | npm --yes install -D typescript
@@ -1129,12 +1131,12 @@ then
 	            nvm alias default 24
 	
 				# install node v24 version of typescript globally
-	            npm install -g typescript pnpm
+	            npm install -g typescript pnpm --no-optional
 	            #npm i --save-dev @types/node
 	
 	   			#npm install --global pnpm
 				
-				pnpm install --frozen-lockfile
+				pnpm install --frozen-lockfile --no-optional
 				
 	
 		 		#pnpm i --frozen-lockfile
