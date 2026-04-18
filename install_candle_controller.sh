@@ -935,7 +935,7 @@ then
 	cd "$CANDLE_BASE/.webthings/addons"
 	
     echo "followers-addon"
-    curl -s "https://api.github.com/repos/flatsiedatsie/followers-addon/releases/latest" \
+    curl -s "https://api.github.com/repos/createcandle/followers-addon/releases/latest" \
         | grep "browser_download_url" \
         | grep "$ARCHSTRING-v3.11" \
         | grep -v ".sha256sum" \
