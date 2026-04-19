@@ -207,10 +207,12 @@ nvm alias default 24
 # npm install -g npm@6.14.17 # Node 14 version # it seems waiting very long also solves it...
 
 
+
 # additions for Zigbee2MQTT
 npm install --global pnpm
 npm install --global source-map-support
 
+npm rebuild
 
 echo
 echo "NODE AND NPM VERSIONS:"
