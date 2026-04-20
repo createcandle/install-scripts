@@ -259,9 +259,16 @@ sudo setcap cap_net_raw+eip $(eval readlink -f `which python3`)
 
 # Download Candle controller from Github and install it
 
-echo ""
-echo "INSTALLING CANDLE CONTROLLER"
-echo ""
+if [ "$WEBTHINGS_GATEWAY" = yes ]; then
+	echo ""
+	echo "INSTALLING WEBTHINGS GATEWAY"
+	echo ""
+else
+	echo ""
+	echo "INSTALLING CANDLE CONTROLLER"
+	echo ""
+fi
+
 
 
 
