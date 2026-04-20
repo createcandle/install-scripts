@@ -996,7 +996,7 @@ then
 
     # Install Candle addons
     
-    for addon in candle-theme tutorial webinterface dashboard scenes hotspot energyuse networkscanner; 
+    for addon in candle-theme webinterface dashboard scenes hotspot energyuse networkscanner; 
     do
         echo ""
 		echo "$addon"
