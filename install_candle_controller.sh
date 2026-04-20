@@ -1338,6 +1338,14 @@ nvm cache clear
 
 pip cache purge
 
+if [ "$WEBTHINGS_GATEWAY" = yes ]; then
+	if [ -f /home/pi/.webthings/config/db.sqlite3 ]; then
+		echo ""
+		#echo "webthings-gateway -> deleting database"
+		echo ""
+	fi
+fi
+
 echo
 #echo "sub-script that installs the Candle controller is done. Returning to the main install script."
 echo "Candle: Returning to the main install script." | sudo tee -a /dev/kmsg
