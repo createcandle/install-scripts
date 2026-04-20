@@ -1287,7 +1287,11 @@ if [ -n "$VIRTUAL_SINK" ]; then
 	fi
 fi
 
-
+if [ -f $CANDLE_BASE/webthings/gateway/candle_controller.sh ] && [ ! -e $CANDLE_BASE/webthings/gateway/run-app.sh ]; then
+	ln -s $CANDLE_BASE/webthings/gateway/candle_controller.sh $CANDLE_BASE/webthings/gateway/run-app.sh
+elif [ -f $CANDLE_BASE/webthings/gateway/run-app.sh ] && [ ! -e $CANDLE_BASE/webthings/gateway/candle_controller.sh ]; then
+	ln -s $CANDLE_BASE/webthings/gateway/run-app.sh $CANDLE_BASE/webthings/gateway/candle_controller.sh
+fi
 
 npm config set metrics-registry="https://"
 #npm config set registry="https://"
