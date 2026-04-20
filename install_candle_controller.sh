@@ -379,7 +379,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 
     export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
     # CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install imagemin-optipng --save-dev
-    npm --yes install typescript --save-dev  # TODO: check if this is now in package.json already
+    #npm --yes install typescript --save-dev  # TODO: check if this is now in package.json already
 
     # npm install
     echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
@@ -388,9 +388,13 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     echo "Do not worry about the errors you will see with optipng and jpegtran"
 
 	
-    
+    echo ""
+	#echo "doing npm install with omit=dev"
+	echo "doing npm install"
+	echo ""
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install
-    CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --omit=dev
+    #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --omit=dev
+	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i
     #CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm ci --production
 
 
@@ -401,21 +405,30 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     #npm run build
 
 	#npm_config_yes=true npx --yes install -D typescript
-	npm_config_yes=true yes "y" | npx --yes --force-yes install -D typescript --omit=dev
 	
+	echo ""
+	echo "installing typescript"
+	echo ""
+	#npm_config_yes=true yes "y" | npx --yes --force-yes install -D typescript --omit=dev
+	echo ""
+	echo "typescript should now be installed"
+	echo ""
     #npx update-browserslist-db@latest --yes
        
     
 	npm_config_yes=true 
- 	yes "y" | npm --yes install -D webpack-cli 
- 	yes "y" | npm --yes install -D webpack
+	echo ""
+	echo "installing webpack-cli"
+	echo ""
+ 	#yes "y" | npm --yes install -D webpack webpack-cli 
+	#echo ""
+	#echo "installing webpack"
+ 	#yes "y" | npm --yes install -D webpack
     
     
 	#yes "y" | npm --yes install -D typescript
 
-	echo ""
-	echo "typescript should now be installed"
-	echo ""
+	
  
     rm -rf build
     cp -rL src build
@@ -428,7 +441,9 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	mkdir -p node_modules
 	cd node_modules
 	if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
-		
+		echo ""
+		echo "installing Candle version of gateway-addon-node"
+		echo ""
 		if [ -d gateway-addon-node ]; then
 			rm -rf gateway-addon-node
 		fi
@@ -450,15 +465,19 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 		#cd ../..
 		cd ..
 	fi
+
+	echo ""
+	echo "doing npm link"
+	echo ""
 	npm link
 	cd "$CANDLE_BASE/webthings/gateway2"
 	
 	echo "Installing typescript globally"
-	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes install -g typescript --save-dev
+	#CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes install -g typescript --save-dev
 
+	echo ""
 	echo "Typescript version:"
 	tsc --version
-	
 	# attempt to fix "ECONNRESET" issue
     #npm config set registry http://registry.npmjs.org/
 
