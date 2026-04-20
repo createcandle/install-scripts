@@ -91,8 +91,11 @@ CUTTING_EDGE=yes
 
 echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 echo "candle: installing python gateway addon" | sudo tee -a $BOOT_DIR/candle_log.txt
-python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
-
+if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
+	python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
+else
+	python3 -m pip install git+https://github.com/WebthingsIO/gateway-addon-python
+fi
 # Install the gateway addon for Python 3.11 too, if Python 3.11 exists
 #if [ -f /usr/bin/python3.11 ]; then
 #    python3.11 --version && python3.11 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --trusted-host pypi.org --trusted-host files.pythonhosted.org
@@ -411,29 +414,32 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	# Manually install the gateway-addon-node module so that it supports sending the origin of a message
 	mkdir -p node_modules
 	cd node_modules
-	if [ -d gateway-addon-node ]; then
-		rm -rf gateway-addon-node
+	if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
+		
+		if [ -d gateway-addon-node ]; then
+			rm -rf gateway-addon-node
+		fi
+		if [ -d gateway-addon ]; then
+			rm -rf gateway-addon
+		fi
+		git clone https://github.com/createcandle/gateway-addon-node
+		mv gateway-addon-node gateway-addon
+		#cp gateway-addon /home/pi/.nvm/versions/node/v20.19.6/lib/node_modules/
+		cd gateway-addon
+		pwd
+		git submodule init
+		git submodule update
+		CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --save
+		node generate-version.js && node generate-types.js && npx tsc -p .
+		ls
+		echo "does gateway-addon/lib exist immediately after?"
+		ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
+		#cd ../..
+		cd ..
 	fi
-	if [ -d gateway-addon ]; then
-		rm -rf gateway-addon
-	fi
-	git clone https://github.com/createcandle/gateway-addon-node
-	mv gateway-addon-node gateway-addon
-	#cp gateway-addon /home/pi/.nvm/versions/node/v20.19.6/lib/node_modules/
-	cd gateway-addon
-	pwd
-	git submodule init
-	git submodule update
-	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --save
-	node generate-version.js && node generate-types.js && npx tsc -p .
-	ls
-	echo "does gateway-addon/lib exist immediately after?"
-	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
-	#cd ../..
-	cd ..
 	npm link
 	cd "$CANDLE_BASE/webthings/gateway2"
-
+	
 	echo "Installing typescript globally"
 	CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes install -g typescript --save-dev
 
