@@ -310,7 +310,7 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
 	else
 		echo "Candle: downloading Webthings Gateway from Github"
 		#git clone --depth 1 https://github.com/webthingsIO/gateway.git candle-controller
-		wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 https://github.com/WebThingsIO/gateway/archive/refs/tags/2.0.0.tar.gz
+		wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 3 https://github.com/WebThingsIO/gateway/archive/refs/tags/2.0.0.tar.gz -O "2.0.0.tar.gz"
 		if [ ! -f "2.0.0.tar.gz" ]; then
 			echo "ERROR, webthings gateway tar did not download"
 			exit 1
