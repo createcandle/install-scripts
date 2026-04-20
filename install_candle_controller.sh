@@ -200,8 +200,13 @@ if [ -f ./install_nvm.sh ]; then
     rm ./install_nvm.sh
 fi
 
-nvm use 24
-nvm alias default 24
+if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
+	nvm use 24
+	nvm alias default 24
+else
+	nvm use 20
+	nvm alias default 20
+fi
 
 # install older version of NPM to avoid issue: reify:date-fns: http fetch GET 200 https://registry.npmjs.org/date-fns/-/date-fns-2.29.3.tgz 105523ms (cache miss)
 # npm install -g npm@6.14.17 # Node 14 version # it seems waiting very long also solves it...
@@ -1149,8 +1154,13 @@ then
 	   			npm cache clean --force
 				nvm cache clear --force
 	
-	   			nvm use 24
-	            nvm alias default 24
+	   			if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
+					nvm use 24
+					nvm alias default 24
+				else
+					nvm use 20
+					nvm alias default 20
+				fi
 	        else
 	            echo "Error, pre-install of z2m failed: no dir"
 	        fi
