@@ -94,7 +94,7 @@ echo "candle: installing python gateway addon" | sudo tee -a $BOOT_DIR/candle_lo
 if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
 	python3 -m pip install git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 else
-	python3 -m pip install git+https://github.com/WebthingsIO/gateway-addon-python
+	python3 -m pip install git+https://github.com/WebthingsIO/gateway-addon-python#egg=gateway_addon --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 fi
 # Install the gateway addon for Python 3.11 too, if Python 3.11 exists
 #if [ -f /usr/bin/python3.11 ]; then
