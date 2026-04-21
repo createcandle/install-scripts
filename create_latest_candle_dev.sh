@@ -4524,6 +4524,10 @@ if [ -d /home/pi/.pnpm-store ]; then
 	rm -rf /home/pi/.pnpm-store
 fi
 
+swapoff -a
+if [ -f /etc/default/rpi-swap ]; then
+	rm /etc/default/rpi-swap
+fi
 
 
 # This is handled by prepare_disk_image
