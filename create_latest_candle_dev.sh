@@ -3697,14 +3697,6 @@ fi
 
 
 
-
-if [ ! -L /etc/hosts ]; then
-    echo "removing /etc/hosts and creating a symlink to /home/pi/.webthings/etc/hosts instead"
-    rm /etc/hosts
-    ln -s /home/pi/.webthings/etc/hosts /etc/hosts
-fi
-
-
 # Set to boot from partition2
 if cat $BOOT_DIR/cmdline.txt | grep -q PARTUUID; then
     echo "replacing PARTUUID= in bootcmd.txt with /dev/mmcblk0p2"
@@ -3990,46 +3982,78 @@ fi
 if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 	cd $CANDLE_BASE
 
+	echo "gateway" > /etc/hostname
+	echo "gateway" > /home/pi/.webthings/etc/hostname
 	# Set gateway as the hostname
-	if [ ! -e /home/pi/.webthings/etc/hostname ]
-	then
-		echo "gateway" > /etc/hostname
-		echo "gateway" > /home/pi/.webthings/etc/hostname
-		echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-		echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
-	else
-		echo "/home/pi/.webthings/etc/hostname already existed"
-		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
-	fi
+	#if [ ! -e /home/pi/.webthings/etc/hostname ]
+	#then
+	#	echo "gateway" > /etc/hostname
+	#	echo "gateway" > /home/pi/.webthings/etc/hostname
+	#	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
+	#	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
+	#else
+	#	echo "/home/pi/.webthings/etc/hostname already existed"
+	#	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
+	#	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
+	#fi
+	
 	# Create hosts file and its symlink
 	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
 		echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-		echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	gateway\n' > /home/pi/.webthings/etc/hosts
+cat >/home/pi/.webthings/etc/hosts <<EOL
+127.0.0.1	localhost
+::1		localhost ip6-localhost ip6-loopback
+ff02::1		ip6-allnodes
+ff02::2		ip6-allrouters
+127.0.1.1	gateway
+EOL
+		#echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	gateway\n' > /home/pi/.webthings/etc/hosts
 	fi
 
 else
 
+	echo "candle" > /etc/hostname
+	echo "candle" > /home/pi/.webthings/etc/hostname
+		
 	# Set candle as the hostname
-	if [ ! -e /home/pi/.webthings/etc/hostname ]
-	then
-		echo "candle" > /etc/hostname
-		echo "candle" > /home/pi/.webthings/etc/hostname
-		echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-		echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
-	else
-		echo "/home/pi/.webthings/etc/hostname already existed"
-		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-		echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
-	fi
+	#if [ ! -e /home/pi/.webthings/etc/hostname ]
+	#then
+	#	echo "candle" > /etc/hostname
+	#	echo "candle" > /home/pi/.webthings/etc/hostname
+	#	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
+	#	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
+	#else
+	#	echo "/home/pi/.webthings/etc/hostname already existed"
+	#	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
+	#	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
+	#fi
 	# Create hosts file and its symlink
 	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
 		echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-		echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
+		#echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
+		cat >/home/pi/.webthings/etc/hosts <<EOL
+127.0.0.1	localhost
+::1		localhost ip6-localhost ip6-loopback
+ff02::1		ip6-allnodes
+ff02::2		ip6-allrouters
+127.0.1.1	candle
+EOL
 	fi
 fi
 
 
+
+if [ -f /home/pi/.webthings/etc/hosts ]; then
+	if [ ! -L /etc/hosts ]; then
+    	echo "removing /etc/hosts and creating a symlink to /home/pi/.webthings/etc/hosts instead"
+    	rm /etc/hosts
+    	ln -s /home/pi/.webthings/etc/hosts /etc/hosts
+	else
+		echo "/etc/hosts was already a symlink to .webthings/etc/hosts"
+	fi
+else
+	echo "ERROR, /home/pi/.webthings/etc/hosts did not exist"
+fi
 
 
 if [ -e /home/pi/webthings/gateway/static/images/floorplan.svg ];
@@ -4180,30 +4204,30 @@ fi
 
 
 # Fix hostname issue from RC2
-if [ -f /home/pi/.webthings/etc/hostname ] && [ -f /home/pi/.webthings/etc/hosts ]; then
-    hostname="$(cat /home/pi/.webthings/etc/hostname)"
-    if ! cat /etc/hosts | grep -q "$hostname"; then
-        echo "hostname was not in /etc/hosts. Attempting to fix."
-        echo "before:"
-        cat /home/pi/.webthings/etc/hosts
-        echo ""
-        sed -i -E -e "s|127\.0\.1\.1[ \t]+.*|127\.0\.1\.1 \t$hostname|" /home/pi/.webthings/etc/hosts
-        echo "after:"
-        cat /home/pi/.webthings/etc/hosts
-        echo ""
-    fi
-else
-    echo
-    echo "Error, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist"
-    echo "Candle: ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> /dev/kmsg
-    echo "ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> $BOOT_DIR/candle_log.txt
-
- 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-    	/bin/ply-image $BOOT_DIR/error.png
-   	fi
-	
-    exit 1
-fi
+#if [ -f /home/pi/.webthings/etc/hostname ] && [ -f /home/pi/.webthings/etc/hosts ]; then
+#    hostname="$(cat /home/pi/.webthings/etc/hostname)"
+#    if ! cat /etc/hosts | grep -q "$hostname"; then
+#        echo "hostname was not in /etc/hosts. Attempting to fix."
+#        echo "before:"
+#        cat /home/pi/.webthings/etc/hosts
+#        echo ""
+#        sed -i -E -e "s|127\.0\.1\.1[ \t]+.*|127\.0\.1\.1 \t$hostname|" /home/pi/.webthings/etc/hosts
+#        echo "after:"
+#        cat /home/pi/.webthings/etc/hosts
+#        echo ""
+#    fi
+#else
+#    echo
+#    echo "Error, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist"
+#    echo "Candle: ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> /dev/kmsg
+#    echo "ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> $BOOT_DIR/candle_log.txt
+#
+# 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
+#    	/bin/ply-image $BOOT_DIR/error.png
+#   	fi
+#	
+#    exit 1
+#fi
 
 
 
