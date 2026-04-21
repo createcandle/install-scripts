@@ -3483,6 +3483,8 @@ echo "adding user to groups"
 usermod -a -G tty pi
 usermod -a -G bluetooth pi
 usermod -a -G mosquitto pi
+usermod -a -G kvm pi
+usermod -a -G libvirt pi
 
 if cat /etc/group | grep -q avahi; then
 	echo "adding user to avahi (mDNS) group"
