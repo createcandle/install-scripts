@@ -96,15 +96,24 @@ if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
 else
 	#python3 -m pip install git+https://github.com/WebthingsIO/gateway-addon-python#egg=gateway_addon --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 	#git clone --revision=c13686b --depth=1 https://github.com/WebThingsIO/gateway-addon-python
-	wget https://github.com/WebThingsIO/gateway-addon-python/archive/c13686b2f5ae026c28b331b63e90befce7fb1bc2.zip
-	unzip c13686b2f5ae026c28b331b63e90befce7fb1bc2.zip
-	if [ -d gateway-addon-python-c13686b2f5ae026c28b331b63e90befce7fb1bc2 ]; then
-		mv gateway-addon-python-c13686b2f5ae026c28b331b63e90befce7fb1bc2 gateway-addon
-		cd gateway-addon
-		pip install -e . --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
-		cd ..
+	wget https://github.com/WebThingsIO/gateway-addon-python/archive/c13686b2f5ae026c28b331b63e90befce7fb1bc2.zip -O gateway-addon.zip
+	if [ -f gateway-addon.zip ]; then
+		unzip gateway-addon.zip
+		if [ -d gateway-addon-python-c13686b2f5ae026c28b331b63e90befce7fb1bc2 ]; then
+			if [ -d ./gateway-addon ]; then
+				rm -rf ./gateway-addon
+			fi
+			mv gateway-addon-python-c13686b2f5ae026c28b331b63e90befce7fb1bc2 gateway-addon
+			cd gateway-addon
+			pip install -e . --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
+			cd ..
+		else
+			echo "ERROR, no gateway-addon-pytho dir after git clone"
+			exit 1
+		fi
 	else
-		echo "ERROR, no gateway-addon-pytho dir after git clone"
+		echo "ERROR, no gateway-addon.zip, download failed"
+		exit 1
 	fi
 	#python3 -m pip install "git+https://github.com/WebThingsIO/gateway-addon-python/tree/c13686b2f5ae026c28b331b63e90befce7fb1bc2#egg=gateway_addon" --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 fi
