@@ -94,30 +94,7 @@ echo "candle: installing python gateway addon" | sudo tee -a $BOOT_DIR/candle_lo
 if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
 	python3 -m pip install "git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon" --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 else
-	#python3 -m pip install git+https://github.com/WebthingsIO/gateway-addon-python#egg=gateway_addon --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
-	#git clone --revision=c13686b --depth=1 https://github.com/WebThingsIO/gateway-addon-python
-	wget https://github.com/WebThingsIO/gateway-addon-python/archive/c13686b2f5ae026c28b331b63e90befce7fb1bc2.zip -O gateway-addon.zip
-	if [ -f gateway-addon.zip ]; then
-		unzip gateway-addon.zip
-		if [ -d gateway-addon-python-c13686b2f5ae026c28b331b63e90befce7fb1bc2 ]; then
-			if [ -d ./gateway-addon ]; then
-				rm -rf ./gateway-addon
-			fi
-			mv gateway-addon-python-c13686b2f5ae026c28b331b63e90befce7fb1bc2 gateway-addon
-			cd gateway-addon
-			git init
-			pip install -e . --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
-			cd ..
-			rm -rf ./gateway-addon
-		else
-			echo "ERROR, no gateway-addon-pytho dir after git clone"
-			exit 1
-		fi
-	else
-		echo "ERROR, no gateway-addon.zip, download failed"
-		exit 1
-	fi
-	#python3 -m pip install "git+https://github.com/WebThingsIO/gateway-addon-python/tree/c13686b2f5ae026c28b331b63e90befce7fb1bc2#egg=gateway_addon" --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
+	python3 -m pip install "git+https://github.com/createcandle/gateway-addon-python@no_meta#egg=gateway_addon" --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 fi
 # Install the gateway addon for Python 3.11 too, if Python 3.11 exists
 #if [ -f /usr/bin/python3.11 ]; then
