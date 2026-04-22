@@ -1336,8 +1336,8 @@ if [ "$WEBTHINGS_GATEWAY" = yes ]; then
 	if [ -f $CANDLE_BASE/.webthings/config/db.sqlite3 ]; then
 		if [ -d /boot/firmware ] && [ ! -f /boot/firmware/candle_first_run_complete.txt ]
 		echo ""
-		echo "webthings-gateway -> deleting database"
-		rm $CANDLE_BASE/.webthings/config/db.sqlite3
+		#echo "webthings-gateway -> deleting database"
+		#rm $CANDLE_BASE/.webthings/config/db.sqlite3
 		echo ""
 	fi
 fi
