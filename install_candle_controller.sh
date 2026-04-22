@@ -107,6 +107,7 @@ else
 			cd gateway-addon
 			pip install -e . --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 			cd ..
+			rm -rf ./gateway-addon
 		else
 			echo "ERROR, no gateway-addon-pytho dir after git clone"
 			exit 1
