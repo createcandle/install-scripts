@@ -482,7 +482,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 		fi
 		git clone https://github.com/createcandle/gateway-addon-node
 		mv gateway-addon-node gateway-addon
-		#cp gateway-addon /home/pi/.nvm/versions/node/v20.19.6/lib/node_modules/
+		#cp gateway-addon /.nvm/versions/node/v20.19.6/lib/node_modules/
 		cd gateway-addon
 		pwd
 		git submodule init
@@ -490,8 +490,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 		CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm --yes i --save
 		node generate-version.js && node generate-types.js && npx tsc -p .
 		ls
-		echo "does gateway-addon/lib exist immediately after?"
-		ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
+		
 		#cd ../..
 		cd ..
 	fi
@@ -510,10 +509,6 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	tsc --version
 	# attempt to fix "ECONNRESET" issue
     #npm config set registry http://registry.npmjs.org/
-
-	
-	#echo "does gateway-addon/lib still exist just before compiling typescript and running webpack?"
-	#ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib
  
     echo ""
     echo "Compiling typescript. this will take a while..."
@@ -546,9 +541,6 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
         echo "big memory, --max-old-space-size=2048"
         NODE_OPTIONS="--max-old-space-size=2048" npx --yes --force-yes webpack
     fi
-
-	echo "does gateway-addon/lib exist after webpack?"
-	ls /home/pi/webthings/gateway2/node_modules/gateway-addon/lib/index.js
  
 	#&& [ -f "$CANDLE_BASE/webthings/gateway2/node_modules/gateway-addon/lib/index.js" ] \	
     if [ -f "$CANDLE_BASE/webthings/gateway2/build/app.js" ] \
@@ -636,8 +628,6 @@ else
 fi
 
 
-echo "does gateway-addon/lib exist even later?"
-ls /home/pi/webthings/gateway/node_modules/gateway-addon/lib/index.js
 
 # TODO: maybe do another sanity check and restore a backup if need be?
 
@@ -831,14 +821,6 @@ then
 	if [ -f addon.tgz ]; then
     	tar -xf addon.tgz
 	    rm addon.tgz
-	    #for directory in kabbi-zigbee2mqtt-adapter*; do
-	    #  [[ -d $directory ]] || continue
-	    #  echo "Directory: $directory"
-	    #  mv -- "$directory" ./zigbee2mqtt-adapter
-	    #done
-	    #chown -R pi:pi zigbee2mqtt-adapter
-	    #mkdir -p /home/pi/.webthings/data/zigbee2mqtt-adapter
-	    #rm ./*.tgz
 	    rm -rf zigbee2mqtt-adapter
 	    mv package zigbee2mqtt-adapter
 	    chown -R pi:pi zigbee2mqtt-adapter
@@ -871,14 +853,6 @@ then
 	        mv package "$addon"
 	        chown -R pi:pi "$addon"
 	        mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
-	        #for directory in flatsiedatsie-"$addon"*; do
-	        #  [[ -d $directory ]] || continue
-	        #  echo "Directory: $directory"
-	        #  rm -rf ./"$addon"
-	        #  mv -- "$directory" ./$addon
-	        #done
-	        #chown -R pi:pi $addon
-	        #mkdir -p /home/pi/.webthings/data/"$addon"
 		else
 			echo "Error, did not install addon: $addon"
 		fi
@@ -904,14 +878,6 @@ then
 				mv package "$addon"
 				chown -R pi:pi "$addon"
 				mkdir -p "$CANDLE_BASE/.webthings/data/$addon"
-				#for directory in flatsiedatsie-"$addon"*; do
-				#  [[ -d $directory ]] || continue
-				#  echo "Directory: $directory"
-				#  rm -rf ./"$addon"
-				#  mv -- "$directory" ./$addon
-				#done
-				#chown -R pi:pi $addon
-				#mkdir -p /home/pi/.webthings/data/"$addon"
 			else
 				echo "Error, did not install addon: $addon"
 			fi
@@ -1272,8 +1238,6 @@ if [ -f "$CANDLE_BASE/.webthings/config/db.sqlite3" ]; then
 	cp -r  "$CANDLE_BASE/.webthings/config/db.sqlite3" "$CANDLE_BASE/safe_mode/config/db.sqlite3" 
 fi
 
-#cd /home/pi/webthings/gateway
-#timeout 10 npm run run-only
 echo "controller installation should be complete"
 echo "ls $CANDLE_BASE/.webthings:"
 ls "$CANDLE_BASE/.webthings"
@@ -1369,9 +1333,10 @@ nvm cache clear
 pip cache purge
 
 if [ "$WEBTHINGS_GATEWAY" = yes ]; then
-	if [ -f /home/pi/.webthings/config/db.sqlite3 ]; then
+	if [ -f $CANDLE_BASE/.webthings/config/db.sqlite3 ]; then
 		echo ""
 		#echo "webthings-gateway -> deleting database"
+		#rm $CANDLE_BASE/.webthings/config/db.sqlite3
 		echo ""
 	fi
 fi
