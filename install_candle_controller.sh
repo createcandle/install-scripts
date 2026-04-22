@@ -105,6 +105,7 @@ else
 			fi
 			mv gateway-addon-python-c13686b2f5ae026c28b331b63e90befce7fb1bc2 gateway-addon
 			cd gateway-addon
+			git init
 			pip install -e . --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
 			cd ..
 			rm -rf ./gateway-addon
