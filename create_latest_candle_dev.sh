@@ -3374,6 +3374,24 @@ echo '{"AllowFileSelectionDialogs": false, "AudioCaptureAllowed": true, "AutoFil
 #fi
 
 
+cd $CANDLE_BASE
+
+echo
+echo "Creating framebuffer clock"
+git clone https://github.com/createcandle/framebuffer-color_clock-C
+if [ -d ./framebuffer-color_clock-C ]; then
+	cd framebuffer-color_clock-C
+	make
+	if [ -f ./color_clock ]; then
+		echo "framebuffer clock created succesfully, moving into place"
+		mkdir -p "$CANDLE_BASE/candle"
+		mv ./color_clock "$CANDLE_BASE/candle/color_clock"
+	fi
+fi
+cd $CANDLE_BASE
+if [ -d ./framebuffer-color_clock-C ]; then
+	rm -rf ./framebuffer-color_clock-C
+fi
 
 echo
 echo "Installing support for iPhone USB tethering"
