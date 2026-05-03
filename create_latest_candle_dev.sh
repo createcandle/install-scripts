@@ -572,6 +572,10 @@ fi
 if [ -d /home/pi/.webthings ]; then
     echo "OK, .webthings directory exists"
 	chown pi:pi /home/pi/.webthings
+	if [ ! -f /home/pi/.webthings/candle.log ]; then
+		touch /home/pi/.webthings/candle.log
+	fi
+	chown pi:pi /home/pi/.webthings/candle.log
 else
     echo "WARNING, .webthings directory still did not exist"
 	mkdir -p /home/pi/.webthings
