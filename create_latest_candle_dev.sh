@@ -4169,6 +4169,10 @@ rm /etc/cron.daily/dpkg
 rm /etc/cron.weekly/*
 echo "#!/bin/sh" > /usr/lib/apt/apt.systemd.daily
 
+# Allow the daily certificate validity check
+if[ -f /etc/cron.daily/ensure_certificate.sh ]; then
+	chmod +x /etc/cron.daily/ensure_certificate.sh
+fi
 
 #rm -rf /var/backups/*
 systemctl disable dpkg-db-backup.timer
