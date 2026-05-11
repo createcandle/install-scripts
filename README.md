@@ -134,6 +134,8 @@ echo "LAST_BLOCK: $LAST_BLOCK  (dd will read this many blocks into a file before
 
 dd iflag=fullblock if=/dev/disk4 bs=$BLOCKSIZE count=$LAST_BLOCK | gzip -c > Candle_64bit_3.0.0.img.zip
 
+md5 Candle_64bit_3.0.0.img.zip
+
 ```
 
 
