@@ -625,6 +625,22 @@ cd $CANDLE_BASE
 #rm /var/lib/man-db/auto-update
 #ln --backup --symbolic --verbose $(which true) $(which mandb)
 
+if [[ -L "/home/pi/.local/state/wireplumber" ]]; then
+	echo "wireplumber folder is already a symlink";
+else
+	mkdir -p /home/pi/.local/state
+	mkdir -p /home/pi/.webthings/etc/state/wireplumber
+	if [ -d /home/pi/.local/state/wireplumber ]; then
+		cp /home/pi/.local/state/wireplumber/* /home/pi/.webthings/etc/state/wireplumber/
+		rm -rf /home/pi/.local/state/wireplumber
+		ls -s /home/pi/.webthings/etc/state/wireplumber /home/pi/.local/state/wireplumber
+	fi
+	
+	chown -R pi:pi /home/pi/.local/state
+	chown -R pi:pi /home/pi/.webthings/etc/state
+fi
+
+
 
 echo "[main]" > /var/lib/NetworkManager/NetworkManager.state
 echo "NetworkingEnabled=true" >> /var/lib/NetworkManager/NetworkManager.state
