@@ -633,7 +633,7 @@ else
 	if [ -d /home/pi/.local/state/wireplumber ]; then
 		cp /home/pi/.local/state/wireplumber/* /home/pi/.webthings/etc/state/wireplumber/
 		rm -rf /home/pi/.local/state/wireplumber
-		ls -s /home/pi/.webthings/etc/state/wireplumber /home/pi/.local/state/wireplumber
+		ln -s /home/pi/.webthings/etc/state/wireplumber /home/pi/.local/state/wireplumber
 	fi
 	
 	chown -R pi:pi /home/pi/.local/state
