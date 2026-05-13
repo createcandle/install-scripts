@@ -108,7 +108,7 @@ fi
 
 scriptname=$(basename "$0")
 
-# Not used in this script yet, currently /home/pi is still hardcoded
+# TODO: check if all hardcoded references to /home/pi have been switched to use this var instead
 if [ -d /home/pi ]; then
     CANDLE_BASE="/home/pi"
 else
@@ -243,6 +243,7 @@ echo "BITS         : $BITTYPE"
 echo "PWD          : $(pwd)"
 echo "PATH         : $PATH"
 echo "SCRIPT NAME  : $scriptname"
+echo "CANDLE_BASE  : $CANDLE_BASE"
 
 if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     echo "CUTTING EDGE : yes"
@@ -625,15 +626,22 @@ cd $CANDLE_BASE
 #rm /var/lib/man-db/auto-update
 #ln --backup --symbolic --verbose $(which true) $(which mandb)
 
-if [[ -L "/home/pi/.local/state" ]]; then
+mkdir -p "$CANDLE_BASE/.local/share/nano"
+chown -R pi:pi "$CANDLE_BASE/.local/share/nano"
+
+if [[ -L "$CANDLE_BASE/.local/state" ]]; then
 	echo "state folder is already a symlink";
 else
 
-	mkdir -p /home/pi/.local
-	mkdir -p /home/pi/.webthings/state
+	if [ ! -d "$CANDLE_BASE/.local" ]; then
+		mkdir -p "$CANDLE_BASE/.local"
+		chown pi:pi "$CANDLE_BASE/.local"
+	fi
+	mkdir -p "$CANDLE_BASE/.webthings/state"
 
-	if [ -d /home/pi/.local/state ]; then
-		cp -r /home/pi/.local/state/* /home/pi/.webthings/state/
+	if [ -d "$CANDLE_BASE/.local/state" ]; then
+		rm -rf "$CANDLE_BASE/.webthings/state/"
+		mv "$CANDLE_BASE/.local/state" "$CANDLE_BASE/.webthings/state"
 	fi
 	
 	#if [ -d /home/pi/.local/state/wireplumber ]; then
@@ -641,12 +649,23 @@ else
 	#	rm -rf /home/pi/.local/state/wireplumber
 	#	ln -s /home/pi/.webthings/state /home/pi/.local/state
 	#fi
+	if [ -d "$CANDLE_BASE/.local/state" ]; then
+		echo "move of $CANDLE_BASE/.local/state to ~/.webthings seems to have failed"
+		exit 1
+	fi
+	if [ -d "$CANDLE_BASE/.webthings/state" ]; then
+		ln -s "$CANDLE_BASE/.webthings/state" "$CANDLE_BASE/.local/state"
+	else
+		echo "move of $CANDLE_BASE/.webthings/state folder does not exist, cannot create symlink"
+		exit 1
+	fi
+	chown -R pi:pi "$CANDLE_BASE/.local/state/"
+	chown -R pi:pi "$CANDLE_BASE/.webthings/state"
+fi
 
-	rm -rf /home/pi/.local/state
-	ln -s /home/pi/.webthings/state /home/pi/.local/state
-	
-	chown -R pi:pi /home/pi/.local/state
-	chown -R pi:pi /home/pi/.webthings/state
+if [[ ! -L "$CANDLE_BASE/.local/state" ]]; then
+	echo "ERROR, $CANDLE_BASE/.local/state was not a symlink"
+	exit 1
 fi
 
 
@@ -1391,18 +1410,19 @@ fi
 
 
 
-mkdir -p /home/pi/.webthings/arduino
-mkdir -p /home/pi/.webthings/arduino/.arduino15
-
-if [ -f /home/pi/nohup.out ]; then
-    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+mkdir -p "$CANDLE_BASE/.webthings/arduino"
+mkdir -p /"$CANDLE_BASE/.webthings/arduino/.arduino15"
+chown -R pi:pi "$CANDLE_BASE/.webthings/arduino"
+if [ -f "$CANDLE_BASE/nohup.out" ]; then
+    cp "$CANDLE_BASE/nohup.out" "$BOOT_DIR/candle_INSTALL_LOG.txt"
 fi
 
 
 # avoid ERROR: Could not install packages due to an OSError: [Errno 13] Permission denied: '/home/pi/.local/lib'
-mkdir -p /home/pi/.local/lib
-chown -R pi:pi /home/pi/.local/lib
-
+if [ ! -d "$CANDLE_BASE/.local/lib" ]; then
+	mkdir -p "$CANDLE_BASE/.local/lib"
+	chown -R pi:pi "$CANDLE_BASE/.local/lib"
+fi
 
 
 # PRE-DOWNLOAD CANDLE CONTROLLER INSTALLER
@@ -1451,9 +1471,9 @@ then
         mv -f ./install-scripts/install_candle_controller.sh ./install_candle_controller.sh
         rm -rf ./install-scripts
         
-        if [ -f /home/pi/latest_stable_controller.tar ]; then
+        if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
             echo "warning, latest_stable_controller.tar already existed. Removing."
-            rm /home/pi/latest_stable_controller.tar
+            rm "$CANDLE_BASE/latest_stable_controller.tar"
         fi
         if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
             echo "warning, latest_stable_controller.tar.txt already existed. Removing."
@@ -1751,8 +1771,8 @@ then
 	
 	
 
-	mkdir -p ~/.webthings/etc/bluetooth
-	cp -R /etc/bluetooth/* ~/.webthings/etc/bluetooth/
+	mkdir -p "$CANDLE_BASE/.webthings/etc/bluetooth"
+	cp -R /etc/bluetooth/* "$CANDLE_BASE/.webthings/etc/bluetooth/"
 	
  
     echo
@@ -2241,8 +2261,7 @@ wait
 #echo "checking if $CANDLE_BASE/.local/bin exists"
 
 #PATH=$PATH:/home/pi/.local/bin
-if [ -d "$CANDLE_BASE/.local/bin" ]
-then
+if [ -d "$CANDLE_BASE/.local/bin" ]; then
     echo "could add to path here"
 	#echo "Adding $CANDLE_BASE/.local/bin to path var"
     #[[ ":$PATH:" != *":$CANDLE_BASE/.local/bin:"* ]] && PATH="$CANDLE_BASE/.local/bin:${PATH}"
