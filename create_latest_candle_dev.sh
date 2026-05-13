@@ -4074,13 +4074,19 @@ if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 	# Create hosts file and its symlink
 	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
 		echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-cat >/home/pi/.webthings/etc/hosts <<EOL
-127.0.0.1	localhost
-::1		localhost ip6-localhost ip6-loopback
-ff02::1		ip6-allnodes
-ff02::2		ip6-allrouters
-127.0.1.1	gateway
-EOL
+		echo "127.0.0.1	localhost" > /home/pi/.webthings/etc/hosts
+		echo "::1		localhost ip6-localhost ip6-loopback" >> /home/pi/.webthings/etc/hosts
+		echp "ff02::1		ip6-allnodes" >> /home/pi/.webthings/etc/hosts
+		echo "ff02::2		ip6-allrouters" >> /home/pi/.webthings/etc/hosts
+		echo "127.0.1.1	gateway" >> /home/pi/.webthings/etc/hosts
+		
+#cat >/home/pi/.webthings/etc/hosts <<EOL
+#127.0.0.1	localhost
+#::1		localhost ip6-localhost ip6-loopback
+#ff02::1		ip6-allnodes
+#ff02::2		ip6-allrouters
+#127.0.1.1	gateway
+#EOL
 		#echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	gateway\n' > /home/pi/.webthings/etc/hosts
 	fi
 
@@ -4104,14 +4110,20 @@ else
 	# Create hosts file and its symlink
 	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
 		echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
+		echo "127.0.0.1	localhost" > /home/pi/.webthings/etc/hosts
+		echo "::1		localhost ip6-localhost ip6-loopback" >> /home/pi/.webthings/etc/hosts
+		echp "ff02::1		ip6-allnodes" >> /home/pi/.webthings/etc/hosts
+		echo "ff02::2		ip6-allrouters" >> /home/pi/.webthings/etc/hosts
+		echo "127.0.1.1	candle" >> /home/pi/.webthings/etc/hosts
+		
 		#echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
-		cat >/home/pi/.webthings/etc/hosts <<EOL
-127.0.0.1	localhost
-::1		localhost ip6-localhost ip6-loopback
-ff02::1		ip6-allnodes
-ff02::2		ip6-allrouters
-127.0.1.1	candle
-EOL
+#		cat >/home/pi/.webthings/etc/hosts <<EOL
+#127.0.0.1	localhost
+#::1		localhost ip6-localhost ip6-loopback
+#ff02::1		ip6-allnodes
+#ff02::2		ip6-allrouters
+#127.0.1.1	candle
+#EOL
 	fi
 fi
 
@@ -4159,14 +4171,18 @@ chown -R pi:pi chromium
 chmod -R 755 chromium
 chown -R pi:pi arduino
 chmod -R 755 arduino
+if [ -d "$CANDLE_BASE/.webthings" ]; then
+	chown -R pi:pi state
+	chmod -R 755 state
+fi
 cd $CANDLE_BASE/
 
-touch /home/pi/.bash_history
-chown pi:pi /home/pi/.bash_history
-chown pi:pi /home/pi/.webthings/etc/asoundrc
+touch "$CANDLE_BASE/.bash_history"
+chown pi:pi "$CANDLE_BASE/.bash_history"
+chown pi:pi "$CANDLE_BASE/.webthings/etc/asoundrc"
 
-touch /home/pi/.webthings/candle.log
-chown pi:pi /home/pi/.webthings/candle.log
+touch "$CANDLE_BASE/.webthings/candle.log"
+chown pi:pi "$CANDLE_BASE/.webthings/candle.log"
 
 if [ -f /etc/profile.d/ensure_dbus.sh ]; then
   chmod +x /etc/profile.d/ensure_dbus.sh
@@ -4179,8 +4195,8 @@ fi
 #    rm /home/pi/create_latest_candle.sh
 #fi
 
-if [ -f /home/pi/ro-root.sh ]; then
-    rm /home/pi/ro-root.sh
+if [ -f "$CANDLE_BASE/ro-root.sh" ]; then
+    rm "$CANDLE_BASE/ro-root.sh"
 fi
 
 #sed '2s/LABEL="alsa_restore_go"/LABEL="alsa_restore_std"/' /usr/lib/udev/rules.d/90-alsa-restore.rules
@@ -4195,12 +4211,12 @@ fi
 
 
 
-mkdir -p /home/pi/.webthings/etc/nmap
+mkdir -p "$CANDLE_BASE/.webthings/etc/nmap"
 
 # Some final insurance
-chown pi:pi /home/pi/*
-chown pi:pi /home/pi/.webthings/candle.log
-chown -R pi:pi /home/pi/candle/*
+chown pi:pi "$CANDLE_BASE/*"
+chown pi:pi "$CANDLE_BASE/.webthings/candle.log"
+chown -R pi:pi "$CANDLE_BASE/candle/*"
 
 #rm -rf python311
 
@@ -4209,7 +4225,9 @@ if [ -f /etc/asound.conf ]; then
     rm /etc/asound.conf
 fi
 
-chmod +x /home/pi/.webthings/etc/wpa_supplicant/*.sh
+if [ -d "$CANDLE_BASE/.webthings/etc/wpa_supplicant" ]; then 
+	chmod +x "$CANDLE_BASE/.webthings/etc/wpa_supplicant/*.sh"
+fi
 #sudo systemctl disable hostapd.service 
 
 # remove cron files
@@ -4240,9 +4258,12 @@ systemctl disable apt-daily-upgrade.timer
 systemctl mask apt-daily-upgrade.timer
 systemctl disable apt-daily-upgrade.service
 
-mkdir -p /home/pi/.webthings/ssl/
-if [ -e /home/pi/.webthings/ssl/ ]; then
-	chown pi:pi /home/pi/.webthings/ssl/
+if [ ! -d "$CANDLE_BASE/.webthings/.webthings/ssl/" ]; then
+	mkdir -p "$CANDLE_BASE/.webthings/ssl"
+fi
+
+if [ -e "$CANDLE_BASE/.webthings/ssl/" ]; then
+	chown -R pi:pi "$CANDLE_BASE/.webthings/ssl/"
 fi
 
 systemctl disable apparmor.service 
@@ -4309,8 +4330,8 @@ fi
 
 
 
-if [ -d /home/pi/webthings/gateway ] && [ -d /home/pi/webthings/gateway2 ]; then
-    rm -rf /home/pi/webthings/gateway2
+if [ -d "$CANDLE_BASE/webthings/gateway" ] && [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
+    rm -rf "$CANDLE_BASE/webthings/gateway2"
 fi
 
 
@@ -4321,8 +4342,8 @@ if [ -f $BOOT_DIR/candle_first_run_complete.txt ] && [ ! -f $BOOT_DIR/candle_ori
 fi
 
 # remember when the disk image was created
-if [ ! -f /home/pi/candle/creation_date.txt ]; then
-    echo "$(date +%s)" > /home/pi/candle/creation_date.txt
+if [ ! -f "$CANDLE_BASE/candle/creation_date.txt" ]; then
+    echo "$(date +%s)" > "$CANDLE_BASE/candle/creation_date.txt"
 fi
 
 # remember when the update script was last run
@@ -4360,9 +4381,9 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     rm $BOOT_DIR/candle_cutting_edge.txt
 fi
 
-if [ -d /home/pi/configuration-files ]; then
+if [ -d "$CANDLE_BASE/configuration-files" ]; then
     echo "removing configuration-files dir"
-    rm -rf /home/pi/configuration-files
+    rm -rf "$CANDLE_BASE/configuration-files"
 fi
 
 
@@ -4495,9 +4516,9 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 fi
 
 
-if [ -f /home/pi/nohup.out ]; then
+if [ -f "$CANDLE_BASE/nohup.out" ]; then
     echo "found nohup.out file, moving it to become the candle log"
-    mv /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+    mv "$CANDLE_BASE/nohup.out" $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
 echo "initial wifi country code was:"
@@ -4598,8 +4619,8 @@ if [ -d /etc/netplan ] ; then
 	rm -rf /etc/netplan
 fi
 
-if [ -d /home/pi/.pnpm-store ]; then
-	rm -rf /home/pi/.pnpm-store
+if [ -d "$CANDLE_BASE/.pnpm-store" ]; then
+	rm -rf "$CANDLE_BASE/.pnpm-store"
 fi
 
 swapoff -a
@@ -4616,12 +4637,13 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
     fi
 fi
 
-if [ -f /home/pi/.webthings/candle_original_version.txt ]; then
-	chmod -x /home/pi/.webthings/candle_original_version.txt
+# TODO: making a .txt file executable?
+if [ -f "$CANDLE_BASE/.webthings/candle_original_version.txt" ]; then
+	chmod -x "$CANDLE_BASE/.webthings/candle_original_version.txt"
 fi
 
 # DONE!
-echo "$(date) - Candle install script done" >> /home/pi/.webthings/candle.log
+echo "$(date) - Candle install script done" >> "$CANDLE_BASE/.webthings/candle.log"
 echo "$(date) - Candle install script done" >> $BOOT_DIR/candle_log.txt
 
 
@@ -4636,7 +4658,9 @@ then
     echo "ALMOST DONE, RUNNING DEBUG SCRIPT"
     echo
 
-	/home/pi/candle/debug.sh > $BOOT_DIR/debug.txt
+	if [ -f "$CANDLE_BASE/candle/debug.sh" ]; then
+		"$CANDLE_BASE/candle/debug.sh" > $BOOT_DIR/debug.txt
+	fi
 	
     if [ -f $BOOT_DIR/candle_first_run_complete.txt ]; then
         /home/pi/candle/debug.sh > $BOOT_DIR/debug.txt
