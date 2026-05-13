@@ -627,7 +627,7 @@ cd $CANDLE_BASE
 #ln --backup --symbolic --verbose $(which true) $(which mandb)
 
 mkdir -p "$CANDLE_BASE/.local/share/nano"
-chown -R pi:pi "$CANDLE_BASE/.local/share/nano"
+chown -R pi:pi "$CANDLE_BASE/.local"
 
 if [[ -L "$CANDLE_BASE/.local/state" ]]; then
 	echo "state folder is already a symlink";
