@@ -1390,6 +1390,10 @@ if [ -f /home/pi/nohup.out ]; then
 fi
 
 
+# avoid ERROR: Could not install packages due to an OSError: [Errno 13] Permission denied: '/home/pi/.local/lib'
+mkdir -p /home/pi/.local/lib
+chown -r pi:pi /home/pi/.local/lib
+
 
 
 # PRE-DOWNLOAD CANDLE CONTROLLER INSTALLER
