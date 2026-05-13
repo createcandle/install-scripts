@@ -662,6 +662,7 @@ else
 	chown -R pi:pi "$CANDLE_BASE/.local/state/"
 	chown -R pi:pi "$CANDLE_BASE/.webthings/state"
 fi
+chown -R pi:pi "$CANDLE_BASE/.local"
 
 if [[ ! -L "$CANDLE_BASE/.local/state" ]]; then
 	echo "ERROR, $CANDLE_BASE/.local/state was not a symlink"
@@ -1421,8 +1422,14 @@ fi
 # avoid ERROR: Could not install packages due to an OSError: [Errno 13] Permission denied: '/home/pi/.local/lib'
 if [ ! -d "$CANDLE_BASE/.local/lib" ]; then
 	mkdir -p "$CANDLE_BASE/.local/lib"
-	chown -R pi:pi "$CANDLE_BASE/.local/lib"
 fi
+if [ ! -d "$CANDLE_BASE/.local/bin" ]; then
+	mkdir -p "$CANDLE_BASE/.local/bin"
+fi
+if [ ! -d "$CANDLE_BASE/.local/share" ]; then
+	mkdir -p "$CANDLE_BASE/.local/share"
+fi
+chown -R pi:pi "$CANDLE_BASE/.local"
 
 
 # PRE-DOWNLOAD CANDLE CONTROLLER INSTALLER
