@@ -625,19 +625,28 @@ cd $CANDLE_BASE
 #rm /var/lib/man-db/auto-update
 #ln --backup --symbolic --verbose $(which true) $(which mandb)
 
-if [[ -L "/home/pi/.local/state/wireplumber" ]]; then
-	echo "wireplumber folder is already a symlink";
+if [[ -L "/home/pi/.local/state" ]]; then
+	echo "state folder is already a symlink";
 else
-	mkdir -p /home/pi/.local/state
-	mkdir -p /home/pi/.webthings/etc/state/wireplumber
-	if [ -d /home/pi/.local/state/wireplumber ]; then
-		cp /home/pi/.local/state/wireplumber/* /home/pi/.webthings/etc/state/wireplumber/
-		rm -rf /home/pi/.local/state/wireplumber
-		ln -s /home/pi/.webthings/etc/state/wireplumber /home/pi/.local/state/wireplumber
+
+	mkdir -p /home/pi/.local
+	mkdir -p /home/pi/.webthings/state
+
+	if [ -d /home/pi/.local/state ]; then
+		cp -r /home/pi/.local/state/* /home/pi/.webthings/state/
 	fi
 	
+	#if [ -d /home/pi/.local/state/wireplumber ]; then
+	#	cp /home/pi/.local/state/wireplumber/* /home/pi/.webthings/state/wireplumber/
+	#	rm -rf /home/pi/.local/state/wireplumber
+	#	ln -s /home/pi/.webthings/state /home/pi/.local/state
+	#fi
+
+	rm -rf /home/pi/.local/state
+	ln -s /home/pi/.webthings/state /home/pi/.local/state
+	
 	chown -R pi:pi /home/pi/.local/state
-	chown -R pi:pi /home/pi/.webthings/etc/state
+	chown -R pi:pi /home/pi/.webthings/state
 fi
 
 
@@ -1774,6 +1783,8 @@ then
 		su -c 'systemctl --user --now enable pipewire.socket pipewire-pulse.socket wireplumber.service' pi
 	fi
 
+	
+	
 	# Disable audio device suspend
 	if [ -f /usr/share/wireplumber/scripts/suspend-node.lua ]; then
 		sed -i 's|if timeout == 0 then|if timeout >= 0 then|g' /usr/share/wireplumber/scripts/suspend-node.lua
