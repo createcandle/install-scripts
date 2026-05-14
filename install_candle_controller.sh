@@ -427,7 +427,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	echo ""
 	echo "installing webpack-cli"
 	echo ""
- 	#yes "y" | npm --yes install -D webpack webpack-cli 
+ 	yes "y" | npm --yes install -D webpack webpack-cli 
 	#echo ""
 	#echo "installing webpack"
  	#yes "y" | npm --yes install -D webpack
