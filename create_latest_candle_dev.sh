@@ -1756,6 +1756,8 @@ then
     apt -y install git --no-install-recommends "$reinstall" 
 
 
+	apt -y install bluez --no-install-recommend
+
 	echo
     echo "Enabling experimental bluetooth features"
 	# enable bluetooth experimental dbus support
@@ -1963,7 +1965,7 @@ then
 	# jan 2026: removed nscd
 	# arping , for usb-gadget mode it seems iputils-arping is dependency instead
     for i in curl autoconf ffmpeg libswresample5 libtool mosquitto mosquitto-clients sqlite3 \
-	    nbtscan iptables liblivemedia-dev rpicam-apps avahi-utils jq i2c-tools cups \
+	    nbtscan iptables liblivemedia-dev rpicam-apps avahi-utils jq i2c-tools cups bluez-cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
 	    netcat-traditional upower libolm3 libffi* evtest faketime rpi-usb-gadget smem; do
             
