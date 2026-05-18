@@ -4534,6 +4534,13 @@ if [ -f "$CANDLE_BASE/nohup.out" ]; then
     mv "$CANDLE_BASE/nohup.out" $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
+
+# Mode NetworkMManager's intern-config path to user partition
+mkdir -p /home/pi/.webthings/etc/NetworkManager/intern-config
+
+
+
+
 echo "initial wifi country code was:"
 iw reg get
 
