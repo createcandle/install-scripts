@@ -3154,6 +3154,7 @@ echo
 
 # enable Candle services
 systemctl enable candle_first_run.service
+systemctl enable candle_first_run_user.service
 #systemctl enable candle_start_swap.service
 systemctl enable candle_early.service
 systemctl enable candle_late.service 
