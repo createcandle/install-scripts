@@ -4642,7 +4642,13 @@ fi
 
 
 # This is handled by prepare_disk_image
-chmod +x /home/pi/candle/candle_first_run.sh
+chmod +x "$CANDLE_BASE/candle/candle_first_run.sh"
+
+if [ -f "$CANDLE_BASE/candle/candle_first_run_user.sh" ]; then
+	chmod +x    "$CANDLE_BASE/candle/candle_first_run_user.sh"
+	chown pi:pi "$CANDLE_BASE/candle/candle_first_run_user.sh"
+fi
+
 if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
     if [ -f /home/pi/candle/candle_first_run.sh ]; then
         cp /home/pi/candle/candle_first_run.sh $BOOT_DIR/candle_first_run.sh
