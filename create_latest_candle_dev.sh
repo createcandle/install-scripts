@@ -1785,7 +1785,7 @@ then
 	
  
     echo
-    echo "installing Pipewire audio"
+    echo "installing  audio"
 	# software-properties-common
 	apt install -y rtkit
     apt install -y pipewire pipewire-bin wireplumber pipewire-alsa pipewire-jack pipewire-pulse libspa-0.2-bluetooth pipewire-audio-client-libraries pipewire-libcamera libcamera-ipa easyeffects portaudio19-dev bluez bluez-tools gstreamer1.0-pipewire --no-install-recommends
@@ -1798,8 +1798,11 @@ then
 
     if [ -e /usr/share/pipewire ]; then
 		mkdir -p /home/pi/.config/wireplumber/main.lua.d
+		chown -R pi:pi /home/pi/.config/wireplumber/main.lua.d
+		
 		mkdir -p /home/pi/.config/wireplumber/wireplumber.conf.d
-	
+		chown -R pi:pi /home/pi/.config/wireplumber/wireplumber.conf.d
+		
 		mkdir -p /home/pi/.webthings/etc
 		mkdir -p /home/pi/.webthings/etc/pipewire
 	    cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
