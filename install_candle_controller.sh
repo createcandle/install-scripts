@@ -835,7 +835,7 @@ then
 		fi
     done
 
-	if [ -f /boot/firmware/candle_ssh.txt ]; then
+	#if [ -f /boot/firmware/candle_ssh.txt ]; then
 		for addon in seashell;
 		do
 			echo "$addon"
@@ -859,7 +859,7 @@ then
 				echo "Error, did not install addon: $addon"
 			fi
 		done
-	fi
+	#fi
 
 
 
