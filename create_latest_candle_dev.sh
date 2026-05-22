@@ -3460,20 +3460,22 @@ if [ -d ./framebuffer-color_clock-C ]; then
 	rm -rf ./framebuffer-color_clock-C
 fi
 
-echo
-echo "Installing support for iPhone USB tethering"
 
-apt install -y libcurl4-openssl-dev
-mkdir -p ~/build
-git clone https://github.com/createcandle/raspi-libimobiledevice.git
-
-./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh
-
-rm -rf ~/build
-rm -rf ./raspi-libimobiledevice
-
-#apt remove -y libcurl4-openssl-dev
-
+if [ ! -f libimobiledevice-1.0.so ]; then
+	echo
+	echo "Installing support for iPhone USB tethering"
+	
+	apt install -y libcurl4-openssl-dev
+	mkdir -p ~/build
+	git clone https://github.com/createcandle/raspi-libimobiledevice.git
+	
+	./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh
+	
+	rm -rf ~/build
+	rm -rf ./raspi-libimobiledevice
+	
+	#apt remove -y libcurl4-openssl-dev
+fi
 
 
 #echo
