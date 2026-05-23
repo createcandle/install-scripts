@@ -3461,7 +3461,7 @@ if [ -d ./framebuffer-color_clock-C ]; then
 fi
 
 
-if [ ! -f libimobiledevice-1.0.so ]; then
+if [ ! -f /usr/local/bin/libimobiledevice-1.0.so ]; then
 	echo
 	echo "Installing support for iPhone USB tethering"
 	
