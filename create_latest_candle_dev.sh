@@ -1970,7 +1970,8 @@ then
     for i in curl autoconf ffmpeg libswresample5 libtool mosquitto mosquitto-clients sqlite3 \
 	    nbtscan iptables liblivemedia-dev rpicam-apps avahi-utils jq i2c-tools cups bluez-cups \
  	    lsb-release libsbc-dev libasound2-dev libspandsp-dev libmp3lame-dev tcpdump dnstop \
-	    netcat-traditional upower libolm3 libffi* evtest faketime rpi-usb-gadget smem; do
+	    netcat-traditional upower libolm3 libffi* evtest faketime rpi-usb-gadget smem \
+		libnetfilter-queue1 libnetfilter-queue-dev; do
             
 		echo "Candle: installing $i"
         echo "Candle: installing $i" >> /dev/kmsg
