@@ -2843,6 +2843,7 @@ chown -R mosquitto:mosquitto /var/log/mosquitto
 
 # Make folders that should be owned by root
 mkdir -p /home/pi/.webthings/var/lib/bluetooth
+mkdir -p /home/pi/.webthings/var/lib/NetworkManager
 mkdir -p /home/pi/.webthings/etc/wpa_supplicant
 
 mkdir -p /home/pi/.webthings/etc/ssh
