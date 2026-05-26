@@ -89,7 +89,7 @@ fi
 CUTTING_EDGE=yes
 
 
-echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
+#echo "candle: installing python gateway addon" | sudo tee -a /dev/kmsg
 echo "candle: installing python gateway addon" | sudo tee -a $BOOT_DIR/candle_log.txt
 if [[ -z "${WEBTHINGS_GATEWAY}" ]] || [ "$WEBTHINGS_GATEWAY" = no ]; then
 	python3 -m pip install "git+https://github.com/createcandle/gateway-addon-python#egg=gateway_addon" --break-system-packages --trusted-host pypi.org --trusted-host files.pythonhosted.org
@@ -110,7 +110,7 @@ if [ ! command -v npm &> /dev/null ] || [ "$(cat $CANDLE_BASE/.webthings/.node_v
 then
     echo
     echo "NPM could not be found. Installing it now."
-    echo "Candle: Installing NVM" | sudo tee -a /dev/kmsg
+    #echo "Candle: Installing NVM" | sudo tee -a /dev/kmsg
     echo "Candle: Installing NVM" | sudo tee -a $BOOT_DIR/candle_log.txt
     
     
@@ -139,8 +139,8 @@ then
     
     if [ -z "$(nvm --version)" ]; then
         echo "ERROR, nvm is not available. Installation failed?"
-        echo "ERROR, nvm is not available. Installation failed?" | sudo tee -a /dev/kmsg
-        echo "ERROR, nvm is not available. Installation failed?" | sudo tee -a $BOOT_DIR/candle_log.txt
+        #echo "ERROR, nvm is not available. Installation failed?" | sudo tee -a /dev/kmsg
+        #echo "ERROR, nvm is not available. Installation failed?" | sudo tee -a $BOOT_DIR/candle_log.txt
         
         if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
             if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
@@ -158,8 +158,8 @@ then
     if cat "$CANDLE_BASE/.profile" | grep NVM
     then
         echo "NVM lines already appended to .profile"
-        echo "NVM lines already appended to .profile" | sudo tee -a /dev/kmsg
-        echo "NVM lines already appended to .profile" | sudo tee -a $BOOT_DIR/candle_log.txt
+        #echo "NVM lines already appended to .profile" | sudo tee -a /dev/kmsg
+        #echo "NVM lines already appended to .profile" | sudo tee -a $BOOT_DIR/candle_log.txt
     else
         echo "Appending NVM lines to .profile"
         echo >> "$CANDLE_BASE/.profile"
@@ -186,8 +186,9 @@ then
 
 
 else
-    echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
-    echo "NPM seems to already be installed." | sudo tee -a $BOOT_DIR/candle_log.txt
+    echo "NPM seems to already be installed." 
+    #echo "NPM seems to already be installed." | sudo tee -a /dev/kmsg
+    #echo "NPM seems to already be installed." | sudo tee -a $BOOT_DIR/candle_log.txt
 fi
 
 
@@ -226,10 +227,10 @@ echo
 echo "NODE AND NPM VERSIONS:"
 node --version
 npm --version
-echo "Candle: Node --version: $(node --version)" | sudo tee -a /dev/kmsg
-echo "Candle: NPM --version: $(npm --version)"   | sudo tee -a /dev/kmsg
-echo "Candle: Node --version: $(node --version)" | sudo tee -a $BOOT_DIR/candle_log.txt
-echo "Candle: NPM --version: $(npm --version)"   | sudo tee -a $BOOT_DIR/candle_log.txt
+#echo "Candle: Node --version: $(node --version)" | sudo tee -a /dev/kmsg
+#echo "Candle: NPM --version: $(npm --version)"   | sudo tee -a /dev/kmsg
+#echo "Candle: Node --version: $(node --version)" | sudo tee -a $BOOT_DIR/candle_log.txt
+#echo "Candle: NPM --version: $(npm --version)"   | sudo tee -a $BOOT_DIR/candle_log.txt
 
 npm cache verify
 
@@ -244,8 +245,8 @@ fi
 
 
 _node_version=$(node --version | grep -E -o '[0-9]+' | head -n1)
-echo "Node version: ${_node_version}" | sudo tee -a /dev/kmsg
-echo "Node version: ${_node_version}" | sudo tee -a $BOOT_DIR/candle_log.txt
+#echo "Node version: ${_node_version}" | sudo tee -a /dev/kmsg
+#echo "Node version: ${_node_version}" | sudo tee -a $BOOT_DIR/candle_log.txt
 
 echo "${_node_version}" > "$CANDLE_BASE/.webthings/.node_version"
 
@@ -285,8 +286,8 @@ if [ -f "$CANDLE_BASE/latest_stable_controller.tar" ]; then
         && [ -d "$CANDLE_BASE/webthings/gateway/build/static/bundle" ];
         then
             echo "Detected old webthings directory! Creating fresh backup"
-            echo "Candle: Detected old webthings directory. Creating fresh backup" | sudo tee -a /dev/kmsg
-            echo "Candle: Detected old webthings directory. Creating fresh backup" | sudo tee -a $BOOT_DIR/candle_log.txt
+            #echo "Candle: Detected old webthings directory. Creating fresh backup" | sudo tee -a /dev/kmsg
+            #echo "Candle: Detected old webthings directory. Creating fresh backup" | sudo tee -a $BOOT_DIR/candle_log.txt
             tar -czf ./controller_backup_fresh.tar ./webthings
         fi
     fi
@@ -303,8 +304,8 @@ fi
 
 if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     
-    echo "Candle: Starting controller source code download" | sudo tee -a /dev/kmsg
-    echo "Candle: Starting controller source code download" | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: Starting controller source code download" | sudo tee -a /dev/kmsg
+    #echo "Candle: Starting controller source code download" | sudo tee -a $BOOT_DIR/candle_log.txt
     mkdir -p "$CANDLE_BASE/webthings"
     chown pi:pi "$CANDLE_BASE/webthings"
     cd "$CANDLE_BASE/webthings"
@@ -335,13 +336,13 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
 	
 	
     if [ -d ./candle-controller ]; then
-        echo "Cutting edge controller download succeeded" | sudo tee -a /dev/kmsg
-        echo "Cutting edge controller download succeeded" | sudo tee -a $BOOT_DIR/candle_log.txt
+        #echo "Cutting edge controller download succeeded" | sudo tee -a /dev/kmsg
+        #echo "Cutting edge controller download succeeded" | sudo tee -a $BOOT_DIR/candle_log.txt
         rm -rf "$CANDLE_BASE/webthings/gateway2"
         mv -f ./candle-controller "$CANDLE_BASE/webthings/gateway2"
     else
-        echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a /dev/kmsg
-        echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a $BOOT_DIR/candle_log.txt
+        #echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a /dev/kmsg
+       # echo "ERROR, downloading cutting edge candle-controller dir from Github failed" | sudo tee -a $BOOT_DIR/candle_log.txt
         
         if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
             if [ -f /bin/ply-image ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
@@ -361,8 +362,8 @@ fi
 if [ -f $BOOT_DIR/candle_cutting_edge.txt ] && [ ! -d "$CANDLE_BASE/webthings/gateway2" ]; then
     echo
     echo "ERROR, missing gateway2 directory"
-    echo "Candle: ERROR, missing gateway2 directory" | sudo tee -a /dev/kmsg
-    echo "Candle: ERROR, missing gateway2 directory" | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: ERROR, missing gateway2 directory" | sudo tee -a /dev/kmsg
+    #echo "Candle: ERROR, missing gateway2 directory" | sudo tee -a $BOOT_DIR/candle_log.txt
     echo
     
     
@@ -389,8 +390,8 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     #npm --yes install typescript --save-dev  # TODO: check if this is now in package.json already
 
     # npm install
-    echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
-    echo "Candle: Installing Node modules (takes a while)" | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: Installing Node modules (takes a while)" | sudo tee -a /dev/kmsg
+    #echo "Candle: Installing Node modules (takes a while)" | sudo tee -a $BOOT_DIR/candle_log.txt
     
     echo "Do not worry about the errors you will see with optipng and jpegtran"
 
@@ -489,16 +490,16 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
  
     echo ""
     echo "Compiling typescript. this will take a while..."
-    echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
-    echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a /dev/kmsg
+    #echo "Candle: Compiling typescript. This will take a while..." | sudo tee -a $BOOT_DIR/candle_log.txt
     yes "y" | npx --force-yes tsc -p . 
     echo "(it probably found some errors, don't worry about those)"
     echo ""
 
  
     #echo "Running webpack. this will take a while too..."
-    echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
-    echo "Candle: Running webpack. This will take a while too..." | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: Running webpack. This will take a while too..." | sudo tee -a /dev/kmsg
+    #echo "Candle: Running webpack. This will take a while too..." | sudo tee -a $BOOT_DIR/candle_log.txt
     
     totalk="$(awk '/^MemTotal:/{print $2}' /proc/meminfo)"
     echo "memory size: $totalk"
@@ -534,7 +535,7 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
       	echo "$(date +%s)" > update_date.txt
       	#echo "Controller installation seems ok"
       	echo "Controller installation seems ok, at $(pwd)"
-      	echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
+      	#echo "Controller installation seems ok, at $(pwd)" | sudo tee -a /dev/kmsg
 
 		echo
 	    echo "New controller was created at $(pwd)"
@@ -547,13 +548,13 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	
 	        if [ ! -d "$CANDLE_BASE/webthings/gateway" ]; then
 	            echo "Candle: Gateway didn't exist, moving gateway2 into position"
-	            echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
-	            echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a $BOOT_DIR/candle_log.txt
+	            #echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a /dev/kmsg
+	            #echo "Candle: Gateway didn't exist, moving gateway2 into position" | sudo tee -a $BOOT_DIR/candle_log.txt
 	            mv "$CANDLE_BASE/webthings/gateway2" "$CANDLE_BASE/webthings/gateway"
 	        else
 	            echo "Candle: Gateway dir existed, doing rsync from gateway2"
-	            echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
-	            echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a $BOOT_DIR/candle_log.txt
+	            #echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a /dev/kmsg
+	            #echo "Candle: Gateway dir existed, doing rsync from gateway2" | sudo tee -a $BOOT_DIR/candle_log.txt
 	            
 	            # rsync recursive, quiet, checksum, copy symlinks as symlinks, preserve Executability, delete extraneous files from destination, show progress
 	            rsync -r -q -c -l -E --delete --progress "$CANDLE_BASE/webthings/gateway2/" "$CANDLE_BASE/webthings/gateway/"
@@ -563,16 +564,17 @@ if [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
 	        fi
 	    else
 	        # This should never happen
-	        echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /dev/kmsg
-	        echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a $BOOT_DIR/candle_log.txt
+			echo "ERROR, gateway2 was just created.. but is missing?"
+	        #echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a /dev/kmsg
+	        #echo "ERROR, gateway2 was just created.. but is missing?" | sudo tee -a $BOOT_DIR/candle_log.txt
 	    fi
 
    
     else
       echo  
       echo "ERROR, controller installation is missing parts"
-      echo "Candle: ERROR, controller installation is mising parts" | sudo tee -a /dev/kmsg
-      echo "$(date) - ERROR, controller installation is mising parts" | sudo tee -a $BOOT_DIR/candle_log.txt
+      #echo "Candle: ERROR, controller installation is mising parts" | sudo tee -a /dev/kmsg
+      #echo "$(date) - ERROR, controller installation is mising parts" | sudo tee -a $BOOT_DIR/candle_log.txt
       ls "$CANDLE_BASE/webthings/gateway2/build/app.js"
       ls "$CANDLE_BASE/webthings/gateway2/build/static/index.html"
       ls "$CANDLE_BASE/webthings/gateway2/node_modules"
@@ -591,8 +593,9 @@ fi
 
 echo
 echo
-echo "Candle: Linking gateway addon" | sudo tee -a /dev/kmsg
-echo "Candle: Linking gateway addon" | sudo tee -a $BOOT_DIR/candle_log.txt
+echo "Candle: Linking gateway addon (blocked"
+#echo "Candle: Linking gateway addon" | sudo tee -a /dev/kmsg
+#echo "Candle: Linking gateway addon" | sudo tee -a $BOOT_DIR/candle_log.txt
 if [ -d "$CANDLE_BASE/webthings/gateway/node_modules/gateway-addon" ];
 then
     cd "$CANDLE_BASE/webthings/gateway/node_modules/gateway-addon"
@@ -600,8 +603,8 @@ then
     cd "$CANDLE_BASE"
 else
     echo "ERROR, $CANDLE_BASE/webthings/gateway/node_modules/gateway-addon was missing"
-    echo "Candle: ERROR, $CANDLE_BASE/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
-    echo "Candle: ERROR, $CANDLE_BASE/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: ERROR, $CANDLE_BASE/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a /dev/kmsg
+    #echo "Candle: ERROR, $CANDLE_BASE/webthings/gateway/node_modules/gateway-addon was missing" | sudo tee -a $BOOT_DIR/candle_log.txt
 fi
 
 
@@ -615,8 +618,8 @@ if [ ! -f "$CANDLE_BASE/webthings/gateway/build/app.js" ] \
 || [ ! -d "$CANDLE_BASE/webthings/gateway/node_modules" ] \
 || [ ! -d "$CANDLE_BASE/webthings/gateway/build/static/bundle" ]; 
 then
-    echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! Backup not created."   | sudo tee -a /dev/kmsg
-    echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! Backup not created." | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! Backup not created."   | sudo tee -a /dev/kmsg
+    #echo "$(date) - WARNING, INSTALLATION OF CANDLE CONTROLLER FAILED! Backup not created." | sudo tee -a $BOOT_DIR/candle_log.txt
 
     ls "$CANDLE_BASE/webthings/gateway/build/app.js"
     ls "$CANDLE_BASE/webthings/gateway/build/static/index.html"
@@ -627,14 +630,14 @@ then
     # restore the backup in case something has gone very wrong
     if [ -f "$CANDLE_BASE/controller_backup.tar" ];
     then
-        echo "Candle: RESTORING BACKUP" | sudo tee -a /dev/kmsg
-        echo "$(date) RESTORING BACKUP" | sudo tee -a $BOOT_DIR/candle_log.txt
+        #echo "Candle: RESTORING BACKUP" | sudo tee -a /dev/kmsg
+        #echo "$(date) RESTORING BACKUP" | sudo tee -a $BOOT_DIR/candle_log.txt
         cd "$CANDLE_BASE"
         sudo rm -rf "$CANDLE_BASE/webthings"
         tar -xf ./controller_backup.tar
-    else
-        echo "Candle: NO BACKUP TO RESTORE!" | sudo tee -a /dev/kmsg
-        echo "$(date) NO BACKUP TO RESTORE!" | sudo tee -a $BOOT_DIR/candle_log.txt
+    #else
+    #    echo "Candle: NO BACKUP TO RESTORE!" | sudo tee -a /dev/kmsg
+    #    echo "$(date) NO BACKUP TO RESTORE!" | sudo tee -a $BOOT_DIR/candle_log.txt
         
         # Could abort here..
     fi
@@ -642,8 +645,8 @@ then
 else
     echo
     echo "Everything looks good"
-    echo "Candle: a valid controller exists" | sudo tee -a /dev/kmsg
-    echo "Candle: a valid controller exists" | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: a valid controller exists" | sudo tee -a /dev/kmsg
+    #echo "Candle: a valid controller exists" | sudo tee -a $BOOT_DIR/candle_log.txt
     echo
 fi
 
@@ -767,8 +770,10 @@ fi
 # TODO: what if part of this failed?
 if [ ! -d "$CANDLE_BASE/.webthings/addons/candleappstore" ]; 
 then
-    echo "Candle: Installing addons" | sudo tee -a /dev/kmsg
-    echo "Candle: Installing addons" | sudo tee -a $BOOT_DIR/candle_log.txt
+	echo ""
+	echo "Candle: Installing addons"
+    #echo "Candle: Installing addons" | sudo tee -a /dev/kmsg
+    #echo "Candle: Installing addons" | sudo tee -a $BOOT_DIR/candle_log.txt
         
     cd "$CANDLE_BASE/.webthings/addons"
 
@@ -1186,8 +1191,8 @@ then
     
 else
     echo "Candle: WARNING, $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt"
-    echo "Candle: WARNING, $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a /dev/kmsg
-    echo "$(date) $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: WARNING, $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a /dev/kmsg
+    #echo "$(date) $CANDLE_BASE/.webthings/data/zigbee2mqtt does not exist? Cannot pre-install zigbee2mqtt" | sudo tee -a $BOOT_DIR/candle_log.txt
 fi
 
 mkdir -p "$CANDLE_BASE/.webthings/backups/addons"
@@ -1227,34 +1232,22 @@ mkdir -p "$CANDLE_BASE/.webthings/config"
 #chown -R pi:pi "$CANDLE_BASE/.webthings/config"
 if [ ! -f "$CANDLE_BASE/.webthings/config/db.sqlite3" ];
 then
-    echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a /dev/kmsg
-    echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a /dev/kmsg
+    #echo "Candle: copying initial Candle database from power settings addon" | sudo tee -a $BOOT_DIR/candle_log.txt
     if [ -f "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3" ]; then
         cp "$CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3" "$CANDLE_BASE/.webthings/config/db.sqlite3"
         #chown pi:pi "$CANDLE_BASE/.webthings/config/db.sqlite3"
     else
         echo "ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing"
-        echo "Candle: ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /dev/kmsg
-        echo "Candle: ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a $BOOT_DIR/candle_log.txt
+        #echo "Candle: ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a /dev/kmsg
+        #echo "Candle: ERROR, $CANDLE_BASE/.webthings/addons/power-settings/db.sqlite3 was missing" | sudo tee -a $BOOT_DIR/candle_log.txt
     fi
 else
     echo "warning, not copying default database since a database file already exists"
-    echo "Candle: Database file already existed, not replacing it" | sudo tee -a /dev/kmsg
-    echo "Candle: Database file already existed, not replacing it" | sudo tee -a $BOOT_DIR/candle_log.txt
+    #echo "Candle: Database file already existed, not replacing it" | sudo tee -a /dev/kmsg
+    #echo "Candle: Database file already existed, not replacing it" | sudo tee -a $BOOT_DIR/candle_log.txt
 fi
 
-mkdir -p "$CANDLE_BASE/.webthings/data/dashboard"
-#chown -R pi:pi "$CANDLE_BASE/.webthings/data"
-if [ ! -f "$CANDLE_BASE/.webthings/data/dashboard/persistence.json" ] && [ -f "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" ];
-then
-    echo "Candle: copying initial dashboard persistence file from dashboard addon" | sudo tee -a /dev/kmsg
-    echo "Candle: copying initial dashboard persistence file from dashboard addon" | sudo tee -a $BOOT_DIR/candle_log.txt
-    cp "$CANDLE_BASE/.webthings/addons/dashboard/persistence.json" "$CANDLE_BASE/.webthings/data/dashboard/persistence.json"
-else
-    echo "warning, not copying dashboard persistence.json since a dashboard persistence file already exists"
-    echo "Candle: dashboard persistence file already existed, not replacing it" | sudo tee -a /dev/kmsg
-    echo "Candle: dashboard persistence file already existed, not replacing it" | sudo tee -a $BOOT_DIR/candle_log.txt
-fi
 
 mkdir -p "$CANDLE_BASE/.webthings/uploads"
 if [ -f "$CANDLE_BASE/.webthings/addons/scenes/images/menu-icon.svg" ] ; then
@@ -1322,8 +1315,9 @@ fi
 
 echo
 #echo "sub-script that installs the Candle controller is done. Returning to the main install script."
-echo "Candle: Returning to the main install script." | sudo tee -a /dev/kmsg
-echo "Candle: Returning to the main install script." | sudo tee -a $BOOT_DIR/candle_log.txt
+echo "Candle: Returning to the main install script."
+#echo "Candle: Returning to the main install script." | sudo tee -a /dev/kmsg
+#echo "Candle: Returning to the main install script." | sudo tee -a $BOOT_DIR/candle_log.txt
 echo
 exit 0
 
