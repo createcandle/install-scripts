@@ -4478,7 +4478,7 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	ls /etc/dhcp/dhclient-enter-hooks.d/resolvconf
 
 	if [ -d /etc/NetworkManager/system-connections ]; then
-		rm /etc/NetworkManager/system-connections/*
+		#rm /etc/NetworkManager/system-connections/*
   		rm -rf /etc/NetworkManager/system-connections/*
 		#cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
 	fi
