@@ -3182,6 +3182,7 @@ systemctl enable candle_hostname_fix.service # ugly solution, might not even be 
 echo "disabling wpa_supplicant.service"
 systemctl stop wpa_supplicant.service
 systemctl disable wpa_supplicant.service
+systemctl mask wpa_supplicant.service
 
 # Disable timers that are useless on a read-only filesystem
 echo "disabling services that make no sense on a read only FS"
