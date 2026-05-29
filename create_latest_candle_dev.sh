@@ -2990,14 +2990,17 @@ mkdir -p $CANDLE_BASE/.webthings/config
 echo "{}" > $CANDLE_BASE/.webthings/config/local.json
 chown -R pi:pi $CANDLE_BASE/.webthings/config
 
-if [ ! -f /home/pi/candle/early.sh ]; then
+if [ ! -f "$CANDLE_BASE/candle/early.sh" ]; then
     echo "ERROR, early.sh is missing?"
     exit 1
 fi
 
 # CHMOD THE NEW FILES
-chmod +x /home/pi/candle/*.sh
+chmod +x  "$CANDLE_BASE/candle/*.sh"
 chmod +x /etc/rc.local
+if [ -f  "$CANDLE_BASE/candle/fbclock_arm64" ]; then
+	chmod +x  "$CANDLE_BASE/candle/fbclock_arm64"
+fi
 #chmod +x /home/pi/candle/reboot_to_recovery.sh
 #if [ -f /etc/xdg/openbox/autostart ]; then
 #    chmod +x /etc/xdg/openbox/autostart
@@ -3015,37 +3018,37 @@ chmod +x /etc/rc.local
 
 
 # CHOWN THE NEW FILES
-chown pi:pi /home/pi/*
-chown -R pi:pi /home/pi/candle
-chown -R pi:pi /home/pi/.config
+chown pi:pi  "$CANDLE_BASE/*"
+chown -R pi:pi "$CANDLE_BASE/candle"
+chown -R pi:pi "$CANDLE_BASE/.config"
 
 # Mosquitto
 mkdir -p /etc/mosquitto/pass
-mkdir -p /home/pi/.webthings/etc/mosquitto/pass
+mkdir -p "$CANDLE_BASE/.webthings/etc/mosquitto/pass"
 chown -R mosquitto:mosquitto /home/pi/.webthings/etc/mosquitto
 #chmod u=rw,g=,o= /home/pi/.webthings/etc/mosquitto/pass/mosquitto_users
-if [ -f /home/pi/.webthings/etc/mosquitto/pass/mosquitto_users ]; then
-	chmod 0400 /home/pi/.webthings/etc/mosquitto/pass/mosquitto_users
+if [ -f "$CANDLE_BASE/.webthings/etc/mosquitto/pass/mosquitto_users" ]; then
+	chmod 0400 "$CANDLE_BASE/.webthings/etc/mosquitto/pass/mosquitto_users"
 else
 	echo "Error, mosquitto password file is missing"
 fi
 
-chown pi:pi /home/pi/.webthings/etc/webthings_settings_backup.js
-chown pi:pi /home/pi/.webthings/etc/webthings_settings.js
-chown pi:pi /home/pi/.webthings/etc/webthings_tunnel_default.js
+chown pi:pi "$CANDLE_BASE/.webthings/etc/webthings_settings_backup.js"
+chown pi:pi "$CANDLE_BASE/.webthings/etc/webthings_settings.js"
+chown pi:pi "$CANDLE_BASE/.webthings/etc/webthings_tunnel_default.js"
 
 
 
 # ADD SYMLINKS
 
 # Create symlink for .asoundrc
-if [ ! -L /home/pi/.asoundrc ]; then
-    if [ -f /home/pi/.webthings/etc/asoundrc ]; then
-        echo "Creating symlink from /home/pi/.asoundrc to /home/pi/.webthings/etc/asoundrc"
-        if [ -f /home/pi/.asoundrc ]; then
-	    rm /home/pi/.asoundrc
+if [ ! -L "$CANDLE_BASE/.asoundrc" ]; then
+    if [ -f "$CANDLE_BASE/.webthings/etc/asoundrc" ]; then
+        echo "Creating symlink from $CANDLE_BASE/.asoundrc to $CANDLE_BASE/.webthings/etc/asoundrc"
+        if [ -f "$CANDLE_BASE/.asoundrc" ]; then
+	    rm "$CANDLE_BASE/.asoundrc"
         fi
-        ln -s /home/pi/.webthings/etc/asoundrc /home/pi/.asoundrc
+        ln -s "$CANDLE_BASE/.webthings/etc/asoundrc" "$CANDLE_BASE/.asoundrc"
     fi
 fi
 
@@ -3071,13 +3074,13 @@ fi
 # Create locations on the user partition for time
 if [ ! -L /etc/localtime ]; then
     echo "creating symlink for /etc/localtime"
-    mkdir -p /home/pi/.webthings/etc
-    if [ ! -f /home/pi/.webthings/etc/localtime ]; then
+    mkdir -p "$CANDLE_BASE/.webthings/etc"
+    if [ ! -f "$CANDLE_BASE/.webthings/etc/localtime" ]; then
         echo "copying localtime file into position"
-        cp /etc/localtime /home/pi/.webthings/etc/localtime
+        cp /etc/localtime "$CANDLE_BASE/.webthings/etc/localtime"
     fi
     rm /etc/localtime
-    ln -s /home/pi/.webthings/etc/localtime /etc/localtime
+    ln -s "$CANDLE_BASE/.webthings/etc/localtime" /etc/localtime
 fi
 
 
@@ -3085,16 +3088,16 @@ fi
 if [ ! -L /etc/timezone ]; then
     echo "removing /etc/timezone file and creating a symlink to /home/pi/.webthings/etc/timezone instead"
     # move timezone file to user partition
-    if [ ! -f /home/pi/.webthings/etc/timezone ]; then
-		if [ -f /home/pi/.webthings/etc/timezone ]; then
-        	echo "copying /etc/timezone to /home/pi/.webthings/etc/timezone"
-        	cp --verbose /etc/timezone /home/pi/.webthings/etc/timezone
+    if [ ! -f "$CANDLE_BASE/.webthings/etc/timezone" ]; then
+		if [ -f "$CANDLE_BASE/.webthings/etc/timezone" ]; then
+        	echo "copying /etc/timezone to $CANDLE_BASE/.webthings/etc/timezone"
+        	cp --verbose /etc/timezone "$CANDLE_BASE/.webthings/etc/timezone"
 		 else
-			echo "Europe/Amsterdam" > /home/pi/.webthings/etc/timezone
+			echo "Europe/Amsterdam" > "$CANDLE_BASE/.webthings/etc/timezone"
    		fi
     fi
     rm /etc/timezone
-    ln -s /home/pi/.webthings/etc/timezone /etc/timezone
+    ln -s "$CANDLE_BASE/.webthings/etc/timezone" /etc/timezone
 fi
 
 
@@ -3102,14 +3105,14 @@ fi
 if [ ! -L /etc/fake-hwclock.data ]; then
     echo "removing /etc/fake-hwclock.data file and creating a symlink to /home/pi/.webthings/etc/fake-hwclock.data instead"
     # create fake-hwclock file
-	mkdir -p /home/pi/.webthings/etc/
-    if [ ! -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
-        echo "copying /etc/fake-hwclock.data to /home/pi/.webthings/etc/fake-hwclock.data"
-        cp --verbose /etc/fake-hwclock.data /home/pi/.webthings/etc/fake-hwclock.data
+	mkdir -p "$CANDLE_BASE/.webthings/etc/"
+    if [ ! -f "$CANDLE_BASE/.webthings/etc/fake-hwclock.data" ]; then
+        echo "copying /etc/fake-hwclock.data to $CANDLE_BASE/.webthings/etc/fake-hwclock.data"
+        cp --verbose /etc/fake-hwclock.data "$CANDLE_BASE/.webthings/etc/fake-hwclock.data"
     fi
-	if [ -f /home/pi/.webthings/etc/fake-hwclock.data ]; then
+	if [ -f "$CANDLE_BASE/.webthings/etc/fake-hwclock.data" ]; then
         rm /etc/fake-hwclock.data
-        ln -s /home/pi/.webthings/etc/fake-hwclock.data /etc/fake-hwclock.data
+        ln -s "$CANDLE_BASE/.webthings/etc/fake-hwclock.data" /etc/fake-hwclock.data
 	else
         echo "ERROR, copying fake-hwclock.data has failed"
 	fi
@@ -3119,17 +3122,17 @@ fi
 # Create location on the user partition for language
 if [ ! -L /etc/default/locale ]; then
     echo "creating symlink for /etc/default/locale"
-    mkdir -p /home/pi/.webthings/etc/default
-    if [ ! -f /home/pi/.webthings/etc/default/locale ]; then
+    mkdir -p "$CANDLE_BASE/.webthings/etc/default"
+    if [ ! -f "$CANDLE_BASE/.webthings/etc/default/locale" ]; then
 		if [ -f /etc/default/locale ]; then
    			echo "copying locale file into position"
-        	cp /etc/default/locale /home/pi/.webthings/etc/default/locale
+        	cp /etc/default/locale "$CANDLE_BASE/.webthings/etc/default/locale"
 		else
-			echo "LANG=en_GB.UTF-8" > /home/pi/.webthings/etc/default/locale
+			echo "LANG=en_GB.UTF-8" > "$CANDLE_BASE/.webthings/etc/default/locale"
   		fi
     fi
     rm /etc/default/locale
-    ln -s /home/pi/.webthings/etc/default/locale /etc/default/locale
+    ln - "$CANDLE_BASE/.webthings/etc/default/locale" /etc/default/locale
 fi
 
 
@@ -3305,11 +3308,11 @@ fi
 
 if [ -d /usr/local/share/nmap ]; then
 
-	mv /usr/local/share/nmap /home/pi/.webthings/etc/
-	mkdir -p /home/pi/.webthings/etc/nmap/scripts
+	mv /usr/local/share/nmap "$CANDLE_BASE/.webthings/etc/"
+	mkdir -p "$CANDLE_BASE/.webthings/etc/nmap/scripts"
 	#mv /usr/share/nmap/scripts/* /home/pi/.webthings/etc/nmap/scripts/
-	chown -R pi:pi /home/pi/.webthings/etc/nmap/scripts
-	ln -s /home/pi/.webthings/etc/nmap /usr/local/share/nmap
+	chown -R pi:pi "$CANDLE_BASE/.webthings/etc/nmap/scripts"
+	ln -s "$CANDLE_BASE/.webthings/etc/nmap /usr/local/share/nmap"
 fi
 
 
@@ -3607,12 +3610,12 @@ cd $CANDLE_BASE
 #fi
 
 
-if [ ! -f /home/pi/webthings/gateway/run-app.sh ] && [ -f /home/pi/webthings/gateway/candle_controller.sh ]; then
-	ln -s /home/pi/webthings/gateway/candle_controller.sh /home/pi/webthings/gateway/run-app.sh
+if [ ! -f "$CANDLE_BASE/webthings/gateway/run-app.sh" ] && [ -f "$CANDLE_BASE/webthings/gateway/candle_controller.sh" ]; then
+	ln -s "$CANDLE_BASE/webthings/gateway/candle_controller.sh" "$CANDLE_BASE/webthings/gateway/run-app.sh"
 fi
 
-if [ ! -f /home/pi/webthings/gateway/candle_controller.sh ] && [ -f /home/pi/webthings/gateway/run-app.sh ]; then
-	ln -s /home/pi/webthings/gateway/run-app.sh /home/pi/webthings/gateway/candle_controller.sh
+if [ ! -f "$CANDLE_BASE/webthings/gateway/candle_controller.sh" ] && [ -f "$CANDLE_BASE/webthings/gateway/run-app.sh" ]; then
+	ln -s "$CANDLE_BASE/webthings/gateway/run-app.sh" "$CANDLE_BASE/webthings/gateway/candle_controller.sh"
 fi
 
 
@@ -3675,7 +3678,7 @@ find /tmp -type f -atime +10 -delete
 # SAVE STATE OF INSTALLED PACKAGES
 
 # Generate file that can be used to re-install this exact combination of Python packages's versions
-pip3 list --format=freeze > /home/pi/candle/candle_requirements.txt
+pip3 list --format=freeze > "$CANDLE_BASE/candle/candle_requirements.txt"
 
 # Create file that simply lists the installed packages and their versions
 #apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > /home/pi/candle/candle_packages.txt
@@ -3691,19 +3694,19 @@ pip3 list --format=freeze > /home/pi/candle/candle_requirements.txt
 
 
 
-if [ -f /home/pi/create_latest_candle_dev.sh ]; then
+if [ -f "$CANDLE_BASE/create_latest_candle_dev.sh" ]; then
     echo "removing old create_latest_candle_dev.sh script"
-    rm /home/pi/create_latest_candle_dev.sh
+    rm "$CANDLE_BASE/create_latest_candle_dev.sh"
 fi
 
-if [ -f /home/pi/recovery.img ]; then
+if [ -f "$CANDLE_BASE/recovery.img" ]; then
     echo "removing old recovery.img file"
-    rm /home/pi/recovery.img
+    rm "$CANDLE_BASE/recovery.img"
 fi
 
-if [ -f /home/pi/prepare_for_disk_image.sh ]; then
+if [ -f "$CANDLE_BASE/prepare_for_disk_image.sh" ]; then
     echo "removing old prepare for disk image script"
-    rm /home/pi/prepare_for_disk_image.sh
+    rm "$CANDLE_BASE/prepare_for_disk_image.sh"
 fi
 
 
@@ -3734,10 +3737,10 @@ fi
 sysctl -w vm.swappiness=0
 
 
-if [ -f /home/pi/.webthings/swap ]; then
+if [ -f "$CANDLE_BASE/.webthings/swap" ]; then
     # TODO: don't remove this if the system is low on memory (which is why it's there in the first place)
-    swapoff /home/pi/.webthings/swap
-    rm /home/pi/.webthings/swap
+    swapoff "$CANDLE_BASE/.webthings/swap"
+    rm "$CANDLE_BASE/.webthings/swap"
 fi
 if [ -f /var/swap ]; then
     echo "Candle: removing swap" >> /dev/kmsg
@@ -3750,18 +3753,18 @@ fi
 echo "Clearing tmp"
 rm -rf /tmp/*
 
-if [ -f /home/pi/.wget-hsts ]; then
-    rm /home/pi/.wget-hsts
+if [ -f "$CANDLE_BASE/.wget-hsts" ]; then
+    rm "$CANDLE_BASE/.wget-hsts"
 fi
 
 # TODO: is deleting this a good idea? Won't chromium just recreate it, this time without any modifications?
-if [ -d /home/pi/.config/chromium ]; then
-    rm -rf /home/pi/.config/chromium
+if [ -d "$CANDLE_BASE/.config/chromium" ]; then
+    rm -rf "$CANDLE_BASE/.config/chromium"
 fi
 
-if [ -f /home/pi/.config/configstore/update-notifier-npm.jso ]; then
-    echo '{"optOut": true,"lastUpdateCheck": 0}' > /home/pi/.config/configstore/update-notifier-npm.json 
-    chown pi:pi /home/pi/.config/configstore/update-notifier-npm.json 
+if [ -f "$CANDLE_BASE/.config/configstore/update-notifier-npm.json" ]; then
+    echo '{"optOut": true,"lastUpdateCheck": 0}' > "$CANDLE_BASE/.config/configstore/update-notifier-npm.json"
+    chown pi:pi "$CANDLE_BASE/.config/configstore/update-notifier-npm.json"
 fi
 
 # Remove files left over by Windows or MacOS
@@ -3808,13 +3811,13 @@ if [ -n "$(lsblk | grep $MMC_BASE\p3)" ] || [ -n "$(lsblk | grep $MMC_BASE\p4)" 
         echo "ERROR, $BOOT_DIR/fstab3.bak and $BOOT_DIR/fstab4.bak do not exist" >> $BOOT_DIR/candle_log.txt
     fi
 
-    if [ -d /home/pi/.webthings/etc/wpa_supplicant ] \
-    && [ -d /home/pi/.webthings/var/lib/bluetooth ] \
-    && [ -d /home/pi/.webthings/etc/ssh ] \
-    && [ -f /home/pi/.webthings/etc/hostname ] \
-    && [ -d /home/pi/.webthings/tmp ] \
-    && [ -d /home/pi/.webthings/arduino/.arduino15 ] \
-    && [ -d /home/pi/.webthings/arduino/Arduino ];
+    if [ -d "$CANDLE_BASE/.webthings/etc/wpa_supplicant" ] \
+    && [ -d "$CANDLE_BASE/.webthings/var/lib/bluetooth" ] \
+    && [ -d "$CANDLE_BASE/.webthings/etc/ssh" ] \
+    && [ -f "$CANDLE_BASE/.webthings/etc/hostname" ] \
+    && [ -d "$CANDLE_BASE/.webthings/tmp" ] \
+    && [ -d "$CANDLE_BASE/.webthings/arduino/.arduino15" ] \
+    && [ -d "$CANDLE_BASE/.webthings/arduino/Arduino" ];
     then
         echo
         echo "COPYING FSTAB FILE"
@@ -3847,9 +3850,9 @@ if [ -n "$(lsblk | grep $MMC_BASE\p3)" ] || [ -n "$(lsblk | grep $MMC_BASE\p4)" 
             echo "Candle: copying 4 partition version of fstab" >> /dev/kmsg
             echo "Candle: copying 4 partition version of fstab" >> $BOOT_DIR/candle_log.txt
         
-            if ! diff -q /home/pi/configuration-files/boot/firmware/fstab4.bak /etc/fstab &>/dev/null; then
+            if ! diff -q "$CANDLE_BASE/configuration-files/boot/firmware/fstab4.bak" /etc/fstab &>/dev/null; then
                 echo "fstab file is different, copying it"
-                cp --verbose /home/pi/configuration-files/boot/firmware/fstab4.bak /etc/fstab
+                cp --verbose "$CANDLE_BASE/configuration-files/boot/firmware/fstab4.bak" /etc/fstab
             else
                 echo "new fstab file is same as the old one, not copying it."
             fi
@@ -3867,10 +3870,10 @@ if [ -n "$(lsblk | grep $MMC_BASE\p3)" ] || [ -n "$(lsblk | grep $MMC_BASE\p4)" 
             echo "Candle: copying 3 partition version of fstab" >> /dev/kmsg
             echo "Candle: copying 3 partition version of fstab" >> $BOOT_DIR/candle_log.txt
         
-            if ! diff -q /home/pi/configuration-files/boot/firmware/fstab3.bak /etc/fstab &>/dev/null; then
+            if ! diff -q /"$CANDLE_BASE/configuration-files/boot/firmware/fstab3.bak" /etc/fstab &>/dev/null; then
                 echo "3 partition fstab file is different, copying it"
                 echo "Candle: 3 partition fstab file is different, copying it" >> /dev/kmsg
-                cp --verbose /home/pi/configuration-files/boot/firmware/fstab3.bak /etc/fstab
+                cp --verbose "$CANDLE_BASE/configuration-files/boot/firmware/fstab3.bak" /etc/fstab
             else
                 echo "new fstab file is same as the old one, not copying it."
                 echo "Candle: new fstab file is same as the old one, not copying it." >> /dev/kmsg
@@ -3894,13 +3897,13 @@ if [ -n "$(lsblk | grep $MMC_BASE\p3)" ] || [ -n "$(lsblk | grep $MMC_BASE\p4)" 
         echo "Candle: ERROR, SOME VITAL MOUNTPOINTS DO NOT EXIST, NOT CHANGING FSTAB" >> $BOOT_DIR/candle_log.txt
         echo ""
     
-        ls /home/pi/.webthings/etc/wpa_supplicant
-        ls /home/pi/.webthings/var/lib/bluetooth
-        ls /home/pi/.webthings/etc/ssh
-        ls /home/pi/.webthings/etc/hostname
-        ls /home/pi/.webthings/tmp
-        ls /home/pi/.webthings/arduino/.arduino15
-        ls /home/pi/.webthings/arduino/Arduino
+        ls "$CANDLE_BASE/.webthings/etc/wpa_supplicant"
+        ls "$CANDLE_BASE/.webthings/var/lib/bluetooth"
+        ls "$CANDLE_BASE/.webthings/etc/ssh"
+        ls "$CANDLE_BASE/.webthings/etc/hostname"
+        ls "$CANDLE_BASE/.webthings/tmp"
+        ls "$CANDLE_BASE/.webthings/arduino/.arduino15"
+        ls "$CANDLE_BASE/.webthings/arduino/Arduino"
     
         echo ""
     
@@ -3910,8 +3913,8 @@ else
 fi
 
 
-echo "Clearing /home/pi/configuration-files"
-rm -rf /home/pi/configuration-files
+echo "Clearing $CANDLE_BASE/configuration-files"
+rm -rf "$CANDLE_BASE/configuration-files"
 
 
 
@@ -3966,8 +3969,8 @@ fi
 
 
 
-if [ -f /home/pi/nohup.out ]; then
-    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+if [ -f "$CANDLE_BASE/nohup.out" ]; then
+    cp "$CANDLE_BASE/nohup.out" $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
 
@@ -4008,7 +4011,7 @@ then
     echo
 
     if [ -f install_candle_controller.sh ]; then
-        chmod +x ./install_candle_controller.sh
+         ./install_candle_controller.sh
         sudo -u pi ./install_candle_controller.sh
         wait
         rm ./install_candle_controller.sh
@@ -4065,8 +4068,8 @@ then
     
     cd $CANDLE_BASE
 
-    if [ -f /home/pi/controller_backup.tar ]; then
-        chown pi:pi /home/pi/controller_backup.tar
+    if [ -f "$CANDLE_BASE/controller_backup.tar" ]; then
+        chown pi:pi "$CANDLE_BASE/controller_backup.tar"
     fi
 	
 fi
@@ -4075,7 +4078,7 @@ if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 	cd $CANDLE_BASE
 
 	echo "gateway" > /etc/hostname
-	echo "gateway" > /home/pi/.webthings/etc/hostname
+	echo "gateway" > "$CANDLE_BASE/.webthings/etc/hostname"
 	# Set gateway as the hostname
 	#if [ ! -e /home/pi/.webthings/etc/hostname ]
 	#then
@@ -4090,13 +4093,13 @@ if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 	#fi
 	
 	# Create hosts file and its symlink
-	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
-		echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-		echo "127.0.0.1	localhost" > /home/pi/.webthings/etc/hosts
-		echo "::1		localhost ip6-localhost ip6-loopback" >> /home/pi/.webthings/etc/hosts
-		echp "ff02::1		ip6-allnodes" >> /home/pi/.webthings/etc/hosts
-		echo "ff02::2		ip6-allrouters" >> /home/pi/.webthings/etc/hosts
-		echo "127.0.1.1	gateway" >> /home/pi/.webthings/etc/hosts
+	if [ ! -f "$CANDLE_BASE/.webthings/etc/hosts" ]; then
+		echo "$CANDLE_BASE/.webthings/etc/hosts did not exist, generating it now"
+		echo "127.0.0.1	localhost" > "$CANDLE_BASE/.webthings/etc/hosts"
+		echo "::1		localhost ip6-localhost ip6-loopback" >> "$CANDLE_BASE/.webthings/etc/hosts"
+		echp "ff02::1		ip6-allnodes" >> "$CANDLE_BASE/.webthings/etc/hosts"
+		echo "ff02::2		ip6-allrouters" >> "$CANDLE_BASE/.webthings/etc/hosts"
+		echo "127.0.1.1	gateway" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		
 #cat >/home/pi/.webthings/etc/hosts <<EOL
 #127.0.0.1	localhost
@@ -4111,7 +4114,7 @@ if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 else
 
 	echo "candle" > /etc/hostname
-	echo "candle" > /home/pi/.webthings/etc/hostname
+	echo "candle" > "$CANDLE_BASE/.webthings/etc/hostname"
 		
 	# Set candle as the hostname
 	#if [ ! -e /home/pi/.webthings/etc/hostname ]
@@ -4126,13 +4129,13 @@ else
 	#	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
 	#fi
 	# Create hosts file and its symlink
-	if [ ! -f /home/pi/.webthings/etc/hosts ]; then
-		echo "/home/pi/.webthings/etc/hosts did not exist, generating it now"
-		echo "127.0.0.1	localhost" > /home/pi/.webthings/etc/hosts
-		echo "::1		localhost ip6-localhost ip6-loopback" >> /home/pi/.webthings/etc/hosts
-		echp "ff02::1		ip6-allnodes" >> /home/pi/.webthings/etc/hosts
-		echo "ff02::2		ip6-allrouters" >> /home/pi/.webthings/etc/hosts
-		echo "127.0.1.1	candle" >> /home/pi/.webthings/etc/hosts
+	if [ ! -f "$CANDLE_BASE/.webthings/etc/hosts" ]; then
+		echo "$CANDLE_BASE/.webthings/etc/hosts did not exist, generating it now"
+		echo "127.0.0.1	localhost" > "$CANDLE_BASE/.webthings/etc/hosts"
+		echo "::1		localhost ip6-localhost ip6-loopback" >> "$CANDLE_BASE/.webthings/etc/hosts"
+		echp "ff02::1		ip6-allnodes" >> "$CANDLE_BASE/.webthings/etc/hosts"
+		echo "ff02::2		ip6-allrouters" >> "$CANDLE_BASE/.webthings/etc/hosts"
+		echo "127.0.1.1	candle" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		
 		#echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
 #		cat >/home/pi/.webthings/etc/hosts <<EOL
@@ -4147,25 +4150,25 @@ fi
 
 
 
-if [ -f /home/pi/.webthings/etc/hosts ]; then
+if [ -f "$CANDLE_BASE/.webthings/etc/hosts" ]; then
 	if [ ! -L /etc/hosts ]; then
-    	echo "removing /etc/hosts and creating a symlink to /home/pi/.webthings/etc/hosts instead"
+    	echo "removing /etc/hosts and creating a symlink to $CANDLE_BASE/.webthings/etc/hosts instead"
     	rm /etc/hosts
-    	ln -s /home/pi/.webthings/etc/hosts /etc/hosts
+    	ln -s "$CANDLE_BASE/.webthings/etc/hosts" /etc/hosts
 	else
 		echo "/etc/hosts was already a symlink to .webthings/etc/hosts"
 	fi
 else
-	echo "ERROR, /home/pi/.webthings/etc/hosts did not exist"
+	echo "ERROR, $CANDLE_BASE/.webthings/etc/hosts did not exist"
 fi
 
 
-if [ -e /home/pi/webthings/gateway/static/images/floorplan.svg ];
+if [ -e "$CANDLE_BASE/webthings/gateway/static/images/floorplan.svg" ];
 then
-    cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/floorplan.svg
-    chown pi:pi /home/pi/.webthings/floorplan.svg
-    mkdir -p /home/pi/.webthings/uploads
-    cp /home/pi/webthings/gateway/static/images/floorplan.svg /home/pi/.webthings/uploads/floorplan.svg
+    cp "$CANDLE_BASE/webthings/gateway/static/images/floorplan.svg" "$CANDLE_BASE/.webthings/floorplan.svg"
+    chown pi:pi "$CANDLE_BASE/.webthings/floorplan.svg"
+    mkdir -p "$CANDLE_BASE/.webthings/uploads"
+    cp "$CANDLE_BASE/webthings/gateway/static/images/floorplan.svg" "$CANDLE_BASE/.webthings/uploads/floorplan.svg"
 else
     echo 
     echo "WARNING: missing floorplan"
@@ -4726,10 +4729,14 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
     
     if [[ -n "${CREATE_DISK_IMAGE}" ]] || [ "$CREATE_DISK_IMAGE" = yes ]; 
     then
-        echo "CREATING DISK IMAGE"
-        echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
-        chmod +x /home/pi/candle/prepare_for_disk_image.sh 
-        /home/pi/candle/prepare_for_disk_image.sh 
+		if [ -f "$CANDLE_BASE/candle/prepare_for_disk_image.sh" ]; then
+	        echo "CREATING DISK IMAGE"
+	        echo "Candle: calling prepare_for_disk_image.sh" >> /dev/kmsg
+	        chmod +x "$CANDLE_BASE/candle/prepare_for_disk_image.sh"
+	        "$CANDLE_BASE/candle/prepare_for_disk_image.sh"
+		else
+			echo "ERROR, $CANDLE_BASE/candle/prepare_for_disk_image.sh is missing"
+		fi
 		
         exit 0
   
@@ -4753,7 +4760,7 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
             echo "Candle: downloading all .deb files" >> /dev/kmsg
         
 
-            cd $CANDLE_BASE/.webthings/deb_packages
+            cd "$CANDLE_BASE/.webthings/deb_packages"
             chmod +x ./candle_packages_downloader.sh
             sudo -u pi ./candle_packages_downloader.sh
         
@@ -4761,9 +4768,9 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
             # for f in *; do mv "$f" "${f//%3a/:}"; done
   
             echo
-            echo "Downloaded packages in /home/pi/.webthings/deb_packages:"
+            echo "Downloaded packages in $CANDLE_BASE/.webthings/deb_packages:"
             ls -l
-            du /home/pi/.webthings/deb_packages -h
+            du "$CANDLE_BASE/.webthings/deb_packages" -h
         
         fi
     
@@ -4777,7 +4784,7 @@ if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
         echo "MOSTLY DONE"
         echo
         echo "To finalize enter this command:"
-        echo "sudo /home/pi/prepare_for_disk_image.sh"
+        echo "sudo $CANDLE_BASE/prepare_for_disk_image.sh"
         echo
         echo "Once that script is done the pi will shut down and can be imaged."
         echo
