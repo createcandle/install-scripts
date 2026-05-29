@@ -105,7 +105,7 @@ diskutil list
 # Then make sure the SD card is not mounted:
 sudo diskutil unmountDisk /dev/disk4
 
-# Finally, clone to SD card straight into a zipped disk image
+# Finally, clone the SD card directly to a zipped disk image:
 sudo dd conv=sparse if=/dev/disk4 bs=2048 | gzip -c > Candle_64bit_3.0.0.img.zip
 
 ```
