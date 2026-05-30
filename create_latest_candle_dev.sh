@@ -4032,6 +4032,7 @@ then
     echo
 
     if [ -f install_candle_controller.sh ]; then
+		chmod +x ./install_candle_controller.sh
         sudo -u pi ./install_candle_controller.sh
         wait
         rm ./install_candle_controller.sh
