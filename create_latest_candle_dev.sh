@@ -3449,7 +3449,8 @@ if [ ! -f /usr/local/bin/libimobiledevice-1.0.so ]; then
 	apt install -y libcurl4-openssl-dev
 	mkdir -p ~/build
 	git clone https://github.com/createcandle/raspi-libimobiledevice.git
-	
+
+	echo "building libimobiledevice..."
 	./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh > /dev/null
 	
 	rm -rf ~/build
