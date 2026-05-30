@@ -3034,17 +3034,17 @@ fi
 
 # make libffi.so.6 "available" for python (voco) by linking to the newer version
 if [ -d /usr/lib/aarch64-linux-gnu ]; then
-  if [ ! -f /usr/lib/aarch64-linux-gnu/libffi.so.6 ] && [ -f /usr/lib/aarch64-linux-gnu/libffi.so.7 ]; then
+  if [ ! -e /usr/lib/aarch64-linux-gnu/libffi.so.6 ] && [ -f /usr/lib/aarch64-linux-gnu/libffi.so.7 ]; then
     if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.6 ]; then
       echo "creating symlink for  libffi.so.6 -> libffi.so.7"
       ln -s /usr/lib/aarch64-linux-gnu/libffi.so.7 /usr/lib/aarch64-linux-gnu/libffi.so.6
     fi
-  elif [ ! -f /usr/lib/aarch64-linux-gnu/libffi.so.6 ] && [ -f /usr/lib/aarch64-linux-gnu/libffi.so.8 ]; then
+  elif [ ! -e /usr/lib/aarch64-linux-gnu/libffi.so.6 ] && [ -f /usr/lib/aarch64-linux-gnu/libffi.so.8 ]; then
     if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.6 ]; then
       echo "creating symlink for  libffi.so.6 -> libffi.so.8"
       ln -s /usr/lib/aarch64-linux-gnu/libffi.so.8 /usr/lib/aarch64-linux-gnu/libffi.so.6
     fi
-	if [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.7 ]; then
+	if [ -f /usr/lib/aarch64-linux-gnu/libffi.so.7 ] && [ ! -L /usr/lib/aarch64-linux-gnu/libffi.so.7 ] && [ ! -e /usr/lib/aarch64-linux-gnu/libffi.so.6 ]; then
       echo "creating symlink for  libffi.so.6 -> libffi.so.7"
       ln -s /usr/lib/aarch64-linux-gnu/libffi.so.7 /usr/lib/aarch64-linux-gnu/libffi.so.6
     fi
