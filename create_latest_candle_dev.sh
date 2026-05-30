@@ -3525,6 +3525,8 @@ nmcli connection modify "$OLD_ETHERNET_NAME" connection.id "Wired connection"
 echo "Was the eth0 interface succesfully changed to the name 'Wired connection'?"
 nmcli c s
 
+nmcli radio wifi off
+
 
 if ip link show | grep -q "wlan0:" ; then
 	echo "Disabling WiFI power save"
