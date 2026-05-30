@@ -4586,18 +4586,10 @@ then
     echo
 
 	if [ -f "$CANDLE_BASE/candle/debug.sh" ]; then
+		chmod +x "$CANDLE_BASE/candle/debug.sh"
 		"$CANDLE_BASE/candle/debug.sh" > $BOOT_DIR/debug.txt
 	fi
 	
-    if [ -f $BOOT_DIR/candle_first_run_complete.txt ]; then
-        $CANDLE_BASE/candle/debug.sh > $BOOT_DIR/debug.txt
-
-        echo "" >> $BOOT_DIR/debug.txt
-        echo "THIS DEBUG OUTPUT WAS CREATED AT THE END OF THE DISK IMAGE CREATION PROCESS" >> $BOOT_DIR/debug.txt
-        cat $BOOT_DIR/debug.txt
-        echo "Candle: DONE. Debug output placed in $BOOT_DIR/debug.txt" >> /dev/kmsg
-    fi
-
     echo
     echo
    
