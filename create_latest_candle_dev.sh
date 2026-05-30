@@ -3450,7 +3450,7 @@ if [ ! -f /usr/local/bin/libimobiledevice-1.0.so ]; then
 	mkdir -p ~/build
 	git clone https://github.com/createcandle/raspi-libimobiledevice.git
 	
-	./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh
+	./raspi-libimobiledevice/pi-setup/libimobiledevice/build-all.sh > /dev/null
 	
 	rm -rf ~/build
 	rm -rf ./raspi-libimobiledevice
