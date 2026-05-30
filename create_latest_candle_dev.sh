@@ -4457,16 +4457,16 @@ rfkill unblock all
 
 
 /sbin/iw dev wlan0 interface add uap0 type __ap
-nmcli dev set uap0 managed yes
+#nmcli dev set uap0 managed yes
 
-#sleep 1
-#nmcli dev set uap0 managed no
-#nmcli radio wifi on
-#wpa_cli interface wlan0
-#if [ -f /var/run/wpa_supplicant/uap0 ]; then
-#    echo "Had to delete wpa_supplicant/uap0"
-#	rm /var/run/wpa_supplicant/uap0
-#fi
+sleep 1
+nmcli dev set uap0 managed no
+nmcli radio wifi on
+wpa_cli interface wlan0
+if [ -f /var/run/wpa_supplicant/uap0 ]; then
+    echo "Had to delete wpa_supplicant/uap0"
+	rm /var/run/wpa_supplicant/uap0
+fi
 
 # ADD A BRIDGE FOR MATTER SEGMENTATION
 #nmcli connection add type bridge ifname virbr con-name CandleBridge -- ipv4.method disabled ipv6.method disabled
