@@ -3011,13 +3011,13 @@ if [ ! -f "$CANDLE_BASE/candle/early.sh" ]; then
 fi
 
 # CHMOD THE NEW FILES
-chmod +x  "$CANDLE_BASE/candle/*.sh"
+chmod +x "$CANDLE_BASE/candle/*.sh"
 chmod +x /etc/rc.local
 if [ -f  "$CANDLE_BASE/candle/fbclock_arm64" ]; then
-	chmod +x  "$CANDLE_BASE/candle/fbclock_arm64"
+	chmod +x "$CANDLE_BASE/candle/fbclock_arm64"
 fi
 if [ -f  "$CANDLE_BASE/candle/color_clock" ]; then
-	chmod +x  "$CANDLE_BASE/candle/color_clock"
+	chmod +x "$CANDLE_BASE/candle/color_clock"
 fi
 #chmod +x /home/pi/candle/reboot_to_recovery.sh
 #if [ -f /etc/xdg/openbox/autostart ]; then
