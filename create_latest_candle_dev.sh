@@ -590,6 +590,7 @@ echo
 echo
 
 
+
 # Clean up any files that may be left over to make sure there is enough space
 if [ -f /zero.fill ]; then
   rm /zero.fill
@@ -619,7 +620,21 @@ fi
 #mkdir -p /mnt/ramdrive
 # not compatible with /ro
 
-sleep 3
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo "    IF YOU WANT TO ABORT EARLY, NOW IS THE TIME"
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+sleep 10
+
 cd $CANDLE_BASE
 
 # mandb is not needed, so this effectvely nullifies it
