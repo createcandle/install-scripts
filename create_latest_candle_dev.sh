@@ -108,7 +108,7 @@ fi
 
 scriptname=$(basename "$0")
 
-# TODO: check if all hardcoded references to /home/pi have been switched to use this var instead
+# TODO: check if all hardcoded references to $CANDLE_BASE have been switched to use this var instead
 if [ -d /home/pi ]; then
     CANDLE_BASE="/home/pi"
 else
@@ -529,18 +529,18 @@ then
 		sleep 1
 
 
-		mkdir -p /home/pi/.webthings
+		mkdir -p "$CANDLE_BASE/.webthings"
 		
 
-  		if mountpoint /home/pi/.webthings | grep -q "/home/pi/.webthings is a mountpoint" ; then
+  		if mountpoint "$CANDLE_BASE/.webthings" | grep -q "$CANDLE_BASE/.webthings is a mountpoint" ; then
 		    echo "WARNING, .webthings folder seems to already be a mountpoint"
  		else
-			echo "Mounting /dev/$MMC_BASE p4 to /home/pi/.webthings"
-        	mount "/dev/$MMC_BASE"p4 /home/pi/.webthings
+			echo "Mounting /dev/$MMC_BASE p4 to $CANDLE_BASE/.webthings"
+        	mount "/dev/$MMC_BASE"p4 "$CANDLE_BASE/.webthings"
    		fi
        
-        chown pi:pi /home/pi/.webthings
-		touch /home/pi/.webthings/candle.log
+        chown pi:pi $CANDLE_BASE/.webthings
+		touch $CANDLE_BASE/.webthings/candle.log
     else
         echo "Error, /dev/mmcblk0p4 was missing. Exiting."
         exit
@@ -551,10 +551,10 @@ then
 else
     echo "Partitions seem to already exist"
     echo "Candle: partitions seem to already exist" >> /dev/kmsg
-	if [ ! -f /home/pi/.webthings/candle.log ]; then
-		touch /home/pi/.webthings/candle.log
+	if [ ! -f $CANDLE_BASE/.webthings/candle.log ]; then
+		touch $CANDLE_BASE/.webthings/candle.log
 	fi
-    echo "$(date) - starting create_latest_candle" >> /home/pi/.webthings/candle.log
+    echo "$(date) - starting create_latest_candle" >> $CANDLE_BASE/.webthings/candle.log
     echo "$(date) - starting create_latest_candle" >> $BOOT_DIR/candle_log.txt
 
 fi
@@ -570,17 +570,17 @@ if ls /dev/mmcblk0p4; then
 fi
 
 
-if [ -d /home/pi/.webthings ]; then
+if [ -d $CANDLE_BASE/.webthings ]; then
     echo "OK, .webthings directory exists"
-	chown pi:pi /home/pi/.webthings
-	if [ ! -f /home/pi/.webthings/candle.log ]; then
-		touch /home/pi/.webthings/candle.log
+	chown pi:pi /$CANDLE_BASE/.webthings
+	if [ ! -f $CANDLE_BASE/.webthings/candle.log ]; then
+		touch $CANDLE_BASE/.webthings/candle.log
 	fi
-	chown pi:pi /home/pi/.webthings/candle.log
+	chown pi:pi $CANDLE_BASE/.webthings/candle.log
 else
     echo "WARNING, .webthings directory still did not exist"
-	mkdir -p /home/pi/.webthings
-    chown pi:pi /home/pi/.webthings
+	mkdir -p $CANDLE_BASE/.webthings
+    chown pi:pi $CANDLE_BASE/.webthings
 fi
 
 echo
@@ -596,22 +596,22 @@ if [ -f /zero.fill ]; then
   rm /zero.fill
   echo "Warning, removed /zero.fill"
 fi
-if [ -f /home/pi/.webthings/zero.fill ]; then
-  rm /home/pi/.webthings/zero.fill
-  echo "Warning, removed /home/pi/.webthings/zero.fill"
+if [ -f $CANDLE_BASE/.webthings/zero.fill ]; then
+  rm $CANDLE_BASE/.webthings/zero.fill
+  echo "Warning, removed $CANDLE_BASE/.webthings/zero.fill"
 fi
 
-if [ -d /home/pi/webthings/gateway2 ]; then
-    rm -rf /home/pi/webthings/gateway2
-    echo "Warning, removed /home/pi/webthings/gateway2"
+if [ -d $CANDLE_BASE/webthings/gateway2 ]; then
+    rm -rf $CANDLE_BASE/webthings/gateway2
+    echo "Warning, removed $CANDLE_BASE/webthings/gateway2"
 fi
-if [ -f /home/pi/latest_stable_controller.tar ]; then
-    rm /home/pi/latest_stable_controller.tar
-    echo "Warning, removed /home/pi/latest_stable_controller.tar"
+if [ -f $CANDLE_BASE/latest_stable_controller.tar ]; then
+    rm $CANDLE_BASE/latest_stable_controller.tar
+    echo "Warning, removed $CANDLE_BASE/latest_stable_controller.tar"
 fi
-if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
-    rm /home/pi/latest_stable_controller.tar.txt
-    echo "Warning, removed /home/pi/latest_stable_controller.tar.txt"
+if [ -f $CANDLE_BASE/latest_stable_controller.tar.txt ]; then
+    rm $CANDLE_BASE/latest_stable_controller.tar.txt
+    echo "Warning, removed $CANDLE_BASE/latest_stable_controller.tar.txt"
 fi
 
 # pre-made mountpoints for mounting user or recovery partition
@@ -659,10 +659,10 @@ else
 		mv "$CANDLE_BASE/.local/state" "$CANDLE_BASE/.webthings/state"
 	fi
 	
-	#if [ -d /home/pi/.local/state/wireplumber ]; then
-	#	cp /home/pi/.local/state/wireplumber/* /home/pi/.webthings/state/wireplumber/
-	#	rm -rf /home/pi/.local/state/wireplumber
-	#	ln -s /home/pi/.webthings/state /home/pi/.local/state
+	#if [ -d $CANDLE_BASE/.local/state/wireplumber ]; then
+	#	cp $CANDLE_BASE/.local/state/wireplumber/* $CANDLE_BASE/.webthings/state/wireplumber/
+	#	rm -rf $CANDLE_BASE/.local/state/wireplumber
+	#	ln -s $CANDLE_BASE/.webthings/state $CANDLE_BASE/.local/state
 	#fi
 	if [ -d "$CANDLE_BASE/.local/state" ]; then
 		echo "move of $CANDLE_BASE/.local/state to ~/.webthings seems to have failed"
@@ -804,7 +804,7 @@ fi
 
 echo ""
 echo "updating /usr/bin/candle_hostname_fix.sh"
-echo -e '#!/bin/bash\nhostname -F /home/pi/.webthings/etc/hostname\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --static\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --transient\nhostnamectl set-hostname $(cat /home/pi/.webthings/etc/hostname) --pretty' > /usr/bin/candle_hostname_fix.sh
+echo -e '#!/bin/bash\nhostname -F $CANDLE_BASE/.webthings/etc/hostname\nhostnamectl set-hostname $(cat $CANDLE_BASE/.webthings/etc/hostname) --static\nhostnamectl set-hostname $(cat $CANDLE_BASE/.webthings/etc/hostname) --transient\nhostnamectl set-hostname $(cat $CANDLE_BASE/.webthings/etc/hostname) --pretty' > /usr/bin/candle_hostname_fix.sh
 chmod +x /usr/bin/candle_hostname_fix.sh
 echo ""
 
@@ -876,8 +876,8 @@ if [ "$BITTYPE" -eq 64 ]; then
     apt update -y && apt install -y screen:armhf
 fi
 
-if [ -f /home/pi/nohup.out ]; then
-    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+if [ -f $CANDLE_BASE/nohup.out ]; then
+    cp $CANDLE_BASE/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
 
@@ -887,7 +887,7 @@ fi
 
 
 
-sed -i 's|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/pi/.local/bin"|' /etc/profile
+sed -i 's|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games"|PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$CANDLE_BASE/.local/bin"|' /etc/profile
 
 if [ -f /etc/systemd/logind.conf ] && cat /etc/systemd/logind.conf | grep -q "#HandlePowerKey=" ; then
 	sed -i 's/#HandlePowerKey=.*/HandlePowerKey=ignore/' /etc/systemd/logind.conf
@@ -995,7 +995,7 @@ if [ "$SKIP_RO" = no ] || [[ -z "${SKIP_RO}" ]]; then
 	else
 	    echo "ERROR: failed to download ro-root.sh"
 	    echo "Candle: ERROR, download of read-only overlay script failed" >> /dev/kmsg
-	    echo "$(date) - download of read-only overlay script failed" >> /home/pi/.webthings/candle.log
+	    echo "$(date) - download of read-only overlay script failed" >> $CANDLE_BASE/.webthings/candle.log
 	    echo "$(date) - download of read-only overlay script failed" >> $BOOT_DIR/candle_log.txt
 	    
 	    # Show error image
@@ -1098,8 +1098,8 @@ then
         echo "WARNING, KERNEL IS UPGRADEABLE" >> $BOOT_DIR/candle_log.txt
     fi
 
- 	if [ -f /home/pi/nohup.out ]; then
-    	cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+ 	if [ -f $CANDLE_BASE/nohup.out ]; then
+    	cp $CANDLE_BASE/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 	fi
     #echo "quickly installing dhcpcd"
     #apt install dhcpcd5 resolvconf -y
@@ -1178,8 +1178,8 @@ then
         echo "Apt upgrade done" >> $BOOT_DIR/candle_log.txt
         echo
 
-		if [ -f /home/pi/nohup.out ]; then
-    		cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+		if [ -f $CANDLE_BASE/nohup.out ]; then
+    		cp $CANDLE_BASE/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 		fi
 
 
@@ -1297,29 +1297,29 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	
 	systemctl stop containerd.service
 	systemctl disable containerd.service
-	mkdir -p /home/pi/.webthings/containerd
+	mkdir -p $CANDLE_BASE/.webthings/containerd
 	if [ -d /var/lib/containerd ]; then
-		cp -R /var/lib/containerd /home/pi/.webthings/containerd
+		cp -R /var/lib/containerd $CANDLE_BASE/.webthings/containerd
 	fi
-	mkdir -p /home/pi/.webthings/containerd/usr
-	mkdir -p /home/pi/.webthings/containerd/usr/lib/cni
-	mkdir -p /home/pi/.webthings/containerd/etc
-	mkdir -p /home/pi/.webthings/containerd/etc/cni
-	mkdir -p /home/pi/.webthings/containerd/etc/nri/conf.d
-	mkdir -p /home/pi/.webthings/containerd/etc/containerd/ocicrypt
-	mkdir -p /home/pi/.webthings/containerd/opt
-	mkdir -p /home/pi/.webthings/containerd/opt/containerd
-	mkdir -p /home/pi/.webthings/containerd/opt/nri/plugins
-	mkdir -p /home/pi/.webthings/containerd/run
-	mkdir -p /home/pi/.webthings/containerd/var/run/nri
-	chown -R root:root /home/pi/.webthings/containerd
+	mkdir -p $CANDLE_BASE/.webthings/containerd/usr
+	mkdir -p $CANDLE_BASE/.webthings/containerd/usr/lib/cni
+	mkdir -p $CANDLE_BASE/.webthings/containerd/etc
+	mkdir -p $CANDLE_BASE/.webthings/containerd/etc/cni
+	mkdir -p $CANDLE_BASE/.webthings/containerd/etc/nri/conf.d
+	mkdir -p $CANDLE_BASE/.webthings/containerd/etc/containerd/ocicrypt
+	mkdir -p $CANDLE_BASE/.webthings/containerd/opt
+	mkdir -p $CANDLE_BASE/.webthings/containerd/opt/containerd
+	mkdir -p $CANDLE_BASE/.webthings/containerd/opt/nri/plugins
+	mkdir -p $CANDLE_BASE/.webthings/containerd/run
+	mkdir -p $CANDLE_BASE/.webthings/containerd/var/run/nri
+	chown -R root:root $CANDLE_BASE/.webthings/containerd
 
 	
 
 	
 	
 	# no longer needed, as config.toml has been added to configuration_files
-	#sed -i 's|root = "/var/lib/containerd"|root = "/home/pi/.webthings/containerd"|g' /etc/containerd/config.toml
+	#sed -i 's|root = "/var/lib/containerd"|root = "$CANDLE_BASE/.webthings/containerd"|g' /etc/containerd/config.toml
 
 	wget https://github.com/containerd/nerdctl/releases/download/v2.2.1/nerdctl-2.2.1-linux-arm64.tar.gz
 	tar xf nerdctl-2.2.1-linux-arm64.tar.gz -C /usr/local/bin
@@ -1327,7 +1327,7 @@ if [ "$SKIP_DOCKER" = no ] || [[ -z "${SKIP_DOCKER}" ]]; then
 	systemctl stop containerd.service
 	systemctl disable containerd.service
 
-	chown -R root:root /home/pi/.webthings/containerd
+	chown -R root:root $CANDLE_BASE/.webthings/containerd
 	rm nerdctl*
 	
 else
@@ -1350,9 +1350,9 @@ echo
 
 
 # Remove old left-over configuration files if they exist
-if [ -d /home/pi/configuration-files ]; then
+if [ -d $CANDLE_BASE/configuration-files ]; then
     echo "Warning, found a left over configuration-files directory"
-    rm -rf /home/pi/configuration-files
+    rm -rf $CANDLE_BASE/configuration-files
 fi
 
 # Download ready-made settings files from the Candle github
@@ -1363,18 +1363,18 @@ if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
     echo "Candle: Starting download of cutting edge configuration files" >> $BOOT_DIR/candle_log.txt
 	if [[ -z "$CONFIGURATION_FILES_BRANCH" ]]; then
 		echo "cloning main configuration-files branch"
-		git clone --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+		git clone --depth 1 https://github.com/createcandle/configuration-files $CANDLE_BASE/configuration-files
 	else
 		echo ""
 		echo "cloning a specific branch of the configuration-files repo: $$CONFIGURATION_FILES_BRANCH"
 		echo ""
-		git clone --branch "$CONFIGURATION_FILES_BRANCH" --depth 1 https://github.com/createcandle/configuration-files /home/pi/configuration-files
+		git clone --branch "$CONFIGURATION_FILES_BRANCH" --depth 1 https://github.com/createcandle/configuration-files $CANDLE_BASE/configuration-files
 	fi
     
-    if [ -d /home/pi/configuration-files ]; then
-        rm /home/pi/configuration-files/LICENSE
-        rm /home/pi/configuration-files/README.md
-        rm -rf /home/pi/configuration-files/.git
+    if [ -d $CANDLE_BASE/configuration-files ]; then
+        rm $CANDLE_BASE/configuration-files/LICENSE
+        rm $CANDLE_BASE/configuration-files/README.md
+        rm -rf $CANDLE_BASE/configuration-files/.git
     fi
     
 else
@@ -1405,12 +1405,12 @@ fi
 
 
 # Check if download succeeded
-if [ ! -d /home/pi/configuration-files ]; then
+if [ ! -d $CANDLE_BASE/configuration-files ]; then
     echo 
     echo "ERROR, failed to download latest configuration files"
     echo "Candle: ERROR, failed to download latest configuration files" >> /dev/kmsg
     echo "$(date) - failed to download latest configuration files" >> $BOOT_DIR/candle_log.txt
-    echo "$(date) - failed to download latest configuration files" >> /home/pi/.webthings/candle.log
+    echo "$(date) - failed to download latest configuration files" >> $CANDLE_BASE/.webthings/candle.log
     echo "$(date) - failed to download latest configuration files" >> $BOOT_DIR/candle_log.txt
     echo
     
@@ -1434,7 +1434,7 @@ if [ -f "$CANDLE_BASE/nohup.out" ]; then
 fi
 
 
-# avoid ERROR: Could not install packages due to an OSError: [Errno 13] Permission denied: '/home/pi/.local/lib'
+# avoid ERROR: Could not install packages due to an OSError: [Errno 13] Permission denied: '$CANDLE_BASE/.local/lib'
 if [ ! -d "$CANDLE_BASE/.local/lib" ]; then
 	mkdir -p "$CANDLE_BASE/.local/lib"
 fi
@@ -1459,8 +1459,8 @@ then
     echo
 
     cd $CANDLE_BASE
-    #rm -rf /home/pi/webthings
-    #rm -rf /home/pi/.webthings # too dangerous
+    #rm -rf $CANDLE_BASE/webthings
+    #rm -rf $CANDLE_BASE/.webthings # too dangerous
     
     if [ -f $BOOT_DIR/candle_cutting_edge.txt ]; then
         echo "Candle: Starting download of cutting edge controller install script"
@@ -1497,30 +1497,30 @@ then
             echo "warning, latest_stable_controller.tar already existed. Removing."
             rm "$CANDLE_BASE/latest_stable_controller.tar"
         fi
-        if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
+        if [ -f $CANDLE_BASE/latest_stable_controller.tar.txt ]; then
             echo "warning, latest_stable_controller.tar.txt already existed. Removing."
-            rm /home/pi/latest_stable_controller.tar.txt
+            rm $CANDLE_BASE/latest_stable_controller.tar.txt
         fi
         
         echo "Candle: Starting download of stable controller tar"
         echo "Candle: Starting download of stable controller tar. Takes a while." >> /dev/kmsg
         echo "Candle: Starting download of stable controller tar" >> $BOOT_DIR/candle_log.txt
-        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O /home/pi/latest_stable_controller.tar --retry-connrefused 
-        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O /home/pi/latest_stable_controller.tar.txt --retry-connrefused 
+        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar -O $CANDLE_BASE/latest_stable_controller.tar --retry-connrefused 
+        wget -nv https://www.candlesmarthome.com/img/controller/latest_stable_controller.tar.txt -O $CANDLE_BASE/latest_stable_controller.tar.txt --retry-connrefused 
         
-        if [ -f /home/pi/latest_stable_controller.tar ] && [ -f /home/pi/latest_stable_controller.tar.txt ]; then
+        if [ -f $CANDLE_BASE/latest_stable_controller.tar ] && [ -f $CANDLE_BASE/latest_stable_controller.tar.txt ]; then
             
             echo "controller tar and md5 downloaded OK"
             echo "Candle: controller tar and md5 downloaded OK" >> /dev/kmsg
             echo "Candle: controller tar and md5 downloaded OK" >> $BOOT_DIR/candle_log.txt
             
-            if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat /home/pi/latest_stable_controller.tar.txt)" ]; then
+            if [ "$(md5sum latest_stable_controller.tar | awk '{print $1}')"  = "$(cat $CANDLE_BASE/latest_stable_controller.tar.txt)" ]; then
                 echo "MD5 checksum of latest_stable_controller.tar matched"
                 
-                chown pi:pi /home/pi/latest_stable_controller.tar
+                chown pi:pi $CANDLE_BASE/latest_stable_controller.tar
                 
-                if [ -f /home/pi/controller_backup_fresh.tar ]; then
-                    rm /home/pi/controller_backup_fresh.tar
+                if [ -f $CANDLE_BASE/controller_backup_fresh.tar ]; then
+                    rm $CANDLE_BASE/controller_backup_fresh.tar
                 fi
                 
             else
@@ -1528,11 +1528,11 @@ then
                 echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> /dev/kmsg
                 echo "Candle: Error, MD5 checksum of latest_stable_controller.tar did not match, bad download?" >> $BOOT_DIR/candle_log.txt
                 
-                if [ -f /home/pi/latest_stable_controller.tar ]; then
-                    rm /home/pi/latest_stable_controller.tar
+                if [ -f $CANDLE_BASE/latest_stable_controller.tar ]; then
+                    rm $CANDLE_BASE/latest_stable_controller.tar
                 fi
-                if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
-                    rm /home/pi/latest_stable_controller.tar.txt
+                if [ -f $CANDLE_BASE/latest_stable_controller.tar.txt ]; then
+                    rm $CANDLE_BASE/latest_stable_controller.tar.txt
                 fi
                 
                 # Show error image
@@ -1552,11 +1552,11 @@ then
             echo "Candle: Error, download of stable controller tar or md5 failed. Aborting." >> /dev/kmsg
             echo "$(date) - download of stable controller tar or md5 failed. Aborting." >> $BOOT_DIR/candle_log.txt
             
-            if [ -f /home/pi/latest_stable_controller.tar ]; then
-                rm /home/pi/latest_stable_controller.tar
+            if [ -f $CANDLE_BASE/latest_stable_controller.tar ]; then
+                rm $CANDLE_BASE/latest_stable_controller.tar
             fi
-            if [ -f /home/pi/latest_stable_controller.tar.txt ]; then
-                rm /home/pi/latest_stable_controller.tar.txt
+            if [ -f $CANDLE_BASE/latest_stable_controller.tar.txt ]; then
+                rm $CANDLE_BASE/latest_stable_controller.tar.txt
             fi
             
             # Show error image
@@ -1580,7 +1580,7 @@ then
         echo "ERROR, missing install_candle_controller.sh file"
         echo "Candle: ERROR, missing install_candle_controller.sh file. Aborting." >> /dev/kmsg
         echo "$(date) - Failed to download install_candle_controller script" >> $BOOT_DIR/candle_log.txt
-        echo "$(date) - Failed to download install_candle_controller script" >> /home/pi/.webthings/candle.log
+        echo "$(date) - Failed to download install_candle_controller script" >> $CANDLE_BASE/.webthings/candle.log
         echo
     
         # Show error image
@@ -1598,8 +1598,8 @@ then
     
 fi
 
-if [ -f /home/pi/nohup.out ]; then
-    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+if [ -f $CANDLE_BASE/nohup.out ]; then
+    cp $CANDLE_BASE/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
 
@@ -1687,8 +1687,8 @@ then
     
 fi
 
-if [ -f /home/pi/nohup.out ]; then
-    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+if [ -f $CANDLE_BASE/nohup.out ]; then
+    cp $CANDLE_BASE/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
 
@@ -1812,16 +1812,16 @@ then
 	usermod -aG pipewire pi
 
     if [ -e /usr/share/pipewire ]; then
-		mkdir -p /home/pi/.config/wireplumber/main.lua.d
-		chown -R pi:pi /home/pi/.config/wireplumber/main.lua.d
+		mkdir -p $CANDLE_BASE/.config/wireplumber/main.lua.d
+		chown -R pi:pi $CANDLE_BASE/.config/wireplumber/main.lua.d
 		
-		mkdir -p /home/pi/.config/wireplumber/wireplumber.conf.d
-		chown -R pi:pi /home/pi/.config/wireplumber/wireplumber.conf.d
+		mkdir -p $CANDLE_BASE/.config/wireplumber/wireplumber.conf.d
+		chown -R pi:pi $CANDLE_BASE/.config/wireplumber/wireplumber.conf.d
 		
-		mkdir -p /home/pi/.webthings/etc
-		mkdir -p /home/pi/.webthings/etc/pipewire
-	    cp -r /usr/share/pipewire/* /home/pi/.webthings/etc/pipewire/
-		ln -s /home/pi/.webthings/etc/pipewire /etc/pipewire 
+		mkdir -p $CANDLE_BASE/.webthings/etc
+		mkdir -p $CANDLE_BASE/.webthings/etc/pipewire
+	    cp -r /usr/share/pipewire/* $CANDLE_BASE/.webthings/etc/pipewire/
+		ln -s $CANDLE_BASE/.webthings/etc/pipewire /etc/pipewire 
 		#systemctl --user enable pipewire
 
 		# TODO: It seems these commands no not work:
@@ -1883,8 +1883,8 @@ then
 	systemctl disable dnsmasq.service
 	
 
- 	if [ -f /home/pi/nohup.out ]; then
-    	cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+ 	if [ -f $CANDLE_BASE/nohup.out ]; then
+    	cp $CANDLE_BASE/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 	fi
 
     
@@ -2206,7 +2206,7 @@ then
             else
                 echo
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> /dev/kmsg
-                #echo "Candle: ERROR, $i package still did not install. Aborting..." >> /home/pi/.webthings/candle.log
+                #echo "Candle: ERROR, $i package still did not install. Aborting..." >> $CANDLE_BASE/.webthings/candle.log
                 echo "Candle: ERROR, $i package still did not install. Aborting..." >> $BOOT_DIR/candle_log.txt
                 dpkg -s "$i"
                 
@@ -2239,8 +2239,8 @@ echo
 echo "Most packages are now installed"
 echo
 
-if [ -f /home/pi/nohup.out ]; then
-    cp /home/pi/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
+if [ -f $CANDLE_BASE/nohup.out ]; then
+    cp $CANDLE_BASE/nohup.out $BOOT_DIR/candle_INSTALL_LOG.txt
 fi
 
 
@@ -2288,13 +2288,12 @@ wait
 
 #echo "checking if $CANDLE_BASE/.local/bin exists"
 
-#PATH=$PATH:/home/pi/.local/bin
 if [ -d "$CANDLE_BASE/.local/bin" ]; then
     echo "could add to path here"
 	#echo "Adding $CANDLE_BASE/.local/bin to path var"
     #[[ ":$PATH:" != *":$CANDLE_BASE/.local/bin:"* ]] && PATH="$CANDLE_BASE/.local/bin:${PATH}"
 else
-    echo "WARNING, /home/pi/.local/bin does not exist"
+    echo "WARNING, $CANDLE_BASE/.local/bin does not exist"
 fi
 
 
@@ -2562,25 +2561,24 @@ then
     then
         cd seeed-voicecard
 	
-        if ! [ -f /home/pi/candle/installed_respeaker_version.txt ]
+        if ! [ -f $CANDLE_BASE/candle/installed_respeaker_version.txt ]
         then
-            mkdir -p /home/pi/candle
-            #touch /home/pi/candle/installed_respeaker_version.txt
-            cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+            mkdir -p $CANDLE_BASE/candle
+            cp ./dkms.conf $CANDLE_BASE/candle/installed_respeaker_version.txt
         fi
 	
         if [ -d "/etc/voicecard" ] && [ -f /bin/seeed-voicecard ]
         then
             echo "ReSpeaker was already installed"
 	
-            if ! diff -q ./dkms.conf /home/pi/candle/installed_respeaker_version.txt &>/dev/null
+            if ! diff -q ./dkms.conf $CANDLE_BASE/candle/installed_respeaker_version.txt &>/dev/null
             then
                 echo "ReSpeaker has an updated version!"
                 echo "ReSpeaker has an updated version! Attempting to install" >> /dev/kmsg
                 echo "ReSpeaker has an updated version! Attempting to install" >> $BOOT_DIR/candle_log.txt
                 ./uninstall.sh
                 echo -e 'N\n' | ./install.sh
-                cp ./dkms.conf /home/pi/candle/installed_respeaker_version.txt
+                cp ./dkms.conf $CANDLE_BASE/candle/installed_respeaker_version.txt
             else
                 echo "not a new respeaker version" >> /dev/kmsg
             fi
@@ -2824,26 +2822,26 @@ systemctl stop triggerhappy.service
 cd "$CANDLE_BASE"
 
 # Make folders that should be owned by Pi user
-mkdir -p /home/pi/Arduino
-chown -R pi:pi /home/pi/Arduino
+mkdir -p $CANDLE_BASE/Arduino
+chown -R pi:pi $CANDLE_BASE/Arduino
 
-mkdir /home/pi/.arduino15
-chown pi:pi /home/pi/.arduino15
+mkdir $CANDLE_BASE/.arduino15
+chown pi:pi $CANDLE_BASE/.arduino15
 
-mkdir -p /home/pi/.webthings/arduino/.arduino15
-mkdir -p /home/pi/.webthings/arduino/Arduino
-chown -R pi:pi /home/pi/.webthings/arduino
+mkdir -p $CANDLE_BASE/.webthings/arduino/.arduino15
+mkdir -p $CANDLE_BASE/.webthings/arduino/Arduino
+chown -R pi:pi $CANDLE_BASE/.webthings/arduino
 
-touch /home/pi/.webthings/candle.log
-chown pi:pi /home/pi/.webthings/candle.log
+touch $CANDLE_BASE/.webthings/candle.log
+chown pi:pi $CANDLE_BASE/.webthings/candle.log
 
-if [ ! -d /home/pi/.webthings/etc ]; then
-    mkdir -p /home/pi/.webthings/etc
-    chown pi:pi /home/pi/.webthings/etc
+if [ ! -d $CANDLE_BASE/.webthings/etc ]; then
+    mkdir -p $CANDLE_BASE/.webthings/etc
+    chown pi:pi $CANDLE_BASE/.webthings/etc
 fi
 
-mkdir -p /home/pi/candle
-chown pi:pi /home/pi/candle
+mkdir -p $CANDLE_BASE/candle
+chown pi:pi $CANDLE_BASE/candle
 
 mkdir -p /var/run/mosquitto/
 chown mosquitto: /var/run/mosquitto
@@ -2857,40 +2855,33 @@ chown -R mosquitto:mosquitto /var/log/mosquitto
 #adduser -S -u 1883 -D -H -h /var/empty -s /sbin/nologin -G mosquitto -g mosquitto mosquitto 2>/dev/null && \
 
 # Make folders that should be owned by root
-mkdir -p /home/pi/.webthings/var/lib/bluetooth
-mkdir -p /home/pi/.webthings/var/lib/NetworkManager
-mkdir -p /home/pi/.webthings/etc/wpa_supplicant
+mkdir -p $CANDLE_BASE/.webthings/var/lib/bluetooth
+mkdir -p $CANDLE_BASE/.webthings/var/lib/NetworkManager
+mkdir -p $CANDLE_BASE/.webthings/etc/wpa_supplicant
 
-mkdir -p /home/pi/.webthings/etc/ssh
+mkdir -p $CANDLE_BASE/.webthings/etc/ssh
 
-mkdir -p /home/pi/.webthings/etc/NetworkManager/
-cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
+mkdir -p $CANDLE_BASE/.webthings/etc/NetworkManager/
+cp -r /etc/NetworkManager/* $CANDLE_BASE/.webthings/etc/NetworkManager/
 
 #echo "Candle: moving and copying directories so fstab works" >> /dev/kmsg
 
 
 
 
-if [ ! -d /home/pi/.webthings/tmp ]; then
-    mkdir -p /home/pi/.webthings/tmp
+if [ ! -d $CANDLE_BASE/.webthings/tmp ]; then
+    mkdir -p $CANDLE_BASE/.webthings/tmp
     rm -rf /tmp/*
     echo "cleared tmp contents"
     ls -l -a /tmp
-    cp -r /tmp/* /home/pi/.webthings/tmp
+    cp -r /tmp/* $CANDLE_BASE/.webthings/tmp
 fi
-mkdir -p /home/pi/.webthings/tmp
-chmod 1777 /home/pi/.webthings/tmp
-find /home/pi/.webthings/tmp \
+mkdir -p $CANDLE_BASE/.webthings/tmp
+chmod 1777 $CANDLE_BASE/.webthings/tmp
+find $CANDLE_BASE/.webthings/tmp \
     -mindepth 1 \
     -name '.*-unix' -exec chmod 1777 {} + -prune -o \
     -exec chmod go-rwx {} +
-
-
-# Prepare a location for Matter settings
-#mkdir /home/pi/.webthings/hasdata
-#ln -s /home/pi/.webthings/hasdata /data
-#chown pi:pi /data
-#chown pi:pi /home/pi/.webthings/hasdata
 
 
 # COPY FILES
@@ -2902,74 +2893,70 @@ cd $CANDLE_BASE
 # PREPARE FOR BINDS IN FSTAB
 echo "generating ssh, wpa_supplicant and bluetooth folders on user partition"
 
-mkdir -p /home/pi/.webthings/arduino
-mkdir -p /home/pi/.webthings/arduino/Arduino
-chown -R pi:pi /home/pi/.webthings/arduino/Arduino
-mkdir -p /home/pi/.webthings/arduino/.arduino15
-chown -R pi:pi /home/pi/.webthings/arduino/.arduino15
+mkdir -p $CANDLE_BASE/.webthings/arduino
+mkdir -p $CANDLE_BASE/.webthings/arduino/Arduino
+chown -R pi:pi $CANDLE_BASE/.webthings/arduino/Arduino
+mkdir -p $CANDLE_BASE/.webthings/arduino/.arduino15
+chown -R pi:pi $CANDLE_BASE/.webthings/arduino/.arduino15
 
 
-mkdir -p /home/pi/.webthings/etc/
+mkdir -p $CANDLE_BASE/.webthings/etc/
 
-#cp --verbose -r /etc/ssh /home/pi/.webthings/etc/
-if [ ! -f /home/pi/.webthings/etc/ssh/ssh_config ]; then
-    cp --verbose /etc/ssh/ssh_config /home/pi/.webthings/etc/ssh/ssh_config
-    cp --verbose /etc/ssh/sshd_config /home/pi/.webthings/etc/ssh/sshd_config
+if [ ! -f $CANDLE_BASE/.webthings/etc/ssh/ssh_config ]; then
+    cp --verbose /etc/ssh/ssh_config  $CANDLE_BASE/.webthings/etc/ssh/ssh_config
+    cp --verbose /etc/ssh/sshd_config $CANDLE_BASE/.webthings/etc/ssh/sshd_config
 fi
-#cp --verbose -r /etc/ssh/ssh_config.d /home/pi/.webthings/etc/ssh/
-#cp --verbose -r /etc/ssh/sshd_config.d /home/pi/.webthings/etc/ssh/
-mkdir -p /home/pi/.webthings/etc/ssh/ssh_config.d
-mkdir -p /home/pi/.webthings/etc/ssh/sshd_config.d 
 
-mkdir -p /home/pi/.webthings/chromium
-chown -R pi:pi /home/pi/.webthings/chromium
+mkdir -p $CANDLE_BASE/.webthings/etc/ssh/ssh_config.d
+mkdir -p $CANDLE_BASE/.webthings/etc/ssh/sshd_config.d 
+
+mkdir -p $CANDLE_BASE/.webthings/chromium
+chown -R pi:pi $CANDLE_BASE/.webthings/chromium
 
 
-mkdir -p /home/pi/.webthings/data
-mkdir -p /home/pi/.webthings/data/dashboard
+mkdir -p $CANDLE_BASE/.webthings/data
+mkdir -p $CANDLE_BASE/.webthings/data/dashboard
 
-# Create "empty" wpa_supplicant config file if it doesn't exist yet
-#if [ ! -f /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf ]; then
-    echo "Creating wpa_supplicant files"
-    mkdir -p /home/pi/.webthings/etc/wpa_supplicant
-    cp -r /etc/wpa_supplicant/* /home/pi/.webthings/etc/wpa_supplicant/
-    #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /etc/wpa_supplicant/wpa_supplicant.conf
-    #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
-    #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /etc/wpa_supplicant/wpa_supplicant.conf
-    #echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /home/pi/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
-#fi
+echo "Creating wpa_supplicant files"
+mkdir -p $CANDLE_BASE/.webthings/etc/wpa_supplicant
+cp -r /etc/wpa_supplicant/* /$CANDLE_BASE/.webthings/etc/wpa_supplicant/
+#echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee /etc/wpa_supplicant/wpa_supplicant.conf
+#echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' | tee $CANDLE_BASE/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
+#echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > /etc/wpa_supplicant/wpa_supplicant.conf
+#echo -e 'ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\ncountry=NL\n' > $CANDLE_BASE/.webthings/etc/wpa_supplicant/wpa_supplicant.conf
+
 
 
 
 # COPY SETTINGS
 
-if [ -d /home/pi/configuration-files ]; then
+if [ -d $CANDLE_BASE/configuration-files ]; then
 
     echo "Copying configuration files into place"
     echo "Candle: Copying configuration files into place" >> /dev/kmsg
     echo "Candle: Copying configuration files into place" >> $BOOT_DIR/candle_log.txt
     
-    rm /home/pi/configuration-files/LICENSE
-    rm /home/pi/configuration-files/README.md
-    rm -rf /home/pi/configuration-files/.git
+    rm $CANDLE_BASE/configuration-files/LICENSE
+    rm $CANDLE_BASE/configuration-files/README.md
+    rm -rf $CANDLE_BASE/configuration-files/.git
     
-    if [ -d /home/pi/candle/configuration-files-backup ]; then
-        rm -rf /home/pi/candle/configuration-files-backup/*
+    if [ -d $CANDLE_BASE/candle/configuration-files-backup ]; then
+        rm -rf $CANDLE_BASE/candle/configuration-files-backup/*
         echo "Updating backup of the configuration files" >> /dev/kmsg
         echo "Updating backup of the configuration files" >> $BOOT_DIR/candle_log.txt
     else
         echo "Creating intial backup of the configuration files" >> /dev/kmsg
         echo "Creating intial backup of the configuration files" >> $BOOT_DIR/candle_log.txt
-        mkdir -p /home/pi/candle/configuration-files-backup
+        mkdir -p $CANDLE_BASE/candle/configuration-files-backup
     fi
     
     echo
     echo "copying configuration-files to configuration-files-backup"
-    cp -r /home/pi/configuration-files/* /home/pi/candle/configuration-files-backup
+    cp -r $CANDLE_BASE/configuration-files/* $CANDLE_BASE/candle/configuration-files-backup
     
     echo
     echo "Doing rsync from configuration-files-backup"
-    rsync -vr --inplace /home/pi/candle/configuration-files-backup/* /
+    rsync -vr --inplace $CANDLE_BASE/candle/configuration-files-backup/* /
     echo "Configuration files should be copied" >> /dev/kmsg
     echo "Configuration files should be copied" >> $BOOT_DIR/candle_log.txt
     
@@ -2982,17 +2969,6 @@ fi
 
 
 
-#if [ ! -f $BOOT_DIR/candle_config_version.txt ]; then
-#    touch $BOOT_DIR/candle_config_version.txt
-#fi
-#if ! diff -q /home/pi/configuration-files/boot/candle_config_version.txt $BOOT_DIR/candle_config_version.txt &>/dev/null; 
-#then
-#    echo "Different config version, intiating Rsync"
-#    echo "Candle: Different config version, intiating Rsync" >> /dev/kmsg
-#    rsync -vr /home/pi/configuration-files/ /
-#else
-#    echo "No new config version detected"
-#fi
 
 
 mkdir -p $CANDLE_BASE/.webthings/data
@@ -3019,20 +2995,6 @@ fi
 if [ -f  "$CANDLE_BASE/candle/color_clock" ]; then
 	chmod +x "$CANDLE_BASE/candle/color_clock"
 fi
-#chmod +x /home/pi/candle/reboot_to_recovery.sh
-#if [ -f /etc/xdg/openbox/autostart ]; then
-#    chmod +x /etc/xdg/openbox/autostart
-#fi
-#chmod +x /home/pi/candle/late.sh
-#chmod +x /home/pi/candle/kiosk.sh
-#chmod +x /home/pi/candle/splash_video.sh
-#chmod +x /home/pi/candle/every_minute.sh
-#chmod +x /home/pi/candle/debug.sh
-#chmod +x /home/pi/candle/files_check.sh
-#chmod +x /home/pi/candle/install_samba.sh
-#chmod +x /home/pi/candle/prepare_for_disk_image.sh
-#chmod +x /home/pi/candle/unsnap.sh
-#chmod +x /home/pi/candle/respeaker_check.sh
 
 
 # CHOWN THE NEW FILES
@@ -3043,8 +3005,8 @@ chown -R pi:pi "$CANDLE_BASE/.config"
 # Mosquitto
 mkdir -p /etc/mosquitto/pass
 mkdir -p "$CANDLE_BASE/.webthings/etc/mosquitto/pass"
-chown -R mosquitto:mosquitto /home/pi/.webthings/etc/mosquitto
-#chmod u=rw,g=,o= /home/pi/.webthings/etc/mosquitto/pass/mosquitto_users
+chown -R mosquitto:mosquitto $CANDLE_BASE/.webthings/etc/mosquitto
+#chmod u=rw,g=,o= $CANDLE_BASE/.webthings/etc/mosquitto/pass/mosquitto_users
 if [ -f "$CANDLE_BASE/.webthings/etc/mosquitto/pass/mosquitto_users" ]; then
 	chmod 0400 "$CANDLE_BASE/.webthings/etc/mosquitto/pass/mosquitto_users"
 else
@@ -3104,7 +3066,7 @@ fi
 
 # Creating symlink for timezone
 if [ ! -L /etc/timezone ]; then
-    echo "removing /etc/timezone file and creating a symlink to /home/pi/.webthings/etc/timezone instead"
+    echo "removing /etc/timezone file and creating a symlink to $CANDLE_BASE/.webthings/etc/timezone instead"
     # move timezone file to user partition
     if [ ! -f "$CANDLE_BASE/.webthings/etc/timezone" ]; then
 		if [ -f "$CANDLE_BASE/.webthings/etc/timezone" ]; then
@@ -3121,7 +3083,7 @@ fi
 
 # Create symlink for fake-hwclock
 if [ ! -L /etc/fake-hwclock.data ]; then
-    echo "removing /etc/fake-hwclock.data file and creating a symlink to /home/pi/.webthings/etc/fake-hwclock.data instead"
+    echo "removing /etc/fake-hwclock.data file and creating a symlink to $CANDLE_BASE/.webthings/etc/fake-hwclock.data instead"
     # create fake-hwclock file
 	mkdir -p "$CANDLE_BASE/.webthings/etc/"
     if [ ! -f "$CANDLE_BASE/.webthings/etc/fake-hwclock.data" ]; then
@@ -3154,11 +3116,6 @@ if [ ! -L /etc/default/locale ]; then
 fi
 
 
-
-
-
-#chown mosquitto: /home/pi/.webthings/etc/mosquitto/zcandle.conf
-#chown mosquitto: /home/pi/.webthings/etc/mosquitto/mosquitto.conf
 
 
 
@@ -3290,7 +3247,7 @@ if [ -f /etc/xdg/labwc/rc.xml ]; then
 fi
 
 
-if [ -f /home/pi/candle/ready.sh ]; then
+if [ -f $CANDLE_BASE/candle/ready.sh ]; then
     systemctl disable gateway-iptables.service
 fi
 
@@ -3329,7 +3286,6 @@ if [ -d /usr/local/share/nmap ]; then
 
 	mv /usr/local/share/nmap "$CANDLE_BASE/.webthings/etc/"
 	mkdir -p "$CANDLE_BASE/.webthings/etc/nmap/scripts"
-	#mv /usr/share/nmap/scripts/* /home/pi/.webthings/etc/nmap/scripts/
 	chown -R pi:pi "$CANDLE_BASE/.webthings/etc/nmap/scripts"
 	ln -s "$CANDLE_BASE/.webthings/etc/nmap /usr/local/share/nmap"
 fi
@@ -3678,7 +3634,7 @@ echo "Candle: almost done, cleaning up" >> /dev/kmsg
 echo "Candle: almost done, cleaning up" >> $BOOT_DIR/candle_log.txt
 
 # Clean NPM cache
-export NVM_DIR="/home/pi/.nvm"
+export NVM_DIR="$CANDLE_BASE/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 #npm cache clean --force # already done in install_candle_controller script
@@ -3700,18 +3656,6 @@ find /tmp -type f -atime +10 -delete
 
 # Generate file that can be used to re-install this exact combination of Python packages's versions
 pip3 list --format=freeze > "$CANDLE_BASE/candle/candle_requirements.txt"
-
-# Create file that simply lists the installed packages and their versions
-#apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print $1 "=" $3}' > /home/pi/candle/candle_packages.txt
-
-# Create a script that could re-install all those packages if the sources were available. 
-# However, the Raspberry servers only serve the very latest versions, so this is moot.
-#apt list --installed 2>/dev/null | grep -v -e "apt/" -e "apt-listchanges/" -e "apt-utils/" -e "libapt-" -e "Listing..." | sed 's/\// /' | awk '{print "apt -y --reinstall install " $1 "=" $3}' > /home/pi/candle/candle_packages_installer.sh
-
-# Prepare for potential download of all current versions of the packages
-#mkdir -p /home/pi/.webthings/deb_packages
-#chown pi:pi /home/pi/.webthings/deb_packages
-#apt list --installed 2>/dev/null | grep -v -e "Listing..." | sed 's/\// /' | awk '{print "echo \'" $1 "\' >> /dev/kmsg && apt download " $1 "=" $3}' > /home/pi/.webthings/deb_packages/candle_packages_downloader.sh
 
 
 
@@ -4046,11 +3990,11 @@ then
         # Check if the installation of the controller succeeded
     
         if [ -d /ro ]; then
-            if [ ! -f /ro/home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -f /ro/home/pi/node12 ]; then
+            if [ ! -f "/ro$CANDLE_BASE/webthings/gateway/.post_upgrade_complete" ] || [ ! -f "/ro$CANDLE_BASE/node12" ]; then
                 echo 
                 echo "ERROR, detected failure to install candle-controller"
                 echo "Candle: ERROR, failed to install candle-controller" >> /dev/kmsg
-                echo "$(date) - ERROR, failed to install candle-controller" >> /home/pi/.webthings/candle.log
+                echo "$(date) - ERROR, failed to install candle-controller" >> $CANDLE_BASE/.webthings/candle.log
                 echo "$(date) - ERROR, failed to install candle-controller" >> $BOOT_DIR/candle_log.txt
                 echo 
 		
@@ -4063,13 +4007,13 @@ then
                 exit 1
             fi
             
-        elif [ ! -f /home/pi/webthings/gateway/.post_upgrade_complete ] || [ ! -e /home/pi/node12 ]
+        elif [ ! -f "$CANDLE_BASE/webthings/gateway/.post_upgrade_complete" ] || [ ! -e "$CANDLE_BASE/node12" ]
 		then
     
             echo 
             echo "ERROR, detected failure to install candle-controller"
             echo "Candle: ERROR, failed to install candle-controller" >> /dev/kmsg
-            echo "Candle: ERROR, failed to install candle-controller" >> /home/pi/.webthings/candle.log
+            echo "Candle: ERROR, failed to install candle-controller" >> $CANDLE_BASE/.webthings/candle.log
             echo "Candle: ERROR, failed to install candle-controller" >> $BOOT_DIR/candle_log.txt
             echo
 
@@ -4100,19 +4044,7 @@ if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 
 	echo "gateway" > /etc/hostname
 	echo "gateway" > "$CANDLE_BASE/.webthings/etc/hostname"
-	# Set gateway as the hostname
-	#if [ ! -e /home/pi/.webthings/etc/hostname ]
-	#then
-	#	echo "gateway" > /etc/hostname
-	#	echo "gateway" > /home/pi/.webthings/etc/hostname
-	#	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-	#	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
-	#else
-	#	echo "/home/pi/.webthings/etc/hostname already existed"
-	#	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-	#	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
-	#fi
-	
+		
 	# Create hosts file and its symlink
 	if [ ! -f "$CANDLE_BASE/.webthings/etc/hosts" ]; then
 		echo "$CANDLE_BASE/.webthings/etc/hosts did not exist, generating it now"
@@ -4121,15 +4053,8 @@ if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 		echo "ff02::1		ip6-allnodes" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		echo "ff02::2		ip6-allrouters" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		echo "127.0.1.1	gateway" >> "$CANDLE_BASE/.webthings/etc/hosts"
-		
-#cat >/home/pi/.webthings/etc/hosts <<EOL
-#127.0.0.1	localhost
-#::1		localhost ip6-localhost ip6-loopback
-#ff02::1		ip6-allnodes
-#ff02::2		ip6-allrouters
-#127.0.1.1	gateway
-#EOL
-		#echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	gateway\n' > /home/pi/.webthings/etc/hosts
+	
+		#echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	gateway\n' > $CANDLE_BASE/.webthings/etc/hosts
 	fi
 
 else
@@ -4137,18 +4062,7 @@ else
 	echo "candle" > /etc/hostname
 	echo "candle" > "$CANDLE_BASE/.webthings/etc/hostname"
 		
-	# Set candle as the hostname
-	#if [ ! -e /home/pi/.webthings/etc/hostname ]
-	#then
-	#	echo "candle" > /etc/hostname
-	#	echo "candle" > /home/pi/.webthings/etc/hostname
-	#	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> /dev/kmsg
-	#	echo "Candle: creating /home/pi/.webthings/etc/hostname" >> $BOOT_DIR/candle_log.txt
-	#else
-	#	echo "/home/pi/.webthings/etc/hostname already existed"
-	#	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> /dev/kmsg
-	#	echo "Candle: /home/pi/.webthings/etc/hostname already existed" >> $BOOT_DIR/candle_log.txt
-	#fi
+	
 	# Create hosts file and its symlink
 	if [ ! -f "$CANDLE_BASE/.webthings/etc/hosts" ]; then
 		echo "$CANDLE_BASE/.webthings/etc/hosts did not exist, generating it now"
@@ -4158,14 +4072,8 @@ else
 		echo "ff02::2		ip6-allrouters" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		echo "127.0.1.1	candle" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		
-		#echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > /home/pi/.webthings/etc/hosts
-#		cat >/home/pi/.webthings/etc/hosts <<EOL
-#127.0.0.1	localhost
-#::1		localhost ip6-localhost ip6-loopback
-#ff02::1		ip6-allnodes
-#ff02::2		ip6-allrouters
-#127.0.1.1	candle
-#EOL
+		#echo -e '127.0.0.1	localhost\n::1		localhost ip6-localhost ip6-loopback\nff02::1		ip6-allnodes\nff02::2		ip6-allrouters\n\n127.0.1.1	candle\n' > $CANDLE_BASE/.webthings/etc/hosts
+
 	fi
 fi
 
@@ -4229,13 +4137,7 @@ chown pi:pi "$CANDLE_BASE/.webthings/candle.log"
 if [ -f /etc/profile.d/ensure_dbus.sh ]; then
   chmod +x /etc/profile.d/ensure_dbus.sh
 fi
-#
-#  ADDITIONAL CLEANUP
-#
-#if [ -f /home/pi/create_latest_candle.sh ]; then
-#    echo "Removing left-over /home/pi/create_latest_candle.sh" >> /dev/kmsg
-#    rm /home/pi/create_latest_candle.sh
-#fi
+
 
 if [ -f "$CANDLE_BASE/ro-root.sh" ]; then
     rm "$CANDLE_BASE/ro-root.sh"
@@ -4344,40 +4246,12 @@ if [ -f $BOOT_DIR/cmdline-candle.txt ]; then
 fi
 
 
-# Fix hostname issue from RC2
-#if [ -f /home/pi/.webthings/etc/hostname ] && [ -f /home/pi/.webthings/etc/hosts ]; then
-#    hostname="$(cat /home/pi/.webthings/etc/hostname)"
-#    if ! cat /etc/hosts | grep -q "$hostname"; then
-#        echo "hostname was not in /etc/hosts. Attempting to fix."
-#        echo "before:"
-#        cat /home/pi/.webthings/etc/hosts
-#        echo ""
-#        sed -i -E -e "s|127\.0\.1\.1[ \t]+.*|127\.0\.1\.1 \t$hostname|" /home/pi/.webthings/etc/hosts
-#        echo "after:"
-#        cat /home/pi/.webthings/etc/hosts
-#        echo ""
-#    fi
-#else
-#    echo
-#    echo "Error, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist"
-#    echo "Candle: ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> /dev/kmsg
-#    echo "ERROR, /home/pi/.webthings/etc/hostname and/or /home/pi/.webthings/etc/hosts did not exist" >> $BOOT_DIR/candle_log.txt
-#
-# 	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/error.png ]; then
-#    	/bin/ply-image $BOOT_DIR/error.png
-#   	fi
-#	
-#    exit 1
-#fi
-
 
 
 if [ -d "$CANDLE_BASE/webthings/gateway" ] && [ -d "$CANDLE_BASE/webthings/gateway2" ]; then
     rm -rf "$CANDLE_BASE/webthings/gateway2"
 fi
 
-
-# cp /home/pi/.webthings/etc/webthings_settings_backup.js /home/pi/.webthings/etc/webthings_settings.js
 
 if [ -f $BOOT_DIR/candle_first_run_complete.txt ] && [ ! -f $BOOT_DIR/candle_original_version.txt ]; then
     echo "3.0.0" > $BOOT_DIR/candle_original_version.txt
@@ -4387,9 +4261,6 @@ fi
 if [ ! -f "$CANDLE_BASE/candle/creation_date.txt" ]; then
     echo "$(date +%s)" > "$CANDLE_BASE/candle/creation_date.txt"
 fi
-
-# remember when the update script was last run
-#echo "$(date +%s)" > /home/pi/candle/update_date.txt
 
 # Add exception for Lixada uDMX USB controller
 echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="05dc", GROUP="plugdev", MODE="0660"' > /etc/udev/rules.d/50-usb-perms.rules
@@ -4506,7 +4377,6 @@ if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
 	if [ -d /etc/NetworkManager/system-connections ]; then
 		#rm /etc/NetworkManager/system-connections/*
   		rm -rf /etc/NetworkManager/system-connections/*
-		#cp -r /etc/NetworkManager/* /home/pi/.webthings/etc/NetworkManager/
 	fi
  
 	#rm dhcpcd.tar.*
@@ -4565,7 +4435,7 @@ fi
 
 
 # Mode NetworkMManager's intern-config path to user partition
-mkdir -p /home/pi/.webthings/etc/NetworkManager/intern-config
+mkdir -p $CANDLE_BASE/.webthings/etc/NetworkManager/intern-config
 
 
 
@@ -4689,8 +4559,8 @@ if [ -f "$CANDLE_BASE/candle/candle_first_run_user.sh" ]; then
 fi
 
 if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
-    if [ -f /home/pi/candle/candle_first_run.sh ]; then
-        cp /home/pi/candle/candle_first_run.sh $BOOT_DIR/candle_first_run.sh
+    if [ -f "$CANDLE_BASE/candle/candle_first_run.sh" ]; then
+        cp $CANDLE_BASE/candle/candle_first_run.sh $BOOT_DIR/candle_first_run.sh
     fi
 fi
 
@@ -4720,7 +4590,7 @@ then
 	fi
 	
     if [ -f $BOOT_DIR/candle_first_run_complete.txt ]; then
-        /home/pi/candle/debug.sh > $BOOT_DIR/debug.txt
+        $CANDLE_BASE/candle/debug.sh > $BOOT_DIR/debug.txt
 
         echo "" >> $BOOT_DIR/debug.txt
         echo "THIS DEBUG OUTPUT WAS CREATED AT THE END OF THE DISK IMAGE CREATION PROCESS" >> $BOOT_DIR/debug.txt
@@ -4736,16 +4606,6 @@ fi
 echo
 
 
-
-#SDCARD_SIZE=$(blockdev --getsize64 /dev/mmcblk0)
-#if [ "$SDCARD_SIZE" -gt "21914983424" ]; then	
-# 	echo "$(date) - Large SD Card, so stopping early" >> /home/pi/.webthings/candle.log
-#	# Show installation complete indication image
-#	if [ -e "/bin/ply-image" ] && [ -e /dev/fb0 ] && [ -f $BOOT_DIR/splash_updating-5.png ]; then
-#		/bin/ply-image $BOOT_DIR/splash_updating-5.png
-#	fi
-#	exit 0
-#fi
 
 
 if [ ! -f $BOOT_DIR/candle_first_run_complete.txt ]; then
