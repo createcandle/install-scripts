@@ -3201,9 +3201,9 @@ systemctl enable candle_hostname_fix.service # ugly solution, might not even be 
 #systemctl enable candle_silence_player.service
 
 # NetworkManager should be managing wpa_supplicant
-echo "disabling wpa_supplicant.service"
-systemctl stop wpa_supplicant.service
-systemctl disable wpa_supplicant.service
+#echo "disabling wpa_supplicant.service"
+#systemctl stop wpa_supplicant.service
+#systemctl disable wpa_supplicant.service
 #systemctl mask wpa_supplicant.service
 
 # Disable timers that are useless on a read-only filesystem
@@ -3264,10 +3264,10 @@ fi
 
 #disable wpa_supplicant service because dhpcpcd is managing it. Otherwise it runs twice.
 
-if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
-	systemctl disable wpa_supplicant.service
-	systemctl mask wpa_supplicant.service
-fi
+#if [ "$SKIP_DHCPCD" = no ] || [[ -z "${SKIP_DHCPCD}" ]]; then
+#	systemctl disable wpa_supplicant.service
+#	systemctl mask wpa_supplicant.service
+#fi
 
 systemctl disable regenerate_ssh_host_keys.service
 systemctl mask regenerate_ssh_host_keys.service
