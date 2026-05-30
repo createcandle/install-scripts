@@ -4118,7 +4118,7 @@ if [ "$SKIP_WEBTHINGS_GATEWAY" = no ]; then
 		echo "$CANDLE_BASE/.webthings/etc/hosts did not exist, generating it now"
 		echo "127.0.0.1	localhost" > "$CANDLE_BASE/.webthings/etc/hosts"
 		echo "::1		localhost ip6-localhost ip6-loopback" >> "$CANDLE_BASE/.webthings/etc/hosts"
-		echp "ff02::1		ip6-allnodes" >> "$CANDLE_BASE/.webthings/etc/hosts"
+		echo "ff02::1		ip6-allnodes" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		echo "ff02::2		ip6-allrouters" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		echo "127.0.1.1	gateway" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		
@@ -4154,7 +4154,7 @@ else
 		echo "$CANDLE_BASE/.webthings/etc/hosts did not exist, generating it now"
 		echo "127.0.0.1	localhost" > "$CANDLE_BASE/.webthings/etc/hosts"
 		echo "::1		localhost ip6-localhost ip6-loopback" >> "$CANDLE_BASE/.webthings/etc/hosts"
-		echp "ff02::1		ip6-allnodes" >> "$CANDLE_BASE/.webthings/etc/hosts"
+		echo "ff02::1		ip6-allnodes" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		echo "ff02::2		ip6-allrouters" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		echo "127.0.1.1	candle" >> "$CANDLE_BASE/.webthings/etc/hosts"
 		
