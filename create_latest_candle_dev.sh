@@ -1771,7 +1771,7 @@ then
     apt -y install git --no-install-recommends "$reinstall" 
 
 
-	apt -y install bluez --no-install-recommend
+	apt -y install bluez --no-install-recommends
 
 	echo
     echo "Enabling experimental bluetooth features"
