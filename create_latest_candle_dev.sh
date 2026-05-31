@@ -2,6 +2,7 @@
 set +e # continue on errors
 
 export DEBIAN_FRONTEND=noninteractive
+export XDG_RUNTIME_DIR=/var/run/$(id -u)
 
 #CUTTING_EDGE=yes 
 #CREATE_DISK_IMAGE=yesf
@@ -12,6 +13,8 @@ else
 	echo "\n\nTHIS SCRIPT IS DESIGNED TO RUN ON LINUX! \n\nABORTING!"; 
 	exit 1
 fi
+
+
 
 
 # CANDLE INSTALL AND UPDATE SCRIPT
