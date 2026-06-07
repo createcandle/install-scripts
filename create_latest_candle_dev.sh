@@ -1857,9 +1857,9 @@ then
 	systemctl --user enable pipewire.service 
 	export XDG_RUNTIME_DIR="/run/user/$UID"
 
-	echo "installing some network applications"
+	echo "installing some networking applications"
 	# switching from wpa_supplicant to iwd (to improve hotspot security) is done later
-	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit rpi-usb-gadget iproute2 socat wireguard
+	apt install -y --no-install-recommends dns-root-data libbluetooth3 libndp0 libnetfilter-conntrack3 libnfnetlink0 iptables dbus-x11 libdbus-1-dev libssl-dev nmap ncat usbmuxd ipv6toolkit rpi-usb-gadget iproute2 socat wireguard traceroute
 
 	# some more apps
 	apt install -y --no-install-recommends tree uhubctl
