@@ -221,7 +221,7 @@ fi
 npm install --global pnpm
 npm install --global source-map-support
 
-#npm rebuild
+npm rebuild
 
 echo
 echo "NODE AND NPM VERSIONS:"
